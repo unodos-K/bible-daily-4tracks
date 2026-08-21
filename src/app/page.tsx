@@ -580,24 +580,54 @@ export default function BibleViewerPage() {
       )}
 
       {/* 플로팅 퀵 네비게이터 */}
-      <div className="fixed right-3 sm:right-5 top-1/2 -translate-y-1/2 z-40 flex flex-col gap-1.5">
-        <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="text-xs font-medium py-1 px-2 rounded-lg bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50" title="맨위로 이동">
-          처음
+      <div className="fixed right-3 md:right-8 top-1/2 -translate-y-1/2 z-40 flex flex-col gap-2 md:gap-3">
+        <button 
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} 
+          className="flex flex-col items-center justify-center p-2 md:p-3 rounded-xl bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50 shadow-md transition-all hover:scale-110" 
+          title="처음"
+        >
+          <span className="text-base md:text-xl mb-1 leading-none">🏠</span>
+          <span className="text-[10px] md:text-xs font-bold leading-none">처음</span>
         </button>
-        <button onClick={() => scrollToSection('track-old-testament')} className="text-xs font-medium py-1 px-2 rounded-lg bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50" title="구약">
-          구약
+        <button 
+          onClick={() => scrollToSection('track-old-testament')} 
+          className="flex flex-col items-center justify-center p-2 md:p-3 rounded-xl bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50 shadow-md transition-all hover:scale-110" 
+          title="구약"
+        >
+          <span className="text-base md:text-xl mb-1 leading-none">📜</span>
+          <span className="text-[10px] md:text-xs font-bold leading-none">구약</span>
         </button>
-        <button onClick={() => scrollToSection('track-new-testament')} className="text-xs font-medium py-1 px-2 rounded-lg bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50" title="신약">
-          신약
+        <button 
+          onClick={() => scrollToSection('track-new-testament')} 
+          className="flex flex-col items-center justify-center p-2 md:p-3 rounded-xl bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50 shadow-md transition-all hover:scale-110" 
+          title="신약"
+        >
+          <span className="text-base md:text-xl mb-1 leading-none">🕊️</span>
+          <span className="text-[10px] md:text-xs font-bold leading-none">신약</span>
         </button>
-        <button onClick={() => scrollToSection('track-psalms')} className="text-xs font-medium py-1 px-2 rounded-lg bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50" title="시편">
-          시편
+        <button 
+          onClick={() => scrollToSection('track-psalms')} 
+          className="flex flex-col items-center justify-center p-2 md:p-3 rounded-xl bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50 shadow-md transition-all hover:scale-110" 
+          title="시편"
+        >
+          <span className="text-base md:text-xl mb-1 leading-none">🎵</span>
+          <span className="text-[10px] md:text-xs font-bold leading-none">시편</span>
         </button>
-        <button onClick={() => scrollToSection('track-proverbs')} className="text-xs font-medium py-1 px-2 rounded-lg bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50" title="잠언">
-          잠언
+        <button 
+          onClick={() => scrollToSection('track-proverbs')} 
+          className="flex flex-col items-center justify-center p-2 md:p-3 rounded-xl bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50 shadow-md transition-all hover:scale-110" 
+          title="잠언"
+        >
+          <span className="text-base md:text-xl mb-1 leading-none">💡</span>
+          <span className="text-[10px] md:text-xs font-bold leading-none">잠언</span>
         </button>
-        <button onClick={() => scrollToSection('viewer-bottom')} className="text-xs font-medium py-1 px-2 rounded-lg bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50" title="완료 버튼으로 이동">
-          완료
+        <button 
+          onClick={() => scrollToSection('viewer-bottom')} 
+          className="flex flex-col items-center justify-center p-2 md:p-3 rounded-xl bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50 shadow-md transition-all hover:scale-110" 
+          title="완료"
+        >
+          <span className="text-base md:text-xl mb-1 leading-none">✅</span>
+          <span className="text-[10px] md:text-xs font-bold leading-none">완료</span>
         </button>
       </div>
 
