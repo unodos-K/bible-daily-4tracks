@@ -98,10 +98,15 @@ export default function MyPage() {
     return <div className="min-h-[calc(100vh-52px)] bg-stone-50 dark:bg-stone-950 flex justify-center items-center">Loading...</div>;
   }
 
-  const executeReset = () => {
-    resetUserData();
+  const executeReset = async () => {
+    if (authUser) {
+      await supabase.from('reading_records').delete().eq('user_id', authUser.id);
+    }
+    const dateObj = new Date();
+    const todayStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+    startNewReading(todayStr);
     setIsResetModalOpen(false);
-    router.push("/");
+    router.refresh();
   };
 
   const handleDayClick = (dateStr: string) => {
@@ -643,7 +648,7 @@ export default function MyPage() {
           className="flex items-center justify-center gap-2 px-6 py-4 text-stone-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-2xl transition-colors font-semibold"
         >
           <RotateCcw size={18} />
-          시작 화면으로 돌아가기 / 통독 재설정
+          통독 재설정
         </button>
       </div>
       {/* Reset Modal */}
@@ -655,7 +660,7 @@ export default function MyPage() {
             </div>
             <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100 text-center">초기화 확인</h3>
             <p className="text-stone-500 dark:text-stone-400 text-center leading-relaxed text-sm">
-              정말 통독 기록을 모두 초기화하고<br />다시 시작하시겠습니까?
+              기존 읽기 데이터를 지우고<br />오늘부터 새로운 통독 일정을 시작하시겠습니까?
             </p>
             <div className="flex gap-3 w-full mt-2">
               <button

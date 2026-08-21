@@ -55,7 +55,7 @@ export default function BibleViewerPage() {
   const [loginId, setLoginId] = useState("");
   const [loginPw, setLoginPw] = useState("");
   const [loginError, setLoginError] = useState("");
-  const [forceOnboarding, setForceOnboarding] = useState(false);
+
 
   const [dayIndex, setDayIndex] = useState<number>(1);
   const [fontSize, setFontSize] = useState<number>(18);
@@ -119,12 +119,22 @@ export default function BibleViewerPage() {
         setStorageUserId("guest");
       }
 
-      const loadedSettings = getReadingSettings();
-      setSettings(loadedSettings);
+      let loadedSettings = getReadingSettings();
       
       if (!loadedSettings || !loadedSettings.hasStarted) {
-        return; // 렌더링 시 랜딩 뷰로 빠짐
+        const dateObj = new Date();
+        const todayStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+        const newSettings = {
+          ...(loadedSettings || {}),
+          startDate: loadedSettings?.startDate || todayStr,
+          currentDay: 1,
+          hasStarted: true
+        };
+        setReadingSettings(newSettings);
+        loadedSettings = newSettings;
       }
+      
+      setSettings(loadedSettings);
 
       try {
         const savedFontSize = localStorage.getItem("bible_viewer_font_size");
@@ -289,35 +299,6 @@ export default function BibleViewerPage() {
     }
   };
 
-  // 온보딩 핸들러
-  const handleStartFresh = () => {
-    const dateObj = new Date();
-    const todayStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
-    startNewReading(todayStr); // storage.ts 안에서 resetChallenge() 수행함
-    setSettings(getReadingSettings());
-    saveViewerDay(1);
-    setDayIndex(1);
-    setForceOnboarding(false);
-  };
-
-  const handleContinue = () => {
-    const dateObj = new Date();
-    const todayStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
-    const currentSettings = getReadingSettings() || { startDate: todayStr, currentDay: 1, hasStarted: false };
-    setReadingSettings({
-      ...currentSettings,
-      startDate: currentSettings.startDate || todayStr,
-      hasStarted: true
-    });
-    // Immediately update local state to avoid flicker before route change
-    setSettings({
-      ...currentSettings,
-      startDate: currentSettings.startDate || todayStr,
-      hasStarted: true
-    });
-    setForceOnboarding(false);
-    router.push("/mypage");
-  };
 
   if (!isClient) {
     return <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex justify-center items-center text-stone-500">Loading...</div>;
@@ -345,59 +326,7 @@ export default function BibleViewerPage() {
     );
   }
 
-  // 온보딩 화면 (풀스크린 랜딩 뷰)
-  if (!settings || !settings.hasStarted || forceOnboarding) {
 
-    return (
-      <div className="w-full min-h-screen flex flex-col items-center justify-center bg-stone-50 dark:bg-stone-950 p-6 px-4">
-        <div className="max-w-md w-full flex flex-col items-center gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          
-          <div className="flex flex-col items-center gap-4 text-center">
-            <div className="w-24 h-24 bg-white dark:bg-stone-900 rounded-full shadow-sm border border-stone-200 dark:border-stone-800 flex items-center justify-center text-5xl">
-              📖
-            </div>
-            <h1 className="text-3xl sm:text-4xl font-black text-stone-800 dark:text-stone-100 tracking-tight leading-tight">
-              말씀 통독에 오신 것을<br/>환영합니다 ✨
-            </h1>
-            <p className="text-stone-500 dark:text-stone-400 text-base sm:text-lg">
-              원하시는 통독 방식을 선택해 주세요.
-            </p>
-          </div>
-          
-          <div className="flex flex-col gap-4 w-full mt-4">
-            {/* 카드 1: 새로 시작하기 */}
-            <button 
-              onClick={handleStartFresh}
-              className="w-full bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 hover:border-sky-300 dark:hover:border-sky-700 p-6 rounded-3xl shadow-sm hover:shadow-md transition-all text-left flex flex-col gap-2 group relative overflow-hidden"
-            >
-              <div className="absolute top-0 right-0 p-6 opacity-10 text-6xl group-hover:scale-110 transition-transform">🚀</div>
-              <h2 className="text-xl font-bold text-sky-600 dark:text-sky-400 flex items-center gap-2">
-                🚀 오늘부터 성경읽기 새로 시작하기
-              </h2>
-              <p className="text-stone-500 dark:text-stone-400 text-sm leading-relaxed pr-10">
-                이 계정의 이전 통독 기록을 모두 초기화하고<br/>오늘을 Day 1로 새로 시작합니다.
-              </p>
-            </button>
-            
-            {/* 카드 2: 이어가기 */}
-            <button 
-              onClick={handleContinue}
-              className="w-full p-6 rounded-3xl transition-all text-left flex flex-col gap-2 relative overflow-hidden bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 hover:border-stone-400 dark:hover:border-stone-600 shadow-sm hover:shadow-md group"
-            >
-              <div className="absolute top-0 right-0 p-6 opacity-5 text-6xl group-hover:scale-110 transition-transform">📖</div>
-              <h2 className="text-xl font-bold flex items-center gap-2 text-stone-700 dark:text-stone-200">
-                📖 기존 성경통독 이어가기
-              </h2>
-              <p className="text-sm leading-relaxed pr-10 text-stone-500 dark:text-stone-400">
-                이 계정의 localStorage에 저장되어 있는 기록을<br/>그대로 유지하며 다음 말씀을 이어 읽습니다.
-              </p>
-            </button>
-          </div>
-          
-        </div>
-      </div>
-    );
-  }
 
   const readingData = getDailyReadingByIndex(dayIndex);
   if (!readingData) {
