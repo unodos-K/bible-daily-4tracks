@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, RotateCcw, BrainCircuit, X, Flame } from "lucide-react";
+import { ChevronLeft, ChevronRight, RotateCcw, BrainCircuit, X, Flame, AlertCircle } from "lucide-react";
 import { 
   ReadingSettings, 
   ReadRecordsMap, 
@@ -71,6 +71,8 @@ export default function MyPage() {
   // 캐러셀 관련 상태 및 Ref
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const carouselRef = useRef<HTMLDivElement>(null);
+  
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -96,11 +98,10 @@ export default function MyPage() {
     return <div className="min-h-[calc(100vh-52px)] bg-stone-50 dark:bg-stone-950 flex justify-center items-center">Loading...</div>;
   }
 
-  const handleReset = () => {
-    if (confirm("정말 통독 기록을 모두 초기화하고 다시 시작하시겠습니까?")) {
-      resetUserData();
-      router.push("/");
-    }
+  const executeReset = () => {
+    resetUserData();
+    setIsResetModalOpen(false);
+    router.push("/");
   };
 
   const handleDayClick = (dateStr: string) => {
@@ -629,13 +630,41 @@ export default function MyPage() {
       {/* 설정 / 위험 구역 */}
       <div className="w-full max-w-2xl mt-12 flex flex-col items-center">
         <button
-          onClick={handleReset}
+          onClick={() => setIsResetModalOpen(true)}
           className="flex items-center justify-center gap-2 px-6 py-4 text-stone-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-2xl transition-colors font-semibold"
         >
           <RotateCcw size={18} />
           시작 화면으로 돌아가기 / 통독 재설정
         </button>
       </div>
+      {/* Reset Modal */}
+      {isResetModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-white dark:bg-stone-900 rounded-2xl p-6 shadow-xl w-full max-w-sm flex flex-col items-center gap-4 animate-in zoom-in-95 border border-stone-200 dark:border-stone-800">
+            <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 flex items-center justify-center mb-2">
+              <AlertCircle size={24} />
+            </div>
+            <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100 text-center">초기화 확인</h3>
+            <p className="text-stone-500 dark:text-stone-400 text-center leading-relaxed text-sm">
+              정말 통독 기록을 모두 초기화하고<br />다시 시작하시겠습니까?
+            </p>
+            <div className="flex gap-3 w-full mt-2">
+              <button
+                onClick={() => setIsResetModalOpen(false)}
+                className="flex-1 py-3 rounded-xl font-bold bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
+              >
+                취소
+              </button>
+              <button
+                onClick={executeReset}
+                className="flex-1 py-3 rounded-xl font-bold bg-red-500 text-white hover:bg-red-600 transition-colors shadow-sm"
+              >
+                확인(초기화)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
