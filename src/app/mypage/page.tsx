@@ -15,7 +15,8 @@ import {
   updateMemorizeRecord,
   saveViewerDay
 } from "@/lib/storage";
-import { getAuthUser, logout, AuthUser } from "@/lib/auth";
+import { getAuthUser, AuthUser } from "@/lib/auth";
+import { signOut, signInWithKakao } from "@/lib/supabase";
 import MemoryTrainerModal from "@/components/MemoryTrainerModal";
 
 function getDaysInMonth(year: number, month: number) {
@@ -73,7 +74,9 @@ export default function MyPage() {
 
   useEffect(() => {
     setIsClient(true);
-    setAuthUser(getAuthUser());
+    getAuthUser().then(user => {
+      setAuthUser(user);
+    });
     const s = getReadingSettings();
     setSettings(s);
     setRecords(getReadRecords());
@@ -82,6 +85,12 @@ export default function MyPage() {
       router.push("/");
     }
   }, [router]);
+
+  const handleLogout = async () => {
+    await signOut();
+    setAuthUser(null);
+    window.location.href = "/";
+  };
 
   if (!isClient || !settings || !settings.hasStarted) {
     return <div className="min-h-[calc(100vh-52px)] bg-stone-50 dark:bg-stone-950 flex justify-center items-center">Loading...</div>;
@@ -177,12 +186,21 @@ export default function MyPage() {
                 📅 통독 시작일: {settings.startDate} (Day {daysSince}일차)
               </p>
             </div>
-            <button
-              onClick={() => logout()}
-              className="text-sm font-semibold text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 transition-colors"
-            >
-              🚪 로그아웃
-            </button>
+            {authUser ? (
+              <button
+                onClick={handleLogout}
+                className="text-sm font-semibold text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 transition-colors"
+              >
+                🚪 로그아웃
+              </button>
+            ) : (
+              <button
+                onClick={signInWithKakao}
+                className="text-xs sm:text-sm font-bold bg-[#FEE500] text-black hover:bg-[#FDD800] px-3 py-2 rounded-lg transition-colors shadow-sm whitespace-nowrap"
+              >
+                💬 카카오 로그인
+              </button>
+            )}
           </div>
 
           <button

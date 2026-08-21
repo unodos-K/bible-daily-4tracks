@@ -19,9 +19,13 @@ import {
   getTodayReadCount,
   getReadRecords,
   saveViewerDay,
-  getSavedViewerDay
+  getSavedViewerDay,
+  setStorageUserId,
+  fetchSupabaseToLocal,
+  syncLocalToSupabase
 } from "@/lib/storage";
-import { getAuthUser, login, AuthUser } from "@/lib/auth";
+import { getAuthUser, AuthUser } from "@/lib/auth";
+import { signInWithKakao } from "@/lib/supabase";
 
 const TRACK_ICONS = {
   OLD: "📖",
@@ -104,50 +108,58 @@ export default function BibleViewerPage() {
 
   useEffect(() => {
     setIsClient(true);
-    const user = getAuthUser();
-    setAuthUser(user);
-    if (!user) return; // 미로그인 시 중단
-
-    const loadedSettings = getReadingSettings();
-    setSettings(loadedSettings);
     
-    if (!loadedSettings || !loadedSettings.hasStarted) {
-      return; // 렌더링 시 랜딩 뷰로 빠짐
-    }
-
-    try {
-      const savedFontSize = localStorage.getItem("bible_viewer_font_size");
-      if (savedFontSize) {
-        const parsed = parseInt(savedFontSize, 10);
-        if (!isNaN(parsed) && parsed >= 14 && parsed <= 26) {
-          setFontSize(parsed);
-        }
+    getAuthUser().then(async (user) => {
+      setAuthUser(user);
+      if (user) {
+        setStorageUserId(user.id);
+        await fetchSupabaseToLocal();
+        syncLocalToSupabase(); // bg sync
+      } else {
+        setStorageUserId("guest");
       }
 
-      const dateObj = new Date();
-      const todayStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
-      const maxAllowed = getNextUnreadDay();
-      const isLimitReached = getTodayReadCount(todayStr) >= 3;
-
-      let initialDay = maxAllowed;
-      const savedDay = getSavedViewerDay();
+      const loadedSettings = getReadingSettings();
+      setSettings(loadedSettings);
       
-      if (savedDay) {
-        if (savedDay >= 1 && savedDay <= 365) {
-          initialDay = Math.min(savedDay, maxAllowed);
+      if (!loadedSettings || !loadedSettings.hasStarted) {
+        return; // 렌더링 시 랜딩 뷰로 빠짐
+      }
+
+      try {
+        const savedFontSize = localStorage.getItem("bible_viewer_font_size");
+        if (savedFontSize) {
+          const parsed = parseInt(savedFontSize, 10);
+          if (!isNaN(parsed) && parsed >= 14 && parsed <= 26) {
+            setFontSize(parsed);
+          }
         }
-      }
 
-      // 초기 진입 시 제한에 걸려있는데 새로운 Day를 열려고 하는 경우
-      if (initialDay === maxAllowed && isLimitReached) {
-        initialDay = Math.max(1, maxAllowed - 1);
-        setShowDailyLimitModal(true);
-      }
+        const dateObj = new Date();
+        const todayStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+        const maxAllowed = getNextUnreadDay();
+        const isLimitReached = getTodayReadCount(todayStr) >= 3;
 
-      setDayIndex(initialDay);
-    } catch {
-      // ignore
-    }
+        let initialDay = maxAllowed;
+        const savedDay = getSavedViewerDay();
+        
+        if (savedDay) {
+          if (savedDay >= 1 && savedDay <= 365) {
+            initialDay = Math.min(savedDay, maxAllowed);
+          }
+        }
+
+        // 초기 진입 시 제한에 걸려있는데 새로운 Day를 열려고 하는 경우
+        if (initialDay === maxAllowed && isLimitReached) {
+          initialDay = Math.max(1, maxAllowed - 1);
+          setShowDailyLimitModal(true);
+        }
+
+        setDayIndex(initialDay);
+      } catch {
+        // ignore
+      }
+    });
   }, []);
 
   // Load record for the current dayIndex
@@ -307,76 +319,8 @@ export default function BibleViewerPage() {
     router.push("/mypage");
   };
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    const success = login(loginId, loginPw);
-    if (success) {
-      const user = getAuthUser();
-      setAuthUser(user);
-      const loadedSettings = getReadingSettings();
-      setSettings(loadedSettings);
-      setForceOnboarding(true);
-    } else {
-      setLoginError("아이디 또는 비밀번호가 올바르지 않습니다.");
-    }
-  };
-
   if (!isClient) {
     return <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex justify-center items-center text-stone-500">Loading...</div>;
-  }
-
-  // 로그인 화면
-  if (!authUser) {
-    return (
-      <div className="w-full min-h-screen flex flex-col items-center justify-center bg-stone-50 dark:bg-stone-950 p-6 px-4">
-        <div className="max-w-md w-full bg-white dark:bg-stone-900 rounded-3xl shadow-xl border border-stone-200 dark:border-stone-800 p-8 flex flex-col gap-6 animate-in fade-in zoom-in-95">
-          <div className="flex flex-col items-center text-center gap-3">
-            <div className="w-16 h-16 bg-sky-100 dark:bg-sky-900/50 rounded-full flex items-center justify-center text-3xl mb-1">
-              🕊️
-            </div>
-            <h1 className="text-2xl font-black text-stone-800 dark:text-stone-100">말씀 통독 & 뇌새김 암송</h1>
-            <p className="text-stone-500 dark:text-stone-400 text-sm">매일 말씀과 동행하는 삶을 시작해보세요.</p>
-          </div>
-
-          <form onSubmit={handleLogin} className="flex flex-col gap-4 mt-2">
-            <div className="flex flex-col gap-3">
-              <input 
-                type="text"
-                placeholder="ID: test"
-                value={loginId}
-                onChange={(e) => { setLoginId(e.target.value); setLoginError(""); }}
-                className="w-full p-4 bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent text-stone-800 dark:text-stone-100 placeholder:text-stone-400"
-              />
-              <input 
-                type="password"
-                placeholder="PW: 1234"
-                value={loginPw}
-                onChange={(e) => { setLoginPw(e.target.value); setLoginError(""); }}
-                className="w-full p-4 bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent text-stone-800 dark:text-stone-100 placeholder:text-stone-400"
-              />
-            </div>
-            {loginError && (
-              <p className="text-red-500 text-sm font-semibold text-center">{loginError}</p>
-            )}
-            
-            <div className="bg-stone-100 dark:bg-stone-800 p-4 rounded-xl mt-2 text-sm text-stone-600 dark:text-stone-400 flex flex-col gap-1.5">
-              <p className="font-bold text-stone-700 dark:text-stone-300 mb-1">지원 테스트 계정:</p>
-              <p>• ID: test / PW: 1234</p>
-              <p>• ID: test1 / PW: 1111</p>
-              <p>• ID: test2 / PW: 2222</p>
-              <p>• ID: test3 / PW: 3333</p>
-            </div>
-
-            <button 
-              type="submit"
-              className="w-full py-4 mt-2 bg-stone-800 hover:bg-stone-900 dark:bg-stone-200 dark:hover:bg-stone-300 text-white dark:text-stone-900 font-bold rounded-xl shadow-md transition-colors flex items-center justify-center gap-2"
-            >
-              🔐 로그인하고 시작하기
-            </button>
-          </form>
-        </div>
-      </div>
-    );
   }
 
   // 온보딩 화면 (풀스크린 랜딩 뷰)
@@ -657,6 +601,17 @@ export default function BibleViewerPage() {
         
         {/* 상단 네비게이터 */}
         <header className="sticky top-[52px] z-30 bg-[#fcfbf9]/95 dark:bg-[#18181b]/95 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 shadow-sm flex flex-col px-3 py-2 gap-2">
+          {/* 카카오 로그인 배너 (비로그인 시) */}
+          {!authUser && (
+            <div className="flex justify-between items-center bg-[#FEE500] text-black px-3 py-2 rounded-lg cursor-pointer hover:bg-[#FDD800] transition-colors shadow-sm mb-1" onClick={signInWithKakao}>
+              <div className="flex items-center gap-2">
+                <span className="font-black text-sm">💬</span>
+                <span className="text-sm font-bold">카카오 로그인으로 통독 기록 저장하기</span>
+              </div>
+              <ChevronRight size={16} />
+            </div>
+          )}
+
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1 sm:gap-2">
               <button

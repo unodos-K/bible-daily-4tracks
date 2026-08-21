@@ -1,4 +1,4 @@
-import { getAuthUser } from "./auth";
+import { supabase } from "./supabase";
 
 export interface ReadingSettings {
   startDate: string; // YYYY-MM-DD
@@ -30,9 +30,14 @@ export type ReadRecordsMap = Record<number, DayRecord>; // key: dayIndex (1~365)
 
 const isBrowser = typeof window !== "undefined";
 
+let currentUserId = "guest";
+
+export function setStorageUserId(id: string) {
+  currentUserId = id;
+}
+
 function getUserId(): string {
-  const user = getAuthUser();
-  return user ? user.id : "guest";
+  return currentUserId;
 }
 
 function getSettingsKey() { return `bible_settings_${getUserId()}`; }
@@ -58,7 +63,7 @@ export function setReadingSettings(settings: ReadingSettings): void {
 }
 
 export function startNewReading(dateStr: string): void {
-  resetUserData(); // 현재 로그인된 유저 데이터만 초기화
+  resetUserData(); 
   setReadingSettings({
     startDate: dateStr,
     currentDay: 1,
@@ -87,7 +92,6 @@ export function getReadRecords(): ReadRecordsMap {
     
     for (const key in parsed) {
       const val = parsed[key];
-      // 하위 호환성: 과거 YYYY-MM-DD 문자열 키로 저장된 경우
       if (typeof key === 'string' && key.includes('-') && isNaN(parseInt(key, 10))) {
         result[val.dayIndex] = {
           dayIndex: val.dayIndex,
@@ -97,7 +101,6 @@ export function getReadRecords(): ReadRecordsMap {
         };
         needsMigration = true;
       } else {
-        // 정상적인 DayRecord 구조
         const day = parseInt(key, 10);
         if (!isNaN(day)) {
           result[day] = val as DayRecord;
@@ -147,6 +150,7 @@ export function updateReadRecordOneVerse(dayIndex: number, oneVerse: OneVerse): 
     records[dayIndex].oneVerse = oneVerse;
     try {
       localStorage.setItem(getRecordsKey(), JSON.stringify(records));
+      syncRecordToSupabase(records[dayIndex]);
     } catch {}
   }
 }
@@ -163,6 +167,7 @@ export function updateMemorizeRecord(dayIndex: number, isMemorized: boolean): vo
     }
     try {
       localStorage.setItem(getRecordsKey(), JSON.stringify(records));
+      syncRecordToSupabase(records[dayIndex]);
     } catch {}
   }
 }
@@ -173,6 +178,7 @@ export function saveDayRecord(record: DayRecord): void {
   records[record.dayIndex] = record;
   try {
     localStorage.setItem(getRecordsKey(), JSON.stringify(records));
+    syncRecordToSupabase(record);
   } catch {}
 }
 
@@ -195,4 +201,60 @@ export function getSavedViewerDay(): number | null {
     if (val) return parseInt(val, 10);
   } catch {}
   return null;
+}
+
+// -----------------------------------------------------------------
+// SUPABASE SYNC LOGIC
+// -----------------------------------------------------------------
+
+async function syncRecordToSupabase(record: DayRecord) {
+  if (currentUserId === "guest") return;
+  
+  // upsert reading record
+  await supabase.from('reading_records').upsert({
+    user_id: currentUserId,
+    day_index: record.dayIndex,
+    read_date: record.readDate,
+    completed_at: record.completedAt,
+    one_verse: record.oneVerse || null,
+  }, { onConflict: 'user_id, day_index' });
+}
+
+export async function syncLocalToSupabase() {
+  if (currentUserId === "guest") return;
+  const localRecords = getReadRecords();
+  const recordsArray = Object.values(localRecords);
+  if (recordsArray.length === 0) return;
+
+  const upsertData = recordsArray.map(record => ({
+    user_id: currentUserId,
+    day_index: record.dayIndex,
+    read_date: record.readDate,
+    completed_at: record.completedAt,
+    one_verse: record.oneVerse || null,
+  }));
+
+  await supabase.from('reading_records').upsert(upsertData, { onConflict: 'user_id, day_index' });
+}
+
+export async function fetchSupabaseToLocal() {
+  if (currentUserId === "guest") return;
+  
+  const { data, error } = await supabase
+    .from('reading_records')
+    .select('*')
+    .eq('user_id', currentUserId);
+
+  if (!error && data) {
+    const localRecords = getReadRecords();
+    data.forEach((row: any) => {
+      localRecords[row.day_index] = {
+        dayIndex: row.day_index,
+        readDate: row.read_date,
+        completedAt: row.completed_at,
+        oneVerse: row.one_verse,
+      };
+    });
+    localStorage.setItem(getRecordsKey(), JSON.stringify(localRecords));
+  }
 }
