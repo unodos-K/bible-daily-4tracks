@@ -94,6 +94,17 @@ export default function MyPage() {
     });
   }, [router]);
 
+  useEffect(() => {
+    if (selectedRecordStr || isResetModalOpen || isMemoryModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [selectedRecordStr, isResetModalOpen, isMemoryModalOpen]);
+
   const handleLogout = async () => {
     await signOut();
     setAuthUser(null);
@@ -457,9 +468,9 @@ export default function MyPage() {
 
         {/* 상세 팝업 모달 (가로 스와이프 캐러셀 지원) */}
         {selectedRecordStr && !isMemoryModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in" onClick={() => setSelectedRecordStr(null)}>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in" onClick={() => setSelectedRecordStr(null)}>
             <div 
-              className="w-[92%] max-w-xl md:max-w-2xl mx-auto bg-white dark:bg-stone-900 rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 max-h-[90vh]"
+              className="w-full max-w-xl md:max-w-2xl mx-auto bg-white dark:bg-stone-900 rounded-3xl shadow-2xl overflow-y-auto flex flex-col animate-in zoom-in-95 max-h-[90vh]"
               onClick={e => e.stopPropagation()}
             >
               {(() => {
