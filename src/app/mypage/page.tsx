@@ -2,14 +2,15 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, CheckCircle2, RotateCcw, BrainCircuit, X, Flame } from "lucide-react";
+import { ChevronLeft, ChevronRight, RotateCcw, BrainCircuit, X, Flame } from "lucide-react";
 import { 
   ReadingSettings, 
   ReadRecordsMap, 
   DayRecord,
+  OneVerse,
   getReadingSettings, 
   getReadRecords, 
-  resetChallenge,
+  resetUserData,
   getNextUnreadDay,
   updateMemorizeRecord,
   saveViewerDay
@@ -88,7 +89,7 @@ export default function MyPage() {
 
   const handleReset = () => {
     if (confirm("정말 통독 기록을 모두 초기화하고 다시 시작하시겠습니까?")) {
-      resetChallenge();
+      resetUserData();
       router.push("/");
     }
   };
@@ -352,7 +353,7 @@ export default function MyPage() {
                 const weekDay = getDayOfWeek(parseInt(yStr), parseInt(mStr), dayNum);
                 const verse = record.oneVerse!;
                 const isMem = verse.isMemorized;
-                // @ts-ignore
+                // @ts-expect-error: compatibility with older data structure
                 const displayTxt = verse.displayText || verse.text || "";
                 const formattedRef = verse.book === "시편" ? `${verse.book} ${verse.chapter}편 ${verse.verse}절` : `${verse.book} ${verse.chapter}장 ${verse.verse}절`;
 
@@ -380,7 +381,7 @@ export default function MyPage() {
 
                     <div className="p-5 flex flex-col gap-3">
                       <blockquote className="text-base sm:text-lg text-stone-800 dark:text-stone-200 font-medium leading-relaxed italic break-keep">
-                        "{displayTxt}"
+                        &quot;{displayTxt}&quot;
                       </blockquote>
                       <div className="text-right text-stone-500 dark:text-stone-400 font-bold text-xs sm:text-sm">
                         - {formattedRef} -
@@ -498,13 +499,13 @@ export default function MyPage() {
                         onScroll={handleCarouselScroll}
                         className="flex w-full overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar"
                       >
-                        {dayRecords.map((record, index) => {
+                        {dayRecords.map((record) => {
                           const verse = record.oneVerse;
                           if (!verse) return (
                             <div key={record.dayIndex} className="min-w-full flex-shrink-0 snap-center p-6">에러: 데이터가 없습니다.</div>
                           );
                           const isMem = verse.isMemorized;
-                          // @ts-ignore
+                          // @ts-expect-error: compatibility with older data structure
                           const displayTxt = verse.displayText || verse.text || "";
                           const formattedRef = verse.book === "시편" ? `${verse.book} ${verse.chapter}편 ${verse.verse}절` : `${verse.book} ${verse.chapter}장 ${verse.verse}절`;
 
@@ -531,7 +532,7 @@ export default function MyPage() {
                                 </div>
                                 <div className="w-full max-h-[300px] md:max-h-[400px] overflow-y-auto pr-2 no-scrollbar">
                                   <blockquote className="w-full break-words break-keep whitespace-normal text-lg sm:text-xl md:text-2xl leading-relaxed sm:leading-loose text-stone-800 dark:text-stone-100 font-medium italic">
-                                    "{displayTxt}"
+                                    &quot;{displayTxt}&quot;
                                   </blockquote>
                                 </div>
                                 <div className="text-right text-stone-500 dark:text-stone-400 font-semibold text-base sm:text-lg">
@@ -597,7 +598,7 @@ export default function MyPage() {
       {/* 암송 트레이너 모달 연동 */}
       {isMemoryModalOpen && selectedDayIndexForMemory && records[selectedDayIndexForMemory]?.oneVerse && (
         <MemoryTrainerModal
-          oneVerse={records[selectedDayIndexForMemory].oneVerse as any}
+          oneVerse={records[selectedDayIndexForMemory].oneVerse as OneVerse}
           onClose={() => setIsMemoryModalOpen(false)}
           onComplete={() => {
             updateMemorizeRecord(selectedDayIndexForMemory, true);

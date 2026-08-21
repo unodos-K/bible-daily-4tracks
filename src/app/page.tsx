@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Calendar, ZoomIn, ZoomOut, Target, ChevronDown, CheckCircle2, Bookmark, Crown, BrainCircuit, AlertCircle, Leaf } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ZoomIn, ZoomOut, ChevronDown, CheckCircle2, Bookmark, BrainCircuit, AlertCircle, Leaf, Crown } from "lucide-react";
 import { getDailyReadingByIndex, getAllSchedules, TRACK_INFO } from "@/lib/bible";
 import MemoryTrainerModal from "@/components/MemoryTrainerModal";
 import { 
@@ -195,11 +195,7 @@ export default function BibleViewerPage() {
   };
 
 
-  const handleSetTodayIndex = () => {
-    if (!settings) return;
-    const targetDay = getNextUnreadDay();
-    handleSetDay(targetDay);
-  };
+
 
   const handleFontSizeChange = (newSize: number) => {
     setFontSize(newSize);
@@ -385,8 +381,6 @@ export default function BibleViewerPage() {
 
   // 온보딩 화면 (풀스크린 랜딩 뷰)
   if (!settings || !settings.hasStarted || forceOnboarding) {
-    const records = getReadRecords();
-    const hasExistingRecords = Object.keys(records).length > 0;
 
     return (
       <div className="w-full min-h-screen flex flex-col items-center justify-center bg-stone-50 dark:bg-stone-950 p-6 px-4">
@@ -540,7 +534,7 @@ export default function BibleViewerPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
           <div className="bg-white dark:bg-stone-900 rounded-2xl p-6 shadow-xl w-full max-w-sm flex flex-col items-center gap-4 animate-in zoom-in-95">
             <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 text-center mb-2 leading-relaxed">
-              '{formatReference(selectedVerse.book, selectedVerse.chapter, selectedVerse.verse)}'을(를)<br/>오늘의 One Verse로 선택하시겠습니까?
+              &apos;{formatReference(selectedVerse.book, selectedVerse.chapter, selectedVerse.verse)}&apos;을(를)<br/>오늘의 One Verse로 선택하시겠습니까?
             </h3>
             <div className="flex gap-3 w-full mt-2">
               <button
@@ -581,7 +575,7 @@ export default function BibleViewerPage() {
             
             <div className="bg-stone-50 dark:bg-stone-800/50 rounded-2xl p-6 mb-8 border border-stone-100 dark:border-stone-700 text-left">
               <p className="text-lg font-semibold text-stone-800 dark:text-stone-200 leading-relaxed mb-4">
-                "{confirmedVerse.displayText}"
+                &quot;{confirmedVerse.displayText}&quot;
               </p>
               <p className="text-sm font-bold text-stone-400 dark:text-stone-500 text-right">
                 {formatReference(confirmedVerse.book, confirmedVerse.chapter, confirmedVerse.verse)}
@@ -729,7 +723,7 @@ export default function BibleViewerPage() {
               </button>
               {(() => {
                 const records = getReadRecords();
-                return allSchedules.map((s, idx) => {
+                return allSchedules.map((s) => {
                   const maxAllowed = getNextUnreadDay();
                   const isLocked = s.dayIndex > maxAllowed;
                   const dayRecord = records[s.dayIndex];
