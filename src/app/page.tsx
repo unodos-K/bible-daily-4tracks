@@ -323,6 +323,28 @@ export default function BibleViewerPage() {
     return <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex justify-center items-center text-stone-500">Loading...</div>;
   }
 
+  // 첫 화면: 로그인 전용 랜딩
+  if (!authUser) {
+    return (
+      <div className="w-full min-h-screen flex flex-col items-center justify-center bg-stone-50 dark:bg-stone-950 p-6 px-4">
+        <div className="max-w-md w-full bg-white dark:bg-stone-900 rounded-3xl shadow-xl border border-stone-200 dark:border-stone-800 p-8 flex flex-col gap-6 animate-in fade-in zoom-in-95 text-center items-center">
+          <div className="w-16 h-16 bg-sky-100 dark:bg-sky-900/50 rounded-full flex items-center justify-center text-3xl mb-1">
+            🕊️
+          </div>
+          <h1 className="text-2xl font-black text-stone-800 dark:text-stone-100">말씀 통독 & 뇌새김 암송</h1>
+          <p className="text-stone-500 dark:text-stone-400 text-sm">매일 말씀과 동행하는 삶을 시작해보세요.</p>
+          
+          <button
+            onClick={signInWithKakao}
+            className="w-full py-4 mt-4 bg-[#FEE500] hover:bg-[#FDD800] text-black font-bold rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2"
+          >
+            <span className="text-lg">💬</span> 카카오 로그인하고 시작하기
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   // 온보딩 화면 (풀스크린 랜딩 뷰)
   if (!settings || !settings.hasStarted || forceOnboarding) {
 
@@ -601,17 +623,6 @@ export default function BibleViewerPage() {
         
         {/* 상단 네비게이터 */}
         <header className="sticky top-[52px] z-30 bg-[#fcfbf9]/95 dark:bg-[#18181b]/95 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 shadow-sm flex flex-col px-3 py-2 gap-2">
-          {/* 카카오 로그인 배너 (비로그인 시) */}
-          {!authUser && (
-            <div className="flex justify-between items-center bg-[#FEE500] text-black px-3 py-2 rounded-lg cursor-pointer hover:bg-[#FDD800] transition-colors shadow-sm mb-1" onClick={signInWithKakao}>
-              <div className="flex items-center gap-2">
-                <span className="font-black text-sm">💬</span>
-                <span className="text-sm font-bold">카카오 로그인으로 통독 기록 저장하기</span>
-              </div>
-              <ChevronRight size={16} />
-            </div>
-          )}
-
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1 sm:gap-2">
               <button
