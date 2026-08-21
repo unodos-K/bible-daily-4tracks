@@ -173,7 +173,7 @@ export default function BibleViewerPage() {
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
-      const headerOffset = 80; // 상단 고정 헤더 높이만큼 오프셋 보정
+      const headerOffset = 104; // 상단 고정 헤더 높이만큼 오프셋 보정
       const elementPosition = element.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
       window.scrollTo({
@@ -614,26 +614,24 @@ export default function BibleViewerPage() {
       )}
 
       {/* 플로팅 퀵 네비게이터 */}
-      <div className="fixed right-3 sm:right-5 top-1/2 -translate-y-1/2 z-40 flex flex-col gap-1.5 p-1.5 bg-stone-900/80 backdrop-blur-md border border-stone-700/60 rounded-full shadow-2xl">
-        <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="p-2 sm:p-2.5 rounded-full hover:bg-stone-800 transition-colors flex items-center justify-center" title="맨위로 이동">
-          <span className="text-sm sm:text-base leading-none">⬆️</span>
+      <div className="fixed right-3 sm:right-5 top-1/2 -translate-y-1/2 z-40 flex flex-col gap-1.5">
+        <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="text-xs font-medium py-1 px-2 rounded-lg bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50" title="맨위로 이동">
+          처음
         </button>
-        <div className="w-full h-px bg-stone-700/60 my-0.5"></div>
-        <button onClick={() => scrollToSection('track-old-testament')} className="p-2 sm:p-2.5 rounded-full hover:bg-stone-800 transition-colors flex items-center justify-center" title="구약">
-          <span className="text-sm sm:text-base leading-none">📖</span>
+        <button onClick={() => scrollToSection('track-old-testament')} className="text-xs font-medium py-1 px-2 rounded-lg bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50" title="구약">
+          구약
         </button>
-        <button onClick={() => scrollToSection('track-new-testament')} className="p-2 sm:p-2.5 rounded-full hover:bg-stone-800 transition-colors flex items-center justify-center" title="신약">
-          <span className="text-sm sm:text-base leading-none">✝️</span>
+        <button onClick={() => scrollToSection('track-new-testament')} className="text-xs font-medium py-1 px-2 rounded-lg bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50" title="신약">
+          신약
         </button>
-        <button onClick={() => scrollToSection('track-psalms')} className="p-2 sm:p-2.5 rounded-full hover:bg-stone-800 transition-colors flex items-center justify-center" title="시편">
-          <span className="text-sm sm:text-base leading-none">🕊️</span>
+        <button onClick={() => scrollToSection('track-psalms')} className="text-xs font-medium py-1 px-2 rounded-lg bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50" title="시편">
+          시편
         </button>
-        <button onClick={() => scrollToSection('track-proverbs')} className="p-2 sm:p-2.5 rounded-full hover:bg-stone-800 transition-colors flex items-center justify-center" title="잠언">
-          <span className="text-sm sm:text-base leading-none">💡</span>
+        <button onClick={() => scrollToSection('track-proverbs')} className="text-xs font-medium py-1 px-2 rounded-lg bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50" title="잠언">
+          잠언
         </button>
-        <div className="w-full h-px bg-stone-700/60 my-0.5"></div>
-        <button onClick={() => scrollToSection('viewer-bottom')} className="p-2 sm:p-2.5 rounded-full hover:bg-stone-800 transition-colors flex items-center justify-center" title="완료 버튼으로 이동">
-          <span className="text-sm sm:text-base leading-none">⬇️</span>
+        <button onClick={() => scrollToSection('viewer-bottom')} className="text-xs font-medium py-1 px-2 rounded-lg bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50" title="완료 버튼으로 이동">
+          완료
         </button>
       </div>
 
@@ -802,16 +800,15 @@ export default function BibleViewerPage() {
               <div key={trackReading.track.type} id={TRACK_ID_MAP[trackReading.track.type as keyof typeof TRACK_ID_MAP]} className="flex flex-col border-b border-stone-200 dark:border-stone-800/60 pb-10">
                 {/* 섹션 헤더 */}
                 <div 
-                  className="sticky top-[156px] z-20 px-5 sm:px-6 py-2.5 sm:py-3 border-b border-stone-200/50 dark:border-stone-800/50 backdrop-blur-md shadow-sm"
-                  style={{ backgroundColor: trackInfo.badgeBg }}
+                  className="sticky top-[104px] z-20 py-2 px-4 text-sm font-semibold bg-stone-900/90 backdrop-blur border-b border-stone-800"
                 >
-                  <h2 className="text-base sm:text-lg font-bold flex items-center gap-2" style={{ color: trackInfo.accentColor }}>
-                    <span>{icon}</span> {trackInfo.title.split(" ")[0]} <span className="text-stone-400/70 font-normal mx-0.5">·</span> {trackReading.track.range}
+                  <h2 className="flex items-center gap-2" style={{ color: trackInfo.accentColor }}>
+                    <span>{icon}</span> {trackInfo.title.split(" ")[0]} <span className="text-stone-500 font-normal mx-0.5">·</span> <span className="text-stone-300">{trackReading.track.range}</span>
                   </h2>
                 </div>
 
                 {/* 성경 본문 */}
-                <div className="px-3 sm:px-6 py-6 sm:py-8 flex flex-col gap-6" style={{ fontSize: `${fontSize}px`, lineHeight: 1.8 }}>
+                <div className="pl-3 pr-14 sm:pl-6 sm:pr-8 py-6 sm:py-8 flex flex-col gap-6" style={{ fontSize: `${fontSize}px`, lineHeight: 1.8 }}>
                   {trackReading.chapters.map((chapterData) => (
                     <div key={`${chapterData.name}-${chapterData.chapter}`} className="flex flex-col">
                       {/* 장 제목 (같은 범위 내에 여러 장이 있을 때 구분) */}
