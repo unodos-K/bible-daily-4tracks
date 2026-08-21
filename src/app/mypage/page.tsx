@@ -8,9 +8,10 @@ import {
   ReadRecordsMap, 
   DayRecord,
   OneVerse,
-  getReadingSettings, 
-  getReadRecords, 
+  fetchReadingSettings, 
+  fetchReadRecords, 
   resetUserData,
+  startNewReading,
   getNextUnreadDay,
   updateMemorizeRecord,
   saveViewerDay
@@ -76,16 +77,21 @@ export default function MyPage() {
 
   useEffect(() => {
     setIsClient(true);
-    getAuthUser().then(user => {
+    getAuthUser().then(async (user) => {
       setAuthUser(user);
+      if (user) {
+        const s = await fetchReadingSettings();
+        if (!s || !s.hasStarted) {
+          router.push("/");
+          return;
+        }
+        setSettings(s);
+        const r = await fetchReadRecords();
+        setRecords(r);
+      } else {
+        router.push("/");
+      }
     });
-    const s = getReadingSettings();
-    setSettings(s);
-    setRecords(getReadRecords());
-
-    if (!s || !s.hasStarted) {
-      router.push("/");
-    }
   }, [router]);
 
   const handleLogout = async () => {
@@ -99,14 +105,11 @@ export default function MyPage() {
   }
 
   const executeReset = async () => {
-    if (authUser) {
-      await supabase.from('reading_records').delete().eq('user_id', authUser.id);
-    }
     const dateObj = new Date();
     const todayStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
-    startNewReading(todayStr);
+    await startNewReading(todayStr);
     setIsResetModalOpen(false);
-    router.refresh();
+    window.location.href = "/";
   };
 
   const handleDayClick = (dateStr: string) => {
@@ -114,7 +117,7 @@ export default function MyPage() {
     setCurrentSlideIndex(0);
   };
 
-  const nextUnreadDay = getNextUnreadDay();
+  const nextUnreadDay = getNextUnreadDay(records);
   const daysSince = calculateDaysSince(settings.startDate);
 
   // 그룹화: 날짜별 완료한 Day 목록
@@ -633,9 +636,13 @@ export default function MyPage() {
         <MemoryTrainerModal
           oneVerse={records[selectedDayIndexForMemory].oneVerse as OneVerse}
           onClose={() => setIsMemoryModalOpen(false)}
-          onComplete={() => {
-            updateMemorizeRecord(selectedDayIndexForMemory, true);
-            setRecords(getReadRecords());
+          onComplete={async () => {
+            const verse = records[selectedDayIndexForMemory].oneVerse;
+            if (verse) {
+              await updateMemorizeRecord(selectedDayIndexForMemory, true, verse);
+              const r = await fetchReadRecords();
+              setRecords(r);
+            }
             setIsMemoryModalOpen(false);
           }}
         />

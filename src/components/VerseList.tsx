@@ -60,7 +60,7 @@ export const VerseList: React.FC<VerseListProps> = ({
                   lineHeight: `${fontSize * 1.85}px`,
                 }}
               >
-                {verse.text}
+                {verse.displayText}
               </p>
             </div>
           );

@@ -7,22 +7,18 @@ import { getDailyReadingByIndex, getAllSchedules, TRACK_INFO } from "@/lib/bible
 import MemoryTrainerModal from "@/components/MemoryTrainerModal";
 import { 
   ReadingSettings,
+  ReadRecordsMap,
   OneVerse,
-  getReadingSettings, 
-  setReadingSettings,
+  fetchReadingSettings, 
+  fetchReadRecords,
   startNewReading,
   getNextUnreadDay,
   saveDayRecord,
-  getReadRecordByDayIndex,
   updateReadRecordOneVerse,
   updateMemorizeRecord,
   getTodayReadCount,
-  getReadRecords,
   saveViewerDay,
-  getSavedViewerDay,
-  setStorageUserId,
-  fetchSupabaseToLocal,
-  syncLocalToSupabase
+  getSavedViewerDay
 } from "@/lib/storage";
 import { getAuthUser, AuthUser } from "@/lib/auth";
 import { signInWithKakao } from "@/lib/supabase";
@@ -51,6 +47,7 @@ export default function BibleViewerPage() {
   const [isClient, setIsClient] = useState(false);
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [settings, setSettings] = useState<ReadingSettings | null>(null);
+  const [records, setRecords] = useState<ReadRecordsMap>({});
   
   const [loginId, setLoginId] = useState("");
   const [loginPw, setLoginPw] = useState("");
@@ -78,10 +75,10 @@ export default function BibleViewerPage() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const allSchedules = getAllSchedules();
 
-  const handleSetDay = (newDay: number) => {
+  const handleSetDay = (newDay: number, currentRecords: ReadRecordsMap = records) => {
     const validDay = Math.max(1, Math.min(365, newDay));
-    const maxAllowedDay = getNextUnreadDay();
-    const isAlreadyRead = !!getReadRecordByDayIndex(validDay);
+    const maxAllowedDay = getNextUnreadDay(currentRecords);
+    const isAlreadyRead = !!currentRecords[validDay];
     
     // 권한 체크: 열리지 않은 미래의 Day
     if (validDay > maxAllowedDay) {
@@ -93,7 +90,7 @@ export default function BibleViewerPage() {
     // 일일 3개 제한 체크: 열리지 않은 '오늘의 새로운 Day'를 열려고 할 때만 발동
     const dateObj = new Date();
     const todayStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
-    if (!isAlreadyRead && getTodayReadCount(todayStr) >= 3) {
+    if (!isAlreadyRead && getTodayReadCount(todayStr, currentRecords) >= 3) {
       setShowDailyLimitModal(true);
       setIsDaySelectorOpen(false);
       return;
@@ -111,30 +108,29 @@ export default function BibleViewerPage() {
     
     getAuthUser().then(async (user) => {
       setAuthUser(user);
-      if (user) {
-        setStorageUserId(user.id);
-        await fetchSupabaseToLocal();
-        syncLocalToSupabase(); // bg sync
-      } else {
-        setStorageUserId("guest");
-      }
-
-      let loadedSettings = getReadingSettings();
       
-      if (!loadedSettings || !loadedSettings.hasStarted) {
+      let currentRecords: ReadRecordsMap = {};
+      let currentSettings: ReadingSettings | null = null;
+      
+      if (user) {
+        currentSettings = await fetchReadingSettings();
+        currentRecords = await fetchReadRecords();
+      }
+      
+      if (!currentSettings || !currentSettings.hasStarted) {
         const dateObj = new Date();
         const todayStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
-        const newSettings = {
-          ...(loadedSettings || {}),
-          startDate: loadedSettings?.startDate || todayStr,
+        await startNewReading(todayStr);
+        currentSettings = {
+          startDate: todayStr,
           currentDay: 1,
           hasStarted: true
         };
-        setReadingSettings(newSettings);
-        loadedSettings = newSettings;
+        currentRecords = {};
       }
       
-      setSettings(loadedSettings);
+      setSettings(currentSettings);
+      setRecords(currentRecords);
 
       try {
         const savedFontSize = localStorage.getItem("bible_viewer_font_size");
@@ -147,8 +143,8 @@ export default function BibleViewerPage() {
 
         const dateObj = new Date();
         const todayStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
-        const maxAllowed = getNextUnreadDay();
-        const isLimitReached = getTodayReadCount(todayStr) >= 3;
+        const maxAllowed = getNextUnreadDay(currentRecords);
+        const isLimitReached = getTodayReadCount(todayStr, currentRecords) >= 3;
 
         let initialDay = maxAllowed;
         const savedDay = getSavedViewerDay();
@@ -175,7 +171,7 @@ export default function BibleViewerPage() {
   // Load record for the current dayIndex
   useEffect(() => {
     if (isClient && settings?.hasStarted) {
-      const record = getReadRecordByDayIndex(dayIndex);
+      const record = records[dayIndex];
       if (record) {
         setIsCompletedDay(true);
         setConfirmedVerse(record.oneVerse || null);
@@ -185,7 +181,7 @@ export default function BibleViewerPage() {
         setConfirmedVerse(null);
       }
     }
-  }, [isClient, dayIndex, settings]);
+  }, [isClient, dayIndex, settings, records]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -207,7 +203,6 @@ export default function BibleViewerPage() {
 
   // 마지막으로 읽은(완료된) Day로 이동하는 핸들러
   const handleGoToLastRead = () => {
-    const records = getReadRecords();
     const completedDays = Object.keys(records)
       .map((k) => Number(k))
       .filter((day) => !!records[day]?.oneVerse);
@@ -250,13 +245,15 @@ export default function BibleViewerPage() {
     }
   };
 
-  const handleConfirmVerse = (verse: OneVerse, e: React.MouseEvent) => {
+  const handleConfirmVerse = async (verse: OneVerse, e: React.MouseEvent) => {
     e.stopPropagation();
     setConfirmedVerse(verse);
     setSelectedVerse(null);
     
     if (isCompletedDay) {
-      updateReadRecordOneVerse(dayIndex, verse);
+      await updateReadRecordOneVerse(dayIndex, verse);
+      const r = await fetchReadRecords();
+      setRecords(r);
       showToast("One Verse가 새로 지정되었습니다.");
     }
   };
@@ -275,26 +272,30 @@ export default function BibleViewerPage() {
     }
   };
 
-  const completeReadingAndShowSuccess = (verse: OneVerse) => {
+  const completeReadingAndShowSuccess = async (verse: OneVerse) => {
     const dateObj = new Date();
     const todayStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
     
     if (!isCompletedDay) {
-      saveDayRecord({
+      await saveDayRecord({
         dayIndex: dayIndex,
         readDate: todayStr,
         completedAt: new Date().toISOString(),
         oneVerse: verse,
       });
       setIsCompletedDay(true);
+      const r = await fetchReadRecords();
+      setRecords(r);
     }
     setShowSuccessModal(true);
   };
 
-  const handleMemoryComplete = () => {
+  const handleMemoryComplete = async () => {
     if (confirmedVerse) {
-      updateMemorizeRecord(dayIndex, true);
+      await updateMemorizeRecord(dayIndex, true, confirmedVerse);
       setConfirmedVerse({ ...confirmedVerse, isMemorized: true, memorizedAt: new Date().toISOString() });
+      const r = await fetchReadRecords();
+      setRecords(r);
       setIsMemoryModalOpen(false);
     }
   };
@@ -357,11 +358,11 @@ export default function BibleViewerPage() {
             <button
               onClick={() => {
                 setShowAccessDeniedModal(false);
-                handleSetDay(getNextUnreadDay());
+                handleSetDay(getNextUnreadDay(records));
               }}
               className="w-full py-3 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl transition-colors"
             >
-              현재 차례(Day {getNextUnreadDay()})로 이동하기
+              현재 차례(Day {getNextUnreadDay(records)})로 이동하기
             </button>
           </div>
         </div>
@@ -391,7 +392,7 @@ export default function BibleViewerPage() {
               <button
                 onClick={() => {
                   setShowDailyLimitModal(false);
-                  setDayIndex(Math.max(1, getNextUnreadDay() - 1));
+                  setDayIndex(Math.max(1, getNextUnreadDay(records) - 1));
                   window.scrollTo(0, 0);
                 }}
                 className="w-full py-3.5 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-bold rounded-xl transition-colors"
@@ -645,9 +646,8 @@ export default function BibleViewerPage() {
                 📌 마지막으로 읽은 본문으로 이동하기
               </button>
               {(() => {
-                const records = getReadRecords();
                 return allSchedules.map((s) => {
-                  const maxAllowed = getNextUnreadDay();
+                  const maxAllowed = getNextUnreadDay(records);
                   const isLocked = s.dayIndex > maxAllowed;
                   const dayRecord = records[s.dayIndex];
                   const hasOneVerse = !!dayRecord?.oneVerse;
