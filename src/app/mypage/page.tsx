@@ -341,7 +341,7 @@ export default function MyPage() {
                           <div key={i} className={`w-1.5 h-1.5 rounded-full ${count === 4 ? 'bg-amber-400' : 'bg-blue-500'}`} />
                         ))}
                       </div>
-                    </div>
+</>
                   )}
                 </div>
               );
