@@ -1,0 +1,622 @@
+"use client";
+
+import React, { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { ChevronLeft, ChevronRight, CheckCircle2, RotateCcw, BrainCircuit, X, Flame } from "lucide-react";
+import { 
+  ReadingSettings, 
+  ReadRecordsMap, 
+  DayRecord,
+  getReadingSettings, 
+  getReadRecords, 
+  resetChallenge,
+  getNextUnreadDay,
+  updateMemorizeRecord,
+  saveViewerDay
+} from "@/lib/storage";
+import { getAuthUser, logout, AuthUser } from "@/lib/auth";
+import MemoryTrainerModal from "@/components/MemoryTrainerModal";
+
+function getDaysInMonth(year: number, month: number) {
+  return new Date(year, month, 0).getDate();
+}
+
+function getFirstDayOfMonth(year: number, month: number) {
+  return new Date(year, month - 1, 1).getDay();
+}
+
+function formatDateStr(year: number, month: number, day: number) {
+  const m = String(month).padStart(2, "0");
+  const d = String(day).padStart(2, "0");
+  return `${year}-${m}-${d}`;
+}
+
+const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
+function getDayOfWeek(year: number, month: number, day: number) {
+  const date = new Date(year, month - 1, day);
+  return WEEKDAYS[date.getDay()];
+}
+
+function calculateDaysSince(startDateStr: string): number {
+  if (!startDateStr) return 1;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const [y, m, d] = startDateStr.split("-").map(Number);
+  const start = new Date(y, m - 1, d);
+  start.setHours(0, 0, 0, 0);
+
+  const diffTime = today.getTime() - start.getTime();
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  
+  return Math.max(1, diffDays + 1);
+}
+
+export default function MyPage() {
+  const router = useRouter();
+  
+  const [settings, setSettings] = useState<ReadingSettings | null>(null);
+  const [records, setRecords] = useState<ReadRecordsMap>({});
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+  
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [isClient, setIsClient] = useState(false);
+  
+  const [selectedRecordStr, setSelectedRecordStr] = useState<string | null>(null);
+  const [selectedDayIndexForMemory, setSelectedDayIndexForMemory] = useState<number | null>(null);
+  const [isMemoryModalOpen, setIsMemoryModalOpen] = useState(false);
+  
+  // 캐러셀 관련 상태 및 Ref
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  const carouselRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setIsClient(true);
+    setAuthUser(getAuthUser());
+    const s = getReadingSettings();
+    setSettings(s);
+    setRecords(getReadRecords());
+
+    if (!s || !s.hasStarted) {
+      router.push("/");
+    }
+  }, [router]);
+
+  if (!isClient || !settings || !settings.hasStarted) {
+    return <div className="min-h-[calc(100vh-52px)] bg-stone-50 dark:bg-stone-950 flex justify-center items-center">Loading...</div>;
+  }
+
+  const handleReset = () => {
+    if (confirm("정말 통독 기록을 모두 초기화하고 다시 시작하시겠습니까?")) {
+      resetChallenge();
+      router.push("/");
+    }
+  };
+
+  const handleDayClick = (dateStr: string) => {
+    setSelectedRecordStr(dateStr);
+    setCurrentSlideIndex(0);
+  };
+
+  const nextUnreadDay = getNextUnreadDay();
+  const daysSince = calculateDaysSince(settings.startDate);
+
+  // 그룹화: 날짜별 완료한 Day 목록
+  const recordsByDate: Record<string, DayRecord[]> = {};
+  for (const day in records) {
+    const r = records[day];
+    if (!recordsByDate[r.readDate]) recordsByDate[r.readDate] = [];
+    recordsByDate[r.readDate].push(r);
+  }
+  
+  // 그룹 내에서 Day 순으로 정렬
+  for (const date in recordsByDate) {
+    recordsByDate[date].sort((a, b) => a.dayIndex - b.dayIndex);
+  }
+
+  // 통계 계산
+  const totalReadDays = Object.keys(records).length;
+  const totalMemorized = Object.values(records).filter(r => r.oneVerse?.isMemorized).length;
+  const progressPercent = ((totalReadDays / 365) * 100).toFixed(1);
+
+  // 달력 렌더링을 위한 데이터
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth() + 1;
+  const daysInMonth = getDaysInMonth(year, month);
+  const firstDay = getFirstDayOfMonth(year, month);
+
+  const calendarDays = [];
+  for (let i = 0; i < firstDay; i++) {
+    calendarDays.push(null);
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    calendarDays.push(d);
+  }
+
+  // 이번 달 One Verse 필터링 로직
+  const currentMonthPrefix = `${year}-${String(month).padStart(2, "0")}-`;
+  const thisMonthRecords = Object.values(records)
+    .filter(record => record.readDate.startsWith(currentMonthPrefix) && record.oneVerse)
+    .sort((a, b) => b.readDate.localeCompare(a.readDate) || b.dayIndex - a.dayIndex); // 내림차순 정렬 (최신순)
+
+  const thisMonthTotal = thisMonthRecords.length;
+  const thisMonthMemorized = thisMonthRecords.filter(r => r.oneVerse?.isMemorized).length;
+
+  const handleCarouselScroll = () => {
+    if (carouselRef.current) {
+      const scrollLeft = carouselRef.current.scrollLeft;
+      const width = carouselRef.current.clientWidth;
+      const newIndex = Math.round(scrollLeft / width);
+      if (newIndex !== currentSlideIndex) {
+        setCurrentSlideIndex(newIndex);
+      }
+    }
+  };
+
+  const scrollToSlide = (index: number) => {
+    if (carouselRef.current) {
+      const width = carouselRef.current.clientWidth;
+      carouselRef.current.scrollTo({ left: width * index, behavior: 'smooth' });
+      setCurrentSlideIndex(index);
+    }
+  };
+
+  return (
+    <div className="w-full min-h-[calc(100vh-52px)] flex flex-col items-center bg-stone-100/50 dark:bg-stone-950 p-4 sm:p-8 pb-32">
+      <div className="w-full max-w-2xl flex flex-col gap-6">
+        
+        {/* 프로필 및 통계 카드 */}
+        <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 p-6 flex flex-col gap-6">
+          <div className="flex justify-between items-start">
+            <div className="flex flex-col gap-1">
+              <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100 flex items-center gap-2">
+                {authUser ? `${authUser.name}님 환영합니다 ✨` : '내 통독 여정'}
+              </h2>
+              <p className="text-sm text-stone-500 dark:text-stone-400 font-medium bg-stone-100 dark:bg-stone-800 inline-block px-3 py-1 rounded-full w-fit">
+                📅 통독 시작일: {settings.startDate} (Day {daysSince}일차)
+              </p>
+            </div>
+            <button
+              onClick={() => logout()}
+              className="text-sm font-semibold text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 transition-colors"
+            >
+              🚪 로그아웃
+            </button>
+          </div>
+
+          <button
+            onClick={() => {
+              try {
+                saveViewerDay(nextUnreadDay);
+              } catch {}
+              router.push("/");
+            }}
+            className="w-full py-4 sm:py-5 bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white font-black rounded-xl transition-transform hover:-translate-y-1 shadow-md flex items-center justify-center gap-2 text-lg sm:text-xl"
+          >
+            <Flame size={24} className="text-amber-300" />
+            Day {nextUnreadDay} 말씀 이어서 읽으러 가기
+          </button>
+
+          <div className="grid grid-cols-3 gap-3 sm:gap-4 border-t border-stone-100 dark:border-stone-800 pt-4">
+            <div className="bg-stone-50 dark:bg-stone-950 rounded-xl p-3 sm:p-4 flex flex-col items-center justify-center border border-stone-100 dark:border-stone-800">
+              <span className="text-stone-500 text-xs sm:text-sm font-medium mb-1">총 읽은 일수</span>
+              <div className="text-2xl sm:text-3xl font-black text-sky-600 dark:text-sky-400">
+                {totalReadDays} <span className="text-sm sm:text-base font-medium text-stone-400">/ 365</span>
+              </div>
+            </div>
+            <div className="bg-stone-50 dark:bg-stone-950 rounded-xl p-3 sm:p-4 flex flex-col items-center justify-center border border-stone-100 dark:border-stone-800">
+              <span className="text-stone-500 text-xs sm:text-sm font-medium mb-1 text-center">암송 완료</span>
+              <div className="text-2xl sm:text-3xl font-black text-amber-500 dark:text-amber-400">
+                {totalMemorized}
+              </div>
+            </div>
+            <div className="bg-stone-50 dark:bg-stone-950 rounded-xl p-3 sm:p-4 flex flex-col items-center justify-center border border-stone-100 dark:border-stone-800">
+              <span className="text-stone-500 text-xs sm:text-sm font-medium mb-1">달성률</span>
+              <div className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400">
+                {progressPercent}%
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 인터랙티브 달력 */}
+        <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 p-4 sm:p-6">
+          <div className="flex items-center justify-between mb-6">
+            <button 
+              onClick={() => setCurrentDate(new Date(year, month - 2, 1))}
+              className="p-2 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full transition-colors"
+            >
+              <ChevronLeft className="text-stone-600 dark:text-stone-300" />
+            </button>
+            <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100">
+              {year}년 {month}월
+            </h3>
+            <button 
+              onClick={() => setCurrentDate(new Date(year, month, 1))}
+              className="p-2 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full transition-colors"
+            >
+              <ChevronRight className="text-stone-600 dark:text-stone-300" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2 text-center text-xs font-semibold text-stone-400">
+            <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
+          </div>
+          
+          <div className="grid grid-cols-7 gap-1 sm:gap-2">
+            {calendarDays.map((day, idx) => {
+              if (day === null) {
+                return <div key={`empty-${idx}`} className="h-20 sm:h-24" />;
+              }
+
+              const dateStr = formatDateStr(year, month, day);
+              const isBeforeStart = dateStr < settings.startDate;
+              const dayRecords = recordsByDate[dateStr] || [];
+              const count = dayRecords.length;
+              const isCompleted = count > 0;
+              
+              const isToday = formatDateStr(new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate()) === dateStr;
+              const isSelected = selectedRecordStr === dateStr;
+
+              // 메달 및 UI 설정
+              let medalStr = "";
+              let borderClass = "";
+              let bgClass = "";
+              
+              if (isCompleted) {
+                if (count === 3) {
+                  medalStr = "🏅🏅🏅";
+                  borderClass = "border-amber-400 dark:border-amber-500 shadow-[0_0_8px_rgba(251,191,36,0.3)]";
+                  bgClass = "bg-amber-50/50 dark:bg-amber-900/10";
+                } else if (count === 2) {
+                  medalStr = "🏅🏅";
+                  borderClass = "border-sky-300 dark:border-sky-700";
+                  bgClass = "bg-sky-50 dark:bg-sky-900/20";
+                } else {
+                  medalStr = "🏅";
+                  borderClass = "border-sky-200 dark:border-sky-800";
+                  bgClass = "bg-sky-50 dark:bg-sky-900/20";
+                }
+              }
+
+              return (
+                <div 
+                  key={day}
+                  onClick={() => {
+                    if (!isBeforeStart || isCompleted) {
+                      handleDayClick(dateStr);
+                    }
+                  }}
+                  className={`
+                    relative h-20 sm:h-24 flex flex-col items-center justify-start pt-2 rounded-xl transition-all border select-none
+                    ${isBeforeStart && !isCompleted ? 'opacity-30 cursor-not-allowed bg-stone-50 dark:bg-stone-900 border-transparent' : 'cursor-pointer'}
+                    ${isSelected ? 'ring-2 ring-sky-500 bg-sky-100 dark:bg-sky-900/60' : ''}
+                    ${isCompleted && !isSelected ? `${bgClass} ${borderClass} hover:brightness-95` : ''}
+                    ${!isCompleted && !isSelected && !isBeforeStart ? 'bg-transparent border-transparent hover:border-stone-200 dark:hover:border-stone-800' : ''}
+                  `}
+                >
+                  <span className={`text-sm font-medium ${isToday ? 'text-sky-600 dark:text-sky-400 font-bold' : 'text-stone-700 dark:text-stone-300'}`}>
+                    {day}
+                  </span>
+                  {isCompleted && (
+                    <div className="mt-1 flex flex-col items-center gap-0.5">
+                      <div className="text-[10px] sm:text-xs leading-none" title={`${count}개 Day 완료`}>{medalStr}</div>
+                      <div className="flex flex-wrap justify-center gap-0.5 mt-1 px-1">
+                        {dayRecords.map(r => (
+                          <span key={r.dayIndex} className={`text-[9px] sm:text-[10px] font-bold px-1 py-0.5 rounded-sm ${
+                            r.oneVerse?.isMemorized 
+                              ? 'text-amber-700 dark:text-amber-400 bg-amber-200 dark:bg-amber-900/60' 
+                              : 'text-sky-700 dark:text-sky-400 bg-white/70 dark:bg-black/30'
+                          }`}>
+                            D{r.dayIndex}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* 이번 달 One Verse 아카이브 리스트 */}
+        <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 p-4 sm:p-6 flex flex-col">
+          <div className="flex flex-col gap-4 mb-6">
+            <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 flex items-center gap-2">
+              📅 {year}년 {month}월의 One Verse
+              <span className="text-sm font-medium text-stone-500 bg-stone-100 dark:bg-stone-800 px-2.5 py-0.5 rounded-full">
+                총 {thisMonthTotal}개
+              </span>
+            </h3>
+            <div className="flex gap-2">
+              <span className="text-xs font-bold bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800 px-2 py-1 rounded-md">
+                👑 암송 완료: {thisMonthMemorized}개
+              </span>
+              <span className="text-xs font-bold bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 px-2 py-1 rounded-md">
+                📖 통독: {thisMonthTotal}개
+              </span>
+            </div>
+          </div>
+
+          {thisMonthTotal === 0 ? (
+            <div className="bg-stone-50 dark:bg-stone-800/50 p-6 rounded-2xl border border-stone-100 dark:border-stone-800 flex flex-col items-center justify-center py-12 text-center">
+              <p className="text-stone-500 dark:text-stone-400 mb-2 font-medium">이번 달에 등록된 One Verse가 아직 없습니다.</p>
+              <p className="text-stone-400 dark:text-stone-500 text-sm">오늘의 말씀을 읽고 마음에 닿는 구절을 남겨보세요! ✨</p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-4">
+              {thisMonthRecords.map((record) => {
+                const [yStr, mStr, dStr] = record.readDate.split("-");
+                const dayNum = parseInt(dStr, 10);
+                const weekDay = getDayOfWeek(parseInt(yStr), parseInt(mStr), dayNum);
+                const verse = record.oneVerse!;
+                const isMem = verse.isMemorized;
+                // @ts-ignore
+                const displayTxt = verse.displayText || verse.text || "";
+                const formattedRef = verse.book === "시편" ? `${verse.book} ${verse.chapter}편 ${verse.verse}절` : `${verse.book} ${verse.chapter}장 ${verse.verse}절`;
+
+                return (
+                  <div key={`${record.readDate}-${record.dayIndex}`} className="flex flex-col bg-stone-50 dark:bg-stone-950 border border-stone-100 dark:border-stone-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                    
+                    <div className="flex justify-between items-center px-4 py-3 bg-white dark:bg-stone-900 border-b border-stone-100 dark:border-stone-800">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-stone-800 dark:text-stone-200">
+                          {parseInt(mStr)}월 {dayNum}일 ({weekDay})
+                        </span>
+                        <span className="text-xs font-semibold bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 px-2.5 py-0.5 rounded-full">
+                          Day {record.dayIndex}
+                        </span>
+                      </div>
+                      
+                      <div className={`text-xs font-bold px-2 py-1 rounded-md border ${
+                        isMem
+                          ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400 border-amber-300 dark:border-amber-800'
+                          : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800'
+                      }`}>
+                        {isMem ? '👑 암송 완료' : '📖 통독 완료'}
+                      </div>
+                    </div>
+
+                    <div className="p-5 flex flex-col gap-3">
+                      <blockquote className="text-base sm:text-lg text-stone-800 dark:text-stone-200 font-medium leading-relaxed italic break-keep">
+                        "{displayTxt}"
+                      </blockquote>
+                      <div className="text-right text-stone-500 dark:text-stone-400 font-bold text-xs sm:text-sm">
+                        - {formattedRef} -
+                      </div>
+                    </div>
+
+                    <div className="flex border-t border-stone-100 dark:border-stone-800 bg-white dark:bg-stone-900">
+                      <button
+                        onClick={() => {
+                          setSelectedRecordStr(record.readDate);
+                          setSelectedDayIndexForMemory(record.dayIndex);
+                          setIsMemoryModalOpen(true);
+                        }}
+                        className="flex-1 py-3 text-sm font-bold text-amber-600 dark:text-amber-500 hover:bg-amber-50 dark:hover:bg-stone-800 flex items-center justify-center gap-1.5 transition-colors border-r border-stone-100 dark:border-stone-800"
+                      >
+                        <BrainCircuit size={16} />
+                        {isMem ? '암송 복습하기' : '암송 훈련하기'}
+                      </button>
+                      <button
+                        onClick={() => {
+                          try {
+                            saveViewerDay(record.dayIndex);
+                          } catch {}
+                          router.push("/");
+                        }}
+                        className="flex-1 py-3 text-sm font-bold text-sky-600 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-stone-800 flex items-center justify-center gap-1.5 transition-colors"
+                      >
+                        📖 말씀 본문 보기
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* 상세 팝업 모달 (가로 스와이프 캐러셀 지원) */}
+        {selectedRecordStr && !isMemoryModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in" onClick={() => setSelectedRecordStr(null)}>
+            <div 
+              className="w-[92%] max-w-xl md:max-w-2xl mx-auto bg-white dark:bg-stone-900 rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 max-h-[90vh]"
+              onClick={e => e.stopPropagation()}
+            >
+              {(() => {
+                const dayRecords = recordsByDate[selectedRecordStr] || [];
+                const [y, m, d] = selectedRecordStr.split("-");
+                
+                if (dayRecords.length === 0) {
+                  return (
+                    <div className="flex flex-col items-center py-10 p-6 sm:p-8">
+                      <div className="flex w-full justify-between items-start mb-1">
+                        <h3 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100 mb-2">
+                          {y}년 {parseInt(m)}월 {parseInt(d)}일
+                        </h3>
+                        <button 
+                          onClick={() => setSelectedRecordStr(null)} 
+                          className="p-2 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 rounded-full text-stone-500 transition-colors"
+                        >
+                          <X size={20}/>
+                        </button>
+                      </div>
+                      <p className="text-stone-500 dark:text-stone-400 mb-8 text-center text-sm sm:text-base mt-4">
+                        해당 날짜에는 아직 읽은 말씀 기록이 없습니다.
+                      </p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="flex flex-col h-full relative">
+                    {/* 모달 헤더 */}
+                    <div className="flex justify-between items-center p-5 sm:p-6 pb-4 border-b border-stone-100 dark:border-stone-800 z-10 bg-white dark:bg-stone-900">
+                      <div className="flex flex-col">
+                        <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100">
+                          {y}년 {parseInt(m)}월 {parseInt(d)}일
+                        </h3>
+                        {dayRecords.length > 1 && (
+                          <div className="text-stone-500 dark:text-stone-400 font-semibold text-sm mt-1">
+                            Day {dayRecords[currentSlideIndex]?.dayIndex} ({currentSlideIndex + 1}/{dayRecords.length})
+                          </div>
+                        )}
+                      </div>
+                      <button 
+                        onClick={() => setSelectedRecordStr(null)} 
+                        className="p-2 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 rounded-full text-stone-500 transition-colors self-start -mt-1 -mr-1"
+                      >
+                        <X size={20}/>
+                      </button>
+                    </div>
+
+                    {/* 캐러셀 컨테이너 */}
+                    <div className="relative w-full">
+                      {/* 좌우 이동 버튼 (복수 개일 때만 노출) */}
+                      {dayRecords.length > 1 && (
+                        <React.Fragment>
+                          <button
+                            onClick={() => scrollToSlide((currentSlideIndex - 1 + dayRecords.length) % dayRecords.length)}
+                            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center bg-white/90 dark:bg-stone-800/90 hover:bg-stone-100 dark:hover:bg-stone-700 rounded-full shadow-md text-stone-700 dark:text-stone-300 backdrop-blur transition-all"
+                          >
+                            <ChevronLeft size={28} />
+                          </button>
+                          <button
+                            onClick={() => scrollToSlide((currentSlideIndex + 1) % dayRecords.length)}
+                            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center bg-white/90 dark:bg-stone-800/90 hover:bg-stone-100 dark:hover:bg-stone-700 rounded-full shadow-md text-stone-700 dark:text-stone-300 backdrop-blur transition-all"
+                          >
+                            <ChevronRight size={28} />
+                          </button>
+                        </React.Fragment>
+                      )}
+
+                      {/* 스와이프 가능한 컨텐츠 영역 */}
+                      <div 
+                        ref={carouselRef}
+                        onScroll={handleCarouselScroll}
+                        className="flex w-full overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar"
+                      >
+                        {dayRecords.map((record, index) => {
+                          const verse = record.oneVerse;
+                          if (!verse) return (
+                            <div key={record.dayIndex} className="min-w-full flex-shrink-0 snap-center p-6">에러: 데이터가 없습니다.</div>
+                          );
+                          const isMem = verse.isMemorized;
+                          // @ts-ignore
+                          const displayTxt = verse.displayText || verse.text || "";
+                          const formattedRef = verse.book === "시편" ? `${verse.book} ${verse.chapter}편 ${verse.verse}절` : `${verse.book} ${verse.chapter}장 ${verse.verse}절`;
+
+                          return (
+                            <div key={record.dayIndex} className="w-full min-w-full max-w-full shrink-0 flex-shrink-0 box-border snap-center p-5 sm:p-8 flex flex-col gap-4">
+                              
+                              {dayRecords.length === 1 && (
+                                <div className="font-bold text-stone-700 dark:text-stone-300 text-sm mb-1">
+                                  Day {record.dayIndex}
+                                </div>
+                              )}
+
+                              <div className={`p-6 sm:p-8 rounded-2xl border flex flex-col gap-6 shadow-sm ${
+                                isMem
+                                  ? 'bg-amber-50/80 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800/50'
+                                  : 'bg-stone-50/80 dark:bg-stone-800/80 border-stone-200 dark:border-stone-700'
+                              }`}>
+                                <div className={`self-start px-3 py-1.5 rounded-full text-sm sm:text-base font-bold ${
+                                  isMem
+                                    ? 'bg-amber-500 text-white shadow-sm'
+                                    : 'bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-300'
+                                }`}>
+                                  {isMem ? '👑 암송 완료' : '📖 통독 완료'}
+                                </div>
+                                <div className="w-full max-h-[300px] md:max-h-[400px] overflow-y-auto pr-2 no-scrollbar">
+                                  <blockquote className="w-full break-words break-keep whitespace-normal text-lg sm:text-xl md:text-2xl leading-relaxed sm:leading-loose text-stone-800 dark:text-stone-100 font-medium italic">
+                                    "{displayTxt}"
+                                  </blockquote>
+                                </div>
+                                <div className="text-right text-stone-500 dark:text-stone-400 font-semibold text-base sm:text-lg">
+                                  - {formattedRef} -
+                                </div>
+                              </div>
+
+                              <div className="flex flex-col sm:flex-row gap-3 mt-4">
+                                <button
+                                  onClick={() => {
+                                    setSelectedDayIndexForMemory(record.dayIndex);
+                                    setIsMemoryModalOpen(true);
+                                  }}
+                                  className="flex-1 py-3.5 sm:py-4 px-6 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl shadow-lg transition-transform hover:scale-[1.02] flex items-center justify-center gap-2 text-base sm:text-lg"
+                                >
+                                  <BrainCircuit size={22} />
+                                  {isMem ? '이 말씀 복습하기' : '이 말씀 암송하기'}
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    try {
+                                      saveViewerDay(record.dayIndex);
+                                    } catch {}
+                                    router.push("/");
+                                  }}
+                                  className="flex-1 py-3.5 sm:py-4 px-6 bg-stone-800 hover:bg-stone-900 dark:bg-stone-200 dark:hover:bg-stone-300 dark:text-stone-900 text-white font-bold rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2 text-base sm:text-lg"
+                                >
+                                  해당 Day 본문 읽으러 가기
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* 하단 페이지네이션 인디케이터 */}
+                    {dayRecords.length > 1 && (
+                      <div className="flex justify-center gap-2 pb-6 bg-white dark:bg-stone-900">
+                        {dayRecords.map((_, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => scrollToSlide(idx)}
+                            className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                              idx === currentSlideIndex 
+                                ? 'bg-amber-500 w-6' 
+                                : 'bg-stone-200 dark:bg-stone-700 hover:bg-stone-300 dark:hover:bg-stone-600'
+                            }`}
+                            aria-label={`${idx + 1}번째 슬라이드로 이동`}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
+        )}
+
+      </div>
+      
+      {/* 암송 트레이너 모달 연동 */}
+      {isMemoryModalOpen && selectedDayIndexForMemory && records[selectedDayIndexForMemory]?.oneVerse && (
+        <MemoryTrainerModal
+          oneVerse={records[selectedDayIndexForMemory].oneVerse as any}
+          onClose={() => setIsMemoryModalOpen(false)}
+          onComplete={() => {
+            updateMemorizeRecord(selectedDayIndexForMemory, true);
+            setRecords(getReadRecords());
+            setIsMemoryModalOpen(false);
+          }}
+        />
+      )}
+
+      {/* 설정 / 위험 구역 */}
+      <div className="w-full max-w-2xl mt-12 flex flex-col items-center">
+        <button
+          onClick={handleReset}
+          className="flex items-center justify-center gap-2 px-6 py-4 text-stone-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-2xl transition-colors font-semibold"
+        >
+          <RotateCcw size={18} />
+          시작 화면으로 돌아가기 / 통독 재설정
+        </button>
+      </div>
+    </div>
+  );
+}
