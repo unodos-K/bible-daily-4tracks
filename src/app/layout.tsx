@@ -3,8 +3,9 @@ import "./globals.css";
 import { GlobalNavigation } from "@/components/GlobalNavigation";
 
 export const metadata: Metadata = {
-  title: "모바일 성경 뷰어 (새번역)",
+  title: "4Tracks",
   description: "깔끔하고 가독성 높은 모바일 성경 뷰어 웹앱",
+  manifest: "/manifest.json",
 };
 
 export const viewport: Viewport = {
