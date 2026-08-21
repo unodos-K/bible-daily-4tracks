@@ -499,7 +499,7 @@ export default function BibleViewerPage() {
             
             <div className="bg-stone-50 dark:bg-stone-800/50 rounded-2xl p-6 mb-8 border border-stone-100 dark:border-stone-700 text-left">
               <p className="text-lg font-semibold text-stone-800 dark:text-stone-200 leading-relaxed mb-4">
-                &quot;{confirmedVerse.displayText}&quot;
+                {confirmedVerse.displayText}
               </p>
               <p className="text-sm font-bold text-stone-400 dark:text-stone-500 text-right">
                 {formatReference(confirmedVerse.book, confirmedVerse.chapter, confirmedVerse.verse)}

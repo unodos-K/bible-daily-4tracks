@@ -428,7 +428,7 @@ export default function MyPage() {
 
                     <div className="p-5 flex flex-col gap-3">
                       <blockquote className="text-base sm:text-lg text-stone-800 dark:text-stone-200 font-medium leading-relaxed italic break-keep">
-                        &quot;{displayTxt}&quot;
+                        {displayTxt}
                       </blockquote>
                       <div className="text-right text-stone-500 dark:text-stone-400 font-bold text-xs sm:text-sm">
                         - {formattedRef} -
@@ -579,7 +579,7 @@ export default function MyPage() {
                                 </div>
                                 <div className="w-full max-h-[300px] md:max-h-[400px] overflow-y-auto pr-2 no-scrollbar">
                                   <blockquote className="w-full break-words break-keep whitespace-normal text-lg sm:text-xl md:text-2xl leading-relaxed sm:leading-loose text-stone-800 dark:text-stone-100 font-medium italic">
-                                    &quot;{displayTxt}&quot;
+                                    {displayTxt}
                                   </blockquote>
                                 </div>
                                 <div className="text-right text-stone-500 dark:text-stone-400 font-semibold text-base sm:text-lg">
