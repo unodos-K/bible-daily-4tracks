@@ -222,7 +222,7 @@ export default function BibleViewerPage() {
   };
 
 
-  const handleVerseClick = (trackType: string, book: string, chapter: number, verse: number, rawText: string, displayText: string, chunks: string[]) => {
+  const handleVerseClick = async (trackType: string, book: string, chapter: number, verse: number, rawText: string, displayText: string, chunks: string[]) => {
     const verseObj = {
       trackType,
       book,
@@ -235,7 +235,22 @@ export default function BibleViewerPage() {
     };
 
     const isConfirmed = confirmedVerse?.book === book && confirmedVerse?.chapter === chapter && confirmedVerse?.verse === verse;
-    if (isConfirmed) return;
+    if (isConfirmed) {
+      if (isCompletedDay) {
+        const success = await updateReadRecordOneVerse(dayIndex, null);
+        if (success) {
+          setConfirmedVerse(null);
+          const r = await fetchReadRecords();
+          setRecords(r);
+          showToast("One Verse 선택이 해제되었습니다.");
+        } else {
+          alert("저장에 실패했습니다.");
+        }
+      } else {
+        setConfirmedVerse(null);
+      }
+      return;
+    }
 
     const isSelected = selectedVerse?.book === book && selectedVerse?.chapter === chapter && selectedVerse?.verse === verse;
     if (isSelected) {
@@ -247,14 +262,21 @@ export default function BibleViewerPage() {
 
   const handleConfirmVerse = async (verse: OneVerse, e: React.MouseEvent) => {
     e.stopPropagation();
-    setConfirmedVerse(verse);
-    setSelectedVerse(null);
     
     if (isCompletedDay) {
-      await updateReadRecordOneVerse(dayIndex, verse);
-      const r = await fetchReadRecords();
-      setRecords(r);
-      showToast("One Verse가 새로 지정되었습니다.");
+      const success = await updateReadRecordOneVerse(dayIndex, verse);
+      if (success) {
+        setConfirmedVerse(verse);
+        setSelectedVerse(null);
+        const r = await fetchReadRecords();
+        setRecords(r);
+        showToast("One Verse가 새로 지정되었습니다.");
+      } else {
+        alert("저장에 실패했습니다.");
+      }
+    } else {
+      setConfirmedVerse(verse);
+      setSelectedVerse(null);
     }
   };
 
@@ -277,17 +299,23 @@ export default function BibleViewerPage() {
     const todayStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
     
     if (!isCompletedDay) {
-      await saveDayRecord({
+      const success = await saveDayRecord({
         dayIndex: dayIndex,
         readDate: todayStr,
         completedAt: new Date().toISOString(),
         oneVerse: verse,
       });
-      setIsCompletedDay(true);
-      const r = await fetchReadRecords();
-      setRecords(r);
+      if (success) {
+        setIsCompletedDay(true);
+        const r = await fetchReadRecords();
+        setRecords(r);
+        setShowSuccessModal(true);
+      } else {
+        alert("저장에 실패했습니다.");
+      }
+    } else {
+      setShowSuccessModal(true);
     }
-    setShowSuccessModal(true);
   };
 
   const handleMemoryComplete = async () => {
