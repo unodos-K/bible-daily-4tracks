@@ -10,6 +10,7 @@ export async function signInWithKakao() {
   await supabase.auth.signInWithOAuth({
     provider: 'kakao',
     options: {
+      scopes: 'profile_nickname profile_image',
       redirectTo: `${origin}/auth/callback`,
     },
   });
