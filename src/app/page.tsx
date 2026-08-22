@@ -22,6 +22,7 @@ import {
 } from "@/lib/storage";
 import { getAuthUser, AuthUser } from "@/lib/auth";
 import { signInWithKakao } from "@/lib/supabase";
+import { useSettings } from "@/contexts/SettingsContext";
 
 const TRACK_ICONS: Record<string, string> = {
   "구약": "📖",
@@ -55,7 +56,7 @@ export default function BibleViewerPage() {
 
 
   const [dayIndex, setDayIndex] = useState<number>(1);
-  const [fontSize, setFontSize] = useState<number>(18);
+  const { fontSize, setFontSize } = useSettings();
   const [isDaySelectorOpen, setIsDaySelectorOpen] = useState(false);
   
   const [isCompletedDay, setIsCompletedDay] = useState(false);
@@ -133,14 +134,6 @@ export default function BibleViewerPage() {
       setRecords(currentRecords);
 
       try {
-        const savedFontSize = localStorage.getItem("bible_viewer_font_size");
-        if (savedFontSize) {
-          const parsed = parseInt(savedFontSize, 10);
-          if (!isNaN(parsed) && parsed >= 14 && parsed <= 26) {
-            setFontSize(parsed);
-          }
-        }
-
         const dateObj = new Date();
         const todayStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
         const maxAllowed = getNextUnreadDay(currentRecords);
@@ -216,9 +209,6 @@ export default function BibleViewerPage() {
 
   const handleFontSizeChange = (newSize: number) => {
     setFontSize(newSize);
-    try {
-      localStorage.setItem("bible_viewer_font_size", newSize.toString());
-    } catch {}
   };
 
 

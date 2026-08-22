@@ -19,6 +19,7 @@ import {
 import { getAuthUser, AuthUser } from "@/lib/auth";
 import { signOut, signInWithKakao } from "@/lib/supabase";
 import MemoryTrainerModal from "@/components/MemoryTrainerModal";
+import SettingsSection from "@/components/SettingsSection";
 
 function getDaysInMonth(year: number, month: number) {
   return new Date(year, month, 0).getDate();
@@ -664,8 +665,13 @@ export default function MyPage() {
         />
       )}
 
-      {/* 설정 / 위험 구역 */}
-      <div className="w-full max-w-2xl mt-12 flex flex-col items-center">
+      {/* 환경 설정 영역 */}
+      <div className="w-full max-w-2xl mt-12 mb-8">
+        <SettingsSection />
+      </div>
+
+      {/* 통독 재설정 (위험 구역) */}
+      <div className="w-full max-w-2xl flex flex-col items-center">
         <button
           onClick={() => setIsResetModalOpen(true)}
           className="flex items-center justify-center gap-2 px-6 py-4 text-stone-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-2xl transition-colors font-semibold"
