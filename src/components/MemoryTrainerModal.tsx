@@ -21,14 +21,31 @@ interface MemoryTrainerModalProps {
 }
 
 interface TrainerStep {
-  phase: 1 | 2 | 3 | 4;
+  phase: 1 | 2 | 3 | 4 | 5;
   phaseLabel: string;
   hiddenIndices: number[];
 }
 
+import rawBibleData from "@/data/chunked_text.json";
+
 export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: MemoryTrainerModalProps) {
-  // 1. 상태 및 상수 선언
-  const chunks = oneVerse.chunks || [];
+  // 0. 로그 출력 (데이터 흐름 추적)
+  console.log("MemoryTrainer Received OneVerse:", oneVerse);
+
+  // 1. 최신 청킹 데이터 가져오기 (DB에 저장된 구형 데이터 덮어쓰기)
+  const bibleTexts = rawBibleData as Record<string, Record<string, Record<string, string>>>;
+  const freshRawText = bibleTexts[oneVerse.book]?.[oneVerse.chapter.toString()]?.[oneVerse.verse.toString()];
+  
+  const textToUse = freshRawText || oneVerse.rawText || oneVerse.displayText || "";
+  const displayString = textToUse.replace(/\s*\/\s*/g, ' ').trim();
+
+  // 최신 데이터에 슬래시가 있으면 그것으로 쪼개고, 없으면 기존 chunks나 띄어쓰기로 폴백
+  const chunks = textToUse.includes('/')
+    ? textToUse.split(/\s*\/\s*/).map(c => c.replace(/\//g, '').trim()).filter(Boolean)
+    : (oneVerse.chunks && oneVerse.chunks.length > 0 ? oneVerse.chunks : textToUse.split(' ').filter(Boolean));
+
+  console.log("MemoryTrainer Chunks:", chunks);
+
   const K = chunks.length;
 
   const [stepState, setStepState] = useState<'intro' | 'training'>('intro');
@@ -41,50 +58,62 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
   const [isListening, setIsListening] = useState(false);
   const [testResult, setTestResult] = useState<'none' | 'success' | 'fail'>('none');
   const [speechResult, setSpeechResult] = useState('');
-
+  
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const recognitionRef = useRef<any>(null);
 
   // 2. 스텝 시퀀스 생성
   const steps: TrainerStep[] = useMemo(() => {
     const seq: TrainerStep[] = [];
-    if (K === 0) return [{ phase: 4, phaseLabel: "빈 구절입니다", hiddenIndices: [] }];
-
-    // Phase 1 (1청크씩 순차 가리기)
+    if (K === 0) return [{ phase: 5, phaseLabel: "빈 구절입니다", hiddenIndices: [] }];
+    
+    // Step 1: 한 마디씩 가리기 (K번 반복)
     for (let i = 0; i < K; i++) {
       seq.push({ phase: 1, phaseLabel: "한 마디씩 마음에 새기기", hiddenIndices: [i] });
     }
-
-    // Phase 2 (2청크 묶음 순차 가리기)
-    if (K >= 3) {
-      for (let i = 0; i < K; i += 2) {
-        const hidden = [i];
-        if (i + 1 < K) hidden.push(i + 1);
-        seq.push({ phase: 2, phaseLabel: "두 마디 묶어 이어가기", hiddenIndices: hidden });
+    
+    // Step 2: 두 마디 묶어 이어가기 (K-1번 반복)
+    if (K >= 2) {
+      for (let i = 0; i < K - 1; i++) {
+        seq.push({ phase: 2, phaseLabel: "두 마디 묶어 이어가기", hiddenIndices: [i, i + 1] });
       }
+    } else {
+      seq.push({ phase: 2, phaseLabel: "두 마디 묶어 이어가기", hiddenIndices: [0] });
     }
-
-    // Phase 3 (전반부 / 후반부 절반 가리기)
+    
+    // Step 3: 징검다리 가리기 (4회 고정: 홀-짝-홀-짝)
+    const oddIndices = Array.from({ length: K }, (_, k) => k).filter(k => k % 2 === 1);
+    const evenIndices = Array.from({ length: K }, (_, k) => k).filter(k => k % 2 === 0);
+    
+    seq.push({ phase: 3, phaseLabel: "징검다리로 흐름 기억하기", hiddenIndices: oddIndices });
+    seq.push({ phase: 3, phaseLabel: "징검다리로 흐름 기억하기", hiddenIndices: evenIndices });
+    seq.push({ phase: 3, phaseLabel: "징검다리로 흐름 기억하기", hiddenIndices: oddIndices });
+    seq.push({ phase: 3, phaseLabel: "징검다리로 흐름 기억하기", hiddenIndices: evenIndices });
+    
+    // Step 4: 절반 가리기 (2회 고정: 후반부-전반부)
     const mid = Math.floor(K / 2);
     const firstHalf = Array.from({ length: mid }, (_, k) => k);
     const secondHalf = Array.from({ length: K - mid }, (_, k) => mid + k);
-    if (firstHalf.length > 0) {
-      seq.push({ phase: 3, phaseLabel: "전반부 흐름 기억하기", hiddenIndices: firstHalf });
-    }
-    if (secondHalf.length > 0) {
-      seq.push({ phase: 3, phaseLabel: "후반부 흐름 기억하기", hiddenIndices: secondHalf });
-    }
-
-    // Phase 4 (전체 가리기)
+    
+    seq.push({ phase: 4, phaseLabel: "절반 가리기 패턴 훈련", hiddenIndices: secondHalf }); // 후반부 가리기
+    seq.push({ phase: 4, phaseLabel: "절반 가리기 패턴 훈련", hiddenIndices: firstHalf });  // 전반부 가리기
+    
+    // Step 5: 전체 가리기/보여주기 (5회 고정: 표-가-표-가-표)
     const all = Array.from({ length: K }, (_, k) => k);
-    seq.push({ phase: 4, phaseLabel: "전체 말씀 온전히 고백하기", hiddenIndices: all });
+    seq.push({ phase: 5, phaseLabel: "전체 말씀 온전히 고백하기", hiddenIndices: [] });
+    seq.push({ phase: 5, phaseLabel: "전체 말씀 온전히 고백하기", hiddenIndices: all });
+    seq.push({ phase: 5, phaseLabel: "전체 말씀 온전히 고백하기", hiddenIndices: [] });
+    seq.push({ phase: 5, phaseLabel: "전체 말씀 온전히 고백하기", hiddenIndices: all });
+    seq.push({ phase: 5, phaseLabel: "전체 말씀 온전히 고백하기", hiddenIndices: [] });
 
     return seq;
   }, [K]);
 
   const currentStep = steps[stepIndex] || steps[steps.length - 1];
   const isLastStep = stepIndex >= steps.length - 1;
-  const totalProgress = Math.round(((stepIndex + 1) / steps.length) * 100);
+  const totalProgress = isLastStep ? 100 : Math.round(((intervalSeconds - timeLeft) / intervalSeconds) * 100);
+  const currentPhaseStepsCount = steps.filter(s => s.phase === currentStep.phase).length;
+  const currentSegmentIndex = stepIndex - steps.findIndex(s => s.phase === currentStep.phase);
 
   // 3. Effect Hooks
   useEffect(() => {
@@ -116,8 +145,8 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
       recognitionRef.current.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript;
         setSpeechResult(transcript);
-
-        const sim = calculateSimilarity(oneVerse.displayText, transcript);
+        
+        const sim = calculateSimilarity(displayString, transcript);
         if (sim >= 0.8) {
           setTestResult('success');
         } else {
@@ -175,6 +204,14 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
     setSpeechResult('');
   };
 
+  const jumpToPhase = (targetPhase: number) => {
+    const index = steps.findIndex(s => s.phase === targetPhase);
+    if (index !== -1) {
+      setStepIndex(index);
+      setTimeLeft(intervalSeconds);
+      setIsPlaying(true);
+    }
+  };
   const triggerConfetti = () => {
     const duration = 2000;
     const end = Date.now() + duration;
@@ -214,13 +251,13 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
       <div className="bg-white dark:bg-stone-900 rounded-3xl p-6 md:p-8 shadow-2xl w-full max-w-lg flex flex-col relative animate-in zoom-in-95 border border-stone-200 dark:border-stone-800">
-
+        
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-2 text-sky-600 dark:text-sky-400 font-bold">
             <BrainCircuit size={24} />
             <h2>뇌새김 암송 트레이너</h2>
           </div>
-          <button
+          <button 
             onClick={onClose}
             className="p-2 bg-stone-100 dark:bg-stone-800 rounded-full text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 transition-colors"
           >
@@ -241,7 +278,7 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
 
             <div className="min-h-[120px] flex items-center justify-center text-center p-6 bg-stone-50 dark:bg-stone-800/50 rounded-2xl border border-stone-200 dark:border-stone-700 shadow-inner">
               <p className="text-xl md:text-2xl font-semibold leading-loose break-keep text-stone-800 dark:text-stone-100">
-                {oneVerse.displayText}
+                {displayString}
               </p>
             </div>
 
@@ -258,10 +295,11 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
                   <button
                     key={opt.value}
                     onClick={() => setIntervalSeconds(opt.value)}
-                    className={`py-3 px-1 rounded-lg text-sm sm:text-base font-bold transition-all duration-200 ${intervalSeconds === opt.value
+                    className={`py-3 px-1 rounded-lg text-sm sm:text-base font-bold transition-all duration-200 ${
+                      intervalSeconds === opt.value
                         ? "bg-white dark:bg-stone-900 text-sky-600 dark:text-sky-400 shadow-sm border border-stone-200 dark:border-stone-700 scale-[1.02]"
                         : "text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 hover:bg-stone-200/50 dark:hover:bg-stone-700/50 border border-transparent"
-                      }`}
+                    }`}
                   >
                     {opt.label} ({opt.value}초)
                   </button>
@@ -287,49 +325,49 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
               </div>
             )}
 
-            <div className="flex flex-col gap-3 mb-6">
-              <div className="flex flex-col md:flex-row md:justify-between md:items-center bg-stone-50 dark:bg-stone-800/50 p-3 rounded-xl border border-stone-100 dark:border-stone-800 gap-3 md:gap-0">
-                <div className="flex flex-col">
-                  <span className="text-sm font-bold text-stone-800 dark:text-stone-200">
-                    Step {currentStep.phase}/4 : {currentStep.phaseLabel}
-                  </span>
-                  <span className="text-xs font-semibold text-stone-400">
-                    진행률 {totalProgress}%
-                  </span>
-                </div>
+            <div className="flex flex-col gap-4 mb-6 bg-stone-50 dark:bg-stone-800/50 p-4 rounded-xl border border-stone-100 dark:border-stone-800">
+              {/* Top: Step Navigation Tabs */}
+              <div className="flex gap-1.5 overflow-x-auto pb-1 w-full scrollbar-hide">
+                {[1, 2, 3, 4, 5].map((phaseNum) => (
+                  <button
+                    key={phaseNum}
+                    onClick={() => jumpToPhase(phaseNum)}
+                    className={`flex-1 px-2 py-2 rounded-lg text-xs sm:text-sm font-bold whitespace-nowrap transition-colors ${
+                      currentStep.phase === phaseNum
+                        ? "bg-sky-600 text-white shadow-sm"
+                        : "bg-stone-200 dark:bg-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-300 dark:hover:bg-stone-600"
+                    }`}
+                  >
+                    Step {phaseNum}
+                  </button>
+                ))}
+              </div>
 
-                <div className="flex items-center justify-end gap-2">
-                  {!isLastStep && (
-                    <React.Fragment>
-                      <button
-                        onClick={() => setIsPlaying(!isPlaying)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-stone-200 hover:bg-stone-300 dark:bg-stone-700 dark:hover:bg-stone-600 text-stone-700 dark:text-stone-300 font-bold text-xs sm:text-sm transition-colors"
-                      >
-                        {isPlaying ? (
-                          <React.Fragment><Pause size={14} /> 일시정지</React.Fragment>
-                        ) : (
-                          <React.Fragment><Play size={14} /> 이어하기</React.Fragment>
-                        )}
-                      </button>
-                      <button
-                        onClick={handleRestart}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-stone-200 hover:bg-stone-300 dark:bg-stone-700 dark:hover:bg-stone-600 text-stone-700 dark:text-stone-300 font-bold text-xs sm:text-sm transition-colors"
-                      >
-                        <RotateCcw size={14} /> 처음부터
-                      </button>
-                    </React.Fragment>
-                  )}
+              {/* Step Info */}
+              <div className="flex flex-col">
+                <span className="text-sm font-bold text-stone-800 dark:text-stone-200">
+                  {currentStep.phaseLabel}
+                </span>
+                <span className="text-xs font-semibold text-stone-400 mt-0.5">
+                  해당 Step 진행률 {totalProgress}%
+                </span>
+              </div>
+
+              {/* Middle: Timer & Timeline Segments */}
+              <div className="flex items-center gap-3 w-full">
+                <div className="flex-shrink-0 min-w-[70px]">
                   {isLastStep ? (
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 font-bold text-sm shadow-sm animate-in zoom-in">
+                    <div className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 font-bold text-sm shadow-sm animate-in zoom-in">
                       🎯 도전!
                     </div>
                   ) : (
-                    <div
+                    <div 
                       key={isPlaying ? timeLeft : 'paused'}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-sm shadow-sm ${isPlaying
-                          ? "bg-sky-100 dark:bg-sky-900/50 text-sky-700 dark:text-sky-400 animate-pulse"
+                      className={`flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-sm shadow-sm w-full ${
+                        isPlaying 
+                          ? "bg-sky-100 dark:bg-sky-900/50 text-sky-700 dark:text-sky-400 animate-pulse" 
                           : "bg-stone-200 dark:bg-stone-700 text-stone-500 dark:text-stone-400"
-                        }`}
+                      }`}
                     >
                       {isPlaying ? (
                         <React.Fragment><Timer size={14} /> {timeLeft}초</React.Fragment>
@@ -339,14 +377,53 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
                     </div>
                   )}
                 </div>
+
+                <div className="flex flex-1 gap-0.5 h-1.5">
+                  {Array.from({ length: currentPhaseStepsCount }).map((_, idx) => {
+                    let width = "0%";
+                    let fillClass = "bg-sky-400 dark:bg-sky-500";
+                    
+                    if (idx < currentSegmentIndex) {
+                      width = "100%";
+                    } else if (idx === currentSegmentIndex) {
+                      width = `${totalProgress}%`;
+                    } else {
+                      fillClass = "bg-transparent";
+                    }
+
+                    return (
+                      <div key={idx} className="flex-1 bg-stone-200 dark:bg-stone-700 rounded-full overflow-hidden">
+                        <div 
+                          className={`h-full transition-all duration-1000 ease-linear ${fillClass}`}
+                          style={{ width }}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
-              <div className="h-1.5 w-full bg-stone-100 dark:bg-stone-800 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-sky-400 via-amber-400 to-emerald-400 transition-all duration-300"
-                  style={{ width: `${totalProgress}%` }}
-                />
-              </div>
+              {/* Bottom: Pause/Play & Restart Controls */}
+              {!isLastStep && (
+                <div className="flex items-center justify-end gap-2 w-full mt-1 border-t border-stone-200/50 dark:border-stone-700/50 pt-3">
+                  <button
+                    onClick={() => setIsPlaying(!isPlaying)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-stone-200 hover:bg-stone-300 dark:bg-stone-700 dark:hover:bg-stone-600 text-stone-700 dark:text-stone-300 font-bold text-xs sm:text-sm transition-colors"
+                  >
+                    {isPlaying ? (
+                      <React.Fragment><Pause size={14} /> 일시정지</React.Fragment>
+                    ) : (
+                      <React.Fragment><Play size={14} /> 이어하기</React.Fragment>
+                    )}
+                  </button>
+                  <button
+                    onClick={handleRestart}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-stone-200 hover:bg-stone-300 dark:bg-stone-700 dark:hover:bg-stone-600 text-stone-700 dark:text-stone-300 font-bold text-xs sm:text-sm transition-colors"
+                  >
+                    <RotateCcw size={14} /> 처음부터
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="min-h-[160px] flex flex-col items-center justify-center text-center p-6 bg-stone-50 dark:bg-stone-950 rounded-2xl border border-stone-100 dark:border-stone-800 mb-8 shadow-inner relative overflow-hidden">
@@ -358,7 +435,7 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
                   <p className="font-bold text-sky-800 dark:text-sky-200 text-lg">
                     말씀을 소리 내어 읽어주세요... 🎙️
                   </p>
-                  <button
+                  <button 
                     onClick={handleStopListening}
                     className="mt-4 px-4 py-2 bg-stone-200 dark:bg-stone-700 rounded-full text-stone-600 dark:text-stone-300 text-sm font-semibold"
                   >
@@ -370,22 +447,17 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
               <p className="text-xl md:text-2xl font-semibold leading-loose break-keep flex flex-wrap justify-center gap-x-2 gap-y-1">
                 {chunks.map((chunk, index) => {
                   const isHidden = currentStep.hiddenIndices.includes(index);
-
-                  const baseStyle: React.CSSProperties = {
-                    transition: "all 0.3s ease",
-                  };
-
-                  if (isHidden) {
-                    baseStyle.color = "transparent";
-                    baseStyle.backgroundColor = "#cbd5e1";
-                    baseStyle.borderRadius = "4px";
-                  }
-
+                  
                   return (
-                    <span
-                      key={index}
-                      style={baseStyle}
-                      className={isHidden ? "select-none cursor-help hover:text-slate-500 hover:bg-transparent dark:hover:text-slate-400" : "text-stone-800 dark:text-stone-100"}
+                    <span 
+                      key={index} 
+                      className={`
+                        transition-all duration-300 ease-in-out px-1.5 py-0.5 mx-0.5 rounded-md
+                        ${isHidden 
+                          ? "select-none cursor-help text-transparent bg-stone-300 dark:bg-stone-700 hover:text-stone-400 dark:hover:text-stone-400" 
+                          : "text-stone-800 dark:text-stone-100 bg-stone-100 dark:bg-stone-800"
+                        }
+                      `}
                       title={isHidden ? "터치하여 살짝 보기" : ""}
                     >
                       {chunk}
@@ -401,14 +473,14 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
             {isLastStep && (
               <div className="flex flex-col gap-3 w-full justify-center mt-2 animate-in slide-in-from-bottom-4">
                 <div className="flex flex-row gap-3">
-                  <button
+                  <button 
                     onClick={handleRestart}
                     className="flex-1 py-4 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-bold rounded-xl border border-stone-200 dark:border-stone-700 transition-colors flex items-center justify-center gap-2"
                   >
                     <RotateCcw size={20} />
                     <span className="text-sm sm:text-base">다시 보기</span>
                   </button>
-                  <button
+                  <button 
                     onClick={handleStartListening}
                     className="flex-[2] py-4 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl shadow-lg flex items-center justify-center gap-2 transition-transform hover:scale-[1.02]"
                   >
@@ -416,8 +488,8 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
                     <span className="text-sm sm:text-base">음성으로 암송하기</span>
                   </button>
                 </div>
-
-                <button
+                
+                <button 
                   onClick={handleComplete}
                   className="text-sm font-medium text-stone-400 hover:text-sky-600 dark:hover:text-sky-400 transition-colors mx-auto mt-2 flex items-center gap-1"
                 >
@@ -442,7 +514,7 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
             <p className="text-stone-500 dark:text-stone-400 mb-8">
               정확하게 말씀을 외우셨어요! 정말 훌륭합니다.
             </p>
-            <button
+            <button 
               onClick={handleComplete}
               className="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl shadow-lg transition-transform hover:scale-[1.02]"
             >
@@ -462,17 +534,17 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
               💡 다시 한 번 암송해볼까요?
             </h3>
             <p className="text-stone-500 dark:text-stone-400 mb-8 text-sm">
-              인식된 음성: <br /><span className="text-stone-700 dark:text-stone-300 italic font-semibold">&quot;{speechResult}&quot;</span>
+              인식된 음성: <br/><span className="text-stone-700 dark:text-stone-300 italic font-semibold">&quot;{speechResult}&quot;</span>
             </p>
             <div className="flex flex-col gap-3">
-              <button
+              <button 
                 onClick={handleStartListening}
                 className="w-full py-3.5 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-xl shadow-md transition-colors flex items-center justify-center gap-2"
               >
                 <Mic size={18} />
                 🔥 한 번 더 도전하기
               </button>
-              <button
+              <button 
                 onClick={handleRestart}
                 className="w-full py-3.5 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-600 dark:text-stone-300 font-bold rounded-xl transition-colors"
               >

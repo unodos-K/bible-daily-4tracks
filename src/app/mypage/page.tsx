@@ -3,13 +3,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, RotateCcw, BrainCircuit, X, Flame, AlertCircle } from "lucide-react";
-import {
-  ReadingSettings,
-  ReadRecordsMap,
+import { 
+  ReadingSettings, 
+  ReadRecordsMap, 
   DayRecord,
   OneVerse,
-  fetchReadingSettings,
-  fetchReadRecords,
+  fetchReadingSettings, 
+  fetchReadRecords, 
   resetUserData,
   startNewReading,
   getNextUnreadDay,
@@ -51,28 +51,28 @@ function calculateDaysSince(startDateStr: string): number {
 
   const diffTime = today.getTime() - start.getTime();
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
+  
   return Math.max(1, diffDays + 1);
 }
 
 export default function MyPage() {
   const router = useRouter();
-
+  
   const [settings, setSettings] = useState<ReadingSettings | null>(null);
   const [records, setRecords] = useState<ReadRecordsMap>({});
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
-
+  
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isClient, setIsClient] = useState(false);
-
+  
   const [selectedRecordStr, setSelectedRecordStr] = useState<string | null>(null);
   const [selectedDayIndexForMemory, setSelectedDayIndexForMemory] = useState<number | null>(null);
   const [isMemoryModalOpen, setIsMemoryModalOpen] = useState(false);
-
+  
   // 캐러셀 관련 상태 및 Ref
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const carouselRef = useRef<HTMLDivElement>(null);
-
+  
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
 
   useEffect(() => {
@@ -138,7 +138,7 @@ export default function MyPage() {
     if (!recordsByDate[r.readDate]) recordsByDate[r.readDate] = [];
     recordsByDate[r.readDate].push(r);
   }
-
+  
   // 그룹 내에서 Day 순으로 정렬
   for (const date in recordsByDate) {
     recordsByDate[date].sort((a, b) => a.dayIndex - b.dayIndex);
@@ -194,40 +194,40 @@ export default function MyPage() {
   return (
     <div className="w-full min-h-[calc(100vh-52px)] flex flex-col items-center bg-stone-100/50 dark:bg-stone-950 p-4 sm:p-8 pb-32">
       <div className="w-full max-w-2xl flex flex-col gap-6">
-
+        
         {/* 프로필 및 통계 카드 */}
-        <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 p-6 flex flex-col gap-6">
-          <div className="flex justify-between items-start">
-            <div className="flex flex-col gap-1">
-              <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100 flex items-center gap-2">
+        <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 p-5 sm:p-6 flex flex-col gap-6">
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-between w-full">
+              <h2 className="text-lg sm:text-xl font-bold text-stone-800 dark:text-stone-100 flex items-center gap-2 flex-1 break-keep pr-2">
                 {authUser ? `${authUser.name}님 환영합니다 ✨` : '내 통독 여정'}
               </h2>
-              <p className="text-sm text-stone-500 dark:text-stone-400 font-medium bg-stone-100 dark:bg-stone-800 inline-block px-3 py-1 rounded-full w-fit">
-                📅 통독 시작일: {settings.startDate} (Day {daysSince}일차)
-              </p>
+              {authUser ? (
+                <button
+                  onClick={handleLogout}
+                  className="text-xs sm:text-sm font-semibold text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 transition-colors whitespace-nowrap flex-shrink-0"
+                >
+                  🚪 로그아웃
+                </button>
+              ) : (
+                <button
+                  onClick={signInWithKakao}
+                  className="text-xs sm:text-sm font-bold bg-[#FEE500] text-black hover:bg-[#FDD800] px-3 py-1.5 rounded-lg transition-colors shadow-sm whitespace-nowrap flex-shrink-0"
+                >
+                  💬 카카오 로그인
+                </button>
+              )}
             </div>
-            {authUser ? (
-              <button
-                onClick={handleLogout}
-                className="text-sm font-semibold text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 transition-colors"
-              >
-                🚪 로그아웃
-              </button>
-            ) : (
-              <button
-                onClick={signInWithKakao}
-                className="text-xs sm:text-sm font-bold bg-[#FEE500] text-black hover:bg-[#FDD800] px-3 py-2 rounded-lg transition-colors shadow-sm whitespace-nowrap"
-              >
-                💬 카카오 로그인
-              </button>
-            )}
+            <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 font-medium bg-stone-100 dark:bg-stone-800 inline-block px-3 py-1.5 rounded-full w-fit">
+              📅 통독 시작일: {settings.startDate} (Day {daysSince}일차)
+            </p>
           </div>
 
           <button
             onClick={() => {
               try {
                 saveViewerDay(nextUnreadDay);
-              } catch { }
+              } catch {}
               router.push("/");
             }}
             className="w-full py-4 sm:py-5 bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white font-black rounded-xl transition-transform hover:-translate-y-1 shadow-md flex items-center justify-center gap-2 text-lg sm:text-xl"
@@ -261,7 +261,7 @@ export default function MyPage() {
         {/* 인터랙티브 달력 */}
         <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 p-4 sm:p-6">
           <div className="flex items-center justify-between mb-6">
-            <button
+            <button 
               onClick={() => setCurrentDate(new Date(year, month - 2, 1))}
               className="p-2 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full transition-colors"
             >
@@ -270,7 +270,7 @@ export default function MyPage() {
             <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100">
               {year}년 {month}월
             </h3>
-            <button
+            <button 
               onClick={() => setCurrentDate(new Date(year, month, 1))}
               className="p-2 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full transition-colors"
             >
@@ -281,7 +281,7 @@ export default function MyPage() {
           <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2 text-center text-xs font-semibold text-stone-400">
             <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
           </div>
-
+          
           <div className="grid grid-cols-7 gap-1 sm:gap-2">
             {calendarDays.map((day, idx) => {
               if (day === null) {
@@ -293,7 +293,7 @@ export default function MyPage() {
               const dayRecords = recordsByDate[dateStr] || [];
               const count = dayRecords.length;
               const isCompleted = count > 0;
-
+              
               const isToday = formatDateStr(new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate()) === dateStr;
               const isSelected = selectedRecordStr === dateStr;
 
@@ -301,7 +301,7 @@ export default function MyPage() {
               let medalStr = "";
               let borderClass = "";
               let bgClass = "";
-
+              
               if (isCompleted) {
                 if (count === 3) {
                   medalStr = "🏅🏅🏅";
@@ -319,7 +319,7 @@ export default function MyPage() {
               }
 
               return (
-                <div
+                <div 
                   key={day}
                   onClick={() => {
                     if (!isBeforeStart || isCompleted) {
@@ -344,10 +344,11 @@ export default function MyPage() {
                         <div className="text-[10px] sm:text-xs leading-none" title={`${count}개 Day 완료`}>{medalStr}</div>
                         <div className="flex flex-wrap justify-center gap-0.5 mt-1 px-1">
                           {dayRecords.map(r => (
-                            <span key={r.dayIndex} className={`text-[9px] sm:text-[10px] font-bold px-1 py-0.5 rounded-sm ${r.oneVerse?.isMemorized
-                                ? 'text-amber-700 dark:text-amber-400 bg-amber-200 dark:bg-amber-900/60'
+                            <span key={r.dayIndex} className={`text-[9px] sm:text-[10px] font-bold px-1 py-0.5 rounded-sm ${
+                              r.oneVerse?.isMemorized 
+                                ? 'text-amber-700 dark:text-amber-400 bg-amber-200 dark:bg-amber-900/60' 
                                 : 'text-sky-700 dark:text-sky-400 bg-white/70 dark:bg-black/30'
-                              }`}>
+                            }`}>
                               D{r.dayIndex}
                             </span>
                           ))}
@@ -359,7 +360,7 @@ export default function MyPage() {
                           <div key={i} className={`w-1.5 h-1.5 rounded-full ${count === 4 ? 'bg-amber-400' : 'bg-blue-500'}`} />
                         ))}
                       </div>
-                    </>
+</>
                   )}
                 </div>
               );
@@ -405,7 +406,7 @@ export default function MyPage() {
 
                 return (
                   <div key={`${record.readDate}-${record.dayIndex}`} className="flex flex-col bg-stone-50 dark:bg-stone-950 border border-stone-100 dark:border-stone-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-
+                    
                     <div className="flex justify-between items-center px-4 py-3 bg-white dark:bg-stone-900 border-b border-stone-100 dark:border-stone-800">
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-stone-800 dark:text-stone-200">
@@ -415,11 +416,12 @@ export default function MyPage() {
                           Day {record.dayIndex}
                         </span>
                       </div>
-
-                      <div className={`text-xs font-bold px-2 py-1 rounded-md border ${isMem
+                      
+                      <div className={`text-xs font-bold px-2 py-1 rounded-md border ${
+                        isMem
                           ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400 border-amber-300 dark:border-amber-800'
                           : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800'
-                        }`}>
+                      }`}>
                         {isMem ? '👑 암송 완료' : '📖 통독 완료'}
                       </div>
                     </div>
@@ -449,7 +451,7 @@ export default function MyPage() {
                         onClick={() => {
                           try {
                             saveViewerDay(record.dayIndex);
-                          } catch { }
+                          } catch {}
                           router.push("/");
                         }}
                         className="flex-1 py-3 text-sm font-bold text-sky-600 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-stone-800 flex items-center justify-center gap-1.5 transition-colors"
@@ -467,14 +469,14 @@ export default function MyPage() {
         {/* 상세 팝업 모달 (가로 스와이프 캐러셀 지원) */}
         {selectedRecordStr && !isMemoryModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in" onClick={() => setSelectedRecordStr(null)}>
-            <div
+            <div 
               className="w-full max-w-xl md:max-w-2xl mx-auto bg-white dark:bg-stone-900 rounded-3xl shadow-2xl overflow-y-auto flex flex-col animate-in zoom-in-95 max-h-[90vh]"
               onClick={e => e.stopPropagation()}
             >
               {(() => {
                 const dayRecords = recordsByDate[selectedRecordStr] || [];
                 const [y, m, d] = selectedRecordStr.split("-");
-
+                
                 if (dayRecords.length === 0) {
                   return (
                     <div className="flex flex-col items-center py-10 p-6 sm:p-8">
@@ -482,11 +484,11 @@ export default function MyPage() {
                         <h3 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100 mb-2">
                           {y}년 {parseInt(m)}월 {parseInt(d)}일
                         </h3>
-                        <button
-                          onClick={() => setSelectedRecordStr(null)}
+                        <button 
+                          onClick={() => setSelectedRecordStr(null)} 
                           className="p-2 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 rounded-full text-stone-500 transition-colors"
                         >
-                          <X size={20} />
+                          <X size={20}/>
                         </button>
                       </div>
                       <p className="text-stone-500 dark:text-stone-400 mb-8 text-center text-sm sm:text-base mt-4">
@@ -510,16 +512,16 @@ export default function MyPage() {
                           </div>
                         )}
                       </div>
-                      <button
-                        onClick={() => setSelectedRecordStr(null)}
+                      <button 
+                        onClick={() => setSelectedRecordStr(null)} 
                         className="p-2 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 rounded-full text-stone-500 transition-colors self-start -mt-1 -mr-1"
                       >
-                        <X size={20} />
+                        <X size={20}/>
                       </button>
                     </div>
 
                     {/* 캐러셀 컨테이너 */}
-                    <div className="relative w-full">
+                    <div className="relative w-full flex-1 min-h-0 flex flex-col">
                       {/* 좌우 이동 버튼 (복수 개일 때만 노출) */}
                       {dayRecords.length > 1 && (
                         <React.Fragment>
@@ -539,41 +541,43 @@ export default function MyPage() {
                       )}
 
                       {/* 스와이프 가능한 컨텐츠 영역 */}
-                      <div
+                      <div 
                         ref={carouselRef}
                         onScroll={handleCarouselScroll}
-                        className="flex w-full overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar"
+                        className="flex w-full overflow-x-auto snap-x snap-mandatory scroll-smooth scrollbar-hide pb-2"
                       >
                         {dayRecords.map((record) => {
                           const verse = record.oneVerse;
                           if (!verse) return (
                             <div key={record.dayIndex} className="min-w-full flex-shrink-0 snap-center p-6">에러: 데이터가 없습니다.</div>
                           );
-                          const isMem = verse.isMemorized;
+                          const isRecordMem = verse.isMemorized;
                           // @ts-expect-error: compatibility with older data structure
                           const displayTxt = verse.displayText || verse.text || "";
                           const formattedRef = verse.book === "시편" ? `${verse.book} ${verse.chapter}편 ${verse.verse}절` : `${verse.book} ${verse.chapter}장 ${verse.verse}절`;
 
                           return (
-                            <div key={record.dayIndex} className="w-full min-w-full max-w-full shrink-0 flex-shrink-0 box-border snap-center p-5 sm:p-8 flex flex-col gap-4">
-
+                            <div key={record.dayIndex} className="w-full min-w-full max-w-full shrink-0 flex-shrink-0 box-border snap-center px-12 sm:px-20 py-4 sm:py-6 flex flex-col gap-4">
+                              
                               {dayRecords.length === 1 && (
                                 <div className="font-bold text-stone-700 dark:text-stone-300 text-sm mb-1">
                                   Day {record.dayIndex}
                                 </div>
                               )}
 
-                              <div className={`p-6 sm:p-8 rounded-2xl border flex flex-col gap-6 shadow-sm ${isMem
+                              <div className={`p-6 sm:p-8 rounded-2xl border flex flex-col gap-6 shadow-sm ${
+                                isRecordMem
                                   ? 'bg-amber-50/80 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800/50'
                                   : 'bg-stone-50/80 dark:bg-stone-800/80 border-stone-200 dark:border-stone-700'
-                                }`}>
-                                <div className={`self-start px-3 py-1.5 rounded-full text-sm sm:text-base font-bold ${isMem
+                              }`}>
+                                <div className={`self-start px-3 py-1.5 rounded-full text-sm sm:text-base font-bold ${
+                                  isRecordMem
                                     ? 'bg-amber-500 text-white shadow-sm'
                                     : 'bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-300'
-                                  }`}>
-                                  {isMem ? '👑 암송 완료' : '📖 통독 완료'}
+                                }`}>
+                                  {isRecordMem ? '👑 암송 완료' : '📖 통독 완료'}
                                 </div>
-                                <div className="w-full max-h-[300px] md:max-h-[400px] overflow-y-auto pr-2 no-scrollbar">
+                                <div className="w-full max-h-[300px] md:max-h-[400px] overflow-y-auto pr-2 scrollbar-hide">
                                   <blockquote className="w-full break-words break-keep whitespace-normal text-lg sm:text-xl md:text-2xl leading-relaxed sm:leading-loose text-stone-800 dark:text-stone-100 font-medium italic">
                                     {displayTxt}
                                   </blockquote>
@@ -581,30 +585,6 @@ export default function MyPage() {
                                 <div className="text-right text-stone-500 dark:text-stone-400 font-semibold text-base sm:text-lg">
                                   - {formattedRef} -
                                 </div>
-                              </div>
-
-                              <div className="flex flex-col sm:flex-row gap-3 mt-4">
-                                <button
-                                  onClick={() => {
-                                    setSelectedDayIndexForMemory(record.dayIndex);
-                                    setIsMemoryModalOpen(true);
-                                  }}
-                                  className="flex-1 py-3.5 sm:py-4 px-6 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl shadow-lg transition-transform hover:scale-[1.02] flex items-center justify-center gap-2 text-base sm:text-lg"
-                                >
-                                  <BrainCircuit size={22} />
-                                  {isMem ? '이 말씀 복습하기' : '이 말씀 암송하기'}
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    try {
-                                      saveViewerDay(record.dayIndex);
-                                    } catch { }
-                                    router.push("/");
-                                  }}
-                                  className="flex-1 py-3.5 sm:py-4 px-6 bg-stone-800 hover:bg-stone-900 dark:bg-stone-200 dark:hover:bg-stone-300 dark:text-stone-900 text-white font-bold rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2 text-base sm:text-lg"
-                                >
-                                  해당 Day 본문 읽으러 가기
-                                </button>
                               </div>
                             </div>
                           );
@@ -614,18 +594,48 @@ export default function MyPage() {
 
                     {/* 하단 페이지네이션 인디케이터 */}
                     {dayRecords.length > 1 && (
-                      <div className="flex justify-center gap-2 pb-6 bg-white dark:bg-stone-900">
+                      <div className="flex justify-center gap-2 pb-4 pt-2 bg-white dark:bg-stone-900">
                         {dayRecords.map((_, idx) => (
                           <button
                             key={idx}
                             onClick={() => scrollToSlide(idx)}
-                            className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${idx === currentSlideIndex
-                                ? 'bg-amber-500 w-6'
+                            className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                              idx === currentSlideIndex 
+                                ? 'bg-amber-500 w-6' 
                                 : 'bg-stone-200 dark:bg-stone-700 hover:bg-stone-300 dark:hover:bg-stone-600'
-                              }`}
+                            }`}
                             aria-label={`${idx + 1}번째 슬라이드로 이동`}
                           />
                         ))}
+                      </div>
+                    )}
+
+                    {/* 고정 하단 액션 버튼 */}
+                    {dayRecords.length > 0 && dayRecords[currentSlideIndex] && (
+                      <div className="p-5 sm:p-6 bg-white dark:bg-stone-900 border-t border-stone-100 dark:border-stone-800">
+                        <div className="flex flex-col sm:flex-row gap-3">
+                          <button
+                            onClick={() => {
+                              setSelectedDayIndexForMemory(dayRecords[currentSlideIndex].dayIndex);
+                              setIsMemoryModalOpen(true);
+                            }}
+                            className="flex-1 py-3.5 sm:py-4 px-6 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl shadow-lg transition-transform hover:scale-[1.02] flex items-center justify-center gap-2 text-base sm:text-lg"
+                          >
+                            <BrainCircuit size={22} />
+                            {dayRecords[currentSlideIndex].oneVerse?.isMemorized ? '이 말씀 복습하기' : '이 말씀 암송하기'}
+                          </button>
+                          <button
+                            onClick={() => {
+                              try {
+                                saveViewerDay(dayRecords[currentSlideIndex].dayIndex);
+                              } catch {}
+                              router.push("/");
+                            }}
+                            className="flex-1 py-3.5 sm:py-4 px-6 bg-stone-800 hover:bg-stone-900 dark:bg-stone-200 dark:hover:bg-stone-300 dark:text-stone-900 text-white font-bold rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2 text-base sm:text-lg"
+                          >
+                            해당 Day 본문 읽으러 가기
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -636,7 +646,7 @@ export default function MyPage() {
         )}
 
       </div>
-
+      
       {/* 암송 트레이너 모달 연동 */}
       {isMemoryModalOpen && selectedDayIndexForMemory && records[selectedDayIndexForMemory]?.oneVerse && (
         <MemoryTrainerModal
