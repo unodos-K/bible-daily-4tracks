@@ -26,9 +26,26 @@ interface TrainerStep {
   hiddenIndices: number[];
 }
 
+import rawBibleData from "@/data/chunked_text.json";
+
 export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: MemoryTrainerModalProps) {
-  // 1. 상태 및 상수 선언
-  const chunks = oneVerse.chunks || [];
+  // 0. 로그 출력 (데이터 흐름 추적)
+  console.log("MemoryTrainer Received OneVerse:", oneVerse);
+
+  // 1. 최신 청킹 데이터 가져오기 (DB에 저장된 구형 데이터 덮어쓰기)
+  const bibleTexts = rawBibleData as Record<string, Record<string, Record<string, string>>>;
+  const freshRawText = bibleTexts[oneVerse.book]?.[oneVerse.chapter.toString()]?.[oneVerse.verse.toString()];
+  
+  const textToUse = freshRawText || oneVerse.rawText || oneVerse.displayText || "";
+  const displayString = textToUse.replace(/\s*\/\s*/g, ' ').trim();
+
+  // 최신 데이터에 슬래시가 있으면 그것으로 쪼개고, 없으면 기존 chunks나 띄어쓰기로 폴백
+  const chunks = textToUse.includes('/')
+    ? textToUse.split(/\s*\/\s*/).map(c => c.replace(/\//g, '').trim()).filter(Boolean)
+    : (oneVerse.chunks && oneVerse.chunks.length > 0 ? oneVerse.chunks : textToUse.split(' ').filter(Boolean));
+
+  console.log("MemoryTrainer Chunks:", chunks);
+
   const K = chunks.length;
 
   const [stepState, setStepState] = useState<'intro' | 'training'>('intro');
@@ -117,7 +134,7 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
         const transcript = event.results[0][0].transcript;
         setSpeechResult(transcript);
         
-        const sim = calculateSimilarity(oneVerse.displayText, transcript);
+        const sim = calculateSimilarity(displayString, transcript);
         if (sim >= 0.8) {
           setTestResult('success');
         } else {
@@ -241,7 +258,7 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
 
             <div className="min-h-[120px] flex items-center justify-center text-center p-6 bg-stone-50 dark:bg-stone-800/50 rounded-2xl border border-stone-200 dark:border-stone-700 shadow-inner">
               <p className="text-xl md:text-2xl font-semibold leading-loose break-keep text-stone-800 dark:text-stone-100">
-                {oneVerse.displayText}
+                {displayString}
               </p>
             </div>
 
