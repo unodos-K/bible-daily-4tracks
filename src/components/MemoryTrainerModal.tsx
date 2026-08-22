@@ -21,7 +21,7 @@ interface MemoryTrainerModalProps {
 }
 
 interface TrainerStep {
-  phase: 1 | 2 | 3 | 4;
+  phase: 1 | 2 | 3 | 4 | 5;
   phaseLabel: string;
   hiddenIndices: number[];
 }
@@ -65,43 +65,52 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
   // 2. 스텝 시퀀스 생성
   const steps: TrainerStep[] = useMemo(() => {
     const seq: TrainerStep[] = [];
-    if (K === 0) return [{ phase: 4, phaseLabel: "빈 구절입니다", hiddenIndices: [] }];
+    if (K === 0) return [{ phase: 5, phaseLabel: "빈 구절입니다", hiddenIndices: [] }];
     
-    // Phase 1 (1청크씩 순차 가리기)
+    // Step 1: 한 마디씩 가리기 (순차 1개씩)
     for (let i = 0; i < K; i++) {
       seq.push({ phase: 1, phaseLabel: "한 마디씩 마음에 새기기", hiddenIndices: [i] });
     }
     
-    // Phase 2 (2청크 묶음 순차 가리기)
-    if (K >= 3) {
-      for (let i = 0; i < K; i += 2) {
-        const hidden = [i];
-        if (i + 1 < K) hidden.push(i + 1);
-        seq.push({ phase: 2, phaseLabel: "두 마디 묶어 이어가기", hiddenIndices: hidden });
+    // Step 2: 두 마디씩 가리기 (연속된 2개씩)
+    if (K >= 2) {
+      for (let i = 0; i < K - 1; i++) {
+        seq.push({ phase: 2, phaseLabel: "두 마디 묶어 이어가기", hiddenIndices: [i, i + 1] });
+      }
+    } else {
+      seq.push({ phase: 2, phaseLabel: "두 마디 묶어 이어가기", hiddenIndices: [0] });
+    }
+    
+    // Step 3: 징검다리 가리기 (홀수 -> 짝수 전체 2번 반복)
+    const oddIndices = Array.from({ length: K }, (_, k) => k).filter(k => k % 2 === 1);
+    const evenIndices = Array.from({ length: K }, (_, k) => k).filter(k => k % 2 === 0);
+    
+    if (oddIndices.length > 0 || evenIndices.length > 0) {
+      for (let r = 0; r < 2; r++) {
+        if (oddIndices.length > 0) seq.push({ phase: 3, phaseLabel: "징검다리로 흐름 기억하기", hiddenIndices: oddIndices });
+        if (evenIndices.length > 0) seq.push({ phase: 3, phaseLabel: "징검다리로 흐름 기억하기", hiddenIndices: evenIndices });
       }
     }
     
-    // Phase 3 (전반부 / 후반부 절반 가리기)
-    const mid = Math.floor(K / 2);
-    const firstHalf = Array.from({ length: mid }, (_, k) => k);
-    const secondHalf = Array.from({ length: K - mid }, (_, k) => mid + k);
-    if (firstHalf.length > 0) {
-      seq.push({ phase: 3, phaseLabel: "전반부 흐름 기억하기", hiddenIndices: firstHalf });
-    }
-    if (secondHalf.length > 0) {
-      seq.push({ phase: 3, phaseLabel: "후반부 흐름 기억하기", hiddenIndices: secondHalf });
+    // Step 4: 절반 가리기 (짝수 인덱스 전체 가리기 2번 반복)
+    if (evenIndices.length > 0) {
+      for (let r = 0; r < 2; r++) {
+        seq.push({ phase: 4, phaseLabel: "절반 가리기 패턴 훈련", hiddenIndices: evenIndices });
+      }
     }
     
-    // Phase 4 (전체 가리기)
+    // Step 5: 전체 가리기 (3번 반복)
     const all = Array.from({ length: K }, (_, k) => k);
-    seq.push({ phase: 4, phaseLabel: "전체 말씀 온전히 고백하기", hiddenIndices: all });
+    for (let r = 0; r < 3; r++) {
+      seq.push({ phase: 5, phaseLabel: "전체 말씀 온전히 고백하기", hiddenIndices: all });
+    }
 
     return seq;
   }, [K]);
 
   const currentStep = steps[stepIndex] || steps[steps.length - 1];
   const isLastStep = stepIndex >= steps.length - 1;
-  const totalProgress = Math.round(((stepIndex + 1) / steps.length) * 100);
+  const totalProgress = isLastStep ? 100 : Math.round(((intervalSeconds - timeLeft) / intervalSeconds) * 100);
 
   // 3. Effect Hooks
   useEffect(() => {
@@ -306,17 +315,17 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
             )}
 
             <div className="flex flex-col gap-3 mb-6">
-              <div className="flex flex-col md:flex-row md:justify-between md:items-center bg-stone-50 dark:bg-stone-800/50 p-3 rounded-xl border border-stone-100 dark:border-stone-800 gap-3 md:gap-0">
-                <div className="flex flex-col">
+              <div className="flex flex-wrap justify-between items-center bg-stone-50 dark:bg-stone-800/50 p-3 rounded-xl border border-stone-100 dark:border-stone-800 gap-y-3 gap-x-4">
+                <div className="flex flex-col min-w-[150px]">
                   <span className="text-sm font-bold text-stone-800 dark:text-stone-200">
-                    Step {currentStep.phase}/4 : {currentStep.phaseLabel}
+                    Step {currentStep.phase}/5 : {currentStep.phaseLabel}
                   </span>
-                  <span className="text-xs font-semibold text-stone-400">
-                    진행률 {totalProgress}%
+                  <span className="text-xs font-semibold text-stone-400 mt-0.5">
+                    해당 Step 진행률 {totalProgress}%
                   </span>
                 </div>
 
-                <div className="flex items-center justify-end gap-2">
+                <div className="flex items-center gap-2 flex-wrap justify-end">
                   {!isLastStep && (
                     <React.Fragment>
                       <button
@@ -390,21 +399,16 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
                 {chunks.map((chunk, index) => {
                   const isHidden = currentStep.hiddenIndices.includes(index);
                   
-                  const baseStyle: React.CSSProperties = {
-                    transition: "all 0.3s ease",
-                  };
-                  
-                  if (isHidden) {
-                    baseStyle.color = "transparent";
-                    baseStyle.backgroundColor = "#cbd5e1";
-                    baseStyle.borderRadius = "4px";
-                  }
-
                   return (
                     <span 
                       key={index} 
-                      style={baseStyle}
-                      className={isHidden ? "select-none cursor-help hover:text-slate-500 hover:bg-transparent dark:hover:text-slate-400" : "text-stone-800 dark:text-stone-100"}
+                      className={`
+                        transition-all duration-300 ease-in-out px-1.5 py-0.5 mx-0.5 rounded-md
+                        ${isHidden 
+                          ? "select-none cursor-help text-transparent bg-stone-300 dark:bg-stone-700 hover:text-stone-400 dark:hover:text-stone-400" 
+                          : "text-stone-800 dark:text-stone-100 bg-stone-100 dark:bg-stone-800"
+                        }
+                      `}
                       title={isHidden ? "터치하여 살짝 보기" : ""}
                     >
                       {chunk}
