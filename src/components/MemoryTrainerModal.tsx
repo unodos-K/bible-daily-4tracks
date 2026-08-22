@@ -394,7 +394,7 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
                     return (
                       <div key={idx} className="flex-1 bg-stone-200 dark:bg-stone-700 rounded-full overflow-hidden">
                         <div 
-                          className={`h-full transition-all duration-300 ${fillClass}`}
+                          className={`h-full transition-all duration-1000 ease-linear ${fillClass}`}
                           style={{ width }}
                         />
                       </div>
