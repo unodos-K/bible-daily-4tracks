@@ -50,30 +50,37 @@ function main() {
     try {
         console.log("Loading Bible text data...");
         const bibleData = JSON.parse(fs.readFileSync(inputPath, 'utf8'));
+        const existingChunkedData = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
         const resultData = {};
 
         let totalChapters = 0;
         let totalVerses = 0;
 
-        for (const book in bibleData) {
-            resultData[book] = {};
-            for (const chapter in bibleData[book]) {
-                totalChapters++;
-                resultData[book][chapter] = {};
-                for (const verse in bibleData[book][chapter]) {
-                    totalVerses++;
-                    const text = bibleData[book][chapter][verse];
-                    resultData[book][chapter][verse] = chunkVerse(text);
+        for (const book in existingChunkedData) {
+            if (book !== '요나') {
+                resultData[book] = existingChunkedData[book];
+            }
+            if (book === '오바댜') {
+                console.log("Processing '요나'...");
+                resultData['요나'] = {};
+                for (const chapter in bibleData['요나']) {
+                    totalChapters++;
+                    resultData['요나'][chapter] = {};
+                    for (const verse in bibleData['요나'][chapter]) {
+                        totalVerses++;
+                        const text = bibleData['요나'][chapter][verse];
+                        resultData['요나'][chapter][verse] = chunkVerse(text);
+                    }
                 }
             }
         }
 
-        console.log(`Processed ${totalChapters} chapters, ${totalVerses} verses.`);
+        console.log(`Processed ${totalChapters} chapters, ${totalVerses} verses for Jonah.`);
 
-        console.log("\n--- 창세기 1장 1절~5절 예시 ---");
+        console.log("\n--- 요나 1장 1절~5절 예시 ---");
         for (let i = 1; i <= 5; i++) {
-            if (resultData['창세기'] && resultData['창세기']['1'] && resultData['창세기']['1'][String(i)]) {
-                console.log(`${i}절: ${resultData['창세기']['1'][String(i)]}`);
+            if (resultData['요나'] && resultData['요나']['1'] && resultData['요나']['1'][String(i)]) {
+                console.log(`${i}절: ${resultData['요나']['1'][String(i)]}`);
             }
         }
         console.log("--------------------------------\n");

@@ -33,7 +33,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#1c1917" />
         <meta name="format-detection" content="telephone=no" />
       </head>
-      <body className="min-h-screen-dynamic bg-neutral-100 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 flex flex-col selection:bg-amber-200 dark:selection:bg-amber-900 pt-[calc(52px+env(safe-area-inset-top))] safe-bottom">
+      <body className="min-h-screen-dynamic bg-neutral-100 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 flex flex-col selection:bg-amber-200 dark:selection:bg-amber-900 pt-[52px] safe-bottom">
         <GlobalNavigation />
         {children}
       </body>
