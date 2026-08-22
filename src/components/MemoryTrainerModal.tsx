@@ -327,12 +327,12 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
 
             <div className="flex flex-col gap-4 mb-6 bg-stone-50 dark:bg-stone-800/50 p-4 rounded-xl border border-stone-100 dark:border-stone-800">
               {/* Top: Step Navigation Tabs */}
-              <div className="flex gap-1.5 overflow-x-auto pb-1 w-full scrollbar-hide">
+              <div className="flex flex-wrap justify-center gap-1.5 pb-1 w-full">
                 {[1, 2, 3, 4, 5].map((phaseNum) => (
                   <button
                     key={phaseNum}
                     onClick={() => jumpToPhase(phaseNum)}
-                    className={`flex-1 px-2 py-2 rounded-lg text-xs sm:text-sm font-bold whitespace-nowrap transition-colors ${
+                    className={`flex-1 min-w-[3rem] px-2 py-1.5 md:px-3 md:py-2 rounded-lg text-xs md:text-sm font-bold whitespace-nowrap transition-colors ${
                       currentStep.phase === phaseNum
                         ? "bg-sky-600 text-white shadow-sm"
                         : "bg-stone-200 dark:bg-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-300 dark:hover:bg-stone-600"
