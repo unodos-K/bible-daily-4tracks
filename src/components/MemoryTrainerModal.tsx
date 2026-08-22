@@ -291,8 +291,8 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
 
   // 5. 렌더링
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-      <div className="bg-white dark:bg-stone-900 rounded-3xl p-6 md:p-8 shadow-2xl w-full max-w-lg flex flex-col relative animate-in zoom-in-95 border border-stone-200 dark:border-stone-800">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in md:p-4">
+      <div className="bg-white dark:bg-stone-900 rounded-none md:rounded-3xl p-6 md:p-8 shadow-2xl w-full h-full md:h-auto md:max-h-[90vh] max-w-lg flex flex-col relative animate-in zoom-in-95 border-0 md:border border-stone-200 dark:border-stone-800 overflow-y-auto">
         
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-2 text-sky-600 dark:text-sky-400 font-bold">
@@ -371,13 +371,14 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
                   <button
                     key={opt.value}
                     onClick={() => setIntervalSeconds(opt.value)}
-                    className={`py-3 px-1 rounded-lg text-sm sm:text-base font-bold transition-all duration-200 ${
+                    className={`py-2 px-1 flex flex-col items-center justify-center gap-0.5 rounded-lg text-xs sm:text-sm font-bold transition-all duration-200 ${
                       intervalSeconds === opt.value
                         ? "bg-white dark:bg-stone-900 text-sky-600 dark:text-sky-400 shadow-sm border border-stone-200 dark:border-stone-700 scale-[1.02]"
                         : "text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 hover:bg-stone-200/50 dark:hover:bg-stone-700/50 border border-transparent"
                     }`}
                   >
-                    {opt.label} ({opt.value}초)
+                    <span className="whitespace-nowrap">{opt.label}</span>
+                    <span className="text-[10px] sm:text-xs font-medium opacity-70 whitespace-nowrap">({opt.value}초)</span>
                   </button>
                 ))}
               </div>
