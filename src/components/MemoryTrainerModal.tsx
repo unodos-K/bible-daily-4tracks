@@ -28,7 +28,15 @@ interface TrainerStep {
 
 export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: MemoryTrainerModalProps) {
   // 1. 상태 및 상수 선언
-  const chunks = oneVerse.chunks || [];
+  const rawText = oneVerse.rawText || oneVerse.displayText || "";
+  const displayString = rawText.includes('/') 
+    ? rawText.replace(/\s*\/\s*/g, ' ').trim() 
+    : oneVerse.displayText;
+
+  const chunks = rawText.includes('/')
+    ? rawText.split(/\s*\/\s*/).map(c => c.replace(/\//g, '').trim()).filter(Boolean)
+    : (oneVerse.chunks && oneVerse.chunks.length > 0 ? oneVerse.chunks : rawText.split(' ').filter(Boolean));
+
   const K = chunks.length;
 
   const [stepState, setStepState] = useState<'intro' | 'training'>('intro');
@@ -117,7 +125,7 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
         const transcript = event.results[0][0].transcript;
         setSpeechResult(transcript);
         
-        const sim = calculateSimilarity(oneVerse.displayText, transcript);
+        const sim = calculateSimilarity(displayString, transcript);
         if (sim >= 0.8) {
           setTestResult('success');
         } else {
@@ -241,7 +249,7 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
 
             <div className="min-h-[120px] flex items-center justify-center text-center p-6 bg-stone-50 dark:bg-stone-800/50 rounded-2xl border border-stone-200 dark:border-stone-700 shadow-inner">
               <p className="text-xl md:text-2xl font-semibold leading-loose break-keep text-stone-800 dark:text-stone-100">
-                {oneVerse.displayText}
+                {displayString}
               </p>
             </div>
 
