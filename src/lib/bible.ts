@@ -1,18 +1,71 @@
-import rawScheduleData from "@/data/mccheyneSchedule.json";
+import rawScheduleData from "@/data/Bible_Reading_Schedule_365.json";
 import rawBibleData from "@/data/chunked_text.json";
 import {
   ChapterData,
   DailyReading,
-  MccheyneDaySchedule,
-  MccheyneTrack,
+  DaySchedule,
+  ReadingTrack,
   TrackReading,
   TrackType,
   Verse,
 } from "@/types/bible";
 
-// 전체 맥체인 스케줄 데이터
-export const mccheyneSchedules: MccheyneDaySchedule[] =
-  rawScheduleData as MccheyneDaySchedule[];
+// 새로운 365 스케줄 데이터 파싱
+const rawSchedules = rawScheduleData as any[];
+export const mccheyneSchedules: DaySchedule[] = rawSchedules.map((item) => {
+  const dayIndex = item.day;
+  
+  // 가상의 date, month, day 생성 (1월 1일 기준 365일)
+  // 윤년 무시하고 대략적인 월/일 매핑 (UI 달력 렌더링 호환용)
+  const d = new Date(2026, 0, dayIndex); 
+  const month = d.getMonth() + 1;
+  const day = d.getDate();
+  const dateStr = `2026-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+  const tracksObj = item.tracks;
+  const parsedTracks: ReadingTrack[] = [];
+
+  const trackTypes: TrackType[] = ["구약", "신약", "시편", "잠언"];
+  for (const tType of trackTypes) {
+    if (tracksObj[tType]) {
+      const tData = tracksObj[tType];
+      
+      // 범위 문자열 생성
+      let rangeStr = "";
+      if (tData.startChapter === tData.endChapter) {
+        if (tData.startVerse === null || tData.endVerse === null) {
+          rangeStr = `${tData.Book} ${tData.startChapter}장`;
+        } else {
+          rangeStr = `${tData.Book} ${tData.startChapter}:${tData.startVerse}~${tData.endVerse}`;
+        }
+      } else {
+        rangeStr = `${tData.Book} ${tData.startChapter}~${tData.endChapter}장`;
+      }
+      if (tData.Book === '시편') {
+        rangeStr = rangeStr.replace(/장/g, '편');
+      }
+
+      parsedTracks.push({
+        type: tType,
+        title: tType,
+        range: rangeStr,
+        book: tData.Book,
+        startChapter: tData.startChapter,
+        endChapter: tData.endChapter,
+        startVerse: tData.startVerse,
+        endVerse: tData.endVerse
+      });
+    }
+  }
+
+  return {
+    dayIndex,
+    date: dateStr,
+    month,
+    day,
+    tracks: parsedTracks
+  };
+});
 
 // 성경 텍스트 데이터 딕셔너리
 const bibleTexts = rawBibleData as Record<string, Record<string, Record<string, string>>>;
@@ -28,28 +81,28 @@ export const TRACK_INFO: Record<
     accentColor: string;
   }
 > = {
-  OLD: {
+  "구약": {
     title: "구약 (역사/율법)",
     description: "창조부터 이어지는 구원의 역사",
     badgeBg: "bg-amber-100 dark:bg-amber-950/60",
     badgeText: "text-amber-800 dark:text-amber-300",
     accentColor: "#d97706",
   },
-  NEW: {
+  "신약": {
     title: "신약 (복음서)",
     description: "예수 그리스도의 생애와 복음",
     badgeBg: "bg-emerald-100 dark:bg-emerald-950/60",
     badgeText: "text-emerald-800 dark:text-emerald-300",
     accentColor: "#059669",
   },
-  PSALMS: {
+  "시편": {
     title: "시편 (찬양과 기도)",
     description: "영혼의 호흡과 찬양",
     badgeBg: "bg-sky-100 dark:bg-sky-950/60",
     badgeText: "text-sky-800 dark:text-sky-300",
     accentColor: "#0284c7",
   },
-  PROVERBS: {
+  "잠언": {
     title: "잠언 (지혜)",
     description: "일상의 경건과 삶의 지혜",
     badgeBg: "bg-purple-100 dark:bg-purple-950/60",
@@ -114,7 +167,7 @@ export function parseDateInput(
 /**
  * 전체 맥체인 읽기표 스케줄 목록을 반환합니다.
  */
-export function getAllSchedules(): MccheyneDaySchedule[] {
+export function getAllSchedules(): DaySchedule[] {
   return mccheyneSchedules;
 }
 
@@ -124,7 +177,7 @@ export function getAllSchedules(): MccheyneDaySchedule[] {
 export function getScheduleForMonthDay(
   month: number,
   day: number
-): MccheyneDaySchedule | null {
+): DaySchedule | null {
   return (
     mccheyneSchedules.find((s) => s.month === month && s.day === day) || null
   );
@@ -135,7 +188,7 @@ export function getScheduleForMonthDay(
  */
 export function getScheduleByDate(
   dateInput: string | { month: number; day: number } | Date
-): MccheyneDaySchedule | null {
+): DaySchedule | null {
   const parsed = parseDateInput(dateInput);
   if (!parsed) return null;
   return getScheduleForMonthDay(parsed.month, parsed.day);
@@ -147,7 +200,7 @@ export function getScheduleByDate(
 export function filterVersesForTrack(
   chapterNumber: number,
   verses: Verse[],
-  track: MccheyneTrack
+  track: ReadingTrack
 ): Verse[] {
   const { startChapter, endChapter, startVerse, endVerse } = track;
 
@@ -176,7 +229,7 @@ export function filterVersesForTrack(
  * 트랙 정보를 기반으로 성경 데이터에서 해당하는 장/절 본문들을 추출합니다.
  */
 export function getBibleChaptersForTrack(
-  track: MccheyneTrack
+  track: ReadingTrack
 ): ChapterData[] {
   const { book, startChapter, endChapter } = track;
   const result: ChapterData[] = [];
@@ -222,7 +275,7 @@ export function getBibleChaptersForTrack(
 /**
  * dayIndex(1~365)를 입력받아 오늘의 맥체인 4개 트랙 스케줄을 조회합니다.
  */
-export function getScheduleByDayIndex(dayIndex: number): MccheyneDaySchedule | null {
+export function getScheduleByDayIndex(dayIndex: number): DaySchedule | null {
   return mccheyneSchedules.find((s) => s.dayIndex === dayIndex) || null;
 }
 

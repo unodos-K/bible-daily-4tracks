@@ -1,0 +1,35 @@
+[
+    {
+        "day": 1,
+        "tracks": {
+            "구약": {
+                "Book": "창세기",
+                "startChapter": 1,
+                "endChapter": 2,
+                "startVerse": 1,
+                "endVerse": 25
+            },
+            "신약": {
+                "Book": "마태복음",
+                "startChapter": 1,
+                "endChapter": 1,
+                "startVerse": 1,
+                "endVerse": 25
+            },
+            "시편": {
+                "Book": "시편",
+                "startChapter": 1,
+                "endChapter": 1,
+                "startVerse": 1,
+                "endVerse": 6
+            },
+            "잠언": {
+                "Book": "잠언",
+                "startChapter": 1,
+                "endChapter": 1,
+                "startVerse": 1,
+                "endVerse": 5
+            }
+        }
+    }
+]

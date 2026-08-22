@@ -23,18 +23,18 @@ import {
 import { getAuthUser, AuthUser } from "@/lib/auth";
 import { signInWithKakao } from "@/lib/supabase";
 
-const TRACK_ICONS = {
-  OLD: "📖",
-  NEW: "✝️",
-  PSALMS: "🕊️",
-  PROVERBS: "💡",
+const TRACK_ICONS: Record<string, string> = {
+  "구약": "📖",
+  "신약": "✝️",
+  "시편": "🕊️",
+  "잠언": "💡",
 };
 
-const TRACK_ID_MAP = {
-  OLD: "track-old-testament",
-  NEW: "track-new-testament",
-  PSALMS: "track-psalms",
-  PROVERBS: "track-proverbs",
+const TRACK_ID_MAP: Record<string, string> = {
+  "구약": "track-old-testament",
+  "신약": "track-new-testament",
+  "시편": "track-psalms",
+  "잠언": "track-proverbs",
 };
 
 const formatReference = (book: string, chapter: number, verse: number) => {
@@ -701,10 +701,10 @@ export default function BibleViewerPage() {
                         </span>
                         
                         <div className="text-xs text-stone-500 dark:text-stone-400 truncate mt-1 leading-relaxed flex flex-wrap gap-x-2">
-                          <span>📖 {s.tracks.find(t => t.type === 'OLD')?.range}</span>
-                          <span>✝️ {s.tracks.find(t => t.type === 'NEW')?.range}</span>
-                          <span>🕊️ {s.tracks.find(t => t.type === 'PSALMS')?.range}</span>
-                          <span>💡 {s.tracks.find(t => t.type === 'PROVERBS')?.range}</span>
+                          <span>📖 {s.tracks.find(t => t.type === '구약')?.range}</span>
+                          <span>✝️ {s.tracks.find(t => t.type === '신약')?.range}</span>
+                          <span>🕊️ {s.tracks.find(t => t.type === '시편')?.range}</span>
+                          <span>💡 {s.tracks.find(t => t.type === '잠언')?.range}</span>
                         </div>
                       </div>
 

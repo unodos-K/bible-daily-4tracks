@@ -17,9 +17,9 @@ export interface BibleData {
   books: ChapterData[];
 }
 
-export type TrackType = "OLD" | "NEW" | "PSALMS" | "PROVERBS";
+export type TrackType = "구약" | "신약" | "시편" | "잠언";
 
-export interface MccheyneTrack {
+export interface ReadingTrack {
   type: TrackType;
   title: string;
   range: string;
@@ -30,16 +30,16 @@ export interface MccheyneTrack {
   endVerse: number | null;
 }
 
-export interface MccheyneDaySchedule {
+export interface DaySchedule {
   dayIndex: number;
   date: string;
   month: number;
   day: number;
-  tracks: MccheyneTrack[];
+  tracks: ReadingTrack[];
 }
 
 export interface TrackReading {
-  track: MccheyneTrack;
+  track: ReadingTrack;
   chapters: ChapterData[];
 }
 
