@@ -8,7 +8,7 @@ export function GlobalNavigation() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 shadow-sm">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 shadow-sm pt-[env(safe-area-inset-top)]">
       <div className="max-w-2xl mx-auto flex">
         <Link 
           href="/"
