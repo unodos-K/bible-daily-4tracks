@@ -196,31 +196,31 @@ export default function MyPage() {
       <div className="w-full max-w-2xl flex flex-col gap-6">
         
         {/* 프로필 및 통계 카드 */}
-        <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 p-6 flex flex-col gap-6">
-          <div className="flex justify-between items-start">
-            <div className="flex flex-col gap-1">
-              <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100 flex items-center gap-2">
+        <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 p-5 sm:p-6 flex flex-col gap-6">
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-between w-full">
+              <h2 className="text-lg sm:text-xl font-bold text-stone-800 dark:text-stone-100 flex items-center gap-2 flex-1 break-keep pr-2">
                 {authUser ? `${authUser.name}님 환영합니다 ✨` : '내 통독 여정'}
               </h2>
-              <p className="text-sm text-stone-500 dark:text-stone-400 font-medium bg-stone-100 dark:bg-stone-800 inline-block px-3 py-1 rounded-full w-fit">
-                📅 통독 시작일: {settings.startDate} (Day {daysSince}일차)
-              </p>
+              {authUser ? (
+                <button
+                  onClick={handleLogout}
+                  className="text-xs sm:text-sm font-semibold text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 transition-colors whitespace-nowrap flex-shrink-0"
+                >
+                  🚪 로그아웃
+                </button>
+              ) : (
+                <button
+                  onClick={signInWithKakao}
+                  className="text-xs sm:text-sm font-bold bg-[#FEE500] text-black hover:bg-[#FDD800] px-3 py-1.5 rounded-lg transition-colors shadow-sm whitespace-nowrap flex-shrink-0"
+                >
+                  💬 카카오 로그인
+                </button>
+              )}
             </div>
-            {authUser ? (
-              <button
-                onClick={handleLogout}
-                className="text-sm font-semibold text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 transition-colors"
-              >
-                🚪 로그아웃
-              </button>
-            ) : (
-              <button
-                onClick={signInWithKakao}
-                className="text-xs sm:text-sm font-bold bg-[#FEE500] text-black hover:bg-[#FDD800] px-3 py-2 rounded-lg transition-colors shadow-sm whitespace-nowrap"
-              >
-                💬 카카오 로그인
-              </button>
-            )}
+            <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 font-medium bg-stone-100 dark:bg-stone-800 inline-block px-3 py-1.5 rounded-full w-fit">
+              📅 통독 시작일: {settings.startDate} (Day {daysSince}일차)
+            </p>
           </div>
 
           <button
