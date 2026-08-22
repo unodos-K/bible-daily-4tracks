@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import confetti from 'canvas-confetti';
-import { X, BrainCircuit, Sparkles, Timer, RotateCcw, Mic, CheckCircle2, XCircle, Rocket, Play, Pause, Volume2, Square } from 'lucide-react';
+import { X, BrainCircuit, Sparkles, Timer, RotateCcw, Mic, CheckCircle2, XCircle, Rocket, Play, Pause, Volume2, Square, ChevronDown } from 'lucide-react';
 import { OneVerse } from '@/lib/storage';
 import { calculateSimilarity } from '@/lib/utils';
 
@@ -327,18 +327,19 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
             {/* TTS Controls */}
             {ttsVoices.length > 0 && (
               <div className="flex items-center justify-between bg-stone-100 dark:bg-stone-800 p-3 rounded-xl gap-2">
-                <div className="flex-1 overflow-hidden bg-white dark:bg-stone-900 rounded-lg border border-stone-200 dark:border-stone-700 px-3 py-2 flex items-center">
+                <div className="flex-1 overflow-hidden bg-white dark:bg-stone-900 rounded-lg border border-stone-200 dark:border-stone-700 px-3 py-2 flex items-center relative">
                   <select
                     value={selectedVoiceIndex}
                     onChange={(e) => setSelectedVoiceIndex(Number(e.target.value))}
-                    className="bg-transparent text-xs sm:text-sm font-semibold text-stone-700 dark:text-stone-300 outline-none w-full appearance-none"
+                    className="bg-transparent text-xs sm:text-sm font-semibold text-stone-700 dark:text-stone-300 outline-none w-full appearance-none pr-8"
                   >
                     {ttsVoices.map((voice, idx) => (
                       <option key={voice.name} value={idx}>
-                        {voice.name}
+                        {voice.name.replace('Google 한국의', '구글 표준 음성')}
                       </option>
                     ))}
                   </select>
+                  <ChevronDown size={16} className="absolute right-3 text-stone-400 pointer-events-none" />
                 </div>
                 <button
                   onClick={toggleTTS}
