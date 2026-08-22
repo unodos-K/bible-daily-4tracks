@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, RotateCcw, BrainCircuit, X, Flame, AlertCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight, RotateCcw, BrainCircuit, X, Flame, AlertCircle, Settings } from "lucide-react";
 import { 
   ReadingSettings, 
   ReadRecordsMap, 
@@ -19,7 +19,7 @@ import {
 import { getAuthUser, AuthUser } from "@/lib/auth";
 import { signOut, signInWithKakao } from "@/lib/supabase";
 import MemoryTrainerModal from "@/components/MemoryTrainerModal";
-import SettingsSection from "@/components/SettingsSection";
+import SettingsModal from "@/components/SettingsModal";
 
 function getDaysInMonth(year: number, month: number) {
   return new Date(year, month, 0).getDate();
@@ -75,6 +75,7 @@ export default function MyPage() {
   const carouselRef = useRef<HTMLDivElement>(null);
   
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -203,21 +204,30 @@ export default function MyPage() {
               <h2 className="text-lg sm:text-xl font-bold text-stone-800 dark:text-stone-100 flex items-center gap-2 flex-1 break-keep pr-2">
                 {authUser ? `${authUser.name}님 환영합니다 ✨` : '내 통독 여정'}
               </h2>
-              {authUser ? (
+              <div className="flex items-center gap-3 flex-shrink-0">
                 <button
-                  onClick={handleLogout}
-                  className="text-xs sm:text-sm font-semibold text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 transition-colors whitespace-nowrap flex-shrink-0"
+                  onClick={() => setIsSettingsModalOpen(true)}
+                  className="p-1.5 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 transition-colors bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 rounded-full"
+                  aria-label="환경 설정"
                 >
-                  🚪 로그아웃
+                  <Settings size={18} />
                 </button>
-              ) : (
-                <button
-                  onClick={signInWithKakao}
-                  className="text-xs sm:text-sm font-bold bg-[#FEE500] text-black hover:bg-[#FDD800] px-3 py-1.5 rounded-lg transition-colors shadow-sm whitespace-nowrap flex-shrink-0"
-                >
-                  💬 카카오 로그인
-                </button>
-              )}
+                {authUser ? (
+                  <button
+                    onClick={handleLogout}
+                    className="text-xs sm:text-sm font-semibold text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 transition-colors whitespace-nowrap"
+                  >
+                    🚪 로그아웃
+                  </button>
+                ) : (
+                  <button
+                    onClick={signInWithKakao}
+                    className="text-xs sm:text-sm font-bold bg-[#FEE500] text-black hover:bg-[#FDD800] px-3 py-1.5 rounded-lg transition-colors shadow-sm whitespace-nowrap"
+                  >
+                    💬 카카오 로그인
+                  </button>
+                )}
+              </div>
             </div>
             <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 font-medium bg-stone-100 dark:bg-stone-800 inline-block px-3 py-1.5 rounded-full w-fit">
               📅 통독 시작일: {settings.startDate} (Day {daysSince}일차)
@@ -665,10 +675,10 @@ export default function MyPage() {
         />
       )}
 
-      {/* 환경 설정 영역 */}
-      <div className="w-full max-w-2xl mt-12 mb-8">
-        <SettingsSection />
-      </div>
+      <SettingsModal 
+        isOpen={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
+      />
 
       {/* 통독 재설정 (위험 구역) */}
       <div className="w-full max-w-2xl flex flex-col items-center">
