@@ -204,6 +204,16 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
     setSpeechResult('');
   };
 
+  const handleNextStep = () => {
+    setStepIndex((curr) => Math.min(curr + 1, steps.length - 1));
+    setTimeLeft(intervalSeconds);
+  };
+
+  const handlePrevStep = () => {
+    setStepIndex((curr) => Math.max(curr - 1, 0));
+    setTimeLeft(intervalSeconds);
+  };
+
   const triggerConfetti = () => {
     const duration = 2000;
     const end = Date.now() + duration;
@@ -317,9 +327,10 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
               </div>
             )}
 
-            <div className="flex flex-col gap-3 mb-6">
-              <div className="flex flex-wrap justify-between items-center bg-stone-50 dark:bg-stone-800/50 p-3 rounded-xl border border-stone-100 dark:border-stone-800 gap-y-3 gap-x-4">
-                <div className="flex flex-col min-w-[150px]">
+            <div className="flex flex-col gap-4 mb-6 bg-stone-50 dark:bg-stone-800/50 p-4 rounded-xl border border-stone-100 dark:border-stone-800">
+              {/* Top: Step Info & Prev/Next Buttons */}
+              <div className="flex justify-between items-center w-full">
+                <div className="flex flex-col">
                   <span className="text-sm font-bold text-stone-800 dark:text-stone-200">
                     Step {currentStep.phase}/5 : {currentStep.phaseLabel}
                   </span>
@@ -327,36 +338,37 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
                     해당 Step 진행률 {totalProgress}%
                   </span>
                 </div>
+                <div className="flex gap-1.5">
+                  <button
+                    onClick={handlePrevStep}
+                    disabled={stepIndex === 0}
+                    className="p-1.5 bg-stone-200 dark:bg-stone-700 hover:bg-stone-300 dark:hover:bg-stone-600 rounded-md text-stone-600 dark:text-stone-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+                    title="이전 단계"
+                  >
+                    <span className="text-xs font-bold px-1">◀</span>
+                  </button>
+                  <button
+                    onClick={handleNextStep}
+                    disabled={isLastStep}
+                    className="p-1.5 bg-stone-200 dark:bg-stone-700 hover:bg-stone-300 dark:hover:bg-stone-600 rounded-md text-stone-600 dark:text-stone-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+                    title="다음 단계"
+                  >
+                    <span className="text-xs font-bold px-1">▶</span>
+                  </button>
+                </div>
+              </div>
 
-                <div className="flex items-center gap-2 flex-wrap justify-end">
-                  {!isLastStep && (
-                    <React.Fragment>
-                      <button
-                        onClick={() => setIsPlaying(!isPlaying)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-stone-200 hover:bg-stone-300 dark:bg-stone-700 dark:hover:bg-stone-600 text-stone-700 dark:text-stone-300 font-bold text-xs sm:text-sm transition-colors"
-                      >
-                        {isPlaying ? (
-                          <React.Fragment><Pause size={14} /> 일시정지</React.Fragment>
-                        ) : (
-                          <React.Fragment><Play size={14} /> 이어하기</React.Fragment>
-                        )}
-                      </button>
-                      <button
-                        onClick={handleRestart}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-stone-200 hover:bg-stone-300 dark:bg-stone-700 dark:hover:bg-stone-600 text-stone-700 dark:text-stone-300 font-bold text-xs sm:text-sm transition-colors"
-                      >
-                        <RotateCcw size={14} /> 처음부터
-                      </button>
-                    </React.Fragment>
-                  )}
+              {/* Middle: Timer & Timeline Segments */}
+              <div className="flex items-center gap-3 w-full">
+                <div className="flex-shrink-0 min-w-[70px]">
                   {isLastStep ? (
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 font-bold text-sm shadow-sm animate-in zoom-in">
+                    <div className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 font-bold text-sm shadow-sm animate-in zoom-in">
                       🎯 도전!
                     </div>
                   ) : (
                     <div 
                       key={isPlaying ? timeLeft : 'paused'}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-sm shadow-sm ${
+                      className={`flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-sm shadow-sm w-full ${
                         isPlaying 
                           ? "bg-sky-100 dark:bg-sky-900/50 text-sky-700 dark:text-sky-400 animate-pulse" 
                           : "bg-stone-200 dark:bg-stone-700 text-stone-500 dark:text-stone-400"
@@ -370,31 +382,53 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
                     </div>
                   )}
                 </div>
+
+                <div className="flex flex-1 gap-0.5 h-1.5">
+                  {Array.from({ length: currentPhaseStepsCount }).map((_, idx) => {
+                    let width = "0%";
+                    let fillClass = "bg-sky-400 dark:bg-sky-500";
+                    
+                    if (idx < currentSegmentIndex) {
+                      width = "100%";
+                    } else if (idx === currentSegmentIndex) {
+                      width = `${totalProgress}%`;
+                    } else {
+                      fillClass = "bg-transparent";
+                    }
+
+                    return (
+                      <div key={idx} className="flex-1 bg-stone-200 dark:bg-stone-700 rounded-full overflow-hidden">
+                        <div 
+                          className={`h-full transition-all duration-300 ${fillClass}`}
+                          style={{ width }}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
-              <div className="flex w-full gap-0.5 h-1.5 px-0.5">
-                {Array.from({ length: currentPhaseStepsCount }).map((_, idx) => {
-                  let width = "0%";
-                  let fillClass = "bg-sky-400 dark:bg-sky-500";
-                  
-                  if (idx < currentSegmentIndex) {
-                    width = "100%";
-                  } else if (idx === currentSegmentIndex) {
-                    width = `${totalProgress}%`;
-                  } else {
-                    fillClass = "bg-transparent";
-                  }
-
-                  return (
-                    <div key={idx} className="flex-1 bg-stone-200 dark:bg-stone-700 rounded-full overflow-hidden">
-                      <div 
-                        className={`h-full transition-all duration-300 ${fillClass}`}
-                        style={{ width }}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
+              {/* Bottom: Pause/Play & Restart Controls */}
+              {!isLastStep && (
+                <div className="flex items-center justify-end gap-2 w-full mt-1 border-t border-stone-200/50 dark:border-stone-700/50 pt-3">
+                  <button
+                    onClick={() => setIsPlaying(!isPlaying)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-stone-200 hover:bg-stone-300 dark:bg-stone-700 dark:hover:bg-stone-600 text-stone-700 dark:text-stone-300 font-bold text-xs sm:text-sm transition-colors"
+                  >
+                    {isPlaying ? (
+                      <React.Fragment><Pause size={14} /> 일시정지</React.Fragment>
+                    ) : (
+                      <React.Fragment><Play size={14} /> 이어하기</React.Fragment>
+                    )}
+                  </button>
+                  <button
+                    onClick={handleRestart}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-stone-200 hover:bg-stone-300 dark:bg-stone-700 dark:hover:bg-stone-600 text-stone-700 dark:text-stone-300 font-bold text-xs sm:text-sm transition-colors"
+                  >
+                    <RotateCcw size={14} /> 처음부터
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="min-h-[160px] flex flex-col items-center justify-center text-center p-6 bg-stone-50 dark:bg-stone-950 rounded-2xl border border-stone-100 dark:border-stone-800 mb-8 shadow-inner relative overflow-hidden">
