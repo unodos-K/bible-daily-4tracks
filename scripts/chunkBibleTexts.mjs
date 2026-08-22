@@ -6,7 +6,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const inputPath = path.join(__dirname, '../src/data/bibleTexts.json');
-const outputPath = path.join(__dirname, '../src/data/chunked_text.json');
+const outputPath = path.join(__dirname, '../src/data/chunked_text_v2.json');
 
 function chunkVerse(text) {
     if (!text) return text;
