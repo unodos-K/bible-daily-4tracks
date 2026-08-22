@@ -67,12 +67,12 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
     const seq: TrainerStep[] = [];
     if (K === 0) return [{ phase: 5, phaseLabel: "빈 구절입니다", hiddenIndices: [] }];
     
-    // Step 1: 한 마디씩 가리기 (순차 1개씩)
+    // Step 1: 한 마디씩 가리기 (K번 반복)
     for (let i = 0; i < K; i++) {
       seq.push({ phase: 1, phaseLabel: "한 마디씩 마음에 새기기", hiddenIndices: [i] });
     }
     
-    // Step 2: 두 마디씩 가리기 (연속된 2개씩)
+    // Step 2: 두 마디 묶어 이어가기 (K-1번 반복)
     if (K >= 2) {
       for (let i = 0; i < K - 1; i++) {
         seq.push({ phase: 2, phaseLabel: "두 마디 묶어 이어가기", hiddenIndices: [i, i + 1] });
@@ -81,29 +81,30 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
       seq.push({ phase: 2, phaseLabel: "두 마디 묶어 이어가기", hiddenIndices: [0] });
     }
     
-    // Step 3: 징검다리 가리기 (홀수 -> 짝수 전체 2번 반복)
+    // Step 3: 징검다리 가리기 (4회 고정: 홀-짝-홀-짝)
     const oddIndices = Array.from({ length: K }, (_, k) => k).filter(k => k % 2 === 1);
     const evenIndices = Array.from({ length: K }, (_, k) => k).filter(k => k % 2 === 0);
     
-    if (oddIndices.length > 0 || evenIndices.length > 0) {
-      for (let r = 0; r < 2; r++) {
-        if (oddIndices.length > 0) seq.push({ phase: 3, phaseLabel: "징검다리로 흐름 기억하기", hiddenIndices: oddIndices });
-        if (evenIndices.length > 0) seq.push({ phase: 3, phaseLabel: "징검다리로 흐름 기억하기", hiddenIndices: evenIndices });
-      }
-    }
+    seq.push({ phase: 3, phaseLabel: "징검다리로 흐름 기억하기", hiddenIndices: oddIndices });
+    seq.push({ phase: 3, phaseLabel: "징검다리로 흐름 기억하기", hiddenIndices: evenIndices });
+    seq.push({ phase: 3, phaseLabel: "징검다리로 흐름 기억하기", hiddenIndices: oddIndices });
+    seq.push({ phase: 3, phaseLabel: "징검다리로 흐름 기억하기", hiddenIndices: evenIndices });
     
-    // Step 4: 절반 가리기 (짝수 인덱스 전체 가리기 2번 반복)
-    if (evenIndices.length > 0) {
-      for (let r = 0; r < 2; r++) {
-        seq.push({ phase: 4, phaseLabel: "절반 가리기 패턴 훈련", hiddenIndices: evenIndices });
-      }
-    }
+    // Step 4: 절반 가리기 (2회 고정: 후반부-전반부)
+    const mid = Math.floor(K / 2);
+    const firstHalf = Array.from({ length: mid }, (_, k) => k);
+    const secondHalf = Array.from({ length: K - mid }, (_, k) => mid + k);
     
-    // Step 5: 전체 가리기 (3번 반복)
+    seq.push({ phase: 4, phaseLabel: "절반 가리기 패턴 훈련", hiddenIndices: secondHalf }); // 후반부 가리기
+    seq.push({ phase: 4, phaseLabel: "절반 가리기 패턴 훈련", hiddenIndices: firstHalf });  // 전반부 가리기
+    
+    // Step 5: 전체 가리기/보여주기 (5회 고정: 표-가-표-가-표)
     const all = Array.from({ length: K }, (_, k) => k);
-    for (let r = 0; r < 3; r++) {
-      seq.push({ phase: 5, phaseLabel: "전체 말씀 온전히 고백하기", hiddenIndices: all });
-    }
+    seq.push({ phase: 5, phaseLabel: "전체 말씀 온전히 고백하기", hiddenIndices: [] });
+    seq.push({ phase: 5, phaseLabel: "전체 말씀 온전히 고백하기", hiddenIndices: all });
+    seq.push({ phase: 5, phaseLabel: "전체 말씀 온전히 고백하기", hiddenIndices: [] });
+    seq.push({ phase: 5, phaseLabel: "전체 말씀 온전히 고백하기", hiddenIndices: all });
+    seq.push({ phase: 5, phaseLabel: "전체 말씀 온전히 고백하기", hiddenIndices: [] });
 
     return seq;
   }, [K]);
