@@ -111,6 +111,8 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
   const currentStep = steps[stepIndex] || steps[steps.length - 1];
   const isLastStep = stepIndex >= steps.length - 1;
   const totalProgress = isLastStep ? 100 : Math.round(((intervalSeconds - timeLeft) / intervalSeconds) * 100);
+  const currentPhaseStepsCount = steps.filter(s => s.phase === currentStep.phase).length;
+  const currentSegmentIndex = stepIndex - steps.findIndex(s => s.phase === currentStep.phase);
 
   // 3. Effect Hooks
   useEffect(() => {
@@ -369,11 +371,28 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
                 </div>
               </div>
 
-              <div className="h-1.5 w-full bg-stone-100 dark:bg-stone-800 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-gradient-to-r from-sky-400 via-amber-400 to-emerald-400 transition-all duration-300"
-                  style={{ width: `${totalProgress}%` }}
-                />
+              <div className="flex w-full gap-0.5 h-1.5 px-0.5">
+                {Array.from({ length: currentPhaseStepsCount }).map((_, idx) => {
+                  let width = "0%";
+                  let fillClass = "bg-sky-400 dark:bg-sky-500";
+                  
+                  if (idx < currentSegmentIndex) {
+                    width = "100%";
+                  } else if (idx === currentSegmentIndex) {
+                    width = `${totalProgress}%`;
+                  } else {
+                    fillClass = "bg-transparent";
+                  }
+
+                  return (
+                    <div key={idx} className="flex-1 bg-stone-200 dark:bg-stone-700 rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full transition-all duration-300 ${fillClass}`}
+                        style={{ width }}
+                      />
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
