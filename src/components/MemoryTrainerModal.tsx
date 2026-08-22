@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import confetti from 'canvas-confetti';
-import { X, BrainCircuit, Sparkles, Timer, RotateCcw, Mic, CheckCircle2, XCircle, Rocket, Play, Pause } from 'lucide-react';
+import { X, BrainCircuit, Sparkles, Timer, RotateCcw, Mic, CheckCircle2, XCircle, Rocket, Play, Pause, Volume2, Square } from 'lucide-react';
 import { OneVerse } from '@/lib/storage';
 import { calculateSimilarity } from '@/lib/utils';
 
@@ -59,8 +59,46 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
   const [testResult, setTestResult] = useState<'none' | 'success' | 'fail'>('none');
   const [speechResult, setSpeechResult] = useState('');
   
+  // TTS State
+  const [ttsVoices, setTtsVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [selectedVoiceIndex, setSelectedVoiceIndex] = useState<number>(0);
+  const [isPlayingTTS, setIsPlayingTTS] = useState(false);
+  
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const recognitionRef = useRef<any>(null);
+
+  // 1.5 TTS Voices Load Effect
+  useEffect(() => {
+    const loadVoices = () => {
+      const allVoices = window.speechSynthesis.getVoices();
+      const koVoices = allVoices.filter(v => v.lang.includes('ko'));
+      setTtsVoices(koVoices);
+    };
+
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+
+    return () => {
+      window.speechSynthesis.cancel();
+    };
+  }, []);
+
+  const toggleTTS = () => {
+    if (isPlayingTTS) {
+      window.speechSynthesis.cancel();
+      setIsPlayingTTS(false);
+    } else {
+      if (ttsVoices.length > 0) {
+        const utterance = new SpeechSynthesisUtterance(displayString);
+        utterance.voice = ttsVoices[selectedVoiceIndex];
+        utterance.lang = 'ko-KR';
+        utterance.onend = () => setIsPlayingTTS(false);
+        utterance.onerror = () => setIsPlayingTTS(false);
+        window.speechSynthesis.speak(utterance);
+        setIsPlayingTTS(true);
+      }
+    }
+  };
 
   // 2. 스텝 시퀀스 생성
   const steps: TrainerStep[] = useMemo(() => {
@@ -188,6 +226,8 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
   };
 
   const handleStartTraining = () => {
+    window.speechSynthesis.cancel();
+    setIsPlayingTTS(false);
     setStepIndex(0);
     setTimeLeft(intervalSeconds);
     setStepState('training');
@@ -195,6 +235,8 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
   };
 
   const handleRestart = () => {
+    window.speechSynthesis.cancel();
+    setIsPlayingTTS(false);
     setStepState('intro');
     setStepIndex(0);
     setTimeLeft(intervalSeconds);
@@ -281,6 +323,39 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
                 {displayString}
               </p>
             </div>
+
+            {/* TTS Controls */}
+            {ttsVoices.length > 0 && (
+              <div className="flex items-center justify-between bg-stone-100 dark:bg-stone-800 p-3 rounded-xl gap-2">
+                <div className="flex-1 overflow-hidden bg-white dark:bg-stone-900 rounded-lg border border-stone-200 dark:border-stone-700 px-3 py-2 flex items-center">
+                  <select
+                    value={selectedVoiceIndex}
+                    onChange={(e) => setSelectedVoiceIndex(Number(e.target.value))}
+                    className="bg-transparent text-xs sm:text-sm font-semibold text-stone-700 dark:text-stone-300 outline-none w-full appearance-none"
+                  >
+                    {ttsVoices.map((voice, idx) => (
+                      <option key={voice.name} value={idx}>
+                        {voice.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <button
+                  onClick={toggleTTS}
+                  className={`flex items-center gap-1.5 px-4 py-2.5 rounded-lg font-bold text-xs sm:text-sm transition-colors flex-shrink-0 shadow-sm ${
+                    isPlayingTTS
+                      ? "bg-stone-200 hover:bg-stone-300 text-stone-700 dark:bg-stone-700 dark:hover:bg-stone-600 dark:text-stone-300"
+                      : "bg-sky-500 hover:bg-sky-600 text-white"
+                  }`}
+                >
+                  {isPlayingTTS ? (
+                    <><Square size={16} fill="currentColor" /> 정지</>
+                  ) : (
+                    <><Volume2 size={16} /> 낭독 듣기</>
+                  )}
+                </button>
+              </div>
+            )}
 
             <div className="flex flex-col gap-3">
               <p className="text-sm font-bold text-stone-600 dark:text-stone-400 text-center">
