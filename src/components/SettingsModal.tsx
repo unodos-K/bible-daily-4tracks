@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { Moon, Sun, Monitor, Minus, Plus, X } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Moon, Sun, Monitor, Minus, Plus, X, RotateCcw, AlertCircle } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
+import { startNewReading } from "@/lib/storage";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -11,6 +12,15 @@ interface SettingsModalProps {
 
 export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const { theme, setTheme, fontSize, setFontSize } = useSettings();
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+
+  const executeReset = async () => {
+    const dateObj = new Date();
+    const todayStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+    await startNewReading(todayStr);
+    setIsResetModalOpen(false);
+    window.location.href = "/";
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -113,7 +123,51 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           </div>
         </div>
 
+        <div className="w-full h-px bg-stone-100 dark:bg-stone-800"></div>
+
+        {/* Danger Zone */}
+        <div className="flex flex-col gap-4">
+          <label className="text-sm font-semibold text-red-500 flex items-center gap-1">
+            <AlertCircle size={16} /> Danger Zone
+          </label>
+          <button
+            onClick={() => setIsResetModalOpen(true)}
+            className="flex items-center justify-center gap-2 w-full py-4 bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/40 text-red-600 dark:text-red-400 font-bold rounded-xl transition-colors border border-red-100 dark:border-red-900/30"
+          >
+            <RotateCcw size={18} />
+            통독 기록 초기화 및 재설정
+          </button>
+        </div>
       </div>
+
+      {/* Reset Confirm Modal */}
+      {isResetModalOpen && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-white dark:bg-stone-900 rounded-2xl p-6 shadow-xl w-full max-w-sm flex flex-col items-center gap-4 animate-in zoom-in-95 border border-stone-200 dark:border-stone-800 relative">
+            <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 flex items-center justify-center mb-2">
+              <AlertCircle size={24} />
+            </div>
+            <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100 text-center">초기화 확인</h3>
+            <p className="text-stone-500 dark:text-stone-400 text-center leading-relaxed text-sm">
+              기존 읽기 데이터를 지우고<br />오늘부터 새로운 통독 일정을 시작하시겠습니까?
+            </p>
+            <div className="flex gap-3 w-full mt-2">
+              <button
+                onClick={() => setIsResetModalOpen(false)}
+                className="flex-1 py-3 rounded-xl font-bold bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
+              >
+                취소
+              </button>
+              <button
+                onClick={executeReset}
+                className="flex-1 py-3 rounded-xl font-bold bg-red-500 text-white hover:bg-red-600 transition-colors shadow-sm"
+              >
+                확인(초기화)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
