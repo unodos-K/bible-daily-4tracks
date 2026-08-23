@@ -730,7 +730,7 @@ export default function BibleViewerPage() {
             const icon = TRACK_ICONS[trackReading.track.type as keyof typeof TRACK_ICONS] || "📖";
             
             return (
-              <div key={trackReading.track.type} id={TRACK_ID_MAP[trackReading.track.type as keyof typeof TRACK_ID_MAP]} className="flex flex-col border-b border-stone-200 dark:border-stone-800/60 pb-10">
+              <div key={trackReading.track.type} id={TRACK_ID_MAP[trackReading.track.type as keyof typeof TRACK_ID_MAP]} className="flex flex-col border-b border-stone-200 dark:border-stone-800/60 pb-10 scroll-mt-24">
                 {/* 섹션 헤더 */}
                 <div 
                   className="sticky top-[52px] z-20 py-2 px-4 text-sm font-semibold bg-stone-900/90 backdrop-blur border-b border-stone-800"
@@ -744,12 +744,10 @@ export default function BibleViewerPage() {
                 <div className="pl-3 pr-14 sm:pl-6 sm:pr-8 py-6 sm:py-8 flex flex-col gap-6" style={{ fontSize: `${fontSize}px`, lineHeight: 1.8 }}>
                   {trackReading.chapters.map((chapterData) => (
                     <div key={`${chapterData.name}-${chapterData.chapter}`} className="flex flex-col">
-                      {/* 장 제목 (같은 범위 내에 여러 장이 있을 때 구분) */}
-                      {trackReading.chapters.length > 1 && (
-                        <h3 className="font-bold mb-4 px-2 text-stone-800 dark:text-stone-200 border-b border-stone-200 dark:border-stone-800 pb-2">
-                          {chapterData.name} {chapterData.chapter}{chapterData.chapterUnit || "장"}
-                        </h3>
-                      )}
+                      {/* 장 제목 */}
+                      <h3 className="font-bold mb-4 px-2 text-stone-800 dark:text-stone-200 border-b border-stone-200 dark:border-stone-800 pb-2">
+                        {chapterData.name} {chapterData.chapter}{chapterData.chapterUnit || (chapterData.name === "시편" ? "편" : "장")}
+                      </h3>
                       
                       {chapterData.verses.length === 0 ? (
                         <p className="text-stone-400 italic px-2">본문 데이터가 없습니다.</p>
