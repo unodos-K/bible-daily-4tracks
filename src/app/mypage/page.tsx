@@ -162,6 +162,21 @@ export default function MyPage() {
     }
   };
 
+  const handleCopyNickname = async () => {
+    if (!authUser) {
+      alert("로그인이 필요합니다.");
+      return;
+    }
+    const nickname = (authUser.nickname || authUser.name).split('#')[0];
+    const textToCopy = `One Verse에서 저와 함께 말씀 통독을 해요! 제 닉네임은 ${nickname}입니다. (친구 탭에서 검색해 주세요!)`;
+    try {
+      await navigator.clipboard.writeText(textToCopy);
+      alert("클립보드에 복사되었습니다!");
+    } catch (e) {
+      alert("복사에 실패했습니다.");
+    }
+  };
+
   if (!isClient || !settings || !settings.hasStarted) {
     return <div className="min-h-[calc(100vh-52px)] bg-stone-50 dark:bg-stone-950 flex justify-center items-center">Loading...</div>;
   }
@@ -490,6 +505,12 @@ export default function MyPage() {
                 className="flex items-center justify-center gap-2 bg-[#FEE500] hover:bg-[#FDD800] text-black font-bold py-3.5 rounded-xl transition-colors shadow-sm w-full"
               >
                 친구에게 One Verse 추천하기
+              </button>
+              <button
+                onClick={handleCopyNickname}
+                className="flex items-center justify-center gap-2 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 font-bold py-3.5 rounded-xl transition-colors shadow-sm w-full"
+              >
+                내 닉네임 복사하기
               </button>
             </div>
           </div>

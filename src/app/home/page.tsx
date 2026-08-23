@@ -74,11 +74,22 @@ export default function HomePage() {
         
         {/* 환영 메시지 (고정 헤더) */}
         <header className="sticky top-0 z-40 bg-stone-50/95 dark:bg-stone-950/95 backdrop-blur-md pt-6 pb-4 px-6 border-b border-stone-200/50 dark:border-stone-800/50 mb-6">
-          <h1 className="text-2xl font-black text-stone-800 dark:text-stone-100 flex flex-col gap-1">
-            <span className="text-sm font-bold text-stone-500 dark:text-stone-400">4Tracks 성경 통독</span>
-            <span>
-              {authUser ? <><span className="text-amber-600 dark:text-amber-500">{authUser.nickname || authUser.name}</span>님 환영합니다 ✨</> : '나의 통독 대시보드 ✨'}
-            </span>
+          <h1 className="flex flex-col gap-1.5 w-full">
+            {authUser ? (
+              <>
+                <div className="flex items-center text-lg font-bold text-amber-600 dark:text-amber-500">
+                  <span className="truncate max-w-[80%] inline-block">{(authUser.nickname || authUser.name).split('#')[0]}</span>
+                  <span>님,</span>
+                </div>
+                <div className="text-xl font-black text-stone-800 dark:text-stone-100 break-keep">
+                  오늘도 말씀을 마음에 새겨볼까요? ✨
+                </div>
+              </>
+            ) : (
+              <div className="text-xl font-black text-stone-800 dark:text-stone-100">
+                나의 통독 대시보드 ✨
+              </div>
+            )}
           </h1>
         </header>
 

@@ -178,7 +178,12 @@ export default function FriendsPage() {
                             )}
                           </div>
                           <div>
-                            <div className="font-bold text-stone-800 dark:text-stone-100 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">{friend.nickname || friend.name}</div>
+                            <div className="font-bold text-stone-800 dark:text-stone-100 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors flex items-center gap-1">
+                              {(friend.nickname || friend.name).split('#')[0]}
+                              {friend.nickname?.includes('#') && (
+                                <span className="text-xs font-normal text-stone-400">#{friend.nickname.split('#')[1]}</span>
+                              )}
+                            </div>
                           </div>
                         </Link>
                         
@@ -229,7 +234,12 @@ export default function FriendsPage() {
                           <div className="w-10 h-10 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden">
                             {req.profile.avatar_url && <img src={req.profile.avatar_url} alt={req.profile.name} className="w-full h-full object-cover" />}
                           </div>
-                          <div className="font-bold text-stone-800 dark:text-stone-100">{req.profile.nickname || req.profile.name}</div>
+                          <div className="font-bold text-stone-800 dark:text-stone-100 flex items-center gap-1">
+                            {(req.profile.nickname || req.profile.name).split('#')[0]}
+                            {req.profile.nickname?.includes('#') && (
+                              <span className="text-xs font-normal text-stone-400">#{req.profile.nickname.split('#')[1]}</span>
+                            )}
+                          </div>
                         </div>
                         <div className="flex items-center gap-2">
                           <button onClick={() => handleRespondRequest(req.id, true)} className="p-2 bg-emerald-100 text-emerald-600 hover:bg-emerald-200 rounded-full">
@@ -280,7 +290,12 @@ export default function FriendsPage() {
                             <div className="w-10 h-10 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden">
                               {user.avatar_url && <img src={user.avatar_url} alt={user.name} className="w-full h-full object-cover" />}
                             </div>
-                            <div className="font-bold text-stone-800 dark:text-stone-100">{user.nickname || user.name}</div>
+                            <div className="font-bold text-stone-800 dark:text-stone-100 flex items-center gap-1">
+                              {(user.nickname || user.name).split('#')[0]}
+                              {user.nickname?.includes('#') && (
+                                <span className="text-xs font-normal text-stone-400">#{user.nickname.split('#')[1]}</span>
+                              )}
+                            </div>
                           </div>
                           
                           {isAlreadyFriend ? (

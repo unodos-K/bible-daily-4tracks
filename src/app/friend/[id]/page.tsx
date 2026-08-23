@@ -107,7 +107,7 @@ export default function FriendProfilePage() {
             <ChevronLeft size={24} />
           </button>
           <h1 className="text-lg font-bold text-stone-800 dark:text-stone-100 ml-2">
-            {profile.nickname || profile.name || '순례자'}님의 묵상 기록
+            친구 묵상 기록
           </h1>
         </div>
       </header>
@@ -123,7 +123,12 @@ export default function FriendProfilePage() {
               <span>👤</span>
             )}
           </div>
-          <h2 className="text-2xl font-bold text-stone-800 dark:text-stone-100">{profile.nickname || profile.name || '이름 없는 순례자'}</h2>
+          <h2 className="text-2xl font-bold text-stone-800 dark:text-stone-100 flex items-center gap-1">
+            {(profile.nickname || profile.name || '이름 없는 순례자').split('#')[0]}
+            {profile.nickname?.includes('#') && (
+              <span className="text-xs font-normal text-stone-400">#{profile.nickname.split('#')[1]}</span>
+            )}
+          </h2>
           {profile.nickname && (
             <p className="text-stone-400 dark:text-stone-500 text-xs mt-1">카카오 연동 이름: {profile.name}</p>
           )}
