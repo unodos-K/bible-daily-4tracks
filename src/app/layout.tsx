@@ -45,8 +45,8 @@ export default function RootLayout({
         <KakaoInit />
         <NicknameGuard />
         <SettingsProvider>
-          <div className="flex-1 w-full max-w-2xl bg-white dark:bg-stone-900 shadow-xl overflow-hidden flex flex-col relative border-x border-stone-200 dark:border-stone-800 pb-[env(safe-area-inset-bottom)] mb-[70px]">
-            <main className="flex-1 overflow-y-auto">
+          <div className="flex-1 w-full max-w-2xl bg-white dark:bg-stone-900 shadow-xl flex flex-col relative border-x border-stone-200 dark:border-stone-800 pb-20 pt-[env(safe-area-inset-top)] min-h-screen">
+            <main className="flex-1 w-full">
               {children}
             </main>
             <BottomNavigation />

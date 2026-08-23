@@ -99,8 +99,8 @@ export default function HomePage() {
   const memorizedCount = recordsArray.filter(r => r.oneVerse?.isMemorized).length;
 
   return (
-    <div className="w-full min-h-full flex flex-col items-center bg-stone-100/50 dark:bg-stone-950 p-4 sm:p-6 pb-20">
-      <div className="w-full max-w-xl flex flex-col gap-6">
+    <div className="w-full min-h-full flex flex-col items-center bg-stone-100/50 dark:bg-stone-950 p-6 pb-28">
+      <div className="w-full max-w-xl flex flex-col gap-8">
         
         {/* 환영 메시지 */}
         <div className="pt-4">

@@ -191,7 +191,7 @@ export default function BibleViewerPage() {
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
-      const headerOffset = 104; // 상단 고정 헤더 높이만큼 오프셋 보정
+      const headerOffset = 90; // 상단 고정 헤더 높이만큼 오프셋 보정
       const elementPosition = element.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
       window.scrollTo({
@@ -604,10 +604,10 @@ export default function BibleViewerPage() {
         </button>
       </div>
 
-      <div className="w-full max-w-2xl bg-[#fcfbf9] dark:bg-[#18181b] shadow-2xl border-x border-stone-200/80 dark:border-stone-800 flex flex-col relative min-h-[calc(100vh-52px)]">
+      <div className="w-full max-w-2xl bg-[#fcfbf9] dark:bg-[#18181b] shadow-2xl border-x border-stone-200/80 dark:border-stone-800 flex flex-col relative min-h-full pb-20">
         
         {/* 상단 네비게이터 */}
-        <header className="sticky top-[52px] z-30 bg-[#fcfbf9]/95 dark:bg-[#18181b]/95 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 shadow-sm flex flex-col px-3 py-2 gap-2">
+        <header className="sticky top-0 z-30 bg-[#fcfbf9]/95 dark:bg-[#18181b]/95 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 shadow-sm flex flex-col px-3 py-2 gap-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1 sm:gap-2">
               <button
@@ -750,7 +750,7 @@ export default function BibleViewerPage() {
               <div key={trackReading.track.type} id={TRACK_ID_MAP[trackReading.track.type as keyof typeof TRACK_ID_MAP]} className="flex flex-col border-b border-stone-200 dark:border-stone-800/60 pb-10">
                 {/* 섹션 헤더 */}
                 <div 
-                  className="sticky top-[104px] z-20 py-2 px-4 text-sm font-semibold bg-stone-900/90 backdrop-blur border-b border-stone-800"
+                  className="sticky top-[52px] z-20 py-2 px-4 text-sm font-semibold bg-stone-900/90 backdrop-blur border-b border-stone-800"
                 >
                   <h2 className="flex items-center gap-2" style={{ color: trackInfo.accentColor }}>
                     <span>{icon}</span> {trackInfo.title.split(" ")[0]} <span className="text-stone-500 font-normal mx-0.5">·</span> <span className="text-stone-300">{trackReading.track.range}</span>

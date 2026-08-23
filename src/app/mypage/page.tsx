@@ -218,8 +218,8 @@ export default function MyPage() {
   };
 
   return (
-    <div className="w-full min-h-full flex flex-col items-center bg-stone-100/50 dark:bg-stone-950 p-4 sm:p-8 pb-32">
-      <div className="w-full max-w-2xl flex flex-col gap-6">
+    <div className="w-full min-h-full flex flex-col items-center bg-stone-100/50 dark:bg-stone-950 p-6 pb-28">
+      <div className="w-full max-w-2xl flex flex-col gap-8">
         
         {/* 헤더 및 프로필 */}
         <div className="flex items-center justify-between w-full pb-2">
