@@ -604,10 +604,10 @@ export default function BibleViewerPage() {
         </button>
       </div>
 
-      <div className="w-full max-w-2xl bg-[#fcfbf9] dark:bg-[#18181b] shadow-2xl border-x border-stone-200/80 dark:border-stone-800 flex flex-col relative min-h-full pb-20">
+      <div className="w-full max-w-2xl bg-transparent shadow-2xl flex flex-col relative min-h-full">
         
         {/* 상단 네비게이터 */}
-        <header className="sticky top-0 z-30 bg-[#fcfbf9]/95 dark:bg-[#18181b]/95 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 shadow-sm flex flex-col px-3 py-2 gap-2">
+        <header className="sticky top-0 z-30 bg-stone-50/95 dark:bg-stone-950/95 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 shadow-sm flex flex-col px-3 py-2 gap-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1 sm:gap-2">
               <button

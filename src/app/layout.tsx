@@ -26,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko">
+    <html lang="ko" className="bg-stone-50 dark:bg-stone-950 overscroll-none">
       <head>
         {/* Mobile Web App Optimizations */}
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
@@ -41,12 +41,12 @@ export default function RootLayout({
           strategy="beforeInteractive"
         />
       </head>
-      <body className="min-h-screen-dynamic bg-neutral-100 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 flex flex-col items-center selection:bg-amber-200 dark:selection:bg-amber-900">
+      <body className="bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 flex flex-col items-center selection:bg-amber-200 dark:selection:bg-amber-900 h-[100dvh] overflow-hidden overscroll-none">
         <KakaoInit />
         <NicknameGuard />
         <SettingsProvider>
-          <div className="flex-1 w-full max-w-2xl bg-white dark:bg-stone-900 shadow-xl flex flex-col relative border-x border-stone-200 dark:border-stone-800 pb-20 pt-[env(safe-area-inset-top)] min-h-screen">
-            <main className="flex-1 w-full">
+          <div className="w-full max-w-2xl h-[100dvh] bg-stone-50 dark:bg-stone-950 shadow-xl flex flex-col relative border-x border-stone-200 dark:border-stone-800 overflow-hidden pt-[env(safe-area-inset-top)]">
+            <main className="flex-1 w-full overflow-y-auto overscroll-y-contain pb-24">
               {children}
             </main>
             <BottomNavigation />
