@@ -11,7 +11,8 @@ import {
   getFriendsList,
   FriendFeedItem,
   getFriendRecords,
-  toggleLike
+  toggleLike,
+  getSentRequests
 } from "@/lib/social";
 
 interface FriendManagementModalProps {
@@ -24,6 +25,7 @@ export default function FriendManagementModal({ isOpen, onClose }: FriendManagem
   
   const [friends, setFriends] = useState<FriendProfile[]>([]);
   const [requests, setRequests] = useState<{ id: string; profile: FriendProfile }[]>([]);
+  const [sentRequests, setSentRequests] = useState<string[]>([]);
   
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<FriendProfile[]>([]);
@@ -53,6 +55,14 @@ export default function FriendManagementModal({ isOpen, onClose }: FriendManagem
       const rList = await getPendingRequests();
       setRequests(rList);
       
+      // Fetch sent requests
+      const sentList = await getSentRequests();
+      setSentRequests(sentList);
+
+      // Fetch initial directory
+      const directory = await searchUsersByNickname("");
+      setSearchResults(directory);
+
       // Fetch feed for friends
       const feeds: Record<string, FriendFeedItem[]> = {};
       for (const friend of fList) {
@@ -78,7 +88,7 @@ export default function FriendManagementModal({ isOpen, onClose }: FriendManagem
   const handleSendRequest = async (friendId: string) => {
     const success = await sendFriendRequest(friendId);
     if (success) {
-      alert("친구 요청을 보냈습니다.");
+      setSentRequests(prev => [...prev, friendId]);
     } else {
       alert("친구 요청에 실패했거나 이미 요청을 보낸 사용자입니다.");
     }
@@ -279,6 +289,8 @@ export default function FriendManagementModal({ isOpen, onClose }: FriendManagem
                     )}
                     {searchResults.map(user => {
                       const isAlreadyFriend = friends.some(f => f.id === user.id);
+                      const isPendingRequest = sentRequests.includes(user.id);
+                      
                       return (
                         <div key={user.id} className="bg-white dark:bg-stone-900 p-4 rounded-xl shadow-sm border border-stone-100 dark:border-stone-800 flex items-center justify-between">
                           <div className="flex items-center gap-3">
@@ -287,12 +299,19 @@ export default function FriendManagementModal({ isOpen, onClose }: FriendManagem
                             </div>
                             <div className="font-bold text-stone-800 dark:text-stone-100">{user.nickname || user.name}</div>
                           </div>
-                          {!isAlreadyFriend ? (
-                            <button onClick={() => handleSendRequest(user.id)} className="px-3 py-1.5 bg-sky-100 text-sky-700 hover:bg-sky-200 font-semibold text-sm rounded-lg flex items-center gap-1">
-                              <UserPlus size={16} /> 요청
+                          
+                          {isAlreadyFriend ? (
+                            <span className="px-3 py-1.5 flex items-center gap-1 text-sm font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg">
+                              <Check size={16} /> 친구 완료
+                            </span>
+                          ) : isPendingRequest ? (
+                            <button disabled className="px-3 py-1.5 bg-stone-100 dark:bg-stone-800 text-stone-400 font-semibold text-sm rounded-lg flex items-center gap-1 cursor-not-allowed">
+                              요청 대기 중
                             </button>
                           ) : (
-                            <span className="text-sm font-semibold text-stone-400">친구</span>
+                            <button onClick={() => handleSendRequest(user.id)} className="px-3 py-1.5 bg-sky-100 text-sky-700 hover:bg-sky-200 font-semibold text-sm rounded-lg flex items-center gap-1">
+                              <UserPlus size={16} /> 친구 추가
+                            </button>
                           )}
                         </div>
                       )

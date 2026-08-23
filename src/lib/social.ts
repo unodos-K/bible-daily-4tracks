@@ -22,23 +22,44 @@ export interface FriendFeedItem {
   is_liked_by_me: boolean;
 }
 
-// 1. 친구 검색 (닉네임 기준)
+// 1. 친구 검색 (닉네임 기준) 또는 전체 디렉토리 조회
 export async function searchUsersByNickname(nickname: string): Promise<FriendProfile[]> {
   const userId = await getUserId();
-  if (!userId || !nickname.trim()) return [];
+  if (!userId) return [];
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('profiles')
     .select('id, name, avatar_url, nickname')
-    .ilike('nickname', `%${nickname.trim()}%`)
     .neq('id', userId)
-    .limit(10);
+    .order('nickname', { ascending: true })
+    .limit(100);
+
+  if (nickname.trim()) {
+    query = query.ilike('nickname', `%${nickname.trim()}%`);
+  }
+
+  const { data, error } = await query;
 
   if (error || !data) {
     console.error("searchUsersByNickname error:", error);
     return [];
   }
   return data as FriendProfile[];
+}
+
+// 1-1. 내가 보낸 친구 요청 목록 (friend_id 리스트 반환)
+export async function getSentRequests(): Promise<string[]> {
+  const userId = await getUserId();
+  if (!userId) return [];
+
+  const { data, error } = await supabase
+    .from('friendships')
+    .select('friend_id')
+    .eq('user_id', userId)
+    .eq('status', 'pending');
+
+  if (error || !data) return [];
+  return data.map(r => r.friend_id);
 }
 
 // 2. 친구 요청 보내기
