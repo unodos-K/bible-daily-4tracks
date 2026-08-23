@@ -548,9 +548,9 @@ export default function MyPage() {
 
         {/* 상세 팝업 모달 (가로 스와이프 캐러셀 지원) */}
         {selectedRecordStr && !isMemoryModalOpen && createPortal(
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in" onClick={() => setSelectedRecordStr(null)}>
+          <div className="fixed inset-0 w-full h-full z-[9999] bg-stone-50 dark:bg-stone-950 animate-in fade-in" onClick={() => setSelectedRecordStr(null)}>
             <div 
-              className="w-full max-w-xl md:max-w-2xl mx-auto bg-white dark:bg-stone-900 rounded-3xl shadow-2xl overflow-y-auto flex flex-col animate-in zoom-in-95 h-[50vh]"
+              className="max-w-md mx-auto h-full flex flex-col p-5 pt-[calc(1rem+env(safe-area-inset-top))] pb-[calc(1rem+env(safe-area-inset-bottom))] bg-transparent relative"
               onClick={e => e.stopPropagation()}
             >
               {(() => {
@@ -579,14 +579,14 @@ export default function MyPage() {
                 }
 
                 return (
-                  <div className="flex flex-col h-full relative">
+                  <div className="flex flex-col h-full w-full relative">
                     {/* 모달 헤더 */}
-                    <div className="flex justify-between items-center p-5 sm:p-6 pb-4 border-b border-stone-100 dark:border-stone-800 z-10 bg-white dark:bg-stone-900">
+                    <div className="flex justify-between items-start px-2 py-4 shrink-0 bg-transparent">
                       <div className="flex flex-col">
                         <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100 flex items-center gap-2">
                           {y}년 {parseInt(m)}월 {parseInt(d)}일
                           {dayRecords[currentSlideIndex] && (
-                            <div className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+                            <div className={`px-2 py-1 rounded-full text-[10px] font-bold ${
                               dayRecords[currentSlideIndex].oneVerse?.isMemorized
                                 ? 'bg-amber-500 text-white'
                                 : 'bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-300'
@@ -603,28 +603,28 @@ export default function MyPage() {
                       </div>
                       <button 
                         onClick={() => setSelectedRecordStr(null)} 
-                        className="p-2 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 rounded-full text-stone-500 transition-colors self-start -mt-1 -mr-1"
+                        className="p-2 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 rounded-full text-stone-500 transition-colors self-start shrink-0 ml-2"
                       >
                         <X size={20}/>
                       </button>
                     </div>
 
                     {/* 캐러셀 컨테이너 */}
-                    <div className="relative w-full flex-1 min-h-0 flex flex-col">
+                    <div className="relative w-full flex-1 min-h-0 flex flex-col justify-center">
                       {/* 좌우 이동 버튼 (복수 개일 때만 노출) */}
                       {dayRecords.length > 1 && (
                         <React.Fragment>
                           <button
                             onClick={() => scrollToSlide((currentSlideIndex - 1 + dayRecords.length) % dayRecords.length)}
-                            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center bg-white/90 dark:bg-stone-800/90 hover:bg-stone-100 dark:hover:bg-stone-700 rounded-full shadow-md text-stone-700 dark:text-stone-300 backdrop-blur transition-all"
+                            className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 flex items-center justify-center bg-white/90 dark:bg-stone-800/90 hover:bg-stone-100 dark:hover:bg-stone-700 rounded-full shadow-md text-stone-700 dark:text-stone-300 backdrop-blur transition-all"
                           >
-                            <ChevronLeft size={28} />
+                            <ChevronLeft size={24} />
                           </button>
                           <button
                             onClick={() => scrollToSlide((currentSlideIndex + 1) % dayRecords.length)}
-                            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center bg-white/90 dark:bg-stone-800/90 hover:bg-stone-100 dark:hover:bg-stone-700 rounded-full shadow-md text-stone-700 dark:text-stone-300 backdrop-blur transition-all"
+                            className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 flex items-center justify-center bg-white/90 dark:bg-stone-800/90 hover:bg-stone-100 dark:hover:bg-stone-700 rounded-full shadow-md text-stone-700 dark:text-stone-300 backdrop-blur transition-all"
                           >
-                            <ChevronRight size={28} />
+                            <ChevronRight size={24} />
                           </button>
                         </React.Fragment>
                       )}
@@ -633,7 +633,7 @@ export default function MyPage() {
                       <div 
                         ref={carouselRef}
                         onScroll={handleCarouselScroll}
-                        className="flex w-full overflow-x-auto snap-x snap-mandatory scroll-smooth scrollbar-hide pb-2"
+                        className="flex w-full h-full overflow-x-auto snap-x snap-mandatory scroll-smooth scrollbar-hide items-center"
                       >
                         {dayRecords.map((record) => {
                           const verse = record.oneVerse;
@@ -646,7 +646,7 @@ export default function MyPage() {
                           const formattedRef = verse.book === "시편" ? `${verse.book} ${verse.chapter}편 ${verse.verse}절` : `${verse.book} ${verse.chapter}장 ${verse.verse}절`;
 
                           return (
-                            <div key={record.dayIndex} className="w-full min-w-full max-w-full shrink-0 flex-shrink-0 box-border snap-center px-12 sm:px-20 py-4 sm:py-6 flex flex-col gap-4">
+                            <div key={record.dayIndex} className="w-full min-w-full max-w-full shrink-0 flex-shrink-0 box-border snap-center px-12 py-4 flex flex-col justify-center max-h-full">
                               
                               {dayRecords.length === 1 && (
                                 <div className="font-bold text-stone-700 dark:text-stone-300 text-sm mb-1">
@@ -654,12 +654,12 @@ export default function MyPage() {
                                 </div>
                               )}
 
-                              <div className={`p-6 sm:p-8 rounded-2xl border flex flex-col gap-6 shadow-sm h-full ${
+                              <div className={`p-6 rounded-3xl border flex flex-col gap-6 shadow-sm ${
                                 isRecordMem
                                   ? 'bg-amber-50/80 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800/50'
-                                  : 'bg-stone-50/80 dark:bg-stone-800/80 border-stone-200 dark:border-stone-700'
+                                  : 'bg-white dark:bg-stone-800/80 border-stone-200 dark:border-stone-700'
                               }`}>
-                                <div className="w-full flex-1 overflow-y-auto pr-2 scrollbar-hide">
+                                <div className="w-full flex-1 overflow-y-auto pr-2 scrollbar-hide max-h-[50vh]">
                                   <blockquote className="w-full break-words break-keep whitespace-normal text-lg sm:text-xl md:text-2xl leading-relaxed sm:leading-loose text-stone-800 dark:text-stone-100 font-medium italic">
                                     {displayTxt}
                                   </blockquote>
@@ -676,7 +676,7 @@ export default function MyPage() {
 
                     {/* 하단 페이지네이션 인디케이터 */}
                     {dayRecords.length > 1 && (
-                      <div className="flex justify-center gap-2 pb-4 pt-2 bg-white dark:bg-stone-900">
+                      <div className="flex justify-center gap-2 pb-4 pt-2 bg-transparent shrink-0">
                         {dayRecords.map((_, idx) => (
                           <button
                             key={idx}
@@ -684,7 +684,7 @@ export default function MyPage() {
                             className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
                               idx === currentSlideIndex 
                                 ? 'bg-amber-500 w-6' 
-                                : 'bg-stone-200 dark:bg-stone-700 hover:bg-stone-300 dark:hover:bg-stone-600'
+                                : 'bg-stone-300 dark:bg-stone-700 hover:bg-stone-400 dark:hover:bg-stone-600'
                             }`}
                             aria-label={`${idx + 1}번째 슬라이드로 이동`}
                           />
@@ -694,8 +694,8 @@ export default function MyPage() {
 
                     {/* 고정 하단 액션 버튼 */}
                     {dayRecords.length > 0 && dayRecords[currentSlideIndex] && (
-                      <div className="p-5 sm:p-6 bg-white dark:bg-stone-900 border-t border-stone-100 dark:border-stone-800">
-                        <div className="flex flex-row gap-2 w-full">
+                      <div className="pt-2 shrink-0 bg-transparent">
+                        <div className="flex flex-row gap-3 w-full">
                           <button
                             onClick={() => {
                               setSelectedDayIndexForMemory(dayRecords[currentSlideIndex].dayIndex);
