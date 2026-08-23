@@ -85,3 +85,9 @@ button, a, [role="button"], .interactive {
     }
   }
 }
+
+/* Disable main scroll when modal is open */
+body.modal-open main {
+  overflow: hidden !important;
+  touch-action: none;
+}

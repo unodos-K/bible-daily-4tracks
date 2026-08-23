@@ -319,6 +319,19 @@ export default function BibleViewerPage() {
     }
   };
 
+  useEffect(() => {
+    const isAnyModalOpen = showConfirmModal || showSuccessModal || showWarningModal || isMemoryModalOpen || showDailyLimitModal || showAccessDeniedModal;
+    if (isAnyModalOpen) {
+      document.body.classList.add('modal-open');
+    } else {
+      document.body.classList.remove('modal-open');
+    }
+    return () => {
+      document.body.classList.remove('modal-open');
+    };
+  }, [showConfirmModal, showSuccessModal, showWarningModal, isMemoryModalOpen, showDailyLimitModal, showAccessDeniedModal]);
+
+
 
   if (!isClient) {
     return <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex justify-center items-center text-stone-500">Loading...</div>;
@@ -451,8 +464,8 @@ export default function BibleViewerPage() {
 
       {/* Confirm Modal (경우 2) */}
       {showConfirmModal && selectedVerse && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in md:p-4">
-          <div className="bg-white dark:bg-stone-900 rounded-none md:rounded-2xl px-6 shadow-xl w-full h-full md:h-auto md:max-h-[90vh] max-w-sm flex flex-col items-center justify-center gap-4 animate-in zoom-in-95 pt-[calc(1.5rem+env(safe-area-inset-top))] pb-[calc(1.5rem+env(safe-area-inset-bottom))] md:py-6 overflow-y-auto">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in md:p-4">
+          <div className="bg-white dark:bg-stone-900 rounded-none md:rounded-2xl px-6 shadow-xl w-full h-full md:h-auto md:max-h-[85vh] max-w-sm flex flex-col items-center justify-center gap-4 animate-in zoom-in-95 pt-[calc(2rem+env(safe-area-inset-top))] pb-[calc(6rem+env(safe-area-inset-bottom))] md:py-6 overflow-y-auto">
             <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 text-center mb-2 leading-relaxed">
               <span className="block">&apos;{formatReference(selectedVerse.book, selectedVerse.chapter, selectedVerse.verse)}&apos;을(를)</span>
               <span className="block">오늘의 One Verse로 선택하시겠습니까?</span>
@@ -482,9 +495,9 @@ export default function BibleViewerPage() {
 
       {/* Success Modal (경우 3) */}
       {showSuccessModal && confirmedVerse && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white dark:bg-stone-900 rounded-3xl p-6 md:p-8 shadow-2xl w-full max-w-md flex flex-col relative animate-in zoom-in-95 border border-stone-200 dark:border-stone-800 text-center">
-            <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/50 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in md:p-4">
+          <div className="bg-white dark:bg-stone-900 rounded-none md:rounded-3xl p-6 md:p-8 shadow-2xl w-full h-full md:h-auto md:max-h-[85vh] max-w-md flex flex-col relative animate-in zoom-in-95 border border-stone-200 dark:border-stone-800 text-center overflow-y-auto pt-[calc(2rem+env(safe-area-inset-top))] pb-[calc(6rem+env(safe-area-inset-bottom))] md:py-8">
+            <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/50 rounded-full flex items-center justify-center mx-auto mb-4 shrink-0">
               <CheckCircle2 size={40} className="text-emerald-500" />
             </div>
             <h3 className="text-2xl font-bold text-stone-800 dark:text-stone-100 mb-2">
