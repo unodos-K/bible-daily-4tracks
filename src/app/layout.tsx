@@ -5,6 +5,7 @@ import { SettingsProvider } from "@/contexts/SettingsContext";
 import KakaoInit from "@/components/KakaoInit";
 import NicknameGuard from "@/components/NicknameGuard";
 import Script from "next/script";
+import AuthProvider from "@/components/AuthProvider";
 
 export const metadata: Metadata = {
   title: "4Tracks",
@@ -47,12 +48,14 @@ export default function RootLayout({
         <KakaoInit />
         <NicknameGuard />
         <SettingsProvider>
-          <div className="w-full max-w-2xl h-[100dvh] bg-stone-50 dark:bg-stone-950 shadow-xl flex flex-col relative border-x border-stone-200 dark:border-stone-800 overflow-hidden pt-[env(safe-area-inset-top)]">
-            <main className="flex-1 w-full overflow-y-auto overscroll-y-contain pb-[calc(80px+env(safe-area-inset-bottom))] bg-stone-50 dark:bg-stone-950">
-              {children}
-            </main>
-            <BottomNavigation />
-          </div>
+          <AuthProvider>
+            <div className="w-full max-w-2xl h-[100dvh] bg-stone-50 dark:bg-stone-950 shadow-xl flex flex-col relative border-x border-stone-200 dark:border-stone-800 overflow-hidden pt-[env(safe-area-inset-top)]">
+              <main className="flex-1 w-full overflow-y-auto overscroll-y-contain pb-[calc(80px+env(safe-area-inset-bottom))] bg-stone-50 dark:bg-stone-950">
+                {children}
+              </main>
+              <BottomNavigation />
+            </div>
+          </AuthProvider>
         </SettingsProvider>
       </body>
     </html>

@@ -19,9 +19,9 @@ export default function AuthCallbackPage() {
 
       if (session) {
         // 성공적으로 세션 획득 시 메인 페이지로 이동 (또는 이전 페이지)
-        router.push('/');
+        router.push('/home');
       } else {
-        // 세션이 없으면 (예: 로그인 취소 등) 메인으로 이동
+        // 세션이 없으면 (예: 로그인 취소 등) 랜딩으로 이동
         router.push('/');
       }
     };
