@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import confetti from 'canvas-confetti';
-import { X, BrainCircuit, Sparkles, Timer, RotateCcw, Mic, CheckCircle2, XCircle, Rocket, Play, Pause, Volume2, Square, ChevronDown } from 'lucide-react';
+import { X, BrainCircuit, Sparkles, Timer, RotateCcw, Mic, CheckCircle2, XCircle, Rocket, Play, Pause, Volume2, Square, ChevronDown, Eye, EyeOff } from 'lucide-react';
 import { OneVerse } from '@/lib/storage';
 import { calculateSimilarity } from '@/lib/utils';
 
@@ -58,6 +58,7 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
   const [isListening, setIsListening] = useState(false);
   const [testResult, setTestResult] = useState<'none' | 'success' | 'fail'>('none');
   const [speechResult, setSpeechResult] = useState('');
+  const [showAnswer, setShowAnswer] = useState(false);
   
   // TTS State
   const [ttsVoices, setTtsVoices] = useState<SpeechSynthesisVoice[]>([]);
@@ -136,13 +137,9 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
     seq.push({ phase: 4, phaseLabel: "절반 가리기 패턴 훈련", hiddenIndices: secondHalf }); // 후반부 가리기
     seq.push({ phase: 4, phaseLabel: "절반 가리기 패턴 훈련", hiddenIndices: firstHalf });  // 전반부 가리기
     
-    // Step 5: 전체 가리기/보여주기 (5회 고정: 표-가-표-가-표)
+    // Step 5: 전체 가리기 (최종 실전 테스트)
     const all = Array.from({ length: K }, (_, k) => k);
-    seq.push({ phase: 5, phaseLabel: "전체 말씀 온전히 고백하기", hiddenIndices: [] });
-    seq.push({ phase: 5, phaseLabel: "전체 말씀 온전히 고백하기", hiddenIndices: all });
-    seq.push({ phase: 5, phaseLabel: "전체 말씀 온전히 고백하기", hiddenIndices: [] });
-    seq.push({ phase: 5, phaseLabel: "전체 말씀 온전히 고백하기", hiddenIndices: all });
-    seq.push({ phase: 5, phaseLabel: "전체 말씀 온전히 고백하기", hiddenIndices: [] });
+    seq.push({ phase: 5, phaseLabel: "전체 말씀 온전히 고백하기 (실전 테스트)", hiddenIndices: all });
 
     return seq;
   }, [K]);
@@ -244,6 +241,7 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
     setHasCompleted(false);
     setTestResult('none');
     setSpeechResult('');
+    setShowAnswer(false);
   };
 
   const jumpToPhase = (targetPhase: number) => {
@@ -523,7 +521,7 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
 
               <p className="text-xl md:text-2xl font-semibold leading-loose break-keep flex flex-wrap justify-center gap-x-2 gap-y-1">
                 {chunks.map((chunk, index) => {
-                  const isHidden = currentStep.hiddenIndices.includes(index);
+                  const isHidden = !showAnswer && currentStep.hiddenIndices.includes(index);
                   
                   return (
                     <span 
@@ -551,11 +549,20 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
               <div className="flex flex-col gap-3 w-full justify-center mt-2 animate-in slide-in-from-bottom-4">
                 <div className="flex flex-row gap-3">
                   <button 
+                    onClick={() => setShowAnswer(!showAnswer)}
+                    className="flex-1 py-3 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-bold rounded-xl border border-stone-200 dark:border-stone-700 transition-colors flex items-center justify-center gap-2"
+                  >
+                    {showAnswer ? <EyeOff size={20} /> : <Eye size={20} />}
+                    <span className="text-sm sm:text-base">{showAnswer ? '정답 가리기' : '정답 확인하기'}</span>
+                  </button>
+                </div>
+                <div className="flex flex-row gap-3">
+                  <button 
                     onClick={handleRestart}
                     className="flex-1 py-4 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-bold rounded-xl border border-stone-200 dark:border-stone-700 transition-colors flex items-center justify-center gap-2"
                   >
                     <RotateCcw size={20} />
-                    <span className="text-sm sm:text-base">다시 보기</span>
+                    <span className="text-sm sm:text-base">처음부터</span>
                   </button>
                   <button 
                     onClick={handleStartListening}
