@@ -97,7 +97,7 @@ export default function FriendProfilePage() {
             <ChevronLeft size={24} />
           </button>
           <h1 className="text-lg font-bold text-stone-800 dark:text-stone-100 ml-2">
-            {profile.name}님의 묵상 기록
+            {profile.nickname || profile.name || '순례자'}님의 묵상 기록
           </h1>
         </div>
       </header>
@@ -113,8 +113,11 @@ export default function FriendProfilePage() {
               <span>👤</span>
             )}
           </div>
-          <h2 className="text-2xl font-bold text-stone-800 dark:text-stone-100">{profile.name}</h2>
-          <p className="text-stone-500 text-sm mt-1">총 {records.length}개의 One Verse 기록이 있습니다</p>
+          <h2 className="text-2xl font-bold text-stone-800 dark:text-stone-100">{profile.nickname || profile.name || '이름 없는 순례자'}</h2>
+          {profile.nickname && (
+            <p className="text-stone-400 dark:text-stone-500 text-xs mt-1">카카오 연동 이름: {profile.name}</p>
+          )}
+          <p className="text-stone-500 text-sm mt-2">총 {records.length}개의 One Verse 기록이 있습니다</p>
         </div>
 
         {/* 묵상 기록 리스트 */}

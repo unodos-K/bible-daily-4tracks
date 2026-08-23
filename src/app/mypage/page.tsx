@@ -229,7 +229,7 @@ export default function MyPage() {
           <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between w-full">
               <h2 className="text-lg sm:text-xl font-bold text-stone-800 dark:text-stone-100 flex items-center gap-2 flex-1 break-keep pr-2">
-                {authUser ? `${authUser.name}님 환영합니다 ✨` : '내 통독 여정'}
+                {authUser ? `${authUser.nickname || authUser.name}님 환영합니다 ✨` : '내 통독 여정'}
               </h2>
               <div className="flex items-center gap-3 flex-shrink-0">
                 <button

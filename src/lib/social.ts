@@ -5,6 +5,7 @@ export interface FriendProfile {
   id: string;
   name: string;
   avatar_url: string;
+  nickname?: string;
 }
 
 export interface FriendFeedItem {
@@ -12,6 +13,7 @@ export interface FriendFeedItem {
   user_id: string;
   name: string;
   avatar_url: string;
+  nickname?: string;
   day_index: number;
   read_date: string;
   completed_at: string;
@@ -63,7 +65,7 @@ export async function getFriendsList(): Promise<FriendProfile[]> {
   // Step 3: profiles 테이블에서 친구들의 닉네임과 아바타 정보 조회
   const { data: profiles, error: profileError } = await supabase
     .from('profiles')
-    .select('id, name, avatar_url')
+    .select('id, name, avatar_url, nickname')
     .in('id', friendIds);
 
   if (profileError || !profiles) {
@@ -77,7 +79,8 @@ export async function getFriendsList(): Promise<FriendProfile[]> {
     friendsMap.set(p.id, {
       id: p.id,
       name: p.name || '친구',
-      avatar_url: p.avatar_url || ''
+      avatar_url: p.avatar_url || '',
+      nickname: p.nickname || undefined
     });
   }
 
@@ -100,7 +103,8 @@ export async function getFriendProfile(friendId: string): Promise<FriendProfile 
   return {
     id: data.id,
     name: data.name || '친구',
-    avatar_url: data.avatar_url || ''
+    avatar_url: data.avatar_url || '',
+    nickname: data.nickname || undefined
   };
 }
 
@@ -134,6 +138,7 @@ export async function getFriendRecords(friendId: string): Promise<FriendFeedItem
   const profile = await getFriendProfile(friendId);
   const friendName = profile?.name || '친구';
   const friendAvatar = profile?.avatar_url || '';
+  const friendNickname = profile?.nickname;
 
   const feedItems: FriendFeedItem[] = records.map(record => {
     const recordLikes = likes ? likes.filter(l => l.day_index === record.day_index) : [];
@@ -143,6 +148,7 @@ export async function getFriendRecords(friendId: string): Promise<FriendFeedItem
       user_id: record.user_id,
       name: friendName,
       avatar_url: friendAvatar,
+      nickname: friendNickname,
       day_index: record.day_index,
       read_date: record.read_date,
       completed_at: record.completed_at,

@@ -75,7 +75,7 @@ export default function FriendsList() {
               )}
             </div>
             <div>
-              <p className="font-bold text-stone-800 dark:text-stone-100">{friend.name}</p>
+              <p className="font-bold text-stone-800 dark:text-stone-100">{friend.nickname || friend.name || '이름 없는 순례자'}</p>
               <p className="text-xs text-stone-400">묵상 기록 보기</p>
             </div>
           </div>

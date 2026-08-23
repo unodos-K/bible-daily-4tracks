@@ -3,6 +3,7 @@ import "./globals.css";
 import { GlobalNavigation } from "@/components/GlobalNavigation";
 import { SettingsProvider } from "@/contexts/SettingsContext";
 import KakaoInit from "@/components/KakaoInit";
+import NicknameGuard from "@/components/NicknameGuard";
 import Script from "next/script";
 
 export const metadata: Metadata = {
@@ -42,6 +43,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen-dynamic bg-neutral-100 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 flex flex-col selection:bg-amber-200 dark:selection:bg-amber-900 pt-[calc(52px+env(safe-area-inset-top))] safe-bottom">
         <KakaoInit />
+        <NicknameGuard />
         <SettingsProvider>
           <GlobalNavigation />
           {children}

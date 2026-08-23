@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Moon, Sun, Monitor, Minus, Plus, X, RotateCcw, AlertCircle } from "lucide-react";
+import { Moon, Sun, Monitor, Minus, Plus, X, RotateCcw, AlertCircle, UserCircle2 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { startNewReading } from "@/lib/storage";
+import { getAuthUser, AuthUser } from "@/lib/auth";
+import NicknameOnboardingModal from "./NicknameOnboardingModal";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -13,6 +15,8 @@ interface SettingsModalProps {
 export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const { theme, setTheme, fontSize, setFontSize } = useSettings();
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+  const [showNicknameModal, setShowNicknameModal] = useState(false);
 
   const executeReset = async () => {
     const dateObj = new Date();
@@ -24,13 +28,12 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = "hidden";
+      document.body.style.overflow = 'hidden';
+      getAuthUser().then(setAuthUser);
     } else {
-      document.body.style.overflow = "unset";
+      document.body.style.overflow = 'unset';
     }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
+    return () => { document.body.style.overflow = 'unset'; };
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -39,6 +42,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const handleIncreaseFontSize = () => setFontSize(Math.min(fontSize + 2, 28));
 
   return (
+    <>
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
       <div className="bg-white dark:bg-stone-900 rounded-3xl p-6 shadow-xl w-full max-w-md flex flex-col gap-8 animate-in zoom-in-95 border border-stone-200 dark:border-stone-800 relative">
         <button
@@ -125,6 +129,22 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
         <div className="w-full h-px bg-stone-100 dark:bg-stone-800"></div>
 
+        {/* Profile / Nickname Zone */}
+        {authUser && (
+          <div className="flex flex-col gap-4">
+            <label className="text-sm font-semibold text-stone-500 dark:text-stone-400">프로필 설정</label>
+            <button
+              onClick={() => setShowNicknameModal(true)}
+              className="flex items-center justify-between w-full px-4 py-3.5 bg-stone-50 dark:bg-stone-800 text-stone-700 dark:text-stone-300 font-bold rounded-xl transition-colors hover:bg-stone-100 dark:hover:bg-stone-700/50 border border-stone-100 dark:border-stone-700"
+            >
+              <div className="flex items-center gap-2">
+                <UserCircle2 size={18} />
+                {authUser.nickname ? `닉네임: ${authUser.nickname}` : "닉네임 설정하기"}
+              </div>
+            </button>
+          </div>
+        )}
+
         {/* Danger Zone */}
         <div className="flex flex-col gap-4">
           <label className="text-sm font-semibold text-red-500 flex items-center gap-1">
@@ -142,32 +162,47 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
       {/* Reset Confirm Modal */}
       {isResetModalOpen && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white dark:bg-stone-900 rounded-2xl p-6 shadow-xl w-full max-w-sm flex flex-col items-center gap-4 animate-in zoom-in-95 border border-stone-200 dark:border-stone-800 relative">
-            <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 flex items-center justify-center mb-2">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in" onClick={() => setIsResetModalOpen(false)}>
+          <div className="bg-white dark:bg-stone-900 w-full max-w-sm rounded-2xl p-6 shadow-xl text-center flex flex-col gap-4 animate-in zoom-in-95" onClick={e => e.stopPropagation()}>
+            <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 text-red-500 mx-auto flex items-center justify-center mb-2">
               <AlertCircle size={24} />
             </div>
-            <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100 text-center">초기화 확인</h3>
-            <p className="text-stone-500 dark:text-stone-400 text-center leading-relaxed text-sm">
-              기존 읽기 데이터를 지우고<br />오늘부터 새로운 통독 일정을 시작하시겠습니까?
+            <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100">정말 초기화하시겠습니까?</h3>
+            <p className="text-stone-500 dark:text-stone-400 text-sm break-keep">
+              지금까지의 통독 기록과 암송 데이터가 모두 삭제되며, 처음부터 다시 시작하게 됩니다. 이 작업은 되돌릴 수 없습니다.
             </p>
-            <div className="flex gap-3 w-full mt-2">
+            <div className="flex gap-3 mt-2">
               <button
                 onClick={() => setIsResetModalOpen(false)}
-                className="flex-1 py-3 rounded-xl font-bold bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
+                className="flex-1 py-3 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-bold rounded-xl transition-colors"
               >
                 취소
               </button>
               <button
                 onClick={executeReset}
-                className="flex-1 py-3 rounded-xl font-bold bg-red-500 text-white hover:bg-red-600 transition-colors shadow-sm"
+                className="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl transition-colors"
               >
-                확인(초기화)
+                초기화
               </button>
             </div>
           </div>
         </div>
       )}
+
+      {showNicknameModal && (
+        <NicknameOnboardingModal 
+          isOpen={showNicknameModal} 
+          cancellable={true} 
+          onCancel={() => setShowNicknameModal(false)}
+          onComplete={(nickname) => {
+            if (authUser) {
+              setAuthUser({ ...authUser, nickname });
+            }
+            setShowNicknameModal(false);
+          }}
+        />
+      )}
     </div>
+    </>
   );
 }
