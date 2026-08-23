@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, BrainCircuit, X, Flame, Settings, Share2 } from "lucide-react";
 import { 
@@ -546,8 +547,8 @@ export default function MyPage() {
         </div>
 
         {/* 상세 팝업 모달 (가로 스와이프 캐러셀 지원) */}
-        {selectedRecordStr && !isMemoryModalOpen && (
-          <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in" onClick={() => setSelectedRecordStr(null)}>
+        {selectedRecordStr && !isMemoryModalOpen && createPortal(
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in" onClick={() => setSelectedRecordStr(null)}>
             <div 
               className="w-full max-w-xl md:max-w-2xl mx-auto bg-white dark:bg-stone-900 rounded-3xl shadow-2xl overflow-y-auto flex flex-col animate-in zoom-in-95 h-[50vh]"
               onClick={e => e.stopPropagation()}
@@ -582,8 +583,17 @@ export default function MyPage() {
                     {/* 모달 헤더 */}
                     <div className="flex justify-between items-center p-5 sm:p-6 pb-4 border-b border-stone-100 dark:border-stone-800 z-10 bg-white dark:bg-stone-900">
                       <div className="flex flex-col">
-                        <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100">
+                        <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100 flex items-center gap-2">
                           {y}년 {parseInt(m)}월 {parseInt(d)}일
+                          {dayRecords[currentSlideIndex] && (
+                            <div className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+                              dayRecords[currentSlideIndex].oneVerse?.isMemorized
+                                ? 'bg-amber-500 text-white'
+                                : 'bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-300'
+                            }`}>
+                              {dayRecords[currentSlideIndex].oneVerse?.isMemorized ? '👑 암송 완료' : '📖 통독 완료'}
+                            </div>
+                          )}
                         </h3>
                         {dayRecords.length > 1 && (
                           <div className="text-stone-500 dark:text-stone-400 font-semibold text-sm mt-1">
@@ -644,18 +654,11 @@ export default function MyPage() {
                                 </div>
                               )}
 
-                              <div className={`p-6 sm:p-8 rounded-2xl border flex flex-col gap-6 shadow-sm ${
+                              <div className={`p-6 sm:p-8 rounded-2xl border flex flex-col gap-6 shadow-sm h-full ${
                                 isRecordMem
                                   ? 'bg-amber-50/80 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800/50'
                                   : 'bg-stone-50/80 dark:bg-stone-800/80 border-stone-200 dark:border-stone-700'
                               }`}>
-                                <div className={`self-start px-3 py-1.5 rounded-full text-sm sm:text-base font-bold ${
-                                  isRecordMem
-                                    ? 'bg-amber-500 text-white shadow-sm'
-                                    : 'bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-300'
-                                }`}>
-                                  {isRecordMem ? '👑 암송 완료' : '📖 통독 완료'}
-                                </div>
                                 <div className="w-full flex-1 overflow-y-auto pr-2 scrollbar-hide">
                                   <blockquote className="w-full break-words break-keep whitespace-normal text-lg sm:text-xl md:text-2xl leading-relaxed sm:leading-loose text-stone-800 dark:text-stone-100 font-medium italic">
                                     {displayTxt}
@@ -692,16 +695,16 @@ export default function MyPage() {
                     {/* 고정 하단 액션 버튼 */}
                     {dayRecords.length > 0 && dayRecords[currentSlideIndex] && (
                       <div className="p-5 sm:p-6 bg-white dark:bg-stone-900 border-t border-stone-100 dark:border-stone-800">
-                        <div className="flex flex-col sm:flex-row gap-3">
+                        <div className="flex flex-row gap-2 w-full">
                           <button
                             onClick={() => {
                               setSelectedDayIndexForMemory(dayRecords[currentSlideIndex].dayIndex);
                               setIsMemoryModalOpen(true);
                             }}
-                            className="flex-1 py-3.5 sm:py-4 px-6 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl shadow-lg transition-transform hover:scale-[1.02] flex items-center justify-center gap-2 text-base sm:text-lg"
+                            className="flex-1 py-3.5 px-3 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl shadow-lg transition-transform hover:scale-[1.02] flex items-center justify-center gap-1.5 text-sm sm:text-base"
                           >
-                            <BrainCircuit size={22} />
-                            {dayRecords[currentSlideIndex].oneVerse?.isMemorized ? '이 말씀 복습하기' : '이 말씀 암송하기'}
+                            <BrainCircuit size={18} />
+                            {dayRecords[currentSlideIndex].oneVerse?.isMemorized ? '복습하기' : '암송하기'}
                           </button>
                           <button
                             onClick={() => {
@@ -710,9 +713,9 @@ export default function MyPage() {
                               } catch {}
                               router.push("/read?day=" + dayRecords[currentSlideIndex].dayIndex);
                             }}
-                            className="flex-1 py-3.5 sm:py-4 px-6 bg-stone-800 hover:bg-stone-900 dark:bg-stone-200 dark:hover:bg-stone-300 dark:text-stone-900 text-white font-bold rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2 text-base sm:text-lg"
+                            className="flex-1 py-3.5 px-3 bg-stone-800 hover:bg-stone-900 dark:bg-stone-200 dark:hover:bg-stone-300 dark:text-stone-900 text-white font-bold rounded-xl shadow-sm transition-colors flex items-center justify-center gap-1.5 text-sm sm:text-base"
                           >
-                            해당 Day 본문 읽으러 가기
+                            본문 읽기
                           </button>
                         </div>
                       </div>
@@ -721,7 +724,8 @@ export default function MyPage() {
                 );
               })()}
             </div>
-          </div>
+          </div>,
+          document.body
         )}
 
       </div>
