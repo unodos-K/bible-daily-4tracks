@@ -480,16 +480,31 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
                 </div>
 
                 <div className="flex flex-1 gap-0.5 h-1.5">
-                  <div className="flex-1 bg-stone-200 dark:bg-stone-700 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-sky-400 dark:bg-sky-500 ease-linear"
-                      style={{ 
-                        width: `${globalProgressValue}%`, 
-                        transitionProperty: 'width', 
-                        transitionDuration: isPlaying ? '20ms' : '0ms' 
-                      }}
-                    />
-                  </div>
+                  {Array.from({ length: currentPhaseStepsCount }).map((_, idx) => {
+                    let width = "0%";
+                    let fillClass = "bg-sky-400 dark:bg-sky-500";
+                    
+                    if (idx < currentSegmentIndex) {
+                      width = "100%";
+                    } else if (idx === currentSegmentIndex) {
+                      width = `${currentSegmentFraction * 100}%`;
+                    } else {
+                      fillClass = "bg-transparent";
+                    }
+
+                    return (
+                      <div key={idx} className="flex-1 bg-stone-200 dark:bg-stone-700 rounded-full overflow-hidden">
+                        <div 
+                          className={`h-full ease-linear ${fillClass}`}
+                          style={{ 
+                            width, 
+                            transitionProperty: 'width', 
+                            transitionDuration: isPlaying && idx === currentSegmentIndex ? '20ms' : '0ms' 
+                          }}
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
