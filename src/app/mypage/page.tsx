@@ -279,7 +279,7 @@ export default function MyPage() {
           <div className="grid grid-cols-7 gap-1 sm:gap-2">
             {calendarDays.map((day, idx) => {
               if (day === null) {
-                return <div key={`empty-${idx}`} className="h-20 sm:h-24" />;
+                return <div key={`empty-${idx}`} className="h-14 sm:h-20" />;
               }
 
               const dateStr = formatDateStr(year, month, day);
@@ -321,7 +321,7 @@ export default function MyPage() {
                     }
                   }}
                   className={`
-                    relative h-20 sm:h-24 flex flex-col items-center justify-start pt-2 rounded-xl transition-all border select-none
+                    relative h-14 sm:h-20 flex flex-col items-center justify-start pt-2 rounded-xl transition-all border select-none
                     ${isBeforeStart && !isCompleted ? 'opacity-30 cursor-not-allowed bg-stone-50 dark:bg-stone-900 border-transparent' : 'cursor-pointer'}
                     ${isSelected ? 'ring-2 ring-sky-500 bg-sky-100 dark:bg-sky-900/60' : ''}
                     ${isCompleted && !isSelected ? `${bgClass} ${borderClass} hover:brightness-95` : ''}
