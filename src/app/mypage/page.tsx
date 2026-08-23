@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, BrainCircuit, X, Flame, Settings } from "lucide-react";
+import { ChevronLeft, ChevronRight, BrainCircuit, X, Flame, Settings, MessageCircle } from "lucide-react";
 import { 
   ReadingSettings, 
   ReadRecordsMap, 
@@ -174,6 +174,27 @@ export default function MyPage() {
       alert("클립보드에 복사되었습니다!");
     } catch (e) {
       alert("복사에 실패했습니다.");
+    }
+  };
+
+  const handleShareOneVerse = (record: DayRecord) => {
+    if (typeof window !== "undefined" && window.Kakao) {
+      const nickname = authUser ? (authUser.nickname || authUser.name).split('#')[0] : '순례자';
+      const displayTxt = record.oneVerse?.displayText || record.oneVerse?.text || '';
+      const formattedRef = `${record.oneVerse?.book} ${record.oneVerse?.chapter}장 ${record.oneVerse?.verse}절`;
+      
+      const textToShare = `[One Verse]\n${nickname}님이 오늘의 One Verse를 보냈어요!\n\n"${displayTxt}"\n\n${formattedRef}`;
+      
+      window.Kakao.Share.sendDefault({
+        objectType: 'text',
+        text: textToShare,
+        link: {
+          mobileWebUrl: window.location.origin,
+          webUrl: window.location.origin,
+        },
+      });
+    } else {
+      alert("카카오톡 공유 기능을 사용할 수 없습니다.");
     }
   };
 
@@ -482,9 +503,16 @@ export default function MyPage() {
                             } catch {}
                             router.push("/read?day=" + record.dayIndex);
                           }}
-                          className="flex-1 py-3 text-sm font-bold text-sky-600 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-stone-800 flex items-center justify-center gap-1.5 transition-colors"
+                          className="flex-1 py-3 text-sm font-bold text-sky-600 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-stone-800 flex items-center justify-center gap-1.5 transition-colors border-r border-stone-100 dark:border-stone-800"
                         >
                           📖 말씀 본문 보기
+                        </button>
+                        <button
+                          onClick={() => handleShareOneVerse(record)}
+                          className="w-14 py-3 text-black dark:text-black hover:bg-[#FDD800] bg-[#FEE500] flex items-center justify-center transition-colors"
+                          aria-label="카카오 공유"
+                        >
+                          <MessageCircle size={18} className="fill-black" />
                         </button>
                       </div>
                     </div>
