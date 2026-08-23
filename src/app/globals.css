@@ -77,11 +77,3 @@ button, a, [role="button"], .interactive {
   -webkit-overflow-scrolling: touch;
 }
 
-@supports (-webkit-touch-callout: none) {
-  @media (display-mode: standalone) {
-    /* iOS PWA 모드에서만 하단 탭 바에 안전 여백 강제 적용 */
-    .ios-pwa-bottom-safe {
-      padding-bottom: max(env(safe-area-inset-bottom), 34px) !important;
-    }
-  }
-}
