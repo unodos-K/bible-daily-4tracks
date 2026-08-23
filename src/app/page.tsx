@@ -5,30 +5,31 @@ import Image from "next/image";
 
 export default function LandingPage() {
   return (
-    <div className="w-full min-h-[100dvh] flex flex-col relative items-center justify-center bg-stone-50 dark:bg-stone-950 overflow-hidden">
+    <div className="w-full h-[100dvh] flex flex-col relative items-center justify-center bg-stone-50 dark:bg-stone-950 overflow-hidden pb-[env(safe-area-inset-bottom)]">
       {/* 백그라운드 효과 (블러 원) */}
       <div className="absolute top-[-10%] left-[-10%] w-72 h-72 bg-sky-200 dark:bg-sky-900/40 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-3xl opacity-70"></div>
       <div className="absolute top-[20%] right-[-10%] w-72 h-72 bg-amber-200 dark:bg-amber-900/40 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-3xl opacity-70"></div>
       <div className="absolute bottom-[-10%] left-[20%] w-72 h-72 bg-emerald-200 dark:bg-emerald-900/30 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-3xl opacity-70"></div>
       
       {/* 메인 컨텐츠 */}
-      <div className="relative z-10 flex flex-col items-center justify-center px-6 w-full max-w-md h-full gap-10">
+      <div className="relative z-10 flex flex-col items-center justify-center px-6 w-full max-w-md h-full gap-12">
         
         {/* 로고 & 타이틀 영역 */}
-        <div className="flex flex-col items-center text-center mt-20">
+        <div className="flex flex-col items-center text-center">
           <div className="w-32 h-32 mb-6 rounded-3xl overflow-hidden shadow-2xl relative">
             <Image src="/icon.png" alt="One Verse Logo" fill className="object-cover" />
           </div>
           <h1 className="text-4xl sm:text-5xl font-black text-stone-800 dark:text-stone-100 tracking-tight leading-tight">
             One Verse
           </h1>
-          <p className="text-zinc-500 dark:text-zinc-400 text-lg mt-3 font-medium">
-            하루 네 장, 내게 남은 한 구절
-          </p>
+          <div className="text-zinc-500 dark:text-zinc-300 text-center space-y-2 mt-4 font-medium">
+            <p>매일 말씀을 읽고 내게 주신 한 구절을 고르고 암송하세요.</p>
+            <p className="text-sm text-zinc-400">말씀읽기 & 뇌새김 말씀 암송</p>
+          </div>
         </div>
 
-        {/* 카카오 로그인 버튼 하단 고정 */}
-        <div className="w-full mt-auto mb-16 flex flex-col gap-4">
+        {/* 카카오 로그인 버튼 */}
+        <div className="w-full flex flex-col gap-4">
           <button
             onClick={signInWithKakao}
             className="w-full bg-[#FEE500] hover:bg-[#FDD800] text-black font-bold py-4 rounded-2xl flex items-center justify-center gap-3 transition-transform hover:-translate-y-1 active:translate-y-0 shadow-lg shadow-[#FEE500]/30"
