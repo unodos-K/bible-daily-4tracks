@@ -129,17 +129,24 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
     seq.push({ phase: 3, phaseLabel: "징검다리로 흐름 기억하기", hiddenIndices: oddIndices });
     seq.push({ phase: 3, phaseLabel: "징검다리로 흐름 기억하기", hiddenIndices: evenIndices });
     
-    // Step 4: 절반 가리기 (2회 고정: 후반부-전반부)
+    // Step 4: 절반 가리기 (총 2회 반복: 전-후-전-후)
     const mid = Math.floor(K / 2);
     const firstHalf = Array.from({ length: mid }, (_, k) => k);
     const secondHalf = Array.from({ length: K - mid }, (_, k) => mid + k);
     
-    seq.push({ phase: 4, phaseLabel: "절반 가리기 패턴 훈련", hiddenIndices: secondHalf }); // 후반부 가리기
-    seq.push({ phase: 4, phaseLabel: "절반 가리기 패턴 훈련", hiddenIndices: firstHalf });  // 전반부 가리기
+    seq.push({ phase: 4, phaseLabel: "절반 가리기 패턴 훈련", hiddenIndices: secondHalf }); // 전반부 보여줌
+    seq.push({ phase: 4, phaseLabel: "절반 가리기 패턴 훈련", hiddenIndices: firstHalf });  // 후반부 보여줌
+    seq.push({ phase: 4, phaseLabel: "절반 가리기 패턴 훈련", hiddenIndices: secondHalf }); // 전반부 보여줌
+    seq.push({ phase: 4, phaseLabel: "절반 가리기 패턴 훈련", hiddenIndices: firstHalf });  // 후반부 보여줌
     
-    // Step 5: 전체 가리기 (최종 실전 테스트)
+    // Step 5: 전체 가리기 깜빡이 후 최종 블라인드 (실전 테스트)
     const all = Array.from({ length: K }, (_, k) => k);
-    seq.push({ phase: 5, phaseLabel: "전체 말씀 온전히 고백하기 (실전 테스트)", hiddenIndices: all });
+    seq.push({ phase: 5, phaseLabel: "전체 말씀 온전히 고백하기", hiddenIndices: [] }); // 1) 모두 보여줌
+    seq.push({ phase: 5, phaseLabel: "전체 말씀 온전히 고백하기", hiddenIndices: all }); // 2) 모두 가림
+    seq.push({ phase: 5, phaseLabel: "전체 말씀 온전히 고백하기", hiddenIndices: [] }); // 3) 모두 보여줌
+    seq.push({ phase: 5, phaseLabel: "전체 말씀 온전히 고백하기", hiddenIndices: all }); // 4) 모두 가림
+    seq.push({ phase: 5, phaseLabel: "전체 말씀 온전히 고백하기", hiddenIndices: [] }); // 5) 모두 보여줌
+    seq.push({ phase: 5, phaseLabel: "전체 말씀 온전히 고백하기 (실전 테스트)", hiddenIndices: all }); // 6) 모두 가림 (마무리)
 
     return seq;
   }, [K]);
