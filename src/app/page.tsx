@@ -1,7 +1,7 @@
 "use client";
 
 import { signInWithKakao } from "@/lib/supabase";
-import { BookOpen } from "lucide-react";
+import Image from "next/image";
 
 export default function LandingPage() {
   return (
@@ -15,16 +15,15 @@ export default function LandingPage() {
       <div className="relative z-10 flex flex-col items-center justify-center px-6 w-full max-w-md h-full gap-10">
         
         {/* 로고 & 타이틀 영역 */}
-        <div className="flex flex-col items-center text-center gap-4 mt-20">
-          <div className="w-20 h-20 bg-gradient-to-tr from-sky-500 to-amber-400 rounded-3xl shadow-xl flex items-center justify-center mb-2 transform -rotate-6">
-            <BookOpen className="text-white w-10 h-10 transform rotate-6" />
+        <div className="flex flex-col items-center text-center mt-20">
+          <div className="w-32 h-32 mb-6 rounded-3xl overflow-hidden shadow-2xl relative">
+            <Image src="/icon.png" alt="One Verse Logo" fill className="object-cover" />
           </div>
           <h1 className="text-4xl sm:text-5xl font-black text-stone-800 dark:text-stone-100 tracking-tight leading-tight">
-            매일 만나는<br/>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-amber-500">생명의 말씀</span>
+            One Verse
           </h1>
-          <p className="text-stone-500 dark:text-stone-400 text-lg mt-2 font-medium">
-            4Tracks 통독과 암송으로 시작하는 하루
+          <p className="text-zinc-500 dark:text-zinc-400 text-lg mt-3 font-medium">
+            하루 네 장, 내게 남은 한 구절
           </p>
         </div>
 
