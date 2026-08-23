@@ -18,6 +18,7 @@ import { getAuthUser, AuthUser } from "@/lib/auth";
 import { signOut, signInWithKakao } from "@/lib/supabase";
 import MemoryTrainerModal from "@/components/MemoryTrainerModal";
 import SettingsModal from "@/components/SettingsModal";
+import FriendManagementModal from "@/components/FriendManagementModal";
 
 function getDaysInMonth(year: number, month: number) {
   return new Date(year, month, 0).getDate();
@@ -73,6 +74,7 @@ export default function MyPage() {
   const carouselRef = useRef<HTMLDivElement>(null);
   
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [isFriendModalOpen, setIsFriendModalOpen] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -110,20 +112,31 @@ export default function MyPage() {
     window.location.href = "/";
   };
 
-  const handleInvite = () => {
+  const handleInvite = async () => {
     if (!authUser) {
       alert("로그인이 필요합니다.");
       return;
     }
     
-    if (typeof window !== "undefined" && window.Kakao) {
-      const inviteUrl = `${window.location.origin}?inviteCode=${authUser.id}`;
-      
+    const inviteUrl = `${window.location.origin}/login?inviteCode=${authUser.id}`;
+    const shareData = {
+      title: 'One Verse 성경읽기',
+      text: '하루 네 장의 말씀과 뇌새김 암송, One Verse로 같이 시작해요!',
+      url: inviteUrl,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        console.error("공유 실패:", err);
+      }
+    } else if (typeof window !== "undefined" && window.Kakao) {
       window.Kakao.Share.sendDefault({
         objectType: 'feed',
         content: {
-          title: '4Tracks 성경 통독',
-          description: `📖 ${authUser.name || '친구'}님과 함께 매일 말씀 통독과 One Verse 묵상을 시작해보세요!`,
+          title: shareData.title,
+          description: shareData.text,
           imageUrl: 'https://images.unsplash.com/photo-1504052434569-70ad5836ab65?q=80&w=800&auto=format&fit=crop',
           link: {
             mobileWebUrl: inviteUrl,
@@ -132,7 +145,7 @@ export default function MyPage() {
         },
         buttons: [
           {
-            title: '함께 통독하기',
+            title: '함께 시작하기',
             link: {
               mobileWebUrl: inviteUrl,
               webUrl: inviteUrl,
@@ -141,7 +154,13 @@ export default function MyPage() {
         ],
       });
     } else {
-      alert("카카오톡 공유 기능을 사용할 수 없습니다.");
+      // 클립보드 복사 폴백
+      try {
+        await navigator.clipboard.writeText(`${shareData.text}\n${shareData.url}`);
+        alert("초대 링크가 클립보드에 복사되었습니다!");
+      } catch (e) {
+        alert("공유 기능을 지원하지 않는 브라우저입니다.");
+      }
     }
   };
 
@@ -461,6 +480,27 @@ export default function MyPage() {
               </div>
             )}
           </div>
+
+          {/* 소셜 및 기능 섹션 */}
+          <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 p-4 sm:p-6 flex flex-col gap-4">
+            <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 flex items-center gap-2 mb-2">
+              🤝 소셜 및 설정
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button
+                onClick={handleInvite}
+                className="flex items-center justify-center gap-2 bg-[#FEE500] hover:bg-[#FDD800] text-black font-bold py-3.5 rounded-xl transition-colors shadow-sm w-full"
+              >
+                친구에게 One Verse 추천하기
+              </button>
+              <button
+                onClick={() => setIsFriendModalOpen(true)}
+                className="flex items-center justify-center gap-2 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 font-bold py-3.5 rounded-xl transition-colors shadow-sm w-full"
+              >
+                친구 관리 / 내 친구
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* 상세 팝업 모달 (가로 스와이프 캐러셀 지원) */}
@@ -664,6 +704,11 @@ export default function MyPage() {
       <SettingsModal 
         isOpen={isSettingsModalOpen}
         onClose={() => setIsSettingsModalOpen(false)}
+      />
+
+      <FriendManagementModal
+        isOpen={isFriendModalOpen}
+        onClose={() => setIsFriendModalOpen(false)}
       />
     </div>
   );

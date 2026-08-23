@@ -1,9 +1,19 @@
 "use client";
 
+import { useEffect } from "react";
 import { signInWithKakao } from "@/lib/supabase";
 import Image from "next/image";
 
 export default function LandingPage() {
+  useEffect(() => {
+    // URL 파라미터에서 inviteCode 추출 후 로컬 스토리지에 임시 저장
+    const params = new URLSearchParams(window.location.search);
+    const inviteCode = params.get("inviteCode");
+    if (inviteCode) {
+      document.cookie = `pending_invite_code=${inviteCode}; path=/; max-age=86400`;
+    }
+  }, []);
+
   return (
     <div className="w-full min-h-full flex flex-col relative items-center justify-center bg-stone-50 dark:bg-stone-950 overflow-hidden pb-6">
       {/* 백그라운드 효과 (블러 원) */}

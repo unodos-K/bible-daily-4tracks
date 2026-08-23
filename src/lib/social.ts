@@ -22,25 +22,102 @@ export interface FriendFeedItem {
   is_liked_by_me: boolean;
 }
 
-// 1. 친구 추가 (쌍방향 upsert)
-export async function addFriend(friendId: string): Promise<boolean> {
+// 1. 친구 검색 (닉네임 기준)
+export async function searchUsersByNickname(nickname: string): Promise<FriendProfile[]> {
   const userId = await getUserId();
-  if (!userId) return false;
-  
-  if (userId === friendId) return false; // 자기 자신을 친구로 추가할 수 없음
+  if (!userId || !nickname.trim()) return [];
 
-  // 양방향으로 레코드 생성
-  const { error } = await supabase.from('friendships').upsert([
-    { user_id: userId, friend_id: friendId },
-    { user_id: friendId, friend_id: userId }
-  ], { onConflict: 'user_id, friend_id' });
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, name, avatar_url, nickname')
+    .ilike('nickname', `%${nickname.trim()}%`)
+    .neq('id', userId)
+    .limit(10);
+
+  if (error || !data) {
+    console.error("searchUsersByNickname error:", error);
+    return [];
+  }
+  return data as FriendProfile[];
+}
+
+// 2. 친구 요청 보내기
+export async function sendFriendRequest(friendId: string): Promise<boolean> {
+  const userId = await getUserId();
+  if (!userId || userId === friendId) return false;
+
+  const { error } = await supabase.from('friendships').insert({
+    user_id: userId,
+    friend_id: friendId,
+    status: 'pending'
+  });
 
   if (error) {
-    console.error("addFriend error:", error);
+    console.error("sendFriendRequest error:", error);
     return false;
   }
   return true;
 }
+
+// 3. 나에게 온 친구 요청 목록 가져오기
+export async function getPendingRequests(): Promise<{ id: string; profile: FriendProfile }[]> {
+  const userId = await getUserId();
+  if (!userId) return [];
+
+  const { data, error } = await supabase
+    .from('friendships')
+    .select(`
+      user_id,
+      profiles!fk_friendships_user (
+        id, name, avatar_url, nickname
+      )
+    `)
+    .eq('friend_id', userId)
+    .eq('status', 'pending');
+
+  if (error || !data) {
+    console.error("getPendingRequests error:", error);
+    return [];
+  }
+
+  return data.map((row: any) => ({
+    id: row.user_id,
+    profile: Array.isArray(row.profiles) ? row.profiles[0] : row.profiles
+  }));
+}
+
+// 4. 친구 요청 수락/거절
+export async function respondToFriendRequest(requesterId: string, accept: boolean): Promise<boolean> {
+  const userId = await getUserId();
+  if (!userId) return false;
+
+  if (accept) {
+    // 수락 시 status를 accepted로 변경하고 쌍방향 레코드 생성
+    const { error: updateError } = await supabase
+      .from('friendships')
+      .update({ status: 'accepted' })
+      .eq('user_id', requesterId)
+      .eq('friend_id', userId);
+
+    if (updateError) return false;
+
+    await supabase.from('friendships').upsert({
+      user_id: userId,
+      friend_id: requesterId,
+      status: 'accepted'
+    });
+    return true;
+  } else {
+    // 거절 시 삭제
+    const { error } = await supabase
+      .from('friendships')
+      .delete()
+      .eq('user_id', requesterId)
+      .eq('friend_id', userId);
+    return !error;
+  }
+}
+
 
 // 2. 내 친구 목록 가져오기 (profiles 테이블과 조인)
 export async function getFriendsList(): Promise<FriendProfile[]> {
@@ -58,7 +135,8 @@ export async function getFriendsList(): Promise<FriendProfile[]> {
         nickname
       )
     `)
-    .eq('user_id', userId);
+    .eq('user_id', userId)
+    .eq('status', 'accepted');
 
   if (error || !data) {
     console.error("getFriendsList error:", error);

@@ -19,16 +19,19 @@ export type Database = {
           created_at: string
           friend_id: string
           user_id: string
+          status: string
         }
         Insert: {
           created_at?: string
           friend_id: string
           user_id: string
+          status?: string
         }
         Update: {
           created_at?: string
           friend_id?: string
           user_id?: string
+          status?: string
         }
         Relationships: [
           {
@@ -41,6 +44,45 @@ export type Database = {
           {
             foreignKeyName: "fk_friendships_user"
             columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invites: {
+        Row: {
+          created_at: string
+          id: string
+          invite_code: string
+          invitee_id: string | null
+          inviter_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invite_code: string
+          invitee_id?: string | null
+          inviter_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invite_code?: string
+          invitee_id?: string | null
+          inviter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invites_invitee_id_fkey"
+            columns: ["invitee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invites_inviter_id_fkey"
+            columns: ["inviter_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
