@@ -153,13 +153,16 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
 
   const currentStep = steps[stepIndex] || steps[steps.length - 1];
   const isLastStep = stepIndex >= steps.length - 1;
-  
-  const rawProgress = isLastStep ? 100 : Math.min(100, (elapsed / (intervalSeconds * 1000)) * 100);
-  const totalProgressDisplay = rawProgress.toFixed(1);
-  const timeLeftDisplay = Math.max(0, intervalSeconds - (elapsed / 1000)).toFixed(1);
-  
   const currentPhaseStepsCount = steps.filter(s => s.phase === currentStep.phase).length;
   const currentSegmentIndex = stepIndex - steps.findIndex(s => s.phase === currentStep.phase);
+  
+  const currentSegmentFraction = Math.min(1, (elapsed / (intervalSeconds * 1000)));
+  const globalProgressValue = isLastStep 
+    ? 100 
+    : ((currentSegmentIndex + currentSegmentFraction) / currentPhaseStepsCount) * 100;
+    
+  const totalProgressDisplay = globalProgressValue.toFixed(1);
+  const timeLeftDisplay = Math.ceil(Math.max(0, intervalSeconds - (elapsed / 1000))).toString();
 
   // 3. Effect Hooks
   useEffect(() => {
@@ -477,31 +480,16 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
                 </div>
 
                 <div className="flex flex-1 gap-0.5 h-1.5">
-                  {Array.from({ length: currentPhaseStepsCount }).map((_, idx) => {
-                    let width = "0%";
-                    let fillClass = "bg-sky-400 dark:bg-sky-500";
-                    
-                    if (idx < currentSegmentIndex) {
-                      width = "100%";
-                    } else if (idx === currentSegmentIndex) {
-                      width = `${rawProgress}%`;
-                    } else {
-                      fillClass = "bg-transparent";
-                    }
-
-                    return (
-                      <div key={idx} className="flex-1 bg-stone-200 dark:bg-stone-700 rounded-full overflow-hidden">
-                        <div 
-                          className={`h-full ease-linear ${fillClass}`}
-                          style={{ 
-                            width, 
-                            transitionProperty: 'width', 
-                            transitionDuration: isPlaying && idx === currentSegmentIndex ? '20ms' : '0ms' 
-                          }}
-                        />
-                      </div>
-                    );
-                  })}
+                  <div className="flex-1 bg-stone-200 dark:bg-stone-700 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-sky-400 dark:bg-sky-500 ease-linear"
+                      style={{ 
+                        width: `${globalProgressValue}%`, 
+                        transitionProperty: 'width', 
+                        transitionDuration: isPlaying ? '20ms' : '0ms' 
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
 
