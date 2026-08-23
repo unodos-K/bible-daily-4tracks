@@ -46,7 +46,7 @@ export default function RootLayout({
         <NicknameGuard />
         <SettingsProvider>
           <div className="w-full max-w-2xl h-[100dvh] bg-stone-50 dark:bg-stone-950 shadow-xl flex flex-col relative border-x border-stone-200 dark:border-stone-800 overflow-hidden pt-[env(safe-area-inset-top)]">
-            <main className="flex-1 w-full overflow-y-auto overscroll-y-contain">
+            <main className="flex-1 w-full overflow-y-auto overscroll-y-contain pb-[calc(80px+env(safe-area-inset-bottom))]">
               {children}
             </main>
             <BottomNavigation />
