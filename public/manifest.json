@@ -1,11 +1,11 @@
 {
-  "name": "4Tracks",
-  "short_name": "4Tracks",
-  "description": "맥체인 성경 읽기 앱",
+  "name": "One Verse 성경읽기",
+  "short_name": "OneVerse",
+  "description": "하루 네 장, 내게 남은 한 구절",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#1c1917",
-  "theme_color": "#1c1917",
+  "background_color": "#0c0a09",
+  "theme_color": "#0c0a09",
   "orientation": "portrait-primary",
   "icons": [
     {

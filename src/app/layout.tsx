@@ -8,12 +8,16 @@ import Script from "next/script";
 import AuthProvider from "@/components/AuthProvider";
 
 export const metadata: Metadata = {
-  title: "4Tracks",
-  description: "깔끔하고 가독성 높은 모바일 성경 뷰어 웹앱",
+  title: "One Verse 성경읽기",
+  description: "하루 네 장, 내게 남은 한 구절",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/icon.png",
+    apple: "/icon.png",
+  },
   appleWebApp: {
     capable: true,
-    title: "4Tracks",
+    title: "One Verse 성경읽기",
     statusBarStyle: "black-translucent",
   },
 };
