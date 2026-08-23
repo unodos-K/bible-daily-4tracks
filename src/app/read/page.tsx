@@ -730,7 +730,7 @@ export default function BibleViewerPage() {
             const icon = TRACK_ICONS[trackReading.track.type as keyof typeof TRACK_ICONS] || "📖";
             
             return (
-              <div key={trackReading.track.type} id={TRACK_ID_MAP[trackReading.track.type as keyof typeof TRACK_ID_MAP]} className="flex flex-col border-b border-stone-200 dark:border-stone-800/60 pb-10 scroll-mt-24">
+              <div key={trackReading.track.type} id={TRACK_ID_MAP[trackReading.track.type as keyof typeof TRACK_ID_MAP]} className="flex flex-col border-b border-stone-200 dark:border-stone-800/60 pb-10 scroll-mt-[52px]">
                 {/* 섹션 헤더 */}
                 <div 
                   className="sticky top-[52px] z-20 py-2 px-4 text-sm font-semibold bg-stone-900/90 backdrop-blur border-b border-stone-800"
