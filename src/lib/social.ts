@@ -1,7 +1,14 @@
 import { supabase } from "./supabase";
 import { getUserId } from "./storage";
 
+export interface FriendProfile {
+  id: string;
+  name: string;
+  avatar_url: string;
+}
+
 export interface FriendFeedItem {
+  id?: string;
   user_id: string;
   name: string;
   avatar_url: string;
@@ -13,17 +20,18 @@ export interface FriendFeedItem {
   is_liked_by_me: boolean;
 }
 
-// 1. 친구 추가 (단방향/상호 자유롭지만 여기서는 내가 상대를 팔로우)
+// 1. 친구 추가 (쌍방향 upsert)
 export async function addFriend(friendId: string): Promise<boolean> {
   const userId = await getUserId();
   if (!userId) return false;
   
   if (userId === friendId) return false; // 자기 자신을 친구로 추가할 수 없음
 
-  const { error } = await supabase.from('friendships').upsert({
-    user_id: userId,
-    friend_id: friendId
-  }, { onConflict: 'user_id, friend_id' });
+  // 양방향으로 레코드 생성
+  const { error } = await supabase.from('friendships').upsert([
+    { user_id: userId, friend_id: friendId },
+    { user_id: friendId, friend_id: userId }
+  ], { onConflict: 'user_id, friend_id' });
 
   if (error) {
     console.error("addFriend error:", error);
@@ -32,12 +40,124 @@ export async function addFriend(friendId: string): Promise<boolean> {
   return true;
 }
 
-// 2. 좋아요 토글
+// 2. 내 친구 목록 가져오기 (profiles 테이블과 조인)
+export async function getFriendsList(): Promise<FriendProfile[]> {
+  const userId = await getUserId();
+  if (!userId) return [];
+
+  // Supabase에서 foreign key 관계가 설정되어 있다면 바로 select 가능
+  // id가 uuid이므로 profiles 테이블의 id와 매칭 가능
+  const { data, error } = await supabase
+    .from('friendships')
+    .select(`
+      friend_id,
+      profiles:friend_id (
+        name,
+        avatar_url
+      )
+    `)
+    .eq('user_id', userId);
+
+  if (error || !data) {
+    console.error("getFriendsList error:", error);
+    return [];
+  }
+
+  // 중복 제거 및 포맷팅
+  const friendsMap = new Map<string, FriendProfile>();
+  
+  for (const row of data) {
+    if (!row.profiles) continue;
+    // profiles가 배열로 올 수도 있고 단일 객체로 올 수도 있음
+    const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
+    if (!profile) continue;
+
+    friendsMap.set(row.friend_id, {
+      id: row.friend_id,
+      name: profile.name || '친구',
+      avatar_url: profile.avatar_url || ''
+    });
+  }
+
+  return Array.from(friendsMap.values());
+}
+
+// 3. 친구 정보 단건 조회
+export async function getFriendProfile(friendId: string): Promise<FriendProfile | null> {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', friendId)
+    .maybeSingle();
+
+  if (error || !data) {
+    console.error("getFriendProfile error:", error);
+    return null;
+  }
+
+  return {
+    id: data.id,
+    name: data.name || '친구',
+    avatar_url: data.avatar_url || ''
+  };
+}
+
+// 4. 특정 친구의 One Verse 기록 조회 (좋아요 상태 포함)
+export async function getFriendRecords(friendId: string): Promise<FriendFeedItem[]> {
+  const myUserId = await getUserId();
+  
+  // 친구의 One Verse 기록 가져오기 (최신순)
+  const { data: records, error: recordError } = await supabase
+    .from('reading_records')
+    .select('*')
+    .eq('user_id', friendId)
+    .not('one_verse', 'is', null)
+    .order('completed_at', { ascending: false })
+    .limit(50);
+
+  if (recordError || !records) {
+    console.error("getFriendRecords error:", recordError);
+    return [];
+  }
+
+  if (records.length === 0) return [];
+
+  // 좋아요 데이터 가져오기
+  const { data: likes, error: likeError } = await supabase
+    .from('one_verse_likes')
+    .select('liker_id, author_id, day_index')
+    .eq('author_id', friendId);
+
+  // 친구 프로필 가져오기
+  const profile = await getFriendProfile(friendId);
+  const friendName = profile?.name || '친구';
+  const friendAvatar = profile?.avatar_url || '';
+
+  const feedItems: FriendFeedItem[] = records.map(record => {
+    const recordLikes = likes ? likes.filter(l => l.day_index === record.day_index) : [];
+    const isLikedByMe = myUserId ? recordLikes.some(l => l.liker_id === myUserId) : false;
+
+    return {
+      user_id: record.user_id,
+      name: friendName,
+      avatar_url: friendAvatar,
+      day_index: record.day_index,
+      read_date: record.read_date,
+      completed_at: record.completed_at,
+      one_verse: record.one_verse,
+      like_count: recordLikes.length,
+      is_liked_by_me: isLikedByMe
+    };
+  });
+
+  return feedItems;
+}
+
+// 5. 좋아요 토글
 export async function toggleLike(authorId: string, dayIndex: number): Promise<boolean> {
   const userId = await getUserId();
   if (!userId) return false;
 
-  // 좋아요가 이미 있는지 확인
   const { data, error: selectError } = await supabase
     .from('one_verse_likes')
     .select('id')
@@ -52,17 +172,12 @@ export async function toggleLike(authorId: string, dayIndex: number): Promise<bo
   }
 
   if (data) {
-    // 좋아요 취소 (삭제)
     const { error: deleteError } = await supabase
       .from('one_verse_likes')
       .delete()
       .eq('id', data.id);
-    if (deleteError) {
-      console.error("toggleLike delete error:", deleteError);
-      return false;
-    }
+    if (deleteError) return false;
   } else {
-    // 좋아요 추가
     const { error: insertError } = await supabase
       .from('one_verse_likes')
       .insert({
@@ -70,77 +185,8 @@ export async function toggleLike(authorId: string, dayIndex: number): Promise<bo
         author_id: authorId,
         day_index: dayIndex
       });
-    if (insertError) {
-      console.error("toggleLike insert error:", insertError);
-      return false;
-    }
+    if (insertError) return false;
   }
   
   return true;
-}
-
-// 3. 친구 피드 조회
-// auth.users 테이블 조인이 불가능할 수 있으므로 (보안 상), 프로필 테이블이 따로 없으면 
-// 앱에서 처리하거나 임시로 카카오 프로필 등을 별도 테이블에 저장해야 합니다.
-// 하지만 Supabase는 기본적으로 auth.users 조인을 지원하지 않습니다 (auth schema 접근 불가 제한).
-// 이를 해결하기 위해 일단 reading_records 만 가져오고 이름은 fallback 처리합니다.
-// (실제 프로덕션에서는 public.profiles 테이블을 만들어서 trigger로 동기화하는 것이 정석입니다.)
-export async function getFriendsFeed(): Promise<FriendFeedItem[]> {
-  const userId = await getUserId();
-  if (!userId) return [];
-
-  // 내 친구들의 목록 가져오기
-  const { data: friendships, error: friendError } = await supabase
-    .from('friendships')
-    .select('friend_id')
-    .eq('user_id', userId);
-
-  if (friendError || !friendships) {
-    console.error("getFriendsFeed friend error:", friendError);
-    return [];
-  }
-
-  const friendIds = friendships.map(f => f.friend_id);
-  if (friendIds.length === 0) return [];
-
-  // 친구들의 One Verse 기록 가져오기 (최신순)
-  const { data: records, error: recordError } = await supabase
-    .from('reading_records')
-    .select('*')
-    .in('user_id', friendIds)
-    .not('one_verse', 'is', null)
-    .order('completed_at', { ascending: false })
-    .limit(50);
-
-  if (recordError || !records) {
-    console.error("getFriendsFeed record error:", recordError);
-    return [];
-  }
-
-  // 모든 좋아요 데이터 가져오기 (피드에 표시된 기록들에 대해서)
-  // 현실적으로는 IN 쿼리나 서버사이드 뷰가 좋지만, 여기서는 간단히 전체 조회를 활용
-  const authorIds = Array.from(new Set(records.map(r => r.user_id)));
-  const { data: likes, error: likeError } = await supabase
-    .from('one_verse_likes')
-    .select('liker_id, author_id, day_index')
-    .in('author_id', authorIds);
-
-  const feedItems: FriendFeedItem[] = records.map(record => {
-    const recordLikes = likes ? likes.filter(l => l.author_id === record.user_id && l.day_index === record.day_index) : [];
-    const isLikedByMe = recordLikes.some(l => l.liker_id === userId);
-
-    return {
-      user_id: record.user_id,
-      name: "익명의 친구", // Profile table needed for real names
-      avatar_url: "",
-      day_index: record.day_index,
-      read_date: record.read_date,
-      completed_at: record.completed_at,
-      one_verse: record.one_verse,
-      like_count: recordLikes.length,
-      is_liked_by_me: isLikedByMe
-    };
-  });
-
-  return feedItems;
 }

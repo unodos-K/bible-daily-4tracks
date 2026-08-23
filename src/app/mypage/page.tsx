@@ -20,7 +20,7 @@ import { getAuthUser, AuthUser } from "@/lib/auth";
 import { signOut, signInWithKakao } from "@/lib/supabase";
 import MemoryTrainerModal from "@/components/MemoryTrainerModal";
 import SettingsModal from "@/components/SettingsModal";
-import FriendsFeed from "@/components/FriendsFeed";
+import FriendsList from "@/components/FriendsList";
 
 function getDaysInMonth(year: number, month: number) {
   return new Date(year, month, 0).getDate();
@@ -694,9 +694,9 @@ export default function MyPage() {
         <div className="w-full h-px bg-stone-200 dark:bg-stone-800 my-4" />
         
         <h2 className="text-lg sm:text-xl font-bold text-stone-800 dark:text-stone-100 flex items-center gap-2">
-          👥 친구들의 One Verse
+          👥 내 친구 목록
         </h2>
-        <FriendsFeed />
+        <FriendsList />
 
       </div>
       
