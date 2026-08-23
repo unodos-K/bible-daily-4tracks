@@ -10,6 +10,11 @@ export const metadata: Metadata = {
   title: "4Tracks",
   description: "깔끔하고 가독성 높은 모바일 성경 뷰어 웹앱",
   manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    title: "4Tracks",
+    statusBarStyle: "black-translucent",
+  },
 };
 
 export const viewport: Viewport = {
@@ -18,6 +23,10 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#fafaf9" },
+    { media: "(prefers-color-scheme: dark)", color: "#0c0a09" },
+  ],
 };
 
 export default function RootLayout({
@@ -28,14 +37,7 @@ export default function RootLayout({
   return (
     <html lang="ko" className="bg-stone-50 dark:bg-stone-950 overscroll-none">
       <head>
-        {/* Mobile Web App Optimizations */}
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="apple-touch-fullscreen" content="yes" />
-        <meta name="theme-color" content="#1c1917" />
-        <meta name="format-detection" content="telephone=no" />
+        {/* Mobile Web App Optimizations - Managed by Next.js metadata/viewport */}
         <Script
           src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"
           strategy="beforeInteractive"
