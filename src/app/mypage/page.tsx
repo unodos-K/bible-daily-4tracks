@@ -547,9 +547,9 @@ export default function MyPage() {
 
         {/* 상세 팝업 모달 (가로 스와이프 캐러셀 지원) */}
         {selectedRecordStr && !isMemoryModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in" onClick={() => setSelectedRecordStr(null)}>
+          <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in" onClick={() => setSelectedRecordStr(null)}>
             <div 
-              className="w-full max-w-xl md:max-w-2xl mx-auto bg-white dark:bg-stone-900 rounded-3xl shadow-2xl overflow-y-auto flex flex-col animate-in zoom-in-95 max-h-[90vh]"
+              className="w-full max-w-xl md:max-w-2xl mx-auto bg-white dark:bg-stone-900 rounded-3xl shadow-2xl overflow-y-auto flex flex-col animate-in zoom-in-95 h-[50vh]"
               onClick={e => e.stopPropagation()}
             >
               {(() => {
@@ -656,7 +656,7 @@ export default function MyPage() {
                                 }`}>
                                   {isRecordMem ? '👑 암송 완료' : '📖 통독 완료'}
                                 </div>
-                                <div className="w-full max-h-[300px] md:max-h-[400px] overflow-y-auto pr-2 scrollbar-hide">
+                                <div className="w-full flex-1 overflow-y-auto pr-2 scrollbar-hide">
                                   <blockquote className="w-full break-words break-keep whitespace-normal text-lg sm:text-xl md:text-2xl leading-relaxed sm:leading-loose text-stone-800 dark:text-stone-100 font-medium italic">
                                     {displayTxt}
                                   </blockquote>
@@ -708,7 +708,7 @@ export default function MyPage() {
                               try {
                                 saveViewerDay(dayRecords[currentSlideIndex].dayIndex);
                               } catch {}
-                              router.push("/");
+                              router.push("/read?day=" + dayRecords[currentSlideIndex].dayIndex);
                             }}
                             className="flex-1 py-3.5 sm:py-4 px-6 bg-stone-800 hover:bg-stone-900 dark:bg-stone-200 dark:hover:bg-stone-300 dark:text-stone-900 text-white font-bold rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2 text-base sm:text-lg"
                           >

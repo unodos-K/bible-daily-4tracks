@@ -448,12 +448,12 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
               </div>
 
               {/* Step Info */}
-              <div className="flex flex-col">
+              <div className="flex flex-col mb-2">
                 <span className="text-sm font-bold text-stone-800 dark:text-stone-200">
                   {currentStep.phaseLabel}
                 </span>
                 <span className="text-xs font-semibold text-stone-400 mt-0.5">
-                  해당 Step 진행률 {totalProgressDisplay}%
+                  해당 Step 진행 중
                 </span>
               </div>
 
