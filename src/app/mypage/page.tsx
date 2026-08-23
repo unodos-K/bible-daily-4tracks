@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, BrainCircuit, X, Flame, Settings, MessageCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight, BrainCircuit, X, Flame, Settings, Share2 } from "lucide-react";
 import { 
   ReadingSettings, 
   ReadRecordsMap, 
@@ -491,10 +491,10 @@ export default function MyPage() {
                             setSelectedDayIndexForMemory(record.dayIndex);
                             setIsMemoryModalOpen(true);
                           }}
-                          className="flex-1 py-3 text-sm font-bold text-amber-600 dark:text-amber-500 hover:bg-amber-50 dark:hover:bg-stone-800 flex items-center justify-center gap-1.5 transition-colors border-r border-stone-100 dark:border-stone-800"
+                          className="flex-1 py-3 text-xs sm:text-sm font-bold text-amber-600 dark:text-amber-500 hover:bg-amber-50 dark:hover:bg-stone-800 flex items-center justify-center gap-1.5 transition-colors border-r border-stone-100 dark:border-stone-800"
                         >
                           <BrainCircuit size={16} />
-                          {isMem ? '암송 복습하기' : '암송 훈련하기'}
+                          {isMem ? '암송 복습' : '암송 훈련'}
                         </button>
                         <button
                           onClick={() => {
@@ -503,16 +503,17 @@ export default function MyPage() {
                             } catch {}
                             router.push("/read?day=" + record.dayIndex);
                           }}
-                          className="flex-1 py-3 text-sm font-bold text-sky-600 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-stone-800 flex items-center justify-center gap-1.5 transition-colors border-r border-stone-100 dark:border-stone-800"
+                          className="flex-1 py-3 text-xs sm:text-sm font-bold text-sky-600 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-stone-800 flex items-center justify-center gap-1.5 transition-colors border-r border-stone-100 dark:border-stone-800"
                         >
-                          📖 말씀 본문 보기
+                          📖 본문 보기
                         </button>
                         <button
                           onClick={() => handleShareOneVerse(record)}
-                          className="w-14 py-3 text-black dark:text-black hover:bg-[#FDD800] bg-[#FEE500] flex items-center justify-center transition-colors"
-                          aria-label="카카오 공유"
+                          className="flex-1 py-3 text-xs sm:text-sm font-bold text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 flex items-center justify-center gap-1.5 transition-colors"
+                          aria-label="공유하기"
                         >
-                          <MessageCircle size={18} className="fill-black" />
+                          <Share2 size={16} />
+                          공유하기
                         </button>
                       </div>
                     </div>
