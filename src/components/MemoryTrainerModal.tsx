@@ -52,7 +52,7 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
   const [isPlaying, setIsPlaying] = useState(true);
   const [intervalSeconds, setIntervalSeconds] = useState<number>(5);
   const [stepIndex, setStepIndex] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(5);
+  const [elapsed, setElapsed] = useState(0); // 정밀한 시간 계산을 위해 경과 시간(ms) 상태 추가
   const [hasCompleted, setHasCompleted] = useState(false);
 
   const [isListening, setIsListening] = useState(false);
@@ -153,7 +153,8 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
 
   const currentStep = steps[stepIndex] || steps[steps.length - 1];
   const isLastStep = stepIndex >= steps.length - 1;
-  const totalProgress = isLastStep ? 100 : Math.round(((intervalSeconds - timeLeft) / intervalSeconds) * 100);
+  const totalProgress = isLastStep ? 100 : Math.min(100, (elapsed / (intervalSeconds * 1000)) * 100);
+  const timeLeftDisplay = Math.max(0, Math.ceil(intervalSeconds - elapsed / 1000));
   const currentPhaseStepsCount = steps.filter(s => s.phase === currentStep.phase).length;
   const currentSegmentIndex = stepIndex - steps.findIndex(s => s.phase === currentStep.phase);
 
@@ -161,19 +162,24 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
   useEffect(() => {
     if (stepState !== 'training' || isLastStep || !isPlaying) return;
 
+    let lastTime = Date.now();
     const timer = setInterval(() => {
-      setTimeLeft((prev) => prev - 1);
-    }, 1000);
+      const now = Date.now();
+      const delta = now - lastTime;
+      lastTime = now;
+      
+      setElapsed((prev) => prev + delta);
+    }, 20); // 20ms 간격으로 업데이트하여 끊김없는 완벽한 싱크 구현 (약 50fps)
 
     return () => clearInterval(timer);
   }, [stepState, isLastStep, isPlaying]);
 
   useEffect(() => {
-    if (timeLeft <= 0 && stepState === 'training' && !isLastStep) {
+    if (elapsed >= intervalSeconds * 1000 && stepState === 'training' && !isLastStep) {
       setStepIndex((curr) => Math.min(curr + 1, steps.length - 1));
-      setTimeLeft(intervalSeconds);
+      setElapsed(0);
     }
-  }, [timeLeft, stepState, isLastStep, intervalSeconds, steps.length]);
+  }, [elapsed, intervalSeconds, stepState, isLastStep, steps.length]);
 
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -233,7 +239,7 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
     window.speechSynthesis.cancel();
     setIsPlayingTTS(false);
     setStepIndex(0);
-    setTimeLeft(intervalSeconds);
+    setElapsed(0);
     setStepState('training');
     setIsPlaying(true);
   };
@@ -243,7 +249,7 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
     setIsPlayingTTS(false);
     setStepState('intro');
     setStepIndex(0);
-    setTimeLeft(intervalSeconds);
+    setElapsed(0);
     setIsPlaying(true);
     setHasCompleted(false);
     setTestResult('none');
@@ -255,7 +261,7 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
     const index = steps.findIndex(s => s.phase === targetPhase);
     if (index !== -1) {
       setStepIndex(index);
-      setTimeLeft(intervalSeconds);
+      setElapsed(0);
       setIsPlaying(true);
     }
   };
@@ -451,7 +457,7 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
                     </div>
                   ) : (
                     <div 
-                      key={isPlaying ? timeLeft : 'paused'}
+                      key={isPlaying ? timeLeftDisplay : 'paused'}
                       className={`flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-sm shadow-sm w-full ${
                         isPlaying 
                           ? "bg-sky-100 dark:bg-sky-900/50 text-sky-700 dark:text-sky-400 animate-pulse" 
@@ -459,7 +465,7 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
                       }`}
                     >
                       {isPlaying ? (
-                        <React.Fragment><Timer size={14} /> {timeLeft}초</React.Fragment>
+                        <React.Fragment><Timer size={14} /> {timeLeftDisplay}초</React.Fragment>
                       ) : (
                         <React.Fragment><Pause size={14} /> 멈춤</React.Fragment>
                       )}
@@ -483,8 +489,12 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
                     return (
                       <div key={idx} className="flex-1 bg-stone-200 dark:bg-stone-700 rounded-full overflow-hidden">
                         <div 
-                          className={`h-full transition-all duration-1000 ease-linear ${fillClass}`}
-                          style={{ width }}
+                          className={`h-full ease-linear ${fillClass}`}
+                          style={{ 
+                            width, 
+                            transitionProperty: 'width', 
+                            transitionDuration: isPlaying && idx === currentSegmentIndex ? '20ms' : '0ms' 
+                          }}
                         />
                       </div>
                     );
