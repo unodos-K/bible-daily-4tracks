@@ -62,9 +62,9 @@ export default function NicknameOnboardingModal({
           나만의 순례자 이름 짓기
         </h2>
         <p className="text-stone-500 dark:text-stone-400 text-sm mb-8 z-10 break-keep">
-          앱에서 활동할 때 사용될 닉네임을 설정해주세요. <br />
-          주사위를 굴려 다른 이름으로 바꿀 수 있습니다. <br />
-          한 번 확정된 닉네임은 변경할 수 없으니 신중하게 선택해 주세요!
+          <span className="block">앱에서 활동할 때 사용될 닉네임을 설정해주세요.</span>
+          <span className="block">주사위를 굴려 다른 이름으로 바꿀 수 있습니다.</span>
+          <span className="block">한 번 확정된 닉네임은 변경할 수 없으니 신중하게 선택해 주세요!</span>
         </p>
 
         <div className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-2xl p-6 mb-6 z-10 flex flex-col items-center justify-center min-h-[100px]">

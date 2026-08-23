@@ -372,7 +372,8 @@ export default function BibleViewerPage() {
             </div>
             <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 text-center">아직 열리지 않은 Day입니다 🔒</h3>
             <p className="text-stone-500 dark:text-stone-400 text-center text-sm mb-2">
-              이전 Day를 먼저 통독해 주세요! ✨<br/>한 걸음씩 차근차근 나아가는 것이 중요합니다.
+              <span className="block">이전 Day를 먼저 통독해 주세요! ✨</span>
+              <span className="block">한 걸음씩 차근차근 나아가는 것이 중요합니다.</span>
             </p>
             <button
               onClick={() => {
@@ -394,9 +395,13 @@ export default function BibleViewerPage() {
             <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-2">
               <Leaf size={32} />
             </div>
-            <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100 text-center">오늘의 권장 통독 분량을<br/>달성했습니다! 🌿</h3>
+            <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100 text-center">
+              <span className="block">오늘의 권장 통독 분량을</span>
+              <span className="block">달성했습니다! 🌿</span>
+            </h3>
             <p className="text-stone-500 dark:text-stone-400 text-center text-sm mb-4 leading-relaxed">
-              말씀의 깊은 묵상을 위해 하루에 최대 3개 Day까지만 읽을 수 있습니다.<br/>내일 새로운 마음으로 다음 말씀을 이어가보세요! ✨
+              <span className="block">말씀의 깊은 묵상을 위해 하루에 최대 3개 Day까지만 읽을 수 있습니다.</span>
+              <span className="block">내일 새로운 마음으로 다음 말씀을 이어가보세요! ✨</span>
             </p>
             <div className="flex flex-col gap-2 w-full">
               <button
@@ -449,7 +454,8 @@ export default function BibleViewerPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in md:p-4">
           <div className="bg-white dark:bg-stone-900 rounded-none md:rounded-2xl px-6 shadow-xl w-full h-full md:h-auto md:max-h-[90vh] max-w-sm flex flex-col items-center justify-center gap-4 animate-in zoom-in-95 pt-[calc(1.5rem+env(safe-area-inset-top))] pb-[calc(1.5rem+env(safe-area-inset-bottom))] md:py-6 overflow-y-auto">
             <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 text-center mb-2 leading-relaxed">
-              &apos;{formatReference(selectedVerse.book, selectedVerse.chapter, selectedVerse.verse)}&apos;을(를)<br/>오늘의 One Verse로 선택하시겠습니까?
+              <span className="block">&apos;{formatReference(selectedVerse.book, selectedVerse.chapter, selectedVerse.verse)}&apos;을(를)</span>
+              <span className="block">오늘의 One Verse로 선택하시겠습니까?</span>
             </h3>
             <div className="flex gap-3 w-full mt-2">
               <button
