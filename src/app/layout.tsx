@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { GlobalNavigation } from "@/components/GlobalNavigation";
 import { SettingsProvider } from "@/contexts/SettingsContext";
+import KakaoInit from "@/components/KakaoInit";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   title: "4Tracks",
@@ -33,8 +35,13 @@ export default function RootLayout({
         <meta name="apple-touch-fullscreen" content="yes" />
         <meta name="theme-color" content="#1c1917" />
         <meta name="format-detection" content="telephone=no" />
+        <Script
+          src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"
+          strategy="beforeInteractive"
+        />
       </head>
       <body className="min-h-screen-dynamic bg-neutral-100 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 flex flex-col selection:bg-amber-200 dark:selection:bg-amber-900 pt-[calc(52px+env(safe-area-inset-top))] safe-bottom">
+        <KakaoInit />
         <SettingsProvider>
           <GlobalNavigation />
           {children}

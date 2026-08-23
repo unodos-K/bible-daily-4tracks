@@ -114,6 +114,13 @@ export default function BibleViewerPage() {
       let currentSettings: ReadingSettings | null = null;
       
       if (user) {
+        // Handle invite code
+        const searchParams = new URLSearchParams(window.location.search);
+        const inviteCode = searchParams.get('inviteCode');
+        if (inviteCode) {
+          import('@/lib/social').then(m => m.addFriend(inviteCode).catch(e => console.error(e)));
+          window.history.replaceState({}, '', window.location.pathname);
+        }
         currentSettings = await fetchReadingSettings();
         currentRecords = await fetchReadRecords();
       }

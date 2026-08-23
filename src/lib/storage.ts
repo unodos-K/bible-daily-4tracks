@@ -31,7 +31,7 @@ export type ReadRecordsMap = Record<number, DayRecord>; // key: dayIndex (1~365)
 const isBrowser = typeof window !== "undefined";
 
 // Fetch user ID securely from session
-async function getUserId(): Promise<string | null> {
+export async function getUserId(): Promise<string | null> {
   const { data: { session } } = await supabase.auth.getSession();
   return session?.user?.id || null;
 }

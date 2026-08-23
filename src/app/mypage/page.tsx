@@ -20,6 +20,7 @@ import { getAuthUser, AuthUser } from "@/lib/auth";
 import { signOut, signInWithKakao } from "@/lib/supabase";
 import MemoryTrainerModal from "@/components/MemoryTrainerModal";
 import SettingsModal from "@/components/SettingsModal";
+import FriendsFeed from "@/components/FriendsFeed";
 
 function getDaysInMonth(year: number, month: number) {
   return new Date(year, month, 0).getDate();
@@ -110,6 +111,41 @@ export default function MyPage() {
     await signOut();
     setAuthUser(null);
     window.location.href = "/";
+  };
+
+  const handleInvite = () => {
+    if (!authUser) {
+      alert("로그인이 필요합니다.");
+      return;
+    }
+    
+    if (typeof window !== "undefined" && window.Kakao) {
+      const inviteUrl = `${window.location.origin}?inviteCode=${authUser.id}`;
+      
+      window.Kakao.Share.sendDefault({
+        objectType: 'feed',
+        content: {
+          title: '4Tracks 성경 통독',
+          description: `📖 ${authUser.name || '친구'}님과 함께 매일 말씀 통독과 One Verse 묵상을 시작해보세요!`,
+          imageUrl: 'https://images.unsplash.com/photo-1504052434569-70ad5836ab65?q=80&w=800&auto=format&fit=crop',
+          link: {
+            mobileWebUrl: inviteUrl,
+            webUrl: inviteUrl,
+          },
+        },
+        buttons: [
+          {
+            title: '함께 통독하기',
+            link: {
+              mobileWebUrl: inviteUrl,
+              webUrl: inviteUrl,
+            },
+          },
+        ],
+      });
+    } else {
+      alert("카카오톡 공유 기능을 사용할 수 없습니다.");
+    }
   };
 
   if (!isClient || !settings || !settings.hasStarted) {
@@ -223,6 +259,14 @@ export default function MyPage() {
             <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 font-medium bg-stone-100 dark:bg-stone-800 inline-block px-3 py-1.5 rounded-full w-fit">
               📅 통독 시작일: {settings.startDate} (Day {daysSince}일차)
             </p>
+            {authUser && (
+              <button
+                onClick={handleInvite}
+                className="mt-2 text-xs sm:text-sm font-bold bg-[#FEE500] text-black hover:bg-[#FDD800] px-4 py-2 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2 w-full"
+              >
+                💬 친구 초대하기 (카카오톡)
+              </button>
+            )}
           </div>
 
           <button
@@ -646,6 +690,13 @@ export default function MyPage() {
             </div>
           </div>
         )}
+
+        <div className="w-full h-px bg-stone-200 dark:bg-stone-800 my-4" />
+        
+        <h2 className="text-lg sm:text-xl font-bold text-stone-800 dark:text-stone-100 flex items-center gap-2">
+          👥 친구들의 One Verse
+        </h2>
+        <FriendsFeed />
 
       </div>
       
