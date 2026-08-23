@@ -191,13 +191,7 @@ export default function BibleViewerPage() {
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
-      const headerOffset = 90; // 상단 고정 헤더 높이만큼 오프셋 보정
-      const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: "smooth"
-      });
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
 
@@ -535,55 +529,60 @@ export default function BibleViewerPage() {
       )}
 
       {/* 플로팅 퀵 네비게이터 */}
-      <div className="fixed right-3 md:right-8 top-1/2 -translate-y-1/2 z-40 flex flex-col gap-2 md:gap-3">
-        <button 
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} 
-          className="flex flex-col items-center justify-center p-2 md:p-3 rounded-xl bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50 shadow-md transition-all hover:scale-110" 
-          title="처음"
-        >
-          <span className="text-base md:text-xl mb-1 leading-none">🏠</span>
-          <span className="text-[10px] md:text-xs font-bold leading-none">처음</span>
-        </button>
-        <button 
-          onClick={() => scrollToSection('track-old-testament')} 
-          className="flex flex-col items-center justify-center p-2 md:p-3 rounded-xl bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50 shadow-md transition-all hover:scale-110" 
-          title="구약"
-        >
-          <span className="text-base md:text-xl mb-1 leading-none">📜</span>
-          <span className="text-[10px] md:text-xs font-bold leading-none">구약</span>
-        </button>
-        <button 
-          onClick={() => scrollToSection('track-new-testament')} 
-          className="flex flex-col items-center justify-center p-2 md:p-3 rounded-xl bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50 shadow-md transition-all hover:scale-110" 
-          title="신약"
-        >
-          <span className="text-base md:text-xl mb-1 leading-none">🕊️</span>
-          <span className="text-[10px] md:text-xs font-bold leading-none">신약</span>
-        </button>
-        <button 
-          onClick={() => scrollToSection('track-psalms')} 
-          className="flex flex-col items-center justify-center p-2 md:p-3 rounded-xl bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50 shadow-md transition-all hover:scale-110" 
-          title="시편"
-        >
-          <span className="text-base md:text-xl mb-1 leading-none">🎵</span>
-          <span className="text-[10px] md:text-xs font-bold leading-none">시편</span>
-        </button>
-        <button 
-          onClick={() => scrollToSection('track-proverbs')} 
-          className="flex flex-col items-center justify-center p-2 md:p-3 rounded-xl bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50 shadow-md transition-all hover:scale-110" 
-          title="잠언"
-        >
-          <span className="text-base md:text-xl mb-1 leading-none">💡</span>
-          <span className="text-[10px] md:text-xs font-bold leading-none">잠언</span>
-        </button>
-        <button 
-          onClick={() => scrollToSection('viewer-bottom')} 
-          className="flex flex-col items-center justify-center p-2 md:p-3 rounded-xl bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50 shadow-md transition-all hover:scale-110" 
-          title="완료"
-        >
-          <span className="text-base md:text-xl mb-1 leading-none">✅</span>
-          <span className="text-[10px] md:text-xs font-bold leading-none">완료</span>
-        </button>
+      <div className="fixed right-0 top-1/2 -translate-y-1/2 z-40 ios-pwa-bottom-safe mr-2">
+        <div className="flex flex-col gap-1 p-2 bg-zinc-900/80 backdrop-blur-md rounded-full shadow-lg">
+          <button 
+            onClick={() => {
+              const main = document.querySelector('main');
+              if (main) main.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className="flex flex-col items-center justify-center w-10 h-10 md:w-12 md:h-12 aspect-square rounded-full bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50 shadow-md transition-all hover:scale-110" 
+            title="처음"
+          >
+            <span className="text-xl leading-none">🏠</span>
+            <span className="sr-only">처음</span>
+          </button>
+          <button 
+            onClick={() => scrollToSection('track-old-testament')} 
+            className="flex flex-col items-center justify-center w-10 h-10 md:w-12 md:h-12 aspect-square rounded-full bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50 shadow-md transition-all hover:scale-110" 
+            title="구약"
+          >
+            <span className="text-xl leading-none">📜</span>
+            <span className="sr-only">구약</span>
+          </button>
+          <button 
+            onClick={() => scrollToSection('track-new-testament')} 
+            className="flex flex-col items-center justify-center w-10 h-10 md:w-12 md:h-12 aspect-square rounded-full bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50 shadow-md transition-all hover:scale-110" 
+            title="신약"
+          >
+            <span className="text-xl leading-none">🕊️</span>
+            <span className="sr-only">신약</span>
+          </button>
+          <button 
+            onClick={() => scrollToSection('track-psalms')} 
+            className="flex flex-col items-center justify-center w-10 h-10 md:w-12 md:h-12 aspect-square rounded-full bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50 shadow-md transition-all hover:scale-110" 
+            title="시편"
+          >
+            <span className="text-xl leading-none">🎵</span>
+            <span className="sr-only">시편</span>
+          </button>
+          <button 
+            onClick={() => scrollToSection('track-proverbs')} 
+            className="flex flex-col items-center justify-center w-10 h-10 md:w-12 md:h-12 aspect-square rounded-full bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50 shadow-md transition-all hover:scale-110" 
+            title="잠언"
+          >
+            <span className="text-xl leading-none">💡</span>
+            <span className="sr-only">잠언</span>
+          </button>
+          <button 
+            onClick={() => scrollToSection('viewer-bottom')} 
+            className="flex flex-col items-center justify-center w-10 h-10 md:w-12 md:h-12 aspect-square rounded-full bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50 shadow-md transition-all hover:scale-110" 
+            title="완료"
+          >
+            <span className="text-xl leading-none">✅</span>
+            <span className="sr-only">완료</span>
+          </button>
+        </div>
       </div>
 
 
