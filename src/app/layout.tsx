@@ -40,7 +40,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" className="bg-white dark:bg-stone-900 overscroll-none">
+    <html lang="ko" className="bg-white dark:bg-stone-900 overscroll-none overflow-hidden">
       <head>
         {/* Mobile Web App Optimizations - Managed by Next.js metadata/viewport */}
         <Script

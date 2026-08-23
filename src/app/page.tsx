@@ -5,14 +5,14 @@ import Image from "next/image";
 
 export default function LandingPage() {
   return (
-    <div className="w-full h-[100dvh] flex flex-col relative items-center justify-center bg-stone-50 dark:bg-stone-950 overflow-hidden pb-[env(safe-area-inset-bottom)]">
+    <div className="w-full min-h-full flex flex-col relative items-center justify-center bg-stone-50 dark:bg-stone-950 overflow-hidden pb-6">
       {/* 백그라운드 효과 (블러 원) */}
       <div className="absolute top-[-10%] left-[-10%] w-72 h-72 bg-sky-200 dark:bg-sky-900/40 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-3xl opacity-70"></div>
       <div className="absolute top-[20%] right-[-10%] w-72 h-72 bg-amber-200 dark:bg-amber-900/40 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-3xl opacity-70"></div>
       <div className="absolute bottom-[-10%] left-[20%] w-72 h-72 bg-emerald-200 dark:bg-emerald-900/30 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-3xl opacity-70"></div>
 
       {/* 메인 컨텐츠 */}
-      <div className="relative z-10 flex flex-col items-center justify-center px-6 w-full max-w-md h-full gap-12">
+      <div className="relative z-10 flex flex-col items-center justify-center px-6 w-full max-w-md h-full gap-8 py-8">
 
         {/* 로고 & 타이틀 영역 */}
         <div className="flex flex-col items-center text-center">
@@ -25,7 +25,7 @@ export default function LandingPage() {
           <div className="text-zinc-500 dark:text-zinc-300 text-center space-y-2 mt-4 font-medium">
             <p>
               <span className="block">매일 말씀을 읽고 내게 주신</span>
-              <span className="block">한 구절을 고르고 암송하세요.</span>
+              <span className="block">한 구절을 암송하세요</span>
             </p>
             <p className="text-sm text-zinc-400">말씀읽기 & 뇌새김 말씀 암송</p>
           </div>
