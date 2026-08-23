@@ -218,7 +218,7 @@ export default function MyPage() {
   };
 
   return (
-    <div className="w-full min-h-full flex flex-col items-center bg-transparent p-6 pb-28">
+    <div className="w-full min-h-full flex flex-col items-center bg-transparent p-6 pb-10">
       <div className="w-full max-w-2xl flex flex-col gap-8">
         
         {/* 헤더 및 프로필 */}

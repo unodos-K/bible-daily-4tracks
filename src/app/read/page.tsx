@@ -586,23 +586,7 @@ export default function BibleViewerPage() {
         </button>
       </div>
 
-      {/* 폰트 조절 플로팅 버튼 */}
-      <div className="fixed bottom-6 right-6 flex flex-col gap-2 z-40">
-        <button
-          onClick={() => handleFontSizeChange(Math.min(fontSize + 2, 28))}
-          className="p-3 bg-white dark:bg-stone-800 shadow-lg rounded-full border border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors"
-          aria-label="글자 크기 확대"
-        >
-          <ZoomIn size={20} />
-        </button>
-        <button
-          onClick={() => handleFontSizeChange(Math.max(fontSize - 2, 14))}
-          className="p-3 bg-white dark:bg-stone-800 shadow-lg rounded-full border border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors"
-          aria-label="글자 크기 축소"
-        >
-          <ZoomOut size={20} />
-        </button>
-      </div>
+
 
       <div className="w-full max-w-2xl bg-transparent shadow-2xl flex flex-col relative min-h-full">
         
