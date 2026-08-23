@@ -496,27 +496,41 @@ export default function BibleViewerPage() {
       {/* Success Modal (경우 3) */}
       {showSuccessModal && confirmedVerse && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in md:p-4">
-          <div className="bg-white dark:bg-stone-900 rounded-none md:rounded-3xl p-6 md:p-8 shadow-2xl w-full h-full md:h-auto md:max-h-[85vh] max-w-md flex flex-col relative animate-in zoom-in-95 border border-stone-200 dark:border-stone-800 text-center overflow-y-auto pt-[calc(2rem+env(safe-area-inset-top))] pb-[calc(6rem+env(safe-area-inset-bottom))] md:py-8">
-            <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/50 rounded-full flex items-center justify-center mx-auto mb-4 shrink-0">
-              <CheckCircle2 size={40} className="text-emerald-500" />
-            </div>
-            <h3 className="text-2xl font-bold text-stone-800 dark:text-stone-100 mb-2">
-              오늘 말씀 통독 완료! 🎉
-            </h3>
-            <p className="text-stone-500 dark:text-stone-400 mb-6">
-              오늘의 4개 트랙 말씀을 모두 읽으셨습니다! 👏
-            </p>
+          <div className="bg-white dark:bg-stone-900 rounded-none md:rounded-3xl p-6 md:p-8 shadow-2xl w-full h-[85vh] max-h-[800px] max-w-md flex flex-col justify-between relative animate-in zoom-in-95 border border-stone-200 dark:border-stone-800 text-center overflow-hidden pt-[calc(2rem+env(safe-area-inset-top))] pb-[calc(1.5rem+env(safe-area-inset-bottom))] md:py-8">
             
-            <div className="bg-stone-50 dark:bg-stone-800/50 rounded-2xl p-6 mb-8 border border-stone-100 dark:border-stone-700 text-left">
-              <p className="text-lg font-semibold text-stone-800 dark:text-stone-200 leading-relaxed mb-4">
-                {confirmedVerse.displayText}
+            {/* Top Area: Header */}
+            <div className="flex-shrink-0">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-emerald-100 dark:bg-emerald-900/50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle2 className="text-emerald-500 w-8 h-8 sm:w-10 sm:h-10" />
+              </div>
+              <h3 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100 mb-2">
+                오늘 말씀 통독 완료! 🎉
+              </h3>
+              <p className="text-stone-500 dark:text-stone-400 text-sm sm:text-base mb-4 sm:mb-6">
+                오늘의 4개 트랙 말씀을 모두 읽으셨습니다! 👏
               </p>
-              <p className="text-sm font-bold text-stone-400 dark:text-stone-500 text-right">
-                {formatReference(confirmedVerse.book, confirmedVerse.chapter, confirmedVerse.verse)}
-              </p>
+            </div>
+            
+            {/* Middle Area: Flexible Card with dynamic text */}
+            <div className="flex-1 min-h-0 bg-stone-50 dark:bg-stone-800/50 rounded-2xl p-4 sm:p-6 mb-6 border border-stone-100 dark:border-stone-700 flex flex-col items-center justify-center overflow-y-auto">
+              <div className="w-full flex flex-col items-center justify-center my-auto">
+                <p className={`text-stone-800 dark:text-stone-200 leading-relaxed mb-4 text-center break-keep w-full ${
+                  confirmedVerse.displayText.length <= 50 
+                    ? "text-2xl sm:text-3xl font-bold" 
+                    : confirmedVerse.displayText.length <= 100 
+                      ? "text-xl sm:text-2xl font-semibold" 
+                      : "text-base sm:text-lg font-medium"
+                }`}>
+                  {confirmedVerse.displayText}
+                </p>
+                <p className="text-sm font-bold text-stone-400 dark:text-stone-500 w-full text-center mt-2">
+                  {formatReference(confirmedVerse.book, confirmedVerse.chapter, confirmedVerse.verse)}
+                </p>
+              </div>
             </div>
 
-            <div className="flex flex-col gap-3">
+            {/* Bottom Area: Action Buttons */}
+            <div className="flex-shrink-0 flex flex-col gap-3 w-full">
               <button
                 onClick={() => {
                   setShowSuccessModal(false);
@@ -533,7 +547,7 @@ export default function BibleViewerPage() {
                   onClick={() => router.push("/mypage")}
                   className="flex-1 py-3.5 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-bold rounded-xl transition-colors"
                 >
-                  마이페이지로 이동
+                  마이페이지로
                 </button>
                 <button
                   onClick={() => setShowSuccessModal(false)}
@@ -543,6 +557,7 @@ export default function BibleViewerPage() {
                 </button>
               </div>
             </div>
+
           </div>
         </div>
       )}
