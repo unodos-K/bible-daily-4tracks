@@ -139,7 +139,7 @@ export default function FriendsPage() {
             onClick={() => setActiveTab("requests")}
             className={`flex-1 pb-3 font-semibold border-b-2 transition-colors relative ${activeTab === "requests" ? "border-stone-800 text-stone-800 dark:border-stone-200 dark:text-stone-200" : "border-transparent text-stone-400 hover:text-stone-600"}`}
           >
-            요청 대기
+            받은 요청
             {requests.length > 0 && (
               <span className="absolute top-0 right-4 w-2 h-2 bg-red-500 rounded-full"></span>
             )}
@@ -222,7 +222,7 @@ export default function FriendsPage() {
                 </div>
               )}
 
-              {/* 요청 대기 탭 */}
+              {/* 받은 요청 탭 */}
               {activeTab === "requests" && (
                 <div className="flex flex-col gap-3">
                   {requests.length === 0 ? (
@@ -242,11 +242,11 @@ export default function FriendsPage() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <button onClick={() => handleRespondRequest(req.id, true)} className="p-2 bg-emerald-100 text-emerald-600 hover:bg-emerald-200 rounded-full">
-                            <Check size={18} />
+                          <button onClick={() => handleRespondRequest(req.id, true)} className="flex items-center gap-1 px-3 py-1.5 font-bold text-sm bg-emerald-100 text-emerald-700 hover:bg-emerald-200 rounded-lg transition-colors">
+                            <Check size={16} /> 수락
                           </button>
-                          <button onClick={() => handleRespondRequest(req.id, false)} className="p-2 bg-red-100 text-red-600 hover:bg-red-200 rounded-full">
-                            <RejectIcon size={18} />
+                          <button onClick={() => handleRespondRequest(req.id, false)} className="flex items-center gap-1 px-3 py-1.5 font-bold text-sm bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700 rounded-lg transition-colors">
+                            <RejectIcon size={16} /> 거절
                           </button>
                         </div>
                       </div>
