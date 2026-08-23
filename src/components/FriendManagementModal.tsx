@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { X, Search, UserPlus, Check, X as RejectIcon, UserCheck, Flame, BookOpen } from "lucide-react";
+import { X, Search, UserPlus, Check, X as RejectIcon, UserCheck, Flame, BookOpen, Heart } from "lucide-react";
 import { 
   FriendProfile, 
   searchUsersByNickname, 
@@ -10,7 +10,8 @@ import {
   respondToFriendRequest, 
   getFriendsList,
   FriendFeedItem,
-  getFriendRecords
+  getFriendRecords,
+  toggleLike
 } from "@/lib/social";
 
 interface FriendManagementModalProps {
@@ -93,6 +94,32 @@ export default function FriendManagementModal({ isOpen, onClose }: FriendManagem
     }
   };
 
+  const handleLike = async (friendId: string, item: FriendFeedItem) => {
+    // 낙관적 업데이트
+    setFriendsFeed(prev => {
+      const friendFeed = prev[friendId];
+      if (!friendFeed) return prev;
+      
+      const newFeed = friendFeed.map(rec => {
+        if (rec.day_index === item.day_index) {
+          return {
+            ...rec,
+            is_liked_by_me: !rec.is_liked_by_me,
+            like_count: rec.is_liked_by_me ? Math.max(0, rec.like_count - 1) : rec.like_count + 1
+          };
+        }
+        return rec;
+      });
+
+      return { ...prev, [friendId]: newFeed };
+    });
+
+    const success = await toggleLike(friendId, item.day_index);
+    if (!success) {
+      console.error("좋아요 처리 실패");
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -164,9 +191,29 @@ export default function FriendManagementModal({ isOpen, onClose }: FriendManagem
                         
                         {/* 최신 One Verse 노출 */}
                         {friendsFeed[friend.id] && friendsFeed[friend.id].length > 0 ? (
-                          <div className="mt-2 p-3 bg-stone-50 dark:bg-stone-950 rounded-xl text-sm italic text-stone-600 dark:text-stone-300 border border-stone-100 dark:border-stone-800">
-                            &quot;{friendsFeed[friend.id][0].one_verse.text}&quot; <br/>
-                            <span className="text-xs text-stone-400 not-italic block mt-1">Day {friendsFeed[friend.id][0].day_index}</span>
+                          <div className="mt-2 p-3 bg-stone-50 dark:bg-stone-950 rounded-xl text-sm text-stone-600 dark:text-stone-300 border border-stone-100 dark:border-stone-800 flex flex-col gap-2">
+                            <div className="flex justify-between items-center">
+                              <span className="font-bold text-sky-600 dark:text-sky-400 text-xs">{friendsFeed[friend.id][0].one_verse.reference}</span>
+                              <span className="text-xs text-stone-400">Day {friendsFeed[friend.id][0].day_index}</span>
+                            </div>
+                            <p className="font-semibold text-stone-700 dark:text-stone-200">
+                              &quot;{friendsFeed[friend.id][0].one_verse.displayText || friendsFeed[friend.id][0].one_verse.text}&quot;
+                            </p>
+                            
+                            {/* 좋아요 버튼 연동 */}
+                            <div className="flex justify-end pt-1 mt-1 border-t border-stone-200 dark:border-stone-800/50">
+                              <button 
+                                onClick={() => handleLike(friend.id, friendsFeed[friend.id][0])}
+                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-colors ${
+                                  friendsFeed[friend.id][0].is_liked_by_me 
+                                    ? "bg-red-50 dark:bg-red-950/30 text-red-500" 
+                                    : "bg-stone-100 dark:bg-stone-800 text-stone-500 hover:bg-stone-200 dark:hover:bg-stone-700"
+                                }`}
+                              >
+                                <Heart size={16} fill={friendsFeed[friend.id][0].is_liked_by_me ? "currentColor" : "none"} />
+                                <span className="text-xs font-bold">{friendsFeed[friend.id][0].like_count > 0 ? friendsFeed[friend.id][0].like_count : '좋아요'}</span>
+                              </button>
+                            </div>
                           </div>
                         ) : (
                           <div className="mt-2 text-xs text-stone-400">아직 기록이 없습니다.</div>
