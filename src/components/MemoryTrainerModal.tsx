@@ -153,8 +153,11 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
 
   const currentStep = steps[stepIndex] || steps[steps.length - 1];
   const isLastStep = stepIndex >= steps.length - 1;
-  const totalProgress = isLastStep ? 100 : Math.min(100, (elapsed / (intervalSeconds * 1000)) * 100);
-  const timeLeftDisplay = Math.max(0, Math.ceil(intervalSeconds - elapsed / 1000));
+  
+  const rawProgress = isLastStep ? 100 : Math.min(100, (elapsed / (intervalSeconds * 1000)) * 100);
+  const totalProgressDisplay = rawProgress.toFixed(1);
+  const timeLeftDisplay = Math.max(0, intervalSeconds - (elapsed / 1000)).toFixed(1);
+  
   const currentPhaseStepsCount = steps.filter(s => s.phase === currentStep.phase).length;
   const currentSegmentIndex = stepIndex - steps.findIndex(s => s.phase === currentStep.phase);
 
@@ -444,7 +447,7 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
                   {currentStep.phaseLabel}
                 </span>
                 <span className="text-xs font-semibold text-stone-400 mt-0.5">
-                  해당 Step 진행률 {totalProgress}%
+                  해당 Step 진행률 {totalProgressDisplay}%
                 </span>
               </div>
 
@@ -481,7 +484,7 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
                     if (idx < currentSegmentIndex) {
                       width = "100%";
                     } else if (idx === currentSegmentIndex) {
-                      width = `${totalProgress}%`;
+                      width = `${rawProgress}%`;
                     } else {
                       fillClass = "bg-transparent";
                     }
