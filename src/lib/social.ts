@@ -256,6 +256,25 @@ export async function getFriendRecords(friendId: string): Promise<FriendFeedItem
   return feedItems;
 }
 
+// 4-1. 특정 친구의 통독 및 암송 통계 조회
+export async function getFriendStats(friendId: string): Promise<{ totalReadDays: number, memorizedCount: number }> {
+  const { data: records, error } = await supabase
+    .from('reading_records')
+    .select('one_verse')
+    .eq('user_id', friendId);
+
+  if (error || !records) {
+    console.error("getFriendStats error:", error);
+    return { totalReadDays: 0, memorizedCount: 0 };
+  }
+
+  const totalReadDays = records.length;
+  // @ts-expect-error: dynamic json type
+  const memorizedCount = records.filter(r => r.one_verse?.isMemorized).length;
+
+  return { totalReadDays, memorizedCount };
+}
+
 // 5. 좋아요 토글
 export async function toggleLike(authorId: string, dayIndex: number): Promise<boolean> {
   const userId = await getUserId();

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { X, Search, UserPlus, Check, X as RejectIcon, UserCheck, Flame, BookOpen, Heart } from "lucide-react";
 import { 
   FriendProfile, 
@@ -15,12 +16,7 @@ import {
   getSentRequests
 } from "@/lib/social";
 
-interface FriendManagementModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-export default function FriendManagementModal({ isOpen, onClose }: FriendManagementModalProps) {
+export default function FriendsPage() {
   const [activeTab, setActiveTab] = useState<"friends" | "requests" | "search">("friends");
   
   const [friends, setFriends] = useState<FriendProfile[]>([]);
@@ -35,16 +31,8 @@ export default function FriendManagementModal({ isOpen, onClose }: FriendManagem
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-      loadData();
-    } else {
-      document.body.style.overflow = "unset";
-    }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [isOpen]);
+    loadData();
+  }, []);
 
   const loadData = async () => {
     setIsLoading(true);
@@ -130,20 +118,15 @@ export default function FriendManagementModal({ isOpen, onClose }: FriendManagem
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in p-4" onClick={onClose}>
-      <div 
-        className="bg-white dark:bg-stone-900 w-full max-w-lg h-[80vh] flex flex-col rounded-3xl shadow-xl overflow-hidden animate-in zoom-in-95"
-        onClick={e => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between p-5 border-b border-stone-100 dark:border-stone-800">
-          <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100">친구 관리</h2>
-          <button onClick={onClose} className="p-2 text-stone-500 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full transition-colors">
-            <X size={20} />
-          </button>
-        </div>
+    <div className="w-full min-h-[calc(100vh-64px)] bg-stone-50 dark:bg-stone-950 flex flex-col pb-20">
+      <div className="w-full max-w-2xl mx-auto flex flex-col h-full">
+        {/* 헤더 */}
+        <header className="sticky top-0 z-40 bg-stone-50/95 dark:bg-stone-950/95 backdrop-blur-md pt-6 pb-4 px-6 border-b border-stone-200/50 dark:border-stone-800/50 flex items-center justify-between w-full">
+          <h1 className="text-2xl font-black text-stone-800 dark:text-stone-100 flex items-center gap-2">
+            친구 탭
+          </h1>
+        </header>
 
         <div className="flex px-4 pt-2 border-b border-stone-100 dark:border-stone-800">
           <button 
@@ -184,8 +167,8 @@ export default function FriendManagementModal({ isOpen, onClose }: FriendManagem
                   ) : (
                     friends.map(friend => (
                       <div key={friend.id} className="bg-white dark:bg-stone-900 p-4 rounded-2xl shadow-sm border border-stone-100 dark:border-stone-800 flex flex-col gap-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden flex-shrink-0">
+                        <Link href={`/friend/${friend.id}`} className="flex items-center gap-3 cursor-pointer group">
+                          <div className="w-10 h-10 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden flex-shrink-0 group-hover:ring-2 ring-sky-500 transition-all">
                             {friend.avatar_url ? (
                               <img src={friend.avatar_url} alt={friend.name} className="w-full h-full object-cover" />
                             ) : (
@@ -195,9 +178,9 @@ export default function FriendManagementModal({ isOpen, onClose }: FriendManagem
                             )}
                           </div>
                           <div>
-                            <div className="font-bold text-stone-800 dark:text-stone-100">{friend.nickname || friend.name}</div>
+                            <div className="font-bold text-stone-800 dark:text-stone-100 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">{friend.nickname || friend.name}</div>
                           </div>
-                        </div>
+                        </Link>
                         
                         {/* 최신 One Verse 노출 */}
                         {friendsFeed[friend.id] && friendsFeed[friend.id].length > 0 ? (

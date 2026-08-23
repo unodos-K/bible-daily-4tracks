@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { BookOpen, Share2 } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import { 
   ReadingSettings, 
   ReadRecordsMap, 
@@ -11,7 +11,6 @@ import {
   getNextUnreadDay
 } from "@/lib/storage";
 import { getAuthUser, AuthUser } from "@/lib/auth";
-import FriendsList from "@/components/FriendsList";
 
 declare global {
   interface Window {
@@ -59,36 +58,7 @@ export default function HomePage() {
     });
   }, []);
 
-  const handleInvite = () => {
-    if (!authUser || typeof window === "undefined" || !window.Kakao) return;
-    
-    if (!window.Kakao.isInitialized()) {
-      alert("카카오톡 SDK가 아직 로드되지 않았습니다.");
-      return;
-    }
 
-    window.Kakao.Share.sendDefault({
-      objectType: 'feed',
-      content: {
-        title: '함께하는 4Tracks 통독',
-        description: `📖 ${authUser.nickname || authUser.name}님과 함께 매일 말씀 통독과 One Verse 묵상을 시작해보세요!`,
-        imageUrl: 'https://i.ibb.co/30B3bM2/bible-daily.png',
-        link: {
-          mobileWebUrl: window.location.origin,
-          webUrl: window.location.origin,
-        },
-      },
-      buttons: [
-        {
-          title: '초대 수락하고 시작하기',
-          link: {
-            mobileWebUrl: `${window.location.origin}/?inviteCode=${authUser.id}`,
-            webUrl: `${window.location.origin}/?inviteCode=${authUser.id}`,
-          },
-        },
-      ],
-    });
-  };
 
   if (!isClient) return null;
 
@@ -158,24 +128,6 @@ export default function HomePage() {
           오늘의 말씀 읽기
         </button>
 
-        {/* 친구 목록 영역 */}
-        <div className="mt-2">
-          <div className="flex items-center justify-between mb-4 px-1">
-            <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 flex items-center gap-2">
-              🤝 함께하는 순례자들
-            </h3>
-            {authUser && (
-              <button
-                onClick={handleInvite}
-                className="text-xs font-bold bg-[#FEE500] text-black hover:bg-[#FDD800] px-3 py-1.5 rounded-lg transition-colors shadow-sm flex items-center gap-1.5"
-              >
-                <Share2 size={12} />
-                카카오톡 초대
-              </button>
-            )}
-          </div>
-          <FriendsList />
-        </div>
         </div>
       </div>
     </div>

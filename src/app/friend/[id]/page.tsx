@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Heart, Loader2, ChevronLeft } from "lucide-react";
-import { getFriendRecords, getFriendProfile, toggleLike, FriendFeedItem, FriendProfile } from "@/lib/social";
+import { getFriendRecords, getFriendProfile, toggleLike, getFriendStats, FriendFeedItem, FriendProfile } from "@/lib/social";
 import { getAuthUser, AuthUser } from "@/lib/auth";
 
 export default function FriendProfilePage() {
@@ -13,6 +13,8 @@ export default function FriendProfilePage() {
 
   const [records, setRecords] = useState<FriendFeedItem[]>([]);
   const [profile, setProfile] = useState<FriendProfile | null>(null);
+  const [stats, setStats] = useState<{ totalReadDays: number, memorizedCount: number }>({ totalReadDays: 0, memorizedCount: 0 });
+  const [thisMonthRecords, setThisMonthRecords] = useState<FriendFeedItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
 
@@ -26,11 +28,19 @@ export default function FriendProfilePage() {
 
       Promise.all([
         getFriendProfile(friendId),
-        getFriendRecords(friendId)
-      ]).then(([prof, recs]) => {
+        getFriendRecords(friendId),
+        getFriendStats(friendId)
+      ]).then(([prof, recs, st]) => {
         if (mounted) {
           setProfile(prof);
           setRecords(recs);
+          setStats(st);
+          
+          const now = new Date();
+          const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+          const monthly = recs.filter(r => r.read_date?.startsWith(currentMonthStr));
+          setThisMonthRecords(monthly);
+          
           setLoading(false);
         }
       });
@@ -104,7 +114,7 @@ export default function FriendProfilePage() {
 
       <main className="w-full max-w-2xl mx-auto flex flex-col gap-6 p-4 sm:p-8 mt-4">
         {/* 프로필 정보 섹션 */}
-        <div className="flex flex-col items-center py-6">
+        <div className="flex flex-col items-center py-6 px-4">
           <div className="w-24 h-24 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden shadow-sm mb-4 flex items-center justify-center text-4xl">
             {profile.avatar_url ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -117,17 +127,41 @@ export default function FriendProfilePage() {
           {profile.nickname && (
             <p className="text-stone-400 dark:text-stone-500 text-xs mt-1">카카오 연동 이름: {profile.name}</p>
           )}
-          <p className="text-stone-500 text-sm mt-2">총 {records.length}개의 One Verse 기록이 있습니다</p>
+
+          {/* 통독 현황 위젯 */}
+          <div className="w-full mt-6 bg-white dark:bg-stone-900 rounded-2xl p-5 shadow-sm border border-stone-200 dark:border-stone-800">
+            <div className="flex justify-between items-end mb-2">
+              <span className="text-sm font-bold text-stone-600 dark:text-stone-300">전체 통독 현황</span>
+              <span className="text-xs font-semibold text-stone-400">{stats.totalReadDays} / 365일 ({(stats.totalReadDays / 365 * 100).toFixed(1)}%)</span>
+            </div>
+            <div className="w-full h-3 bg-stone-100 dark:bg-stone-800 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-sky-500 dark:bg-sky-400 transition-all duration-1000 ease-out rounded-full" 
+                style={{ width: `${Math.min(100, (stats.totalReadDays / 365) * 100)}%` }} 
+              />
+            </div>
+            
+            {/* 뇌새김(암송) 통계 */}
+            <div className="mt-4 pt-4 border-t border-stone-100 dark:border-stone-800 flex justify-between items-center">
+              <span className="text-sm font-bold text-stone-600 dark:text-stone-300">뇌새김 암송 완료</span>
+              <span className="px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs font-bold rounded-full">
+                👑 {stats.memorizedCount}구절
+              </span>
+            </div>
+          </div>
         </div>
 
-        {/* 묵상 기록 리스트 */}
-        <div className="flex flex-col gap-5">
-          {records.length === 0 ? (
+        {/* 이번 달 One Verse 아카이브 */}
+        <div className="flex flex-col gap-4 mt-2">
+          <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 px-1">
+            📅 이번 달 One Verse 모음
+          </h3>
+          {thisMonthRecords.length === 0 ? (
             <div className="text-center py-12 text-stone-500 bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-sm">
-              <p>아직 기록한 One Verse가 없습니다.</p>
+              <p>이번 달에 기록한 One Verse가 없습니다.</p>
             </div>
           ) : (
-            records.map((record) => (
+            thisMonthRecords.map((record) => (
               <div key={record.day_index} className="bg-white dark:bg-stone-900 p-5 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 flex flex-col gap-3">
                 <div className="flex justify-between items-center mb-1">
                   <div className="flex items-center gap-2">
@@ -165,6 +199,15 @@ export default function FriendProfilePage() {
             ))
           )}
         </div>
+        
+        {/* 이전 기록 보기 (추후 구현 가능) */}
+        {records.length > thisMonthRecords.length && (
+          <div className="text-center mt-4">
+            <button className="text-sm font-semibold text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 transition-colors">
+              이전 기록 모두 보기 ({records.length - thisMonthRecords.length}개)
+            </button>
+          </div>
+        )}
       </main>
     </div>
   );

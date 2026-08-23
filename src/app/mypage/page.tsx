@@ -18,7 +18,6 @@ import { getAuthUser, AuthUser } from "@/lib/auth";
 import { signOut, signInWithKakao } from "@/lib/supabase";
 import MemoryTrainerModal from "@/components/MemoryTrainerModal";
 import SettingsModal from "@/components/SettingsModal";
-import FriendManagementModal from "@/components/FriendManagementModal";
 
 function getDaysInMonth(year: number, month: number) {
   return new Date(year, month, 0).getDate();
@@ -74,7 +73,6 @@ export default function MyPage() {
   const carouselRef = useRef<HTMLDivElement>(null);
   
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
-  const [isFriendModalOpen, setIsFriendModalOpen] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -486,18 +484,12 @@ export default function MyPage() {
             <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 flex items-center gap-2 mb-2">
               🤝 소셜 및 설정
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3">
               <button
                 onClick={handleInvite}
                 className="flex items-center justify-center gap-2 bg-[#FEE500] hover:bg-[#FDD800] text-black font-bold py-3.5 rounded-xl transition-colors shadow-sm w-full"
               >
                 친구에게 One Verse 추천하기
-              </button>
-              <button
-                onClick={() => setIsFriendModalOpen(true)}
-                className="flex items-center justify-center gap-2 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 font-bold py-3.5 rounded-xl transition-colors shadow-sm w-full"
-              >
-                친구 관리 / 내 친구
               </button>
             </div>
           </div>
@@ -704,11 +696,6 @@ export default function MyPage() {
       <SettingsModal 
         isOpen={isSettingsModalOpen}
         onClose={() => setIsSettingsModalOpen(false)}
-      />
-
-      <FriendManagementModal
-        isOpen={isFriendModalOpen}
-        onClose={() => setIsFriendModalOpen(false)}
       />
     </div>
   );
