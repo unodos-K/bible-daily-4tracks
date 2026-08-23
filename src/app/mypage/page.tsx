@@ -119,8 +119,8 @@ export default function MyPage() {
     
     const inviteUrl = window.location.origin || process.env.NEXT_PUBLIC_BASE_URL || "";
     const shareData = {
-      title: 'One Verse 성경읽기',
-      text: '하루 네 장의 말씀과 뇌새김 암송, One Verse로 같이 시작해요!',
+      title: 'One Verse',
+      text: '매일 말씀을 읽고 내게 주신 한 구절을 암송하세요\n말씀읽기 & 뇌새김 말씀 암송',
       url: inviteUrl,
     };
 
