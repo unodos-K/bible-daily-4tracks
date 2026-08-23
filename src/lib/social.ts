@@ -47,40 +47,36 @@ export async function getFriendsList(): Promise<FriendProfile[]> {
   const userId = await getUserId();
   if (!userId) return [];
 
-  // Step 1: 현재 유저의 친구 관계 데이터만 단순하게 조회
-  const { data: friendships, error: friendError } = await supabase
+  // FK 제약 조건이 설정되었으므로 profiles 테이블과 바로 조인 가능
+  const { data, error } = await supabase
     .from('friendships')
-    .select('friend_id')
+    .select(`
+      friend_id,
+      profiles:friend_id (
+        name,
+        avatar_url,
+        nickname
+      )
+    `)
     .eq('user_id', userId);
 
-  if (friendError || !friendships) {
-    console.error("getFriendsList friend error:", friendError);
+  if (error || !data) {
+    console.error("getFriendsList error:", error);
     return [];
   }
 
-  // Step 2: friend_id 배열 추출
-  const friendIds = friendships.map(f => f.friend_id);
-  if (friendIds.length === 0) return [];
-
-  // Step 3: profiles 테이블에서 친구들의 닉네임과 아바타 정보 조회
-  const { data: profiles, error: profileError } = await supabase
-    .from('profiles')
-    .select('id, name, avatar_url, nickname')
-    .in('id', friendIds);
-
-  if (profileError || !profiles) {
-    console.error("getFriendsList profile error:", profileError);
-    return [];
-  }
-
-  // 두 데이터를 조합하여 친구 목록 반환
   const friendsMap = new Map<string, FriendProfile>();
-  for (const p of profiles) {
-    friendsMap.set(p.id, {
-      id: p.id,
-      name: p.name || '친구',
-      avatar_url: p.avatar_url || '',
-      nickname: p.nickname || undefined
+  
+  for (const row of data) {
+    if (!row.profiles) continue;
+    const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
+    if (!profile) continue;
+
+    friendsMap.set(row.friend_id, {
+      id: row.friend_id,
+      name: profile.name || '친구',
+      avatar_url: profile.avatar_url || '',
+      nickname: profile.nickname || undefined
     });
   }
 
