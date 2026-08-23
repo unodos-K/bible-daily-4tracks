@@ -35,7 +35,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" className="bg-stone-50 dark:bg-stone-950 overscroll-none">
+    <html lang="ko" className="bg-white dark:bg-stone-900 overscroll-none">
       <head>
         {/* Mobile Web App Optimizations - Managed by Next.js metadata/viewport */}
         <Script
@@ -43,12 +43,12 @@ export default function RootLayout({
           strategy="beforeInteractive"
         />
       </head>
-      <body className="bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 flex flex-col items-center selection:bg-amber-200 dark:selection:bg-amber-900 h-[100dvh] overflow-hidden overscroll-none">
+      <body className="bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 flex flex-col items-center selection:bg-amber-200 dark:selection:bg-amber-900 h-[100dvh] overflow-hidden overscroll-none">
         <KakaoInit />
         <NicknameGuard />
         <SettingsProvider>
           <div className="w-full max-w-2xl h-[100dvh] bg-stone-50 dark:bg-stone-950 shadow-xl flex flex-col relative border-x border-stone-200 dark:border-stone-800 overflow-hidden pt-[env(safe-area-inset-top)]">
-            <main className="flex-1 w-full overflow-y-auto overscroll-y-contain pb-[calc(80px+env(safe-area-inset-bottom))]">
+            <main className="flex-1 w-full overflow-y-auto overscroll-y-contain pb-[calc(80px+env(safe-area-inset-bottom))] bg-stone-50 dark:bg-stone-950">
               {children}
             </main>
             <BottomNavigation />

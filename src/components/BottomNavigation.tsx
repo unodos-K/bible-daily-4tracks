@@ -8,7 +8,7 @@ export function BottomNavigation() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 w-full z-50 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border-t border-stone-200 dark:border-stone-800 pb-[env(safe-area-inset-bottom)] min-h-[64px] box-border">
+    <nav className="fixed bottom-0 left-0 w-full z-50 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border-t border-stone-200 dark:border-stone-800 pb-[env(safe-area-inset-bottom)] min-h-[64px] box-border ios-pwa-bottom-safe">
       <div className="max-w-md mx-auto flex">
         <Link 
           href="/"
