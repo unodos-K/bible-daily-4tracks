@@ -10,17 +10,14 @@ import {
   OneVerse,
   fetchReadingSettings, 
   fetchReadRecords, 
-  resetUserData,
-  startNewReading,
-  getNextUnreadDay,
   updateMemorizeRecord,
-  saveViewerDay
+  saveViewerDay,
+  getNextUnreadDay
 } from "@/lib/storage";
 import { getAuthUser, AuthUser } from "@/lib/auth";
 import { signOut, signInWithKakao } from "@/lib/supabase";
 import MemoryTrainerModal from "@/components/MemoryTrainerModal";
 import SettingsModal from "@/components/SettingsModal";
-import FriendsList from "@/components/FriendsList";
 
 function getDaysInMonth(year: number, month: number) {
   return new Date(year, month, 0).getDate();
@@ -221,86 +218,37 @@ export default function MyPage() {
   };
 
   return (
-    <div className="w-full min-h-[calc(100vh-52px)] flex flex-col items-center bg-stone-100/50 dark:bg-stone-950 p-4 sm:p-8 pb-32">
+    <div className="w-full min-h-full flex flex-col items-center bg-stone-100/50 dark:bg-stone-950 p-4 sm:p-8 pb-32">
       <div className="w-full max-w-2xl flex flex-col gap-6">
         
-        {/* 프로필 및 통계 카드 */}
-        <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 p-5 sm:p-6 flex flex-col gap-6">
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center justify-between w-full">
-              <h2 className="text-lg sm:text-xl font-bold text-stone-800 dark:text-stone-100 flex items-center gap-2 flex-1 break-keep pr-2">
-                {authUser ? `${authUser.nickname || authUser.name}님 환영합니다 ✨` : '내 통독 여정'}
-              </h2>
-              <div className="flex items-center gap-3 flex-shrink-0">
-                <button
-                  onClick={() => setIsSettingsModalOpen(true)}
-                  className="p-1.5 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 transition-colors bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 rounded-full"
-                  aria-label="환경 설정"
-                >
-                  <Settings size={18} />
-                </button>
-                {authUser ? (
-                  <button
-                    onClick={handleLogout}
-                    className="text-xs sm:text-sm font-semibold text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 transition-colors whitespace-nowrap"
-                  >
-                    🚪 로그아웃
-                  </button>
-                ) : (
-                  <button
-                    onClick={signInWithKakao}
-                    className="text-xs sm:text-sm font-bold bg-[#FEE500] text-black hover:bg-[#FDD800] px-3 py-1.5 rounded-lg transition-colors shadow-sm whitespace-nowrap"
-                  >
-                    💬 카카오 로그인
-                  </button>
-                )}
-              </div>
-            </div>
-            <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 font-medium bg-stone-100 dark:bg-stone-800 inline-block px-3 py-1.5 rounded-full w-fit">
-              📅 통독 시작일: {settings.startDate} (Day {daysSince}일차)
-            </p>
-            {authUser && (
+        {/* 헤더 및 프로필 */}
+        <div className="flex items-center justify-between w-full pb-2">
+          <h1 className="text-2xl font-black text-stone-800 dark:text-stone-100 flex items-center gap-2">
+            나의 기록 보관소
+          </h1>
+          <div className="flex items-center gap-3">
+            {authUser ? (
               <button
-                onClick={handleInvite}
-                className="mt-2 text-xs sm:text-sm font-bold bg-[#FEE500] text-black hover:bg-[#FDD800] px-4 py-2 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2 w-full"
+                onClick={handleLogout}
+                className="text-xs sm:text-sm font-semibold text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 transition-colors whitespace-nowrap"
               >
-                💬 친구 초대하기 (카카오톡)
+                🚪 로그아웃
+              </button>
+            ) : (
+              <button
+                onClick={signInWithKakao}
+                className="text-xs sm:text-sm font-bold bg-[#FEE500] text-black hover:bg-[#FDD800] px-3 py-1.5 rounded-lg transition-colors shadow-sm whitespace-nowrap"
+              >
+                💬 카카오 로그인
               </button>
             )}
-          </div>
-
-          <button
-            onClick={() => {
-              try {
-                saveViewerDay(nextUnreadDay);
-              } catch {}
-              router.push("/");
-            }}
-            className="w-full py-4 sm:py-5 bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white font-black rounded-xl transition-transform hover:-translate-y-1 shadow-md flex items-center justify-center gap-2 text-lg sm:text-xl"
-          >
-            <Flame size={24} className="text-amber-300" />
-            Day {nextUnreadDay} 말씀 이어서 읽으러 가기
-          </button>
-
-          <div className="grid grid-cols-3 gap-3 sm:gap-4 border-t border-stone-100 dark:border-stone-800 pt-4">
-            <div className="bg-stone-50 dark:bg-stone-950 rounded-xl p-3 sm:p-4 flex flex-col items-center justify-center border border-stone-100 dark:border-stone-800">
-              <span className="text-stone-500 text-xs sm:text-sm font-medium mb-1">총 읽은 일수</span>
-              <div className="text-2xl sm:text-3xl font-black text-sky-600 dark:text-sky-400">
-                {totalReadDays} <span className="text-sm sm:text-base font-medium text-stone-400">/ 365</span>
-              </div>
-            </div>
-            <div className="bg-stone-50 dark:bg-stone-950 rounded-xl p-3 sm:p-4 flex flex-col items-center justify-center border border-stone-100 dark:border-stone-800">
-              <span className="text-stone-500 text-xs sm:text-sm font-medium mb-1 text-center">암송 완료</span>
-              <div className="text-2xl sm:text-3xl font-black text-amber-500 dark:text-amber-400">
-                {totalMemorized}
-              </div>
-            </div>
-            <div className="bg-stone-50 dark:bg-stone-950 rounded-xl p-3 sm:p-4 flex flex-col items-center justify-center border border-stone-100 dark:border-stone-800">
-              <span className="text-stone-500 text-xs sm:text-sm font-medium mb-1">달성률</span>
-              <div className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400">
-                {progressPercent}%
-              </div>
-            </div>
+            <button
+              onClick={() => setIsSettingsModalOpen(true)}
+              className="p-2 text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 transition-colors bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-full shadow-sm"
+              aria-label="환경 설정"
+            >
+              <Settings size={20} />
+            </button>
           </div>
         </div>
 
@@ -498,7 +446,7 @@ export default function MyPage() {
                           try {
                             saveViewerDay(record.dayIndex);
                           } catch {}
-                          router.push("/");
+                          router.push("/read?day=" + record.dayIndex);
                         }}
                         className="flex-1 py-3 text-sm font-bold text-sky-600 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-stone-800 flex items-center justify-center gap-1.5 transition-colors"
                       >
@@ -690,13 +638,6 @@ export default function MyPage() {
             </div>
           </div>
         )}
-
-        <div className="w-full h-px bg-stone-200 dark:bg-stone-800 my-4" />
-        
-        <h2 className="text-lg sm:text-xl font-bold text-stone-800 dark:text-stone-100 flex items-center gap-2">
-          👥 내 친구 목록
-        </h2>
-        <FriendsList />
 
       </div>
       

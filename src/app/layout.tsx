@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import { GlobalNavigation } from "@/components/GlobalNavigation";
+import { BottomNavigation } from "@/components/BottomNavigation";
 import { SettingsProvider } from "@/contexts/SettingsContext";
 import KakaoInit from "@/components/KakaoInit";
 import NicknameGuard from "@/components/NicknameGuard";
@@ -41,12 +41,16 @@ export default function RootLayout({
           strategy="beforeInteractive"
         />
       </head>
-      <body className="min-h-screen-dynamic bg-neutral-100 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 flex flex-col selection:bg-amber-200 dark:selection:bg-amber-900 pt-[calc(52px+env(safe-area-inset-top))] safe-bottom">
+      <body className="min-h-screen-dynamic bg-neutral-100 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 flex flex-col items-center selection:bg-amber-200 dark:selection:bg-amber-900">
         <KakaoInit />
         <NicknameGuard />
         <SettingsProvider>
-          <GlobalNavigation />
-          {children}
+          <div className="flex-1 w-full max-w-2xl bg-white dark:bg-stone-900 shadow-xl overflow-hidden flex flex-col relative border-x border-stone-200 dark:border-stone-800 pb-[env(safe-area-inset-bottom)] mb-[70px]">
+            <main className="flex-1 overflow-y-auto">
+              {children}
+            </main>
+            <BottomNavigation />
+          </div>
         </SettingsProvider>
       </body>
     </html>
