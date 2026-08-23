@@ -99,20 +99,22 @@ export default function HomePage() {
   const memorizedCount = recordsArray.filter(r => r.oneVerse?.isMemorized).length;
 
   return (
-    <div className="w-full min-h-full flex flex-col items-center bg-transparent p-6 pb-10">
-      <div className="w-full max-w-xl flex flex-col gap-8">
+    <div className="w-full min-h-full flex flex-col items-center bg-transparent pb-10">
+      <div className="w-full max-w-xl flex flex-col">
         
-        {/* 환영 메시지 */}
-        <div className="pt-4">
+        {/* 환영 메시지 (고정 헤더) */}
+        <header className="sticky top-0 z-40 bg-stone-50/95 dark:bg-stone-950/95 backdrop-blur-md pt-6 pb-4 px-6 border-b border-stone-200/50 dark:border-stone-800/50 mb-6">
           <h1 className="text-2xl font-black text-stone-800 dark:text-stone-100 flex flex-col gap-1">
             <span className="text-sm font-bold text-stone-500 dark:text-stone-400">4Tracks 성경 통독</span>
             <span>
               {authUser ? <><span className="text-amber-600 dark:text-amber-500">{authUser.nickname || authUser.name}</span>님 환영합니다 ✨</> : '나의 통독 대시보드 ✨'}
             </span>
           </h1>
-        </div>
+        </header>
 
-        {/* 통독 요약 위젯 */}
+        {/* 메인 컨텐츠 영역 */}
+        <div className="flex flex-col gap-8 px-6">
+          {/* 통독 요약 위젯 */}
         <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 p-5 flex flex-col gap-4">
           <div className="flex justify-between items-end">
             <div>
@@ -172,8 +174,8 @@ export default function HomePage() {
               </button>
             )}
           </div>
-          
           <FriendsList />
+        </div>
         </div>
       </div>
     </div>
