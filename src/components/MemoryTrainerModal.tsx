@@ -315,8 +315,8 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
 
   // 5. 렌더링
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in md:p-4">
-      <div className="bg-white dark:bg-stone-900 rounded-none md:rounded-3xl px-6 md:px-8 shadow-2xl w-full h-full md:h-auto md:max-h-[85vh] max-w-lg flex flex-col relative animate-in zoom-in-95 border-0 md:border border-stone-200 dark:border-stone-800 overflow-y-auto pt-[calc(2rem+env(safe-area-inset-top))] pb-[calc(6rem+env(safe-area-inset-bottom))] md:py-8">
+    <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in md:p-4">
+      <div className="bg-white dark:bg-stone-900 rounded-none md:rounded-3xl px-6 md:px-8 shadow-2xl w-full h-full md:h-auto md:max-h-[85vh] max-w-lg flex flex-col relative animate-in zoom-in-95 border-0 md:border border-stone-200 dark:border-stone-800 overflow-y-auto pt-[calc(2rem+env(safe-area-inset-top))] pb-[calc(2rem+env(safe-area-inset-bottom))] md:py-8">
         
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-2 text-sky-600 dark:text-sky-400 font-bold">

@@ -378,7 +378,7 @@ export default function BibleViewerPage() {
 
       {/* Access Denied Modal */}
       {showAccessDeniedModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
+        <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
           <div className="bg-white dark:bg-stone-900 rounded-2xl p-6 shadow-xl w-full max-w-sm flex flex-col items-center gap-4 animate-in zoom-in-95">
             <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 flex items-center justify-center mb-2">
               <AlertCircle size={24} />
@@ -403,7 +403,7 @@ export default function BibleViewerPage() {
 
       {/* Daily Limit Modal (최대 3개 제한) */}
       {showDailyLimitModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
+        <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
           <div className="bg-white dark:bg-stone-900 rounded-2xl p-6 shadow-xl w-full max-w-md flex flex-col items-center gap-4 animate-in zoom-in-95">
             <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-2">
               <Leaf size={32} />
@@ -443,7 +443,7 @@ export default function BibleViewerPage() {
 
       {/* Warning Modal (경우 1) */}
       {showWarningModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
+        <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
           <div className="bg-white dark:bg-stone-900 rounded-2xl p-6 shadow-xl w-full max-w-sm flex flex-col items-center gap-4 animate-in zoom-in-95">
             <div className="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-2">
               <Bookmark size={24} />
@@ -464,8 +464,8 @@ export default function BibleViewerPage() {
 
       {/* Confirm Modal (경우 2) */}
       {showConfirmModal && selectedVerse && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in md:p-4">
-          <div className="bg-white dark:bg-stone-900 rounded-none md:rounded-2xl px-6 shadow-xl w-full h-full md:h-auto md:max-h-[85vh] max-w-sm flex flex-col items-center justify-center gap-4 animate-in zoom-in-95 pt-[calc(2rem+env(safe-area-inset-top))] pb-[calc(6rem+env(safe-area-inset-bottom))] md:py-6 overflow-y-auto">
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in md:p-4">
+          <div className="bg-white dark:bg-stone-900 rounded-none md:rounded-2xl px-6 shadow-xl w-full h-full md:h-auto md:max-h-[85vh] max-w-sm flex flex-col items-center justify-center gap-4 animate-in zoom-in-95 pt-[calc(2rem+env(safe-area-inset-top))] pb-[calc(2rem+env(safe-area-inset-bottom))] md:py-6 overflow-y-auto">
             <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 text-center mb-2 leading-relaxed">
               <span className="block">&apos;{formatReference(selectedVerse.book, selectedVerse.chapter, selectedVerse.verse)}&apos;을(를)</span>
               <span className="block">오늘의 One Verse로 선택하시겠습니까?</span>
@@ -495,7 +495,7 @@ export default function BibleViewerPage() {
 
       {/* Success Modal (경우 3) */}
       {showSuccessModal && confirmedVerse && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in md:p-4">
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in md:p-4">
           <div className="bg-white dark:bg-stone-900 rounded-none md:rounded-3xl p-6 md:p-8 shadow-2xl w-full h-[85vh] max-h-[800px] max-w-md flex flex-col justify-between relative animate-in zoom-in-95 border border-stone-200 dark:border-stone-800 text-center overflow-hidden pt-[calc(2rem+env(safe-area-inset-top))] pb-[calc(1.5rem+env(safe-area-inset-bottom))] md:py-8">
             
             {/* Top Area: Header */}
