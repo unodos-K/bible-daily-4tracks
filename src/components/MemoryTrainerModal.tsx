@@ -146,18 +146,19 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
     seq.push({ phase: 5, phaseLabel: "전체 말씀 온전히 고백하기", hiddenIndices: [] }); // 3) 모두 보여줌
     seq.push({ phase: 5, phaseLabel: "전체 말씀 온전히 고백하기", hiddenIndices: all }); // 4) 모두 가림
     seq.push({ phase: 5, phaseLabel: "전체 말씀 온전히 고백하기", hiddenIndices: [] }); // 5) 모두 보여줌
-    seq.push({ phase: 5, phaseLabel: "전체 말씀 온전히 고백하기 (실전 테스트)", hiddenIndices: all }); // 6) 모두 가림 (마무리)
 
     return seq;
   }, [K]);
 
   const currentStep = steps[stepIndex] || steps[steps.length - 1];
   const isLastStep = stepIndex >= steps.length - 1;
+  const isTrainingFinished = isLastStep && elapsed >= intervalSeconds * 1000;
+  
   const currentPhaseStepsCount = steps.filter(s => s.phase === currentStep.phase).length;
   const currentSegmentIndex = stepIndex - steps.findIndex(s => s.phase === currentStep.phase);
   
   const currentSegmentFraction = Math.min(1, (elapsed / (intervalSeconds * 1000)));
-  const globalProgressValue = isLastStep 
+  const globalProgressValue = isTrainingFinished 
     ? 100 
     : ((currentSegmentIndex + currentSegmentFraction) / currentPhaseStepsCount) * 100;
     
@@ -166,7 +167,7 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
 
   // 3. Effect Hooks
   useEffect(() => {
-    if (stepState !== 'training' || isLastStep || !isPlaying) return;
+    if (stepState !== 'training' || isTrainingFinished || !isPlaying) return;
 
     let lastTime = Date.now();
     const timer = setInterval(() => {
@@ -178,12 +179,14 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
     }, 20); // 20ms 간격으로 업데이트하여 끊김없는 완벽한 싱크 구현 (약 50fps)
 
     return () => clearInterval(timer);
-  }, [stepState, isLastStep, isPlaying]);
+  }, [stepState, isTrainingFinished, isPlaying]);
 
   useEffect(() => {
-    if (elapsed >= intervalSeconds * 1000 && stepState === 'training' && !isLastStep) {
-      setStepIndex((curr) => Math.min(curr + 1, steps.length - 1));
-      setElapsed(0);
+    if (elapsed >= intervalSeconds * 1000 && stepState === 'training') {
+      if (!isLastStep) {
+        setStepIndex((curr) => Math.min(curr + 1, steps.length - 1));
+        setElapsed(0);
+      }
     }
   }, [elapsed, intervalSeconds, stepState, isLastStep, steps.length]);
 
@@ -418,7 +421,7 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
           </div>
         ) : (
           <div className="flex flex-col gap-0 animate-in fade-in zoom-in-95">
-            {isLastStep && testResult === 'none' && !isListening && (
+            {isTrainingFinished && testResult === 'none' && !isListening && (
               <div className="mb-6 p-4 bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40 rounded-2xl border border-amber-200 dark:border-amber-800 text-center animate-in slide-in-from-top-2 shadow-sm">
                 <span className="font-bold text-amber-700 dark:text-amber-400 text-lg flex items-center justify-center gap-2">
                   🎉 마지막 단계! 음성으로 암송해보세요
@@ -457,7 +460,7 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
               {/* Middle: Timer & Timeline Segments */}
               <div className="flex items-center gap-3 w-full">
                 <div className="flex-shrink-0 min-w-[70px]">
-                  {isLastStep ? (
+                  {isTrainingFinished ? (
                     <div className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 font-bold text-sm shadow-sm animate-in zoom-in">
                       🎯 도전!
                     </div>
@@ -509,7 +512,7 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
               </div>
 
               {/* Bottom: Pause/Play & Restart Controls */}
-              {!isLastStep && (
+              {!isTrainingFinished && (
                 <div className="flex items-center justify-end gap-2 w-full mt-1 border-t border-stone-200/50 dark:border-stone-700/50 pt-3">
                   <button
                     onClick={() => setIsPlaying(!isPlaying)}
@@ -551,7 +554,7 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
 
               <p className="text-xl md:text-2xl font-semibold leading-loose break-keep flex flex-wrap justify-center gap-x-2 gap-y-1">
                 {chunks.map((chunk, index) => {
-                  const isHidden = !showAnswer && currentStep.hiddenIndices.includes(index);
+                  const isHidden = !showAnswer && (isTrainingFinished || currentStep.hiddenIndices.includes(index));
                   
                   return (
                     <span 
@@ -575,7 +578,7 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
               </div>
             </div>
 
-            {isLastStep && (
+            {isTrainingFinished && (
               <div className="flex flex-col gap-3 w-full justify-center mt-2 animate-in slide-in-from-bottom-4">
                 <div className="flex flex-row gap-3">
                   <button 

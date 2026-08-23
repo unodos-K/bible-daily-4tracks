@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ZoomIn, ZoomOut, ChevronDown, CheckCircle2, Bookmark, BrainCircuit, AlertCircle, Leaf, Crown } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ZoomIn, ZoomOut, ChevronDown, CheckCircle2, Bookmark, BrainCircuit, AlertCircle, Leaf, Crown, X } from "lucide-react";
 import { getDailyReadingByIndex, getAllSchedules, TRACK_INFO } from "@/lib/bible";
 import MemoryTrainerModal from "@/components/MemoryTrainerModal";
 import { 
@@ -118,7 +118,7 @@ export default function BibleViewerPage() {
         const searchParams = new URLSearchParams(window.location.search);
         const inviteCode = searchParams.get('inviteCode');
         if (inviteCode) {
-          import('@/lib/social').then(m => m.addFriend(inviteCode).catch(e => console.error(e)));
+          import('@/lib/social').then(m => m.sendFriendRequest(inviteCode).catch((e: Error) => console.error(e)));
           window.history.replaceState({}, '', window.location.pathname);
         }
         currentSettings = await fetchReadingSettings();
@@ -496,14 +496,20 @@ export default function BibleViewerPage() {
       {/* Success Modal (경우 3) */}
       {showSuccessModal && confirmedVerse && (
         <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in md:p-4">
-          <div className="bg-white dark:bg-stone-900 rounded-none md:rounded-3xl p-6 md:p-8 shadow-2xl w-full h-[85vh] max-h-[800px] max-w-md flex flex-col justify-between relative animate-in zoom-in-95 border border-stone-200 dark:border-stone-800 text-center overflow-hidden pt-[calc(2rem+env(safe-area-inset-top))] pb-[calc(1.5rem+env(safe-area-inset-bottom))] md:py-8">
+          <div className="bg-white dark:bg-stone-900 rounded-none md:rounded-3xl p-6 md:p-8 shadow-2xl w-full h-full md:h-auto md:max-h-[85vh] max-w-lg flex flex-col justify-between relative animate-in zoom-in-95 border border-stone-200 dark:border-stone-800 text-center overflow-hidden pt-[calc(2rem+env(safe-area-inset-top))] pb-[calc(2rem+env(safe-area-inset-bottom))] md:py-8">
             
-            {/* Top Area: Header */}
-            <div className="flex-shrink-0">
+            {/* Top Area: Header with Close Button */}
+            <div className="flex-shrink-0 relative">
+              <button 
+                onClick={() => setShowSuccessModal(false)}
+                className="absolute right-0 top-0 p-2 bg-stone-100 dark:bg-stone-800 rounded-full text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 transition-colors"
+              >
+                <X size={20} />
+              </button>
               <div className="w-16 h-16 sm:w-20 sm:h-20 bg-emerald-100 dark:bg-emerald-900/50 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle2 className="text-emerald-500 w-8 h-8 sm:w-10 sm:h-10" />
               </div>
-              <h3 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100 mb-2">
+              <h3 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100 mb-2 mt-4 md:mt-0">
                 오늘 말씀 통독 완료! 🎉
               </h3>
               <p className="text-stone-500 dark:text-stone-400 text-sm sm:text-base mb-4 sm:mb-6">
@@ -545,15 +551,9 @@ export default function BibleViewerPage() {
               <div className="flex gap-3">
                 <button
                   onClick={() => router.push("/mypage")}
-                  className="flex-1 py-3.5 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-bold rounded-xl transition-colors"
+                  className="w-full py-3.5 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-bold rounded-xl transition-colors"
                 >
-                  마이페이지로
-                </button>
-                <button
-                  onClick={() => setShowSuccessModal(false)}
-                  className="flex-1 py-3.5 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-bold rounded-xl transition-colors"
-                >
-                  닫기
+                  마이페이지로 이동
                 </button>
               </div>
             </div>

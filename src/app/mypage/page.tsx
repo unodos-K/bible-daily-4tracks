@@ -180,7 +180,7 @@ export default function MyPage() {
   const handleShareOneVerse = (record: DayRecord) => {
     if (typeof window !== "undefined" && window.Kakao) {
       const nickname = authUser ? (authUser.nickname || authUser.name).split('#')[0] : '순례자';
-      const displayTxt = record.oneVerse?.displayText || record.oneVerse?.text || '';
+      const displayTxt = record.oneVerse?.displayText || record.oneVerse?.rawText || '';
       const formattedRef = `${record.oneVerse?.book} ${record.oneVerse?.chapter}장 ${record.oneVerse?.verse}절`;
       
       const textToShare = `[One Verse]\n${nickname}님이 오늘의 One Verse를 보냈어요!\n\n"${displayTxt}"\n\n${formattedRef}`;

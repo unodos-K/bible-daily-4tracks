@@ -269,7 +269,6 @@ export async function getFriendStats(friendId: string): Promise<{ totalReadDays:
   }
 
   const totalReadDays = records.length;
-  // @ts-expect-error: dynamic json type
   const memorizedCount = records.filter(r => r.one_verse?.isMemorized).length;
 
   return { totalReadDays, memorizedCount };
