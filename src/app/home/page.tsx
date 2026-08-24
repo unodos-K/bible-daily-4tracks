@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { BookOpen } from "lucide-react";
+import { BookOpen, CheckCircle2, AlertCircle } from "lucide-react";
 import { 
   ReadingSettings, 
   ReadRecordsMap, 
@@ -67,6 +67,9 @@ export default function HomePage() {
   const achievementRate = Math.round((totalReadDays / 365) * 100);
   const daysSince = settings ? calculateDaysSince(settings.startDate) : 1;
   const memorizedCount = recordsArray.filter(r => r.oneVerse?.isMemorized).length;
+  
+  const missedDays = Math.max(0, daysSince - totalReadDays);
+  const isOnTrack = missedDays === 0;
 
   return (
     <div className="w-full min-h-full flex flex-col items-center bg-transparent pb-10">
@@ -118,14 +121,27 @@ export default function HomePage() {
             ></div>
           </div>
           
-          <div className="grid grid-cols-2 gap-3 mt-2">
+          <div className="grid grid-cols-2 gap-3 mt-4">
+            <div className="bg-stone-50 dark:bg-stone-950 rounded-xl p-3 flex flex-col items-center justify-center border border-stone-100 dark:border-stone-800">
+              <span className="text-xs font-semibold text-stone-500 mb-0.5">목표 진도</span>
+              <span className="text-lg font-black text-stone-700 dark:text-stone-300">Day {daysSince}</span>
+            </div>
             <div className="bg-stone-50 dark:bg-stone-950 rounded-xl p-3 flex flex-col items-center justify-center border border-stone-100 dark:border-stone-800">
               <span className="text-xs font-semibold text-stone-500 mb-0.5">암송 완료</span>
               <span className="text-lg font-black text-stone-700 dark:text-stone-300">{memorizedCount}절</span>
             </div>
-            <div className="bg-stone-50 dark:bg-stone-950 rounded-xl p-3 flex flex-col items-center justify-center border border-stone-100 dark:border-stone-800">
-              <span className="text-xs font-semibold text-stone-500 mb-0.5">통독 일차</span>
-              <span className="text-lg font-black text-stone-700 dark:text-stone-300">Day {daysSince}</span>
+            
+            <div className="bg-stone-50 dark:bg-stone-950 rounded-xl p-3 flex flex-col items-center justify-center border border-stone-100 dark:border-stone-800 col-span-2">
+              <span className="text-xs font-semibold text-stone-500 mb-1">오늘의 통독 상태</span>
+              {isOnTrack ? (
+                <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                  <CheckCircle2 size={16} /> 목표 진도 달성 완료! 멋져요 🎉
+                </span>
+              ) : (
+                <span className="text-sm font-bold text-rose-500 dark:text-rose-400 flex items-center gap-1.5">
+                  <AlertCircle size={16} /> 밀린 진도가 {missedDays}일 있어요! 몰아보기 추천 🔥
+                </span>
+              )}
             </div>
           </div>
         </div>
