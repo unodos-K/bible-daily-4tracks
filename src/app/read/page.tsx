@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ZoomIn, ZoomOut, ChevronDown, CheckCircle2, Bookmark, BrainCircuit, AlertCircle, Leaf, Crown, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ZoomIn, ZoomOut, ChevronDown, CheckCircle2, Bookmark, BrainCircuit, AlertCircle, Leaf, Crown, X, Share2, PencilLine, FileText } from "lucide-react";
 import { getDailyReadingByIndex, getAllSchedules, TRACK_INFO } from "@/lib/bible";
 import MemoryTrainerModal from "@/components/MemoryTrainerModal";
 import { 
@@ -21,6 +21,8 @@ import {
   getSavedViewerDay
 } from "@/lib/storage";
 import { getAuthUser, AuthUser } from "@/lib/auth";
+import { shareOneVerse } from "@/lib/share";
+import OneVerseMemoModal from "@/components/OneVerseMemoModal";
 import { signInWithKakao } from "@/lib/supabase";
 import { useSettings } from "@/contexts/SettingsContext";
 
@@ -42,34 +44,6 @@ const formatReference = (book: string, chapter: number, verse: number) => {
   return book === "시편" ? `${book} ${chapter}편 ${verse}절` : `${book} ${chapter}장 ${verse}절`;
 };
 
-const MemoInput = ({ dayIndex, initialMemo, memoUpdatedAt, onSave }: { dayIndex: number, initialMemo: string, memoUpdatedAt?: string, onSave: (dayIndex: number, memo: string) => void }) => {
-  const [memo, setMemo] = useState(initialMemo || "");
-  useEffect(() => {
-    setMemo(initialMemo || "");
-  }, [initialMemo]);
-
-  const formattedDate = memoUpdatedAt 
-    ? new Date(memoUpdatedAt).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\. /g, '.').replace(/\.$/, '')
-    : "";
-
-  return (
-    <div className="flex flex-col relative w-full px-2 sm:px-3 mb-2">
-      <textarea
-        value={memo}
-        onChange={e => setMemo(e.target.value)}
-        onBlur={() => onSave(dayIndex, memo)}
-        placeholder="이 말씀이 마음에 와닿은 이유는 무엇인가요?"
-        className="w-full mt-2 bg-transparent border-b border-stone-200 dark:border-stone-800 text-sm sm:text-base text-stone-700 dark:text-stone-300 placeholder-stone-400 focus:outline-none focus:border-stone-400 dark:focus:border-stone-600 resize-none py-2 transition-colors pb-6"
-        rows={2}
-        onClick={(e) => e.stopPropagation()}
-      />
-      {memo && formattedDate && (
-        <span className="absolute bottom-1 right-3 text-[10px] text-stone-400">
-          {formattedDate}
-        </span>
-      )}
-    </div>
-  );
 }
 
 export default function BibleViewerPage() {
@@ -93,13 +67,12 @@ export default function BibleViewerPage() {
   
   const [selectedVerse, setSelectedVerse] = useState<OneVerse | null>(null);
   const [confirmedVerse, setConfirmedVerse] = useState<OneVerse | null>(null);
-  
-  const [showWarningModal, setShowWarningModal] = useState(false);
+  const [isMemoryModalOpen, setIsMemoryModalOpen] = useState(false);
+  const [memoModalState, setMemoModalState] = useState<{ isOpen: boolean, dayIndex: number | null, initialMode?: 'view' | 'edit' }>({ isOpen: false, dayIndex: null });
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showAccessDeniedModal, setShowAccessDeniedModal] = useState(false);
   const [showDailyLimitModal, setShowDailyLimitModal] = useState(false);
-  const [isMemoryModalOpen, setIsMemoryModalOpen] = useState(false);
   
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -306,6 +279,12 @@ export default function BibleViewerPage() {
       }
     }));
     await updateReadRecordOneVerse(dayIndex, updatedVerse);
+  };
+
+  const handleShareOneVerseClick = async (record: DayRecord) => {
+    const user = await getAuthUser();
+    const nickname = user ? (user.nickname || user.name).split('#')[0] : '순례자';
+    shareOneVerse(record, nickname);
   };
 
   const handleConfirmVerse = async (verse: OneVerse, e: React.MouseEvent) => {
@@ -912,13 +891,30 @@ export default function BibleViewerPage() {
                               actionArea = (
                                 <>
                                   {actionArea}
-                                  <div className="pl-[1.5ch] sm:pl-[2ch]">
-                                    <MemoInput 
-                                      dayIndex={dayIndex} 
-                                      initialMemo={confirmedVerse.memo || ""} 
-                                      memoUpdatedAt={confirmedVerse.memoUpdatedAt} 
-                                      onSave={handleMemoSave} 
-                                    />
+                                  <div className="pl-[2ch] sm:pl-[2.5ch] mt-4 flex items-center gap-2 border-t border-stone-200 dark:border-stone-800/50 pt-3">
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); setMemoModalState({ isOpen: true, dayIndex, initialMode: 'edit' }); }}
+                                      className="flex-1 py-2 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors border border-stone-200 dark:border-stone-700 shadow-sm"
+                                    >
+                                      <PencilLine size={16} />
+                                      {confirmedVerse.memo ? "메모 수정" : "메모 작성"}
+                                    </button>
+                                    {confirmedVerse.memo && (
+                                      <button
+                                        onClick={(e) => { e.stopPropagation(); setMemoModalState({ isOpen: true, dayIndex, initialMode: 'view' }); }}
+                                        className="flex-1 py-2 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors border border-stone-200 dark:border-stone-700 shadow-sm"
+                                      >
+                                        <FileText size={16} />
+                                        메모 보기
+                                      </button>
+                                    )}
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); if (records[dayIndex]) handleShareOneVerseClick(records[dayIndex]); }}
+                                      className="flex-1 py-2 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors border border-stone-200 dark:border-stone-700 shadow-sm"
+                                    >
+                                      <Share2 size={16} />
+                                      공유하기
+                                    </button>
                                   </div>
                                 </>
                               );
@@ -1016,6 +1012,19 @@ export default function BibleViewerPage() {
           oneVerse={confirmedVerse}
           onClose={() => setIsMemoryModalOpen(false)}
           onComplete={handleMemoryComplete}
+        />
+      )}
+
+      {memoModalState.isOpen && memoModalState.dayIndex !== null && records[memoModalState.dayIndex]?.oneVerse && (
+        <OneVerseMemoModal
+          isOpen={memoModalState.isOpen}
+          onClose={() => setMemoModalState({ isOpen: false, dayIndex: null })}
+          dayIndex={memoModalState.dayIndex}
+          initialMemo={records[memoModalState.dayIndex].oneVerse!.memo || ""}
+          memoUpdatedAt={records[memoModalState.dayIndex].oneVerse!.memoUpdatedAt}
+          onSave={handleMemoSave}
+          initialMode={memoModalState.initialMode}
+          onShare={() => handleShareOneVerseClick(records[memoModalState.dayIndex])}
         />
       )}
 

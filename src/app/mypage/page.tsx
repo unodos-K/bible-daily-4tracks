@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, BrainCircuit, X, Flame, Settings, Share2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, BrainCircuit, X, Flame, Settings, Share2, PencilLine, FileText } from "lucide-react";
 import { 
   ReadingSettings, 
   ReadRecordsMap, 
@@ -18,8 +18,10 @@ import {
 } from "@/lib/storage";
 import { getAuthUser, AuthUser } from "@/lib/auth";
 import { signOut, signInWithKakao } from "@/lib/supabase";
+import { shareOneVerse } from "@/lib/share";
 import MemoryTrainerModal from "@/components/MemoryTrainerModal";
 import SettingsModal from "@/components/SettingsModal";
+import OneVerseMemoModal from "@/components/OneVerseMemoModal";
 
 function getDaysInMonth(year: number, month: number) {
   return new Date(year, month, 0).getDate();
@@ -56,35 +58,6 @@ function calculateDaysSince(startDateStr: string): number {
   return Math.max(1, diffDays + 1);
 }
 
-const MemoInput = ({ dayIndex, initialMemo, memoUpdatedAt, onSave }: { dayIndex: number, initialMemo: string, memoUpdatedAt?: string, onSave: (dayIndex: number, memo: string) => void }) => {
-  const [memo, setMemo] = useState(initialMemo || "");
-  useEffect(() => {
-    setMemo(initialMemo || "");
-  }, [initialMemo]);
-
-  const formattedDate = memoUpdatedAt 
-    ? new Date(memoUpdatedAt).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\. /g, '.').replace(/\.$/, '')
-    : "";
-
-  return (
-    <div className="flex flex-col relative w-full">
-      <textarea
-        value={memo}
-        onChange={e => setMemo(e.target.value)}
-        onBlur={() => onSave(dayIndex, memo)}
-        placeholder="이 말씀이 마음에 와닿은 이유는 무엇인가요?"
-        className="w-full mt-2 bg-transparent border-b border-stone-200 dark:border-stone-800 text-sm sm:text-base text-stone-700 dark:text-stone-300 placeholder-stone-400 focus:outline-none focus:border-stone-400 dark:focus:border-stone-600 resize-none py-2 transition-colors pb-6"
-        rows={2}
-      />
-      {memo && formattedDate && (
-        <span className="absolute bottom-1 right-1 text-[10px] text-stone-400">
-          {formattedDate}
-        </span>
-      )}
-    </div>
-  );
-}
-
 export default function MyPage() {
   const router = useRouter();
   
@@ -98,6 +71,8 @@ export default function MyPage() {
   const [selectedRecordStr, setSelectedRecordStr] = useState<string | null>(null);
   const [selectedDayIndexForMemory, setSelectedDayIndexForMemory] = useState<number | null>(null);
   const [isMemoryModalOpen, setIsMemoryModalOpen] = useState(false);
+  
+  const [memoModalState, setMemoModalState] = useState<{ isOpen: boolean, dayIndex: number | null, initialMode?: 'view' | 'edit' }>({ isOpen: false, dayIndex: null });
   
   // 캐러셀 관련 상태 및 Ref
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
@@ -125,7 +100,7 @@ export default function MyPage() {
   }, [router]);
 
   useEffect(() => {
-    if (selectedRecordStr || isMemoryModalOpen) {
+    if (selectedRecordStr || isMemoryModalOpen || memoModalState.isOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
@@ -133,7 +108,7 @@ export default function MyPage() {
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [selectedRecordStr, isMemoryModalOpen]);
+  }, [selectedRecordStr, isMemoryModalOpen, memoModalState.isOpen]);
 
   useEffect(() => {
     const handleRecordsUpdated = async () => {
@@ -220,18 +195,6 @@ export default function MyPage() {
   };
 
   const handleShareOneVerse = (record: DayRecord) => {
-    if (typeof window !== "undefined" && window.Kakao) {
-      const nickname = authUser ? (authUser.nickname || authUser.name).split('#')[0] : '순례자';
-      const displayTxt = record.oneVerse?.displayText || record.oneVerse?.rawText || '';
-      const formattedRef = `${record.oneVerse?.book} ${record.oneVerse?.chapter}장 ${record.oneVerse?.verse}절`;
-      const memoTxt = record.oneVerse?.memo ? `\n\n[묵상 노트]\n${record.oneVerse.memo}` : '';
-      
-      const textToShare = `[One Verse]\n${nickname}님이 오늘의 One Verse를 보냈어요!\n\n"${displayTxt}"\n\n${formattedRef}${memoTxt}`;
-      
-      window.Kakao.Share.sendDefault({
-        objectType: 'text',
-        text: textToShare,
-        link: {
           mobileWebUrl: window.location.origin,
           webUrl: window.location.origin,
         },
@@ -248,6 +211,11 @@ export default function MyPage() {
   const handleDayClick = (dateStr: string) => {
     setSelectedRecordStr(dateStr);
     setCurrentSlideIndex(0);
+  };
+
+  const handleShareOneVerse = (record: DayRecord) => {
+    const nickname = authUser ? (authUser.nickname || authUser.name).split('#')[0] : '순례자';
+    shareOneVerse(record, nickname);
   };
 
   const handleMemoSave = async (dayIndex: number, newMemo: string) => {
@@ -523,7 +491,31 @@ export default function MyPage() {
                         <div className="text-right text-stone-500 dark:text-stone-400 font-bold text-xs sm:text-sm">
                           - {formattedRef} -
                         </div>
-                        <MemoInput dayIndex={record.dayIndex} initialMemo={verse.memo || ""} memoUpdatedAt={verse.memoUpdatedAt} onSave={handleMemoSave} />
+                        <div className="flex items-center gap-2 mt-4 pt-4 border-t border-stone-100 dark:border-stone-800">
+                          <button
+                            onClick={() => setMemoModalState({ isOpen: true, dayIndex: record.dayIndex, initialMode: 'edit' })}
+                            className="flex-1 py-2 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
+                          >
+                            <PencilLine size={16} />
+                            {verse.memo ? "메모 수정" : "메모 작성"}
+                          </button>
+                          {verse.memo && (
+                            <button
+                              onClick={() => setMemoModalState({ isOpen: true, dayIndex: record.dayIndex, initialMode: 'view' })}
+                              className="flex-1 py-2 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
+                            >
+                              <FileText size={16} />
+                              메모 보기
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleShareOneVerse(record)}
+                            className="flex-1 py-2 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
+                          >
+                            <Share2 size={16} />
+                            공유하기
+                          </button>
+                        </div>
                       </div>
 
                       <div className="flex border-t border-stone-100 dark:border-stone-800 bg-white dark:bg-stone-900">
@@ -548,14 +540,6 @@ export default function MyPage() {
                           className="flex-1 py-3 text-xs sm:text-sm font-bold text-sky-600 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-stone-800 flex items-center justify-center gap-1.5 transition-colors border-r border-stone-100 dark:border-stone-800"
                         >
                           📖 본문 보기
-                        </button>
-                        <button
-                          onClick={() => handleShareOneVerse(record)}
-                          className="flex-1 py-3 text-xs sm:text-sm font-bold text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 flex items-center justify-center gap-1.5 transition-colors"
-                          aria-label="공유하기"
-                        >
-                          <Share2 size={16} />
-                          공유하기
                         </button>
                       </div>
                     </div>
@@ -708,7 +692,31 @@ export default function MyPage() {
                                 <div className="text-right text-stone-500 dark:text-stone-400 font-semibold text-base sm:text-lg">
                                   - {formattedRef} -
                                 </div>
-                                <MemoInput dayIndex={record.dayIndex} initialMemo={verse.memo || ""} memoUpdatedAt={verse.memoUpdatedAt} onSave={handleMemoSave} />
+                                <div className="flex items-center gap-2 mt-4 pt-4 border-t border-stone-100 dark:border-stone-800">
+                                  <button
+                                    onClick={() => setMemoModalState({ isOpen: true, dayIndex: record.dayIndex, initialMode: 'edit' })}
+                                    className="flex-1 py-2 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
+                                  >
+                                    <PencilLine size={16} />
+                                    {verse.memo ? "메모 수정" : "메모 작성"}
+                                  </button>
+                                  {verse.memo && (
+                                    <button
+                                      onClick={() => setMemoModalState({ isOpen: true, dayIndex: record.dayIndex, initialMode: 'view' })}
+                                      className="flex-1 py-2 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
+                                    >
+                                      <FileText size={16} />
+                                      메모 보기
+                                    </button>
+                                  )}
+                                  <button
+                                    onClick={() => handleShareOneVerse(record)}
+                                    className="flex-1 py-2 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
+                                  >
+                                    <Share2 size={16} />
+                                    공유하기
+                                  </button>
+                                </div>
                               </div>
                             </div>
                           );
@@ -792,7 +800,23 @@ export default function MyPage() {
       <SettingsModal 
         isOpen={isSettingsModalOpen}
         onClose={() => setIsSettingsModalOpen(false)}
+        settings={settings}
+        onSave={handleSettingsSave}
       />
+
+      {memoModalState.isOpen && memoModalState.dayIndex !== null && records[memoModalState.dayIndex]?.oneVerse && (
+        <OneVerseMemoModal
+          isOpen={memoModalState.isOpen}
+          onClose={() => setMemoModalState({ isOpen: false, dayIndex: null })}
+          dayIndex={memoModalState.dayIndex}
+          initialMemo={records[memoModalState.dayIndex].oneVerse!.memo || ""}
+          memoUpdatedAt={records[memoModalState.dayIndex].oneVerse!.memoUpdatedAt}
+          onSave={handleMemoSave}
+          initialMode={memoModalState.initialMode}
+          onShare={() => handleShareOneVerse(records[memoModalState.dayIndex])}
+        />
+      )}
+
     </div>
   );
 }
