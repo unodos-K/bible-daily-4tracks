@@ -803,7 +803,7 @@ export default function MyPage() {
           memoUpdatedAt={records[memoModalState.dayIndex].oneVerse!.memoUpdatedAt}
           onSave={handleMemoSave}
           initialMode={memoModalState.initialMode}
-          onShare={() => handleShareOneVerse(records[memoModalState.dayIndex])}
+          onShare={() => handleShareOneVerse(records[memoModalState.dayIndex!])}
         />
       )}
 

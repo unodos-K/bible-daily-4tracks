@@ -8,6 +8,7 @@ import MemoryTrainerModal from "@/components/MemoryTrainerModal";
 import { 
   ReadingSettings,
   ReadRecordsMap,
+  DayRecord,
   OneVerse,
   fetchReadingSettings, 
   fetchReadRecords,
@@ -1059,11 +1060,11 @@ export default function BibleViewerPage() {
           isOpen={memoModalState.isOpen}
           onClose={() => setMemoModalState({ isOpen: false, dayIndex: null })}
           dayIndex={memoModalState.dayIndex}
-          initialMemo={records[memoModalState.dayIndex].oneVerse!.memo || ""}
-          memoUpdatedAt={records[memoModalState.dayIndex].oneVerse!.memoUpdatedAt}
+          initialMemo={records[memoModalState.dayIndex!].oneVerse!.memo || ""}
+          memoUpdatedAt={records[memoModalState.dayIndex!].oneVerse!.memoUpdatedAt}
           onSave={handleMemoSave}
           initialMode={memoModalState.initialMode}
-          onShare={() => handleShareOneVerseClick(records[memoModalState.dayIndex])}
+          onShare={() => handleShareOneVerseClick(records[memoModalState.dayIndex!])}
         />
       )}
 

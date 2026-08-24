@@ -43,8 +43,8 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
   return (
     <>
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-      <div className="bg-white dark:bg-stone-900 rounded-3xl p-6 shadow-xl w-full max-w-md flex flex-col gap-8 animate-in zoom-in-95 border border-stone-200 dark:border-stone-800 relative">
+    <div className="fixed inset-0 z-50 flex items-start md:items-center justify-center bg-white dark:bg-stone-900 md:bg-black/60 md:backdrop-blur-sm animate-in fade-in overflow-y-auto">
+      <div className="bg-white dark:bg-stone-900 md:rounded-3xl p-6 pt-12 pb-20 md:p-6 md:shadow-xl w-full min-h-full md:min-h-0 md:h-auto max-w-md flex flex-col gap-8 md:animate-in md:zoom-in-95 border-0 md:border border-stone-200 dark:border-stone-800 relative">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 p-2 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 transition-colors"

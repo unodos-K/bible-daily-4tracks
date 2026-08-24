@@ -230,22 +230,22 @@ export default function FriendsPage() {
                   ) : (
                     requests.map(req => (
                       <div key={req.id} className="bg-white dark:bg-stone-900 p-4 rounded-xl shadow-sm border border-stone-100 dark:border-stone-800 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden">
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <div className="w-10 h-10 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden flex-shrink-0">
                             {req.profile.avatar_url && <img src={req.profile.avatar_url} alt={req.profile.name} className="w-full h-full object-cover" />}
                           </div>
-                          <div className="font-bold text-stone-800 dark:text-stone-100 flex items-center gap-1">
-                            {(req.profile.nickname || req.profile.name).split('#')[0]}
+                          <div className="font-bold text-stone-800 dark:text-stone-100 flex items-center gap-1 truncate">
+                            <span className="truncate">{(req.profile.nickname || req.profile.name).split('#')[0]}</span>
                             {req.profile.nickname?.includes('#') && (
-                              <span className="text-xs font-normal text-stone-400">#{req.profile.nickname.split('#')[1]}</span>
+                              <span className="text-xs font-normal text-stone-400 flex-shrink-0">#{req.profile.nickname.split('#')[1]}</span>
                             )}
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <button onClick={() => handleRespondRequest(req.id, true)} className="flex items-center gap-1 px-3 py-1.5 font-bold text-sm bg-emerald-100 text-emerald-700 hover:bg-emerald-200 rounded-lg transition-colors">
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <button onClick={() => handleRespondRequest(req.id, true)} className="flex items-center gap-1 px-3 py-1.5 font-bold text-sm bg-emerald-100 text-emerald-700 hover:bg-emerald-200 rounded-full transition-colors">
                             <Check size={16} /> 수락
                           </button>
-                          <button onClick={() => handleRespondRequest(req.id, false)} className="flex items-center gap-1 px-3 py-1.5 font-bold text-sm bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700 rounded-lg transition-colors">
+                          <button onClick={() => handleRespondRequest(req.id, false)} className="flex items-center gap-1 px-3 py-1.5 font-bold text-sm bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700 rounded-full transition-colors">
                             <RejectIcon size={16} /> 거절
                           </button>
                         </div>
@@ -286,29 +286,29 @@ export default function FriendsPage() {
                       
                       return (
                         <div key={user.id} className="bg-white dark:bg-stone-900 p-4 rounded-xl shadow-sm border border-stone-100 dark:border-stone-800 flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden">
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <div className="w-10 h-10 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden flex-shrink-0">
                               {user.avatar_url && <img src={user.avatar_url} alt={user.name} className="w-full h-full object-cover" />}
                             </div>
-                            <div className="font-bold text-stone-800 dark:text-stone-100 flex items-center gap-1">
-                              {(user.nickname || user.name).split('#')[0]}
+                            <div className="font-bold text-stone-800 dark:text-stone-100 flex items-center gap-1 truncate">
+                              <span className="truncate">{(user.nickname || user.name).split('#')[0]}</span>
                               {user.nickname?.includes('#') && (
-                                <span className="text-xs font-normal text-stone-400">#{user.nickname.split('#')[1]}</span>
+                                <span className="text-xs font-normal text-stone-400 flex-shrink-0">#{user.nickname.split('#')[1]}</span>
                               )}
                             </div>
                           </div>
                           
                           {isAlreadyFriend ? (
-                            <span className="px-3 py-1.5 flex items-center gap-1 text-sm font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg">
-                              <Check size={16} /> 친구 완료
+                            <span className="px-3 py-1 flex items-center gap-1 text-xs font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 rounded-full whitespace-nowrap flex-shrink-0">
+                              <Check size={14} /> 친구 완료
                             </span>
                           ) : isPendingRequest ? (
-                            <button disabled className="px-3 py-1.5 bg-stone-100 dark:bg-stone-800 text-stone-400 font-semibold text-sm rounded-lg flex items-center gap-1 cursor-not-allowed">
-                              요청 대기 중
+                            <button disabled className="px-3 py-1 bg-stone-100 dark:bg-stone-800 text-stone-400 font-semibold text-xs rounded-full flex items-center gap-1 cursor-not-allowed whitespace-nowrap flex-shrink-0">
+                              요청 대기중
                             </button>
                           ) : (
-                            <button onClick={() => handleSendRequest(user.id)} className="px-3 py-1.5 bg-sky-100 text-sky-700 hover:bg-sky-200 font-semibold text-sm rounded-lg flex items-center gap-1">
-                              <UserPlus size={16} /> 친구 추가
+                            <button onClick={() => handleSendRequest(user.id)} className="px-3 py-1 bg-sky-100 text-sky-700 hover:bg-sky-200 font-semibold text-xs rounded-full flex items-center gap-1 whitespace-nowrap flex-shrink-0 transition-colors">
+                              <UserPlus size={14} /> 친구 추가
                             </button>
                           )}
                         </div>
