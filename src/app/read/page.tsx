@@ -70,6 +70,7 @@ export default function BibleViewerPage() {
   const [isMemoryModalOpen, setIsMemoryModalOpen] = useState(false);
   const [memoModalState, setMemoModalState] = useState<{ isOpen: boolean, dayIndex: number | null, initialMode?: 'view' | 'edit' }>({ isOpen: false, dayIndex: null });
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [verseToReplace, setVerseToReplace] = useState<OneVerse | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showAccessDeniedModal, setShowAccessDeniedModal] = useState(false);
   const [showDailyLimitModal, setShowDailyLimitModal] = useState(false);
@@ -241,19 +242,8 @@ export default function BibleViewerPage() {
 
     const isConfirmed = confirmedVerse?.book === book && confirmedVerse?.chapter === chapter && confirmedVerse?.verse === verse;
     if (isConfirmed) {
-      if (isCompletedDay) {
-        const success = await updateReadRecordOneVerse(dayIndex, null);
-        if (success) {
-          setConfirmedVerse(null);
-          const r = await fetchReadRecords();
-          setRecords(r);
-          showToast("One Verse 선택이 해제되었습니다.");
-        } else {
-          alert("저장에 실패했습니다.");
-        }
-      } else {
-        setConfirmedVerse(null);
-      }
+      // 1. 단순 터치로 인한 One Verse 지정 취소 방지
+      // 이미 지정된 상태라면 해제되지 않도록 리턴
       return;
     }
 
@@ -290,11 +280,22 @@ export default function BibleViewerPage() {
   const handleConfirmVerse = async (verse: OneVerse, e: React.MouseEvent) => {
     e.stopPropagation();
     
+    // 이미 One Verse가 있고 다른 구절을 선택한 경우 교체 모달 표시
+    if (confirmedVerse && (confirmedVerse.book !== verse.book || confirmedVerse.chapter !== verse.chapter || confirmedVerse.verse !== verse.verse)) {
+      setVerseToReplace(verse);
+      return;
+    }
+
+    await executeReplaceVerse(verse);
+  };
+
+  const executeReplaceVerse = async (verse: OneVerse) => {
     if (isCompletedDay) {
       const success = await updateReadRecordOneVerse(dayIndex, verse);
       if (success) {
         setConfirmedVerse(verse);
         setSelectedVerse(null);
+        setVerseToReplace(null);
         const r = await fetchReadRecords();
         setRecords(r);
         showToast("One Verse가 새로 지정되었습니다.");
@@ -304,6 +305,7 @@ export default function BibleViewerPage() {
     } else {
       setConfirmedVerse(verse);
       setSelectedVerse(null);
+      setVerseToReplace(null);
     }
   };
 
@@ -478,6 +480,44 @@ export default function BibleViewerPage() {
       )}
 
       {/* Warning Modal (경우 1) */}
+      {verseToReplace && confirmedVerse && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-sm bg-stone-900 border border-stone-800 rounded-2xl overflow-hidden shadow-2xl flex flex-col p-6 items-center text-center">
+            <h2 className="text-xl font-bold text-stone-100 mb-4">One Verse를 교체하시겠습니까?</h2>
+            
+            <div className="bg-stone-800/50 p-4 rounded-xl mb-4 w-full text-left">
+              <div className="text-xs text-stone-400 mb-1 font-bold">기존 One Verse</div>
+              <p className="text-stone-300 text-sm leading-relaxed mb-2 line-clamp-3">
+                "{confirmedVerse.displayText}"
+              </p>
+              <div className="text-xs text-stone-500 font-bold">
+                {confirmedVerse.book} {confirmedVerse.chapter}:{confirmedVerse.verse}
+              </div>
+            </div>
+
+            <p className="text-red-400 text-sm mb-6 font-bold flex items-center justify-center gap-1.5 leading-relaxed bg-red-950/30 p-3 rounded-lg w-full">
+              <AlertCircle size={16} className="shrink-0" />
+              One Verse를 교체할 경우 메모 기록과 암송 데이터는 복구할 수 없습니다.
+            </p>
+            
+            <div className="flex gap-3 w-full">
+              <button 
+                onClick={() => setVerseToReplace(null)}
+                className="flex-1 py-3.5 bg-stone-800 hover:bg-stone-700 text-stone-200 font-bold rounded-xl transition-colors"
+              >
+                취소
+              </button>
+              <button 
+                onClick={() => executeReplaceVerse(verseToReplace)}
+                className="flex-1 py-3.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl transition-colors"
+              >
+                교체
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showWarningModal && (
         <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
           <div className="bg-white dark:bg-stone-900 rounded-2xl p-6 shadow-xl w-full max-w-sm flex flex-col items-center gap-4 animate-in zoom-in-95">
