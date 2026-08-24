@@ -195,13 +195,8 @@ export default function MyPage() {
   };
 
   const handleShareOneVerse = (record: DayRecord) => {
-          mobileWebUrl: window.location.origin,
-          webUrl: window.location.origin,
-        },
-      });
-    } else {
-      alert("카카오톡 공유 기능을 사용할 수 없습니다.");
-    }
+    const nickname = authUser ? (authUser.nickname || authUser.name).split('#')[0] : '순례자';
+    shareOneVerse(record, nickname);
   };
 
   if (!isClient || !settings || !settings.hasStarted) {
@@ -213,10 +208,7 @@ export default function MyPage() {
     setCurrentSlideIndex(0);
   };
 
-  const handleShareOneVerse = (record: DayRecord) => {
-    const nickname = authUser ? (authUser.nickname || authUser.name).split('#')[0] : '순례자';
-    shareOneVerse(record, nickname);
-  };
+
 
   const handleMemoSave = async (dayIndex: number, newMemo: string) => {
     const record = records[dayIndex];

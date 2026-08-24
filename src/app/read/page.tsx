@@ -44,8 +44,6 @@ const formatReference = (book: string, chapter: number, verse: number) => {
   return book === "시편" ? `${book} ${chapter}편 ${verse}절` : `${book} ${chapter}장 ${verse}절`;
 };
 
-}
-
 export default function BibleViewerPage() {
   const router = useRouter();
   
