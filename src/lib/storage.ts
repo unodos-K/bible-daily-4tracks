@@ -17,6 +17,7 @@ export interface OneVerse {
   reference: string;
   isMemorized?: boolean;
   memorizedAt?: string; // ISO String
+  memo?: string;
 }
 
 export interface DayRecord {

@@ -13,7 +13,8 @@ import {
   fetchReadRecords, 
   updateMemorizeRecord,
   saveViewerDay,
-  getNextUnreadDay
+  getNextUnreadDay,
+  updateReadRecordOneVerse
 } from "@/lib/storage";
 import { getAuthUser, AuthUser } from "@/lib/auth";
 import { signOut, signInWithKakao } from "@/lib/supabase";
@@ -53,6 +54,23 @@ function calculateDaysSince(startDateStr: string): number {
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
   
   return Math.max(1, diffDays + 1);
+}
+
+const MemoInput = ({ dayIndex, initialMemo, onSave }: { dayIndex: number, initialMemo: string, onSave: (dayIndex: number, memo: string) => void }) => {
+  const [memo, setMemo] = useState(initialMemo || "");
+  useEffect(() => {
+    setMemo(initialMemo || "");
+  }, [initialMemo]);
+  return (
+    <textarea
+      value={memo}
+      onChange={e => setMemo(e.target.value)}
+      onBlur={() => onSave(dayIndex, memo)}
+      placeholder="이 말씀이 마음에 와닿은 이유는 무엇인가요?"
+      className="w-full mt-2 bg-transparent border-b border-stone-200 dark:border-stone-800 text-sm sm:text-base text-stone-700 dark:text-stone-300 placeholder-stone-400 focus:outline-none focus:border-stone-400 dark:focus:border-stone-600 resize-none py-2 transition-colors"
+      rows={2}
+    />
+  );
 }
 
 export default function MyPage() {
@@ -183,8 +201,9 @@ export default function MyPage() {
       const nickname = authUser ? (authUser.nickname || authUser.name).split('#')[0] : '순례자';
       const displayTxt = record.oneVerse?.displayText || record.oneVerse?.rawText || '';
       const formattedRef = `${record.oneVerse?.book} ${record.oneVerse?.chapter}장 ${record.oneVerse?.verse}절`;
+      const memoTxt = record.oneVerse?.memo ? `\n\n[묵상 노트]\n${record.oneVerse.memo}` : '';
       
-      const textToShare = `[One Verse]\n${nickname}님이 오늘의 One Verse를 보냈어요!\n\n"${displayTxt}"\n\n${formattedRef}`;
+      const textToShare = `[One Verse]\n${nickname}님이 오늘의 One Verse를 보냈어요!\n\n"${displayTxt}"\n\n${formattedRef}${memoTxt}`;
       
       window.Kakao.Share.sendDefault({
         objectType: 'text',
@@ -206,6 +225,22 @@ export default function MyPage() {
   const handleDayClick = (dateStr: string) => {
     setSelectedRecordStr(dateStr);
     setCurrentSlideIndex(0);
+  };
+
+  const handleMemoSave = async (dayIndex: number, newMemo: string) => {
+    const record = records[dayIndex];
+    if (!record || !record.oneVerse) return;
+    if (record.oneVerse.memo === newMemo) return;
+    
+    const updatedVerse = { ...record.oneVerse, memo: newMemo };
+    setRecords(prev => ({
+      ...prev,
+      [dayIndex]: {
+        ...prev[dayIndex],
+        oneVerse: updatedVerse
+      }
+    }));
+    await updateReadRecordOneVerse(dayIndex, updatedVerse);
   };
 
   const nextUnreadDay = getNextUnreadDay(records);
@@ -465,6 +500,7 @@ export default function MyPage() {
                         <div className="text-right text-stone-500 dark:text-stone-400 font-bold text-xs sm:text-sm">
                           - {formattedRef} -
                         </div>
+                        <MemoInput dayIndex={record.dayIndex} initialMemo={verse.memo || ""} onSave={handleMemoSave} />
                       </div>
 
                       <div className="flex border-t border-stone-100 dark:border-stone-800 bg-white dark:bg-stone-900">
@@ -649,6 +685,7 @@ export default function MyPage() {
                                 <div className="text-right text-stone-500 dark:text-stone-400 font-semibold text-base sm:text-lg">
                                   - {formattedRef} -
                                 </div>
+                                <MemoInput dayIndex={record.dayIndex} initialMemo={verse.memo || ""} onSave={handleMemoSave} />
                               </div>
                             </div>
                           );
