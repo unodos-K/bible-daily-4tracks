@@ -167,26 +167,25 @@ export default function FriendsPage() {
                   ) : (
                     friends.map(friend => (
                       <div key={friend.id} className="bg-white dark:bg-stone-900 p-4 rounded-2xl shadow-sm border border-stone-100 dark:border-stone-800 flex flex-col gap-3">
-                        <Link href={`/friend/${friend.id}`} className="flex items-center gap-3 cursor-pointer group">
-                          <div className="w-10 h-10 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden flex-shrink-0 group-hover:ring-2 ring-sky-500 transition-all">
-                            {friend.avatar_url ? (
-                              <img src={friend.avatar_url} alt={friend.name} className="w-full h-full object-cover" />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-stone-400">
-                                <UserCheck size={20} />
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex-1 flex items-center gap-1 whitespace-nowrap">
-                            <span className={`font-bold text-stone-800 dark:text-stone-100 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors ${
-                              (friend.nickname || friend.name).split('#')[0].length >= 11 ? 'text-[10px]' :
-                              (friend.nickname || friend.name).split('#')[0].length >= 7 ? 'text-xs' : 'text-sm'
-                            }`}>
-                              {(friend.nickname || friend.name).split('#')[0]}
-                            </span>
-                            {friend.nickname?.includes('#') && (
-                              <span className="text-[10px] font-normal text-stone-400 flex-shrink-0">#{friend.nickname.split('#')[1]}</span>
-                            )}
+                        <Link href={`/friend/${friend.id}`} className="flex flex-col gap-3 cursor-pointer group">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden flex-shrink-0 group-hover:ring-2 ring-sky-500 transition-all">
+                              {friend.avatar_url ? (
+                                <img src={friend.avatar_url} alt={friend.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-stone-400">
+                                  <UserCheck size={24} />
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex flex-col flex-1">
+                              <span className="font-bold text-lg text-stone-800 dark:text-stone-100 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors break-words">
+                                {(friend.nickname || friend.name).split('#')[0]}
+                              </span>
+                              {friend.nickname?.includes('#') && (
+                                <span className="text-sm font-medium text-stone-400 mt-0.5">#{friend.nickname.split('#')[1]}</span>
+                              )}
+                            </div>
                           </div>
                         </Link>
                         
@@ -232,29 +231,26 @@ export default function FriendsPage() {
                     <div className="text-center text-stone-500 py-10">받은 친구 요청이 없습니다.</div>
                   ) : (
                     requests.map(req => (
-                      <div key={req.id} className="bg-white dark:bg-stone-900 p-4 rounded-xl shadow-sm border border-stone-100 dark:border-stone-800 flex items-center justify-between">
-                        <div className="flex items-center gap-3 flex-1 whitespace-nowrap">
-                          <div className="w-10 h-10 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden flex-shrink-0">
+                      <div key={req.id} className="bg-white dark:bg-stone-900 p-5 rounded-2xl shadow-sm border border-stone-100 dark:border-stone-800 flex flex-col gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden flex-shrink-0">
                             {req.profile.avatar_url && <img src={req.profile.avatar_url} alt={req.profile.name} className="w-full h-full object-cover" />}
                           </div>
-                          <div className="flex items-center gap-1">
-                            <span className={`font-bold text-stone-800 dark:text-stone-100 ${
-                              (req.profile.nickname || req.profile.name).split('#')[0].length >= 11 ? 'text-[10px]' :
-                              (req.profile.nickname || req.profile.name).split('#')[0].length >= 7 ? 'text-xs' : 'text-sm'
-                            }`}>
+                          <div className="flex flex-col flex-1">
+                            <span className="font-bold text-lg text-stone-800 dark:text-stone-100 break-words">
                               {(req.profile.nickname || req.profile.name).split('#')[0]}
                             </span>
                             {req.profile.nickname?.includes('#') && (
-                              <span className="text-[10px] font-normal text-stone-400 flex-shrink-0">#{req.profile.nickname.split('#')[1]}</span>
+                              <span className="text-sm font-medium text-stone-400 mt-0.5">#{req.profile.nickname.split('#')[1]}</span>
                             )}
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <button onClick={() => handleRespondRequest(req.id, true)} className="flex items-center gap-1 px-3 py-1.5 font-bold text-sm bg-emerald-100 text-emerald-700 hover:bg-emerald-200 rounded-full transition-colors">
-                            <Check size={16} /> 수락
+                        <div className="flex items-center justify-end gap-2 mt-2">
+                          <button onClick={() => handleRespondRequest(req.id, false)} className="flex-1 sm:flex-none justify-center flex items-center gap-1.5 px-4 py-2.5 font-bold text-sm bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700 rounded-xl transition-colors">
+                            <RejectIcon size={18} /> 거절
                           </button>
-                          <button onClick={() => handleRespondRequest(req.id, false)} className="flex items-center gap-1 px-3 py-1.5 font-bold text-sm bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700 rounded-full transition-colors">
-                            <RejectIcon size={16} /> 거절
+                          <button onClick={() => handleRespondRequest(req.id, true)} className="flex-1 sm:flex-none justify-center flex items-center gap-1.5 px-4 py-2.5 font-bold text-sm bg-emerald-100 text-emerald-700 hover:bg-emerald-200 rounded-xl transition-colors">
+                            <Check size={18} /> 수락
                           </button>
                         </div>
                       </div>
@@ -293,37 +289,36 @@ export default function FriendsPage() {
                       const isPendingRequest = sentRequests.includes(user.id);
                       
                       return (
-                        <div key={user.id} className="bg-white dark:bg-stone-900 p-4 rounded-xl shadow-sm border border-stone-100 dark:border-stone-800 flex items-center justify-between">
-                          <div className="flex items-center gap-3 flex-1 whitespace-nowrap">
-                            <div className="w-10 h-10 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden flex-shrink-0">
+                        <div key={user.id} className="bg-white dark:bg-stone-900 p-5 rounded-2xl shadow-sm border border-stone-100 dark:border-stone-800 flex flex-col gap-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden flex-shrink-0">
                               {user.avatar_url && <img src={user.avatar_url} alt={user.name} className="w-full h-full object-cover" />}
                             </div>
-                            <div className="flex items-center gap-1">
-                              <span className={`font-bold text-stone-800 dark:text-stone-100 ${
-                                (user.nickname || user.name).split('#')[0].length >= 11 ? 'text-[10px]' :
-                                (user.nickname || user.name).split('#')[0].length >= 7 ? 'text-xs' : 'text-sm'
-                              }`}>
+                            <div className="flex flex-col flex-1">
+                              <span className="font-bold text-lg text-stone-800 dark:text-stone-100 break-words">
                                 {(user.nickname || user.name).split('#')[0]}
                               </span>
                               {user.nickname?.includes('#') && (
-                                <span className="text-[10px] font-normal text-stone-400 flex-shrink-0">#{user.nickname.split('#')[1]}</span>
+                                <span className="text-sm font-medium text-stone-400 mt-0.5">#{user.nickname.split('#')[1]}</span>
                               )}
                             </div>
                           </div>
                           
-                          {isAlreadyFriend ? (
-                            <span className="px-3 py-1 flex items-center gap-1 text-xs font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 rounded-full whitespace-nowrap flex-shrink-0">
-                              <Check size={14} /> 친구 완료
-                            </span>
-                          ) : isPendingRequest ? (
-                            <button disabled className="px-3 py-1 bg-stone-100 dark:bg-stone-800 text-stone-400 font-semibold text-xs rounded-full flex items-center gap-1 cursor-not-allowed whitespace-nowrap flex-shrink-0">
-                              요청 대기중
-                            </button>
-                          ) : (
-                            <button onClick={() => handleSendRequest(user.id)} className="px-3 py-1 bg-sky-100 text-sky-700 hover:bg-sky-200 font-semibold text-xs rounded-full flex items-center gap-1 whitespace-nowrap flex-shrink-0 transition-colors">
-                              <UserPlus size={14} /> 친구 추가
-                            </button>
-                          )}
+                          <div className="flex justify-end mt-2">
+                            {isAlreadyFriend ? (
+                              <span className="w-full sm:w-auto flex justify-center items-center gap-1.5 px-4 py-2.5 text-sm font-bold text-emerald-700 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl">
+                                <Check size={18} /> 친구 완료
+                              </span>
+                            ) : isPendingRequest ? (
+                              <button disabled className="w-full sm:w-auto flex justify-center items-center gap-1.5 px-4 py-2.5 bg-stone-100 dark:bg-stone-800 text-stone-400 font-bold text-sm rounded-xl cursor-not-allowed">
+                                요청 대기중
+                              </button>
+                            ) : (
+                              <button onClick={() => handleSendRequest(user.id)} className="w-full sm:w-auto flex justify-center items-center gap-1.5 px-4 py-2.5 bg-sky-100 text-sky-700 hover:bg-sky-200 font-bold text-sm rounded-xl transition-colors">
+                                <UserPlus size={18} /> 친구 추가
+                              </button>
+                            )}
+                          </div>
                         </div>
                       )
                     })}
