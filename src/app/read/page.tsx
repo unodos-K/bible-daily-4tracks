@@ -621,57 +621,73 @@ export default function BibleViewerPage() {
 
       {/* 플로팅 퀵 네비게이터 */}
       <div className="fixed right-0 top-1/2 -translate-y-1/2 z-40 ios-pwa-bottom-safe mr-2">
-        <div className="flex flex-col gap-1 p-2 bg-zinc-900/80 backdrop-blur-md rounded-full shadow-lg">
+        <div className="flex flex-col gap-1.5 p-2 bg-zinc-900/80 backdrop-blur-md rounded-[2rem] shadow-lg">
           <button 
             onClick={() => {
               const main = document.querySelector('main');
               if (main) main.scrollTo({ top: 0, behavior: 'smooth' });
+              else window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            className="flex flex-col items-center justify-center w-10 h-10 md:w-12 md:h-12 aspect-square rounded-full bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50 shadow-md transition-all hover:scale-110" 
+            className="flex flex-col items-center justify-center w-11 h-11 md:w-16 md:h-16 aspect-square rounded-full bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50 shadow-md transition-all hover:scale-105 gap-0.5 md:gap-1" 
             title="처음"
           >
-            <span className="text-xl leading-none">🏠</span>
-            <span className="sr-only">처음</span>
+            <span className="text-base md:text-2xl leading-none mt-0.5">🏠</span>
+            <span className="text-[9px] md:text-xs font-medium whitespace-nowrap">홈</span>
           </button>
           <button 
             onClick={() => scrollToSection('track-old-testament')} 
-            className="flex flex-col items-center justify-center w-10 h-10 md:w-12 md:h-12 aspect-square rounded-full bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50 shadow-md transition-all hover:scale-110" 
+            className="flex flex-col items-center justify-center w-11 h-11 md:w-16 md:h-16 aspect-square rounded-full bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50 shadow-md transition-all hover:scale-105 gap-0.5 md:gap-1" 
             title="구약"
           >
-            <span className="text-xl leading-none">📜</span>
-            <span className="sr-only">구약</span>
+            <span className="text-base md:text-2xl leading-none mt-0.5">📜</span>
+            <span className="text-[9px] md:text-xs font-medium whitespace-nowrap">구약</span>
           </button>
           <button 
             onClick={() => scrollToSection('track-new-testament')} 
-            className="flex flex-col items-center justify-center w-10 h-10 md:w-12 md:h-12 aspect-square rounded-full bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50 shadow-md transition-all hover:scale-110" 
+            className="flex flex-col items-center justify-center w-11 h-11 md:w-16 md:h-16 aspect-square rounded-full bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50 shadow-md transition-all hover:scale-105 gap-0.5 md:gap-1" 
             title="신약"
           >
-            <span className="text-xl leading-none">🕊️</span>
-            <span className="sr-only">신약</span>
+            <span className="text-base md:text-2xl leading-none mt-0.5">🕊️</span>
+            <span className="text-[9px] md:text-xs font-medium whitespace-nowrap">신약</span>
           </button>
           <button 
             onClick={() => scrollToSection('track-psalms')} 
-            className="flex flex-col items-center justify-center w-10 h-10 md:w-12 md:h-12 aspect-square rounded-full bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50 shadow-md transition-all hover:scale-110" 
+            className="flex flex-col items-center justify-center w-11 h-11 md:w-16 md:h-16 aspect-square rounded-full bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50 shadow-md transition-all hover:scale-105 gap-0.5 md:gap-1" 
             title="시편"
           >
-            <span className="text-xl leading-none">🎵</span>
-            <span className="sr-only">시편</span>
+            <span className="text-base md:text-2xl leading-none mt-0.5">🎵</span>
+            <span className="text-[9px] md:text-xs font-medium whitespace-nowrap">시편</span>
           </button>
           <button 
             onClick={() => scrollToSection('track-proverbs')} 
-            className="flex flex-col items-center justify-center w-10 h-10 md:w-12 md:h-12 aspect-square rounded-full bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50 shadow-md transition-all hover:scale-110" 
+            className="flex flex-col items-center justify-center w-11 h-11 md:w-16 md:h-16 aspect-square rounded-full bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50 shadow-md transition-all hover:scale-105 gap-0.5 md:gap-1" 
             title="잠언"
           >
-            <span className="text-xl leading-none">💡</span>
-            <span className="sr-only">잠언</span>
+            <span className="text-base md:text-2xl leading-none mt-0.5">💡</span>
+            <span className="text-[9px] md:text-xs font-medium whitespace-nowrap">잠언</span>
+          </button>
+          <button 
+            onClick={() => {
+              const el = document.getElementById('one-verse-target');
+              if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              } else {
+                showToast("오늘의 One Verse를 먼저 지정해주세요.");
+              }
+            }} 
+            className="flex flex-col items-center justify-center w-11 h-11 md:w-16 md:h-16 aspect-square rounded-full bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50 shadow-md transition-all hover:scale-105 gap-0.5 md:gap-1" 
+            title="오늘"
+          >
+            <span className="text-base md:text-2xl leading-none mt-0.5">📌</span>
+            <span className="text-[9px] md:text-xs font-medium whitespace-nowrap">오늘</span>
           </button>
           <button 
             onClick={() => scrollToSection('viewer-bottom')} 
-            className="flex flex-col items-center justify-center w-10 h-10 md:w-12 md:h-12 aspect-square rounded-full bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50 shadow-md transition-all hover:scale-110" 
+            className="flex flex-col items-center justify-center w-11 h-11 md:w-16 md:h-16 aspect-square rounded-full bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50 shadow-md transition-all hover:scale-105 gap-0.5 md:gap-1" 
             title="완료"
           >
-            <span className="text-xl leading-none">✅</span>
-            <span className="sr-only">완료</span>
+            <span className="text-base md:text-2xl leading-none mt-0.5">✅</span>
+            <span className="text-[9px] md:text-xs font-medium whitespace-nowrap">완료</span>
           </button>
         </div>
       </div>
@@ -937,6 +953,7 @@ export default function BibleViewerPage() {
                             return (
                               <button
                                 key={v.verse}
+                                id={(isConfirmed || isSelected) ? "one-verse-target" : undefined}
                                 onClick={() => handleVerseClick(trackReading.track.type, chapterData.name, chapterData.chapter, v.verse, v.rawText, v.displayText, v.chunks)}
                                 className={wrapperClass}
                               >
