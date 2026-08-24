@@ -101,6 +101,7 @@ export default function FriendsPage() {
     if (success) {
       alert(accept ? "친구 요청을 수락했습니다." : "친구 요청을 거절했습니다.");
       loadData(); // 리로드
+      window.dispatchEvent(new CustomEvent('friend_requests_updated'));
     } else {
       alert("처리에 실패했습니다.");
     }
@@ -151,12 +152,14 @@ export default function FriendsPage() {
           </button>
           <button 
             onClick={() => setActiveTab("requests")}
-            className={`flex-1 pb-3 font-semibold border-b-2 transition-colors relative ${activeTab === "requests" ? "border-stone-800 text-stone-800 dark:border-stone-200 dark:text-stone-200" : "border-transparent text-stone-400 hover:text-stone-600"}`}
+            className={`flex-1 flex justify-center pb-3 font-semibold border-b-2 transition-colors ${activeTab === "requests" ? "border-stone-800 text-stone-800 dark:border-stone-200 dark:text-stone-200" : "border-transparent text-stone-400 hover:text-stone-600"}`}
           >
-            받은 요청
-            {requests.length > 0 && (
-              <span className="absolute top-0 right-4 w-2 h-2 bg-red-500 rounded-full"></span>
-            )}
+            <span className="relative">
+              받은 요청
+              {requests.length > 0 && (
+                <span className="absolute -top-1 -right-3 w-2 h-2 rounded-full bg-red-500 ring-2 ring-stone-50 dark:ring-stone-950"></span>
+              )}
+            </span>
           </button>
           <button 
             onClick={() => setActiveTab("search")}
@@ -285,8 +288,9 @@ export default function FriendsPage() {
                           <button onClick={() => handleRespondRequest(req.id, false)} className="flex-1 sm:flex-none justify-center flex items-center gap-1.5 px-4 py-2.5 font-bold text-sm bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700 rounded-xl transition-colors">
                             <RejectIcon size={18} /> 거절
                           </button>
-                          <button onClick={() => handleRespondRequest(req.id, true)} className="flex-1 sm:flex-none justify-center flex items-center gap-1.5 px-4 py-2.5 font-bold text-sm bg-emerald-100 text-emerald-700 hover:bg-emerald-200 rounded-xl transition-colors">
+                          <button onClick={() => handleRespondRequest(req.id, true)} className="relative flex-1 sm:flex-none justify-center flex items-center gap-1.5 px-4 py-2.5 font-bold text-sm bg-emerald-100 text-emerald-700 hover:bg-emerald-200 rounded-xl transition-colors">
                             <Check size={18} /> 수락
+                            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-red-500 ring-2 ring-stone-50 dark:ring-stone-900 animate-pulse"></span>
                           </button>
                         </div>
                       </div>

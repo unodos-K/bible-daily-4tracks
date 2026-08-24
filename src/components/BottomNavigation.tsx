@@ -1,11 +1,38 @@
 "use client";
 
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, BookOpen, User, Users } from "lucide-react";
+import { getPendingRequests } from "@/lib/social";
 
 export function BottomNavigation() {
   const pathname = usePathname();
+  const [pendingCount, setPendingCount] = useState(0);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchRequests = async () => {
+      try {
+        const requests = await getPendingRequests();
+        if (isMounted) setPendingCount(requests.length);
+      } catch (e) {
+        console.error("Failed to fetch pending requests", e);
+      }
+    };
+
+    fetchRequests();
+
+    const handleUpdate = () => {
+      fetchRequests();
+    };
+
+    window.addEventListener('friend_requests_updated', handleUpdate);
+    return () => {
+      isMounted = false;
+      window.removeEventListener('friend_requests_updated', handleUpdate);
+    };
+  }, [pathname]);
 
   if (pathname === "/" || pathname === "/login") {
     return null;
@@ -44,7 +71,12 @@ export function BottomNavigation() {
               : "text-stone-400 hover:text-stone-600 dark:hover:text-stone-300"
           }`}
         >
-          <Users size={20} />
+          <div className="relative">
+            <Users size={20} />
+            {pendingCount > 0 && (
+              <span className="absolute -top-1 -right-1.5 w-2 h-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-stone-900"></span>
+            )}
+          </div>
           <span className="text-[10px]">친구</span>
         </Link>
         <Link 
