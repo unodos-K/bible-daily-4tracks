@@ -280,32 +280,46 @@ export default function BibleViewerPage() {
   const handleConfirmVerse = async (verse: OneVerse, e: React.MouseEvent) => {
     e.stopPropagation();
     
-    // 이미 One Verse가 있고 다른 구절을 선택한 경우 교체 모달 표시
-    if (confirmedVerse && (confirmedVerse.book !== verse.book || confirmedVerse.chapter !== verse.chapter || confirmedVerse.verse !== verse.verse)) {
-      setVerseToReplace(verse);
+    if (!confirmedVerse) {
+      await executeReplaceVerse(verse);
       return;
     }
 
-    await executeReplaceVerse(verse);
+    // 이미 One Verse가 있고 다른 구절을 선택한 경우 교체 모달 표시
+    if (confirmedVerse.book !== verse.book || confirmedVerse.chapter !== verse.chapter || confirmedVerse.verse !== verse.verse) {
+      setVerseToReplace(verse);
+    }
   };
 
   const executeReplaceVerse = async (verse: OneVerse) => {
+    let success = false;
+    
     if (isCompletedDay) {
-      const success = await updateReadRecordOneVerse(dayIndex, verse);
-      if (success) {
-        setConfirmedVerse(verse);
-        setSelectedVerse(null);
-        setVerseToReplace(null);
-        const r = await fetchReadRecords();
-        setRecords(r);
-        showToast("One Verse가 새로 지정되었습니다.");
-      } else {
-        alert("저장에 실패했습니다.");
-      }
+      success = await updateReadRecordOneVerse(dayIndex, verse);
     } else {
+      const dateObj = new Date();
+      const todayStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+      
+      success = await saveDayRecord({
+        dayIndex: dayIndex,
+        readDate: todayStr,
+        completedAt: new Date().toISOString(),
+        oneVerse: verse,
+      });
+      if (success) {
+        setIsCompletedDay(true);
+      }
+    }
+
+    if (success) {
       setConfirmedVerse(verse);
       setSelectedVerse(null);
       setVerseToReplace(null);
+      const r = await fetchReadRecords();
+      setRecords(r);
+      showToast("One Verse가 새로 지정되었습니다.");
+    } else {
+      alert("저장에 실패했습니다.");
     }
   };
 
