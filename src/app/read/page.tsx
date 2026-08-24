@@ -67,6 +67,7 @@ export default function BibleViewerPage() {
   const [confirmedVerse, setConfirmedVerse] = useState<OneVerse | null>(null);
   const [isMemoryModalOpen, setIsMemoryModalOpen] = useState(false);
   const [memoModalState, setMemoModalState] = useState<{ isOpen: boolean, dayIndex: number | null, initialMode?: 'view' | 'edit' }>({ isOpen: false, dayIndex: null });
+  const [showWarningModal, setShowWarningModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [verseToReplace, setVerseToReplace] = useState<OneVerse | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
