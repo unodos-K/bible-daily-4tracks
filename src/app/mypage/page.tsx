@@ -406,10 +406,16 @@ export default function MyPage() {
                       {day}
                     </span>
                     {isCompleted && (
-                      <div className="flex mt-1 justify-center gap-1">
-                        {Array.from({ length: count }).map((_, i) => (
-                          <div key={i} className={`w-1.5 h-1.5 rounded-full ${count === 4 ? 'bg-amber-400' : 'bg-blue-500'}`} />
-                        ))}
+                      <div className="flex mt-1 justify-center gap-1 items-center">
+                        {count > 3 ? (
+                          <span className="bg-stone-700 dark:bg-stone-600 text-stone-100 text-[10px] font-bold px-1.5 py-0.5 leading-none rounded-full">
+                            +{count}
+                          </span>
+                        ) : (
+                          Array.from({ length: count }).map((_, i) => (
+                            <div key={i} className="w-1.5 h-1.5 rounded-full bg-sky-500" />
+                          ))
+                        )}
                       </div>
                     )}
                   </div>

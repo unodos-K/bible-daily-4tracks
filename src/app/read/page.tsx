@@ -45,6 +45,20 @@ const formatReference = (book: string, chapter: number, verse: number) => {
   return book === "시편" ? `${book} ${chapter}편 ${verse}절` : `${book} ${chapter}장 ${verse}절`;
 };
 
+function calculateDaysSince(startDateStr: string): number {
+  if (!startDateStr) return 1;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const [y, m, d] = startDateStr.split("-").map(Number);
+  const start = new Date(y, m - 1, d);
+  start.setHours(0, 0, 0, 0);
+
+  const diffTime = today.getTime() - start.getTime();
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  return Math.max(1, diffDays + 1);
+}
+
 export default function BibleViewerPage() {
   const router = useRouter();
   
@@ -82,12 +96,12 @@ export default function BibleViewerPage() {
 
   const handleSetDay = (newDay: number, currentRecords: ReadRecordsMap = records) => {
     const validDay = Math.max(1, Math.min(365, newDay));
-    const maxAllowedDay = getNextUnreadDay(currentRecords);
+    const maxAllowedDay = settings ? calculateDaysSince(settings.startDate) : getNextUnreadDay(currentRecords);
     const isAlreadyRead = !!currentRecords[validDay];
     
     // 권한 체크: 열리지 않은 미래의 Day
     if (validDay > maxAllowedDay) {
-      setShowAccessDeniedModal(true);
+      showToast("이 진도는 내일 열려요! 내일 만나요 👋");
       setIsDaySelectorOpen(false);
       return;
     }
@@ -147,7 +161,7 @@ export default function BibleViewerPage() {
       try {
         const dateObj = new Date();
         const todayStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
-        const maxAllowed = getNextUnreadDay(currentRecords);
+        const maxAllowed = currentSettings ? calculateDaysSince(currentSettings.startDate) : getNextUnreadDay(currentRecords);
         const isLimitReached = getTodayReadCount(todayStr, currentRecords) >= 3;
 
         let initialDay = maxAllowed;
@@ -759,6 +773,13 @@ export default function BibleViewerPage() {
                 Day {readingData.dayIndex} 
                 <ChevronDown size={18} className={`text-stone-400 transition-transform ${isDaySelectorOpen ? 'rotate-180' : ''}`} />
               </h1>
+              <span className="text-[10px] sm:text-xs text-stone-500 font-medium mt-0.5">
+                {isCompletedDay && records[dayIndex]?.readDate ? (
+                  `${parseInt(records[dayIndex].readDate.split('-')[1])}월 ${parseInt(records[dayIndex].readDate.split('-')[2])}일 완료 / 목표 Day ${settings ? calculateDaysSince(settings.startDate) : 1}`
+                ) : (
+                  `${new Date().getMonth() + 1}월 ${new Date().getDate()}일 (오늘) / 목표 Day ${settings ? calculateDaysSince(settings.startDate) : 1}`
+                )}
+              </span>
             </div>
 
             <div className="flex items-center gap-1 sm:gap-2">
