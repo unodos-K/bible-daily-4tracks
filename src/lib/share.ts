@@ -15,6 +15,20 @@ export const shareOneVerse = async (record: DayRecord, nickname: string) => {
     url: window.location.origin,
   };
 
+  // Prioritize Kakao Share
+  if ((window as any).Kakao && (window as any).Kakao.isInitialized()) {
+    (window as any).Kakao.Share.sendDefault({
+      objectType: 'text',
+      text: textToShare,
+      link: {
+        mobileWebUrl: window.location.origin,
+        webUrl: window.location.origin,
+      },
+    });
+    return;
+  }
+
+  // Fallback to Native Share (AirDrop, Messages, etc)
   if (navigator.share) {
     try {
       await navigator.share(shareData);
@@ -24,23 +38,11 @@ export const shareOneVerse = async (record: DayRecord, nickname: string) => {
     }
   }
 
-  // Fallback to Kakao Share
-  if ((window as any).Kakao) {
-    (window as any).Kakao.Share.sendDefault({
-      objectType: 'text',
-      text: textToShare,
-      link: {
-        mobileWebUrl: window.location.origin,
-        webUrl: window.location.origin,
-      },
-    });
-  } else {
-    // Clipboard copy fallback
-    try {
-      await navigator.clipboard.writeText(`${textToShare}\n${window.location.origin}`);
-      alert("공유 링크가 클립보드에 복사되었습니다!");
-    } catch (e) {
-      alert("공유 기능을 지원하지 않는 브라우저입니다.");
-    }
+  // Clipboard copy fallback
+  try {
+    await navigator.clipboard.writeText(`${textToShare}\n${window.location.origin}`);
+    alert("공유 링크가 클립보드에 복사되었습니다!");
+  } catch (e) {
+    alert("공유 기능을 지원하지 않는 브라우저입니다.");
   }
 };

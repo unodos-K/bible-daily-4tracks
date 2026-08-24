@@ -792,8 +792,6 @@ export default function MyPage() {
       <SettingsModal 
         isOpen={isSettingsModalOpen}
         onClose={() => setIsSettingsModalOpen(false)}
-        settings={settings}
-        onSave={handleSettingsSave}
       />
 
       {memoModalState.isOpen && memoModalState.dayIndex !== null && records[memoModalState.dayIndex]?.oneVerse && (
