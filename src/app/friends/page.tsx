@@ -177,13 +177,16 @@ export default function FriendsPage() {
                               </div>
                             )}
                           </div>
-                          <div>
-                            <div className="font-bold text-stone-800 dark:text-stone-100 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors flex items-center gap-1">
+                          <div className="flex-1 flex items-center gap-1 whitespace-nowrap">
+                            <span className={`font-bold text-stone-800 dark:text-stone-100 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors ${
+                              (friend.nickname || friend.name).split('#')[0].length >= 11 ? 'text-[10px]' :
+                              (friend.nickname || friend.name).split('#')[0].length >= 7 ? 'text-xs' : 'text-sm'
+                            }`}>
                               {(friend.nickname || friend.name).split('#')[0]}
-                              {friend.nickname?.includes('#') && (
-                                <span className="text-xs font-normal text-stone-400">#{friend.nickname.split('#')[1]}</span>
-                              )}
-                            </div>
+                            </span>
+                            {friend.nickname?.includes('#') && (
+                              <span className="text-[10px] font-normal text-stone-400 flex-shrink-0">#{friend.nickname.split('#')[1]}</span>
+                            )}
                           </div>
                         </Link>
                         
@@ -230,14 +233,19 @@ export default function FriendsPage() {
                   ) : (
                     requests.map(req => (
                       <div key={req.id} className="bg-white dark:bg-stone-900 p-4 rounded-xl shadow-sm border border-stone-100 dark:border-stone-800 flex items-center justify-between">
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className="flex items-center gap-3 flex-1 whitespace-nowrap">
                           <div className="w-10 h-10 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden flex-shrink-0">
                             {req.profile.avatar_url && <img src={req.profile.avatar_url} alt={req.profile.name} className="w-full h-full object-cover" />}
                           </div>
-                          <div className="font-bold text-stone-800 dark:text-stone-100 flex items-center gap-1 truncate">
-                            <span className="truncate">{(req.profile.nickname || req.profile.name).split('#')[0]}</span>
+                          <div className="flex items-center gap-1">
+                            <span className={`font-bold text-stone-800 dark:text-stone-100 ${
+                              (req.profile.nickname || req.profile.name).split('#')[0].length >= 11 ? 'text-[10px]' :
+                              (req.profile.nickname || req.profile.name).split('#')[0].length >= 7 ? 'text-xs' : 'text-sm'
+                            }`}>
+                              {(req.profile.nickname || req.profile.name).split('#')[0]}
+                            </span>
                             {req.profile.nickname?.includes('#') && (
-                              <span className="text-xs font-normal text-stone-400 flex-shrink-0">#{req.profile.nickname.split('#')[1]}</span>
+                              <span className="text-[10px] font-normal text-stone-400 flex-shrink-0">#{req.profile.nickname.split('#')[1]}</span>
                             )}
                           </div>
                         </div>
@@ -286,14 +294,19 @@ export default function FriendsPage() {
                       
                       return (
                         <div key={user.id} className="bg-white dark:bg-stone-900 p-4 rounded-xl shadow-sm border border-stone-100 dark:border-stone-800 flex items-center justify-between">
-                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <div className="flex items-center gap-3 flex-1 whitespace-nowrap">
                             <div className="w-10 h-10 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden flex-shrink-0">
                               {user.avatar_url && <img src={user.avatar_url} alt={user.name} className="w-full h-full object-cover" />}
                             </div>
-                            <div className="font-bold text-stone-800 dark:text-stone-100 flex items-center gap-1 truncate">
-                              <span className="truncate">{(user.nickname || user.name).split('#')[0]}</span>
+                            <div className="flex items-center gap-1">
+                              <span className={`font-bold text-stone-800 dark:text-stone-100 ${
+                                (user.nickname || user.name).split('#')[0].length >= 11 ? 'text-[10px]' :
+                                (user.nickname || user.name).split('#')[0].length >= 7 ? 'text-xs' : 'text-sm'
+                              }`}>
+                                {(user.nickname || user.name).split('#')[0]}
+                              </span>
                               {user.nickname?.includes('#') && (
-                                <span className="text-xs font-normal text-stone-400 flex-shrink-0">#{user.nickname.split('#')[1]}</span>
+                                <span className="text-[10px] font-normal text-stone-400 flex-shrink-0">#{user.nickname.split('#')[1]}</span>
                               )}
                             </div>
                           </div>
