@@ -388,29 +388,11 @@ export default function MyPage() {
                       {day}
                     </span>
                     {isCompleted && (
-                      <>
-                        {/* PC view: medal + D tags */}
-                        <div className="hidden md:flex flex-col items-center gap-0.5 mt-1">
-                          <div className="text-[10px] sm:text-xs leading-none" title={`${count}개 Day 완료`}>{medalStr}</div>
-                          <div className="flex flex-wrap justify-center gap-0.5 mt-1 px-1">
-                            {dayRecords.map(r => (
-                              <span key={r.dayIndex} className={`text-[9px] sm:text-[10px] font-bold px-1 py-0.5 rounded-sm ${
-                                r.oneVerse?.isMemorized 
-                                  ? 'text-amber-700 dark:text-amber-400 bg-amber-200 dark:bg-amber-900/60' 
-                                  : 'text-sky-700 dark:text-sky-400 bg-white/70 dark:bg-black/30'
-                              }`}>
-                                D{r.dayIndex}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                        {/* Mobile view: dots indicating number of completed tracks */}
-                        <div className="flex md:hidden mt-1 justify-center gap-1">
-                          {Array.from({ length: count }).map((_, i) => (
-                            <div key={i} className={`w-1.5 h-1.5 rounded-full ${count === 4 ? 'bg-amber-400' : 'bg-blue-500'}`} />
-                          ))}
-                        </div>
-                      </>
+                      <div className="flex mt-1 justify-center gap-1">
+                        {Array.from({ length: count }).map((_, i) => (
+                          <div key={i} className={`w-1.5 h-1.5 rounded-full ${count === 4 ? 'bg-amber-400' : 'bg-blue-500'}`} />
+                        ))}
+                      </div>
                     )}
                   </div>
                 );
