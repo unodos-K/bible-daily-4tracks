@@ -676,10 +676,10 @@ export default function BibleViewerPage() {
               }
             }} 
             className="flex flex-col items-center justify-center w-11 h-11 md:w-16 md:h-16 aspect-square rounded-full bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50 shadow-md transition-all hover:scale-105 gap-0.5 md:gap-1" 
-            title="오늘"
+            title="One"
           >
             <span className="text-base md:text-2xl leading-none mt-0.5">📌</span>
-            <span className="text-[9px] md:text-xs font-medium whitespace-nowrap">오늘</span>
+            <span className="text-[9px] md:text-xs font-medium whitespace-nowrap">One</span>
           </button>
           <button 
             onClick={() => scrollToSection('viewer-bottom')} 
