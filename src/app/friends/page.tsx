@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { X, Search, UserPlus, Check, X as RejectIcon, UserCheck, Flame, BookOpen, Heart } from "lucide-react";
+import { X, Search, UserPlus, Check, X as RejectIcon, UserCheck, Flame, BookOpen, Heart, MessageCircle } from "lucide-react";
 import { 
   FriendProfile, 
   searchUsersByNickname, 
@@ -29,6 +29,20 @@ export default function FriendsPage() {
   
   const [friendsFeed, setFriendsFeed] = useState<Record<string, FriendFeedItem[]>>({});
   const [isLoading, setIsLoading] = useState(true);
+
+  const [pressedId, setPressedId] = useState<string | null>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleTouchStart = (id: string) => {
+    timerRef.current = setTimeout(() => {
+      setPressedId(id);
+    }, 500);
+  };
+
+  const handleTouchEnd = () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    setPressedId(null);
+  };
 
   useEffect(() => {
     loadData();
@@ -166,10 +180,16 @@ export default function FriendsPage() {
                     </div>
                   ) : (
                     friends.map(friend => (
-                      <div key={friend.id} className="bg-white dark:bg-stone-900 p-4 rounded-2xl shadow-sm border border-stone-100 dark:border-stone-800 flex flex-col gap-3">
-                        <Link href={`/friend/${friend.id}`} className="flex flex-col gap-3 cursor-pointer group">
+                      <div 
+                        key={friend.id} 
+                        className="bg-white dark:bg-stone-900 p-4 rounded-2xl shadow-sm border border-stone-100 dark:border-stone-800 flex flex-col gap-3 group"
+                        onTouchStart={() => handleTouchStart(friend.id)}
+                        onTouchEnd={handleTouchEnd}
+                        onTouchCancel={handleTouchEnd}
+                      >
+                        <Link href={`/friend/${friend.id}`} className="flex flex-col gap-3 cursor-pointer group/link">
                           <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden flex-shrink-0 group-hover:ring-2 ring-sky-500 transition-all">
+                            <div className="w-12 h-12 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden flex-shrink-0 group-hover/link:ring-2 ring-sky-500 transition-all">
                               {friend.avatar_url ? (
                                 <img src={friend.avatar_url} alt={friend.name} className="w-full h-full object-cover" />
                               ) : (
@@ -179,12 +199,17 @@ export default function FriendsPage() {
                               )}
                             </div>
                             <div className="flex flex-col flex-1">
-                              <span className="font-bold text-lg text-stone-800 dark:text-stone-100 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors break-words">
+                              <span className="font-bold text-lg text-stone-800 dark:text-stone-100 group-hover/link:text-sky-600 dark:group-hover/link:text-sky-400 transition-colors break-words">
                                 {(friend.nickname || friend.name).split('#')[0]}
                               </span>
-                              {friend.nickname?.includes('#') && (
-                                <span className="text-sm font-medium text-stone-400 mt-0.5">#{friend.nickname.split('#')[1]}</span>
-                              )}
+                              <div className="relative">
+                                <span className={`block text-sm font-medium text-stone-400 mt-0.5 transition-opacity duration-300 ${pressedId === friend.id ? 'opacity-0' : 'opacity-100 md:group-hover:opacity-0'}`}>
+                                  {friend.nickname?.includes('#') ? `#${friend.nickname.split('#')[1]}` : '\u00A0'}
+                                </span>
+                                <span className={`absolute left-0 top-0.5 text-sm font-medium text-amber-500 transition-opacity duration-300 flex items-center gap-1 w-full pointer-events-none ${pressedId === friend.id ? 'opacity-100' : 'opacity-0 md:group-hover:opacity-100'}`}>
+                                  <MessageCircle size={14} className="flex-shrink-0" /> <span className="truncate">Kakao: {friend.name}</span>
+                                </span>
+                              </div>
                             </div>
                           </div>
                         </Link>
@@ -231,7 +256,13 @@ export default function FriendsPage() {
                     <div className="text-center text-stone-500 py-10">받은 친구 요청이 없습니다.</div>
                   ) : (
                     requests.map(req => (
-                      <div key={req.id} className="bg-white dark:bg-stone-900 p-5 rounded-2xl shadow-sm border border-stone-100 dark:border-stone-800 flex flex-col gap-3">
+                      <div 
+                        key={req.id} 
+                        className="bg-white dark:bg-stone-900 p-5 rounded-2xl shadow-sm border border-stone-100 dark:border-stone-800 flex flex-col gap-3 group"
+                        onTouchStart={() => handleTouchStart(req.id)}
+                        onTouchEnd={handleTouchEnd}
+                        onTouchCancel={handleTouchEnd}
+                      >
                         <div className="flex items-center gap-3">
                           <div className="w-12 h-12 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden flex-shrink-0">
                             {req.profile.avatar_url && <img src={req.profile.avatar_url} alt={req.profile.name} className="w-full h-full object-cover" />}
@@ -240,9 +271,14 @@ export default function FriendsPage() {
                             <span className="font-bold text-lg text-stone-800 dark:text-stone-100 break-words">
                               {(req.profile.nickname || req.profile.name).split('#')[0]}
                             </span>
-                            {req.profile.nickname?.includes('#') && (
-                              <span className="text-sm font-medium text-stone-400 mt-0.5">#{req.profile.nickname.split('#')[1]}</span>
-                            )}
+                            <div className="relative">
+                              <span className={`block text-sm font-medium text-stone-400 mt-0.5 transition-opacity duration-300 ${pressedId === req.id ? 'opacity-0' : 'opacity-100 md:group-hover:opacity-0'}`}>
+                                {req.profile.nickname?.includes('#') ? `#${req.profile.nickname.split('#')[1]}` : '\u00A0'}
+                              </span>
+                              <span className={`absolute left-0 top-0.5 text-sm font-medium text-amber-500 transition-opacity duration-300 flex items-center gap-1 w-full pointer-events-none ${pressedId === req.id ? 'opacity-100' : 'opacity-0 md:group-hover:opacity-100'}`}>
+                                <MessageCircle size={14} className="flex-shrink-0" /> <span className="truncate">Kakao: {req.profile.name}</span>
+                              </span>
+                            </div>
                           </div>
                         </div>
                         <div className="flex items-center justify-end gap-2 mt-2">
@@ -289,7 +325,13 @@ export default function FriendsPage() {
                       const isPendingRequest = sentRequests.includes(user.id);
                       
                       return (
-                        <div key={user.id} className="bg-white dark:bg-stone-900 p-5 rounded-2xl shadow-sm border border-stone-100 dark:border-stone-800 flex flex-col gap-3">
+                        <div 
+                          key={user.id} 
+                          className="bg-white dark:bg-stone-900 p-5 rounded-2xl shadow-sm border border-stone-100 dark:border-stone-800 flex flex-col gap-3 group"
+                          onTouchStart={() => handleTouchStart(user.id)}
+                          onTouchEnd={handleTouchEnd}
+                          onTouchCancel={handleTouchEnd}
+                        >
                           <div className="flex items-center gap-3">
                             <div className="w-12 h-12 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden flex-shrink-0">
                               {user.avatar_url && <img src={user.avatar_url} alt={user.name} className="w-full h-full object-cover" />}
@@ -298,9 +340,14 @@ export default function FriendsPage() {
                               <span className="font-bold text-lg text-stone-800 dark:text-stone-100 break-words">
                                 {(user.nickname || user.name).split('#')[0]}
                               </span>
-                              {user.nickname?.includes('#') && (
-                                <span className="text-sm font-medium text-stone-400 mt-0.5">#{user.nickname.split('#')[1]}</span>
-                              )}
+                              <div className="relative">
+                                <span className={`block text-sm font-medium text-stone-400 mt-0.5 transition-opacity duration-300 ${pressedId === user.id ? 'opacity-0' : 'opacity-100 md:group-hover:opacity-0'}`}>
+                                  {user.nickname?.includes('#') ? `#${user.nickname.split('#')[1]}` : '\u00A0'}
+                                </span>
+                                <span className={`absolute left-0 top-0.5 text-sm font-medium text-amber-500 transition-opacity duration-300 flex items-center gap-1 w-full pointer-events-none ${pressedId === user.id ? 'opacity-100' : 'opacity-0 md:group-hover:opacity-100'}`}>
+                                  <MessageCircle size={14} className="flex-shrink-0" /> <span className="truncate">Kakao: {user.name}</span>
+                                </span>
+                              </div>
                             </div>
                           </div>
                           
