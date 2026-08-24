@@ -18,6 +18,7 @@ export interface OneVerse {
   isMemorized?: boolean;
   memorizedAt?: string; // ISO String
   memo?: string;
+  memoUpdatedAt?: string; // ISO String
 }
 
 export interface DayRecord {
@@ -125,6 +126,10 @@ export async function updateReadRecordOneVerse(dayIndex: number, oneVerse: OneVe
   if (error) {
     console.error("One Verse Update Error:", error);
     return false;
+  }
+  
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('records_updated'));
   }
   return true;
 }

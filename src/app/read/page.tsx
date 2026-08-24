@@ -42,6 +42,36 @@ const formatReference = (book: string, chapter: number, verse: number) => {
   return book === "시편" ? `${book} ${chapter}편 ${verse}절` : `${book} ${chapter}장 ${verse}절`;
 };
 
+const MemoInput = ({ dayIndex, initialMemo, memoUpdatedAt, onSave }: { dayIndex: number, initialMemo: string, memoUpdatedAt?: string, onSave: (dayIndex: number, memo: string) => void }) => {
+  const [memo, setMemo] = useState(initialMemo || "");
+  useEffect(() => {
+    setMemo(initialMemo || "");
+  }, [initialMemo]);
+
+  const formattedDate = memoUpdatedAt 
+    ? new Date(memoUpdatedAt).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\. /g, '.').replace(/\.$/, '')
+    : "";
+
+  return (
+    <div className="flex flex-col relative w-full px-2 sm:px-3 mb-2">
+      <textarea
+        value={memo}
+        onChange={e => setMemo(e.target.value)}
+        onBlur={() => onSave(dayIndex, memo)}
+        placeholder="이 말씀이 마음에 와닿은 이유는 무엇인가요?"
+        className="w-full mt-2 bg-transparent border-b border-stone-200 dark:border-stone-800 text-sm sm:text-base text-stone-700 dark:text-stone-300 placeholder-stone-400 focus:outline-none focus:border-stone-400 dark:focus:border-stone-600 resize-none py-2 transition-colors pb-6"
+        rows={2}
+        onClick={(e) => e.stopPropagation()}
+      />
+      {memo && formattedDate && (
+        <span className="absolute bottom-1 right-3 text-[10px] text-stone-400">
+          {formattedDate}
+        </span>
+      )}
+    </div>
+  );
+}
+
 export default function BibleViewerPage() {
   const router = useRouter();
   
@@ -166,6 +196,17 @@ export default function BibleViewerPage() {
         // ignore
       }
     });
+
+    const handleRecordsUpdated = async () => {
+      getAuthUser().then(async (user) => {
+        if (user) {
+          const r = await fetchReadRecords();
+          setRecords(r);
+        }
+      });
+    };
+    window.addEventListener('records_updated', handleRecordsUpdated);
+    return () => window.removeEventListener('records_updated', handleRecordsUpdated);
   }, []);
 
   // Load record for the current dayIndex
@@ -249,6 +290,22 @@ export default function BibleViewerPage() {
     } else {
       setSelectedVerse(verseObj);
     }
+  };
+
+  const handleMemoSave = async (dayIndex: number, newMemo: string) => {
+    const record = records[dayIndex];
+    if (!record || !record.oneVerse) return;
+    if (record.oneVerse.memo === newMemo) return;
+    
+    const updatedVerse = { ...record.oneVerse, memo: newMemo, memoUpdatedAt: new Date().toISOString() };
+    setRecords(prev => ({
+      ...prev,
+      [dayIndex]: {
+        ...prev[dayIndex],
+        oneVerse: updatedVerse
+      }
+    }));
+    await updateReadRecordOneVerse(dayIndex, updatedVerse);
   };
 
   const handleConfirmVerse = async (verse: OneVerse, e: React.MouseEvent) => {
@@ -835,6 +892,19 @@ export default function BibleViewerPage() {
                                     {isMem ? "✅ 암송 복습하기" : "🧠 암송 도전"}
                                   </button>
                                 </div>
+                              );
+                              actionArea = (
+                                <>
+                                  {actionArea}
+                                  <div className="pl-[1.5ch] sm:pl-[2ch]">
+                                    <MemoInput 
+                                      dayIndex={dayIndex} 
+                                      initialMemo={confirmedVerse.memo || ""} 
+                                      memoUpdatedAt={confirmedVerse.memoUpdatedAt} 
+                                      onSave={handleMemoSave} 
+                                    />
+                                  </div>
+                                </>
                               );
                             } else if (isSelected) {
                               wrapperClass += "bg-sky-50 dark:bg-sky-900/20 text-stone-900 dark:text-stone-100 border border-sky-200 border-dashed dark:border-sky-800/50 mt-1 mb-2";

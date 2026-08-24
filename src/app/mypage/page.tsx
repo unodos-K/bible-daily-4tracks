@@ -56,20 +56,32 @@ function calculateDaysSince(startDateStr: string): number {
   return Math.max(1, diffDays + 1);
 }
 
-const MemoInput = ({ dayIndex, initialMemo, onSave }: { dayIndex: number, initialMemo: string, onSave: (dayIndex: number, memo: string) => void }) => {
+const MemoInput = ({ dayIndex, initialMemo, memoUpdatedAt, onSave }: { dayIndex: number, initialMemo: string, memoUpdatedAt?: string, onSave: (dayIndex: number, memo: string) => void }) => {
   const [memo, setMemo] = useState(initialMemo || "");
   useEffect(() => {
     setMemo(initialMemo || "");
   }, [initialMemo]);
+
+  const formattedDate = memoUpdatedAt 
+    ? new Date(memoUpdatedAt).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\. /g, '.').replace(/\.$/, '')
+    : "";
+
   return (
-    <textarea
-      value={memo}
-      onChange={e => setMemo(e.target.value)}
-      onBlur={() => onSave(dayIndex, memo)}
-      placeholder="이 말씀이 마음에 와닿은 이유는 무엇인가요?"
-      className="w-full mt-2 bg-transparent border-b border-stone-200 dark:border-stone-800 text-sm sm:text-base text-stone-700 dark:text-stone-300 placeholder-stone-400 focus:outline-none focus:border-stone-400 dark:focus:border-stone-600 resize-none py-2 transition-colors"
-      rows={2}
-    />
+    <div className="flex flex-col relative w-full">
+      <textarea
+        value={memo}
+        onChange={e => setMemo(e.target.value)}
+        onBlur={() => onSave(dayIndex, memo)}
+        placeholder="이 말씀이 마음에 와닿은 이유는 무엇인가요?"
+        className="w-full mt-2 bg-transparent border-b border-stone-200 dark:border-stone-800 text-sm sm:text-base text-stone-700 dark:text-stone-300 placeholder-stone-400 focus:outline-none focus:border-stone-400 dark:focus:border-stone-600 resize-none py-2 transition-colors pb-6"
+        rows={2}
+      />
+      {memo && formattedDate && (
+        <span className="absolute bottom-1 right-1 text-[10px] text-stone-400">
+          {formattedDate}
+        </span>
+      )}
+    </div>
   );
 }
 
@@ -122,6 +134,17 @@ export default function MyPage() {
       document.body.style.overflow = 'unset';
     };
   }, [selectedRecordStr, isMemoryModalOpen]);
+
+  useEffect(() => {
+    const handleRecordsUpdated = async () => {
+      if (authUser) {
+        const r = await fetchReadRecords();
+        setRecords(r);
+      }
+    };
+    window.addEventListener('records_updated', handleRecordsUpdated);
+    return () => window.removeEventListener('records_updated', handleRecordsUpdated);
+  }, [authUser]);
 
   const handleLogout = async () => {
     await signOut();
@@ -232,7 +255,7 @@ export default function MyPage() {
     if (!record || !record.oneVerse) return;
     if (record.oneVerse.memo === newMemo) return;
     
-    const updatedVerse = { ...record.oneVerse, memo: newMemo };
+    const updatedVerse = { ...record.oneVerse, memo: newMemo, memoUpdatedAt: new Date().toISOString() };
     setRecords(prev => ({
       ...prev,
       [dayIndex]: {
@@ -500,7 +523,7 @@ export default function MyPage() {
                         <div className="text-right text-stone-500 dark:text-stone-400 font-bold text-xs sm:text-sm">
                           - {formattedRef} -
                         </div>
-                        <MemoInput dayIndex={record.dayIndex} initialMemo={verse.memo || ""} onSave={handleMemoSave} />
+                        <MemoInput dayIndex={record.dayIndex} initialMemo={verse.memo || ""} memoUpdatedAt={verse.memoUpdatedAt} onSave={handleMemoSave} />
                       </div>
 
                       <div className="flex border-t border-stone-100 dark:border-stone-800 bg-white dark:bg-stone-900">
@@ -685,7 +708,7 @@ export default function MyPage() {
                                 <div className="text-right text-stone-500 dark:text-stone-400 font-semibold text-base sm:text-lg">
                                   - {formattedRef} -
                                 </div>
-                                <MemoInput dayIndex={record.dayIndex} initialMemo={verse.memo || ""} onSave={handleMemoSave} />
+                                <MemoInput dayIndex={record.dayIndex} initialMemo={verse.memo || ""} memoUpdatedAt={verse.memoUpdatedAt} onSave={handleMemoSave} />
                               </div>
                             </div>
                           );
