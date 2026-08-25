@@ -806,6 +806,12 @@ export default function MyPage() {
           onSave={handleMemoSave}
           initialMode={memoModalState.initialMode}
           onShare={() => handleShareOneVerse(records[memoModalState.dayIndex!])}
+          verseText={records[memoModalState.dayIndex].oneVerse!.displayText || records[memoModalState.dayIndex].oneVerse!.rawText}
+          verseRef={
+            records[memoModalState.dayIndex].oneVerse!.book === "시편"
+              ? `${records[memoModalState.dayIndex].oneVerse!.book} ${records[memoModalState.dayIndex].oneVerse!.chapter}편 ${records[memoModalState.dayIndex].oneVerse!.verse}절`
+              : `${records[memoModalState.dayIndex].oneVerse!.book} ${records[memoModalState.dayIndex].oneVerse!.chapter}장 ${records[memoModalState.dayIndex].oneVerse!.verse}절`
+          }
         />
       )}
 

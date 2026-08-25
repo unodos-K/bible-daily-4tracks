@@ -1136,6 +1136,8 @@ export default function BibleViewerPage() {
           onSave={handleMemoSave}
           initialMode={memoModalState.initialMode}
           onShare={() => handleShareOneVerseClick(records[memoModalState.dayIndex!])}
+          verseText={records[memoModalState.dayIndex!].oneVerse!.displayText || records[memoModalState.dayIndex!].oneVerse!.rawText}
+          verseRef={formatReference(records[memoModalState.dayIndex!].oneVerse!.book, records[memoModalState.dayIndex!].oneVerse!.chapter, records[memoModalState.dayIndex!].oneVerse!.verse)}
         />
       )}
 

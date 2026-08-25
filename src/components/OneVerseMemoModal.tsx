@@ -11,6 +11,8 @@ interface OneVerseMemoModalProps {
   onSave: (dayIndex: number, newMemo: MemoData) => Promise<void>;
   onShare?: () => void;
   initialMode?: 'view' | 'edit';
+  verseText?: string;
+  verseRef?: string;
 }
 
 const parseInitialMemo = (m: string | MemoData | undefined): MemoData => {
@@ -27,7 +29,9 @@ export default function OneVerseMemoModal({
   memoUpdatedAt, 
   onSave,
   onShare,
-  initialMode
+  initialMode,
+  verseText,
+  verseRef
 }: OneVerseMemoModalProps) {
   const [mode, setMode] = useState<'view' | 'edit'>(initialMode || (initialMemo ? 'view' : 'edit'));
   const [memoData, setMemoData] = useState<MemoData>(parseInitialMemo(initialMemo));
@@ -187,6 +191,16 @@ export default function OneVerseMemoModal({
 
         {/* Content */}
         <div className="p-5 flex flex-col overflow-y-auto flex-1">
+          {verseText && verseRef && (
+            <div className="mb-6 bg-stone-100 dark:bg-white/5 p-4 rounded-xl border border-stone-200 dark:border-stone-800">
+              <blockquote className="text-[15px] sm:text-base text-stone-800 dark:text-stone-200 leading-relaxed italic break-keep mb-3">
+                "{verseText}"
+              </blockquote>
+              <div className="text-right text-stone-500 dark:text-stone-400 font-bold text-xs">
+                - {verseRef} -
+              </div>
+            </div>
+          )}
           <div className="text-stone-400 text-xs mb-4 font-medium tracking-wide">
             작성일: {formattedDate}
           </div>
