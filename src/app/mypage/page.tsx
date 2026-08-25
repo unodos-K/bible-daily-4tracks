@@ -22,7 +22,7 @@ import { signOut, signInWithKakao } from "@/lib/supabase";
 import { shareOneVerse } from "@/lib/share";
 import ShareModal from "@/components/ShareModal";
 import MemoryTrainerModal from "@/components/MemoryTrainerModal";
-
+import SettingsModal from "@/components/SettingsModal";
 function getDaysInMonth(year: number, month: number) {
   return new Date(year, month, 0).getDate();
 }
@@ -78,7 +78,7 @@ export default function MyPage() {
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const carouselRef = useRef<HTMLDivElement>(null);
   
-  // 캐러셀 관련 상태 및 Ref (removed)
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -235,6 +235,13 @@ export default function MyPage() {
                 💬 카카오 로그인
               </button>
             )}
+            <button
+              onClick={() => setIsSettingsModalOpen(true)}
+              className="p-2 text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 transition-colors bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-full shadow-sm"
+              aria-label="환경 설정"
+            >
+              <Settings size={20} />
+            </button>
           </div>
         </header>
 
@@ -490,6 +497,11 @@ export default function MyPage() {
         </div>
       )}
 
+      <SettingsModal 
+        isOpen={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
+        onLogout={handleLogout}
+      />
     </div>
   );
 }

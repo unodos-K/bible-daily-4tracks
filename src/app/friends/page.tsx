@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { X, Search, UserPlus, Check, X as RejectIcon, UserCheck, Flame, BookOpen, Heart, MessageCircle, Settings, Share2, Copy } from "lucide-react";
+import { X, Search, UserPlus, Check, X as RejectIcon, UserCheck, Flame, BookOpen, Heart, MessageCircle, Share2, Copy } from "lucide-react";
 import { 
   FriendProfile, 
   searchUsersByNickname, 
@@ -22,7 +22,6 @@ import SettingsModal from "@/components/SettingsModal";
 export default function FriendsPage() {
   const [activeTab, setActiveTab] = useState<"friends" | "requests" | "search">("friends");
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
-  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   
   const [friends, setFriends] = useState<FriendProfile[]>([]);
   const [requests, setRequests] = useState<{ id: string; profile: FriendProfile }[]>([]);
@@ -232,39 +231,34 @@ export default function FriendsPage() {
   return (
     <div className="w-full min-h-[calc(100vh-64px)] bg-stone-50 dark:bg-stone-950 flex flex-col pb-20">
       <div className="w-full max-w-2xl mx-auto flex flex-col h-full">
-        {/* 헤더 */}
-        <header className="sticky top-0 z-40 bg-stone-50/95 dark:bg-stone-950/95 backdrop-blur-md pt-6 pb-4 px-6 border-b border-stone-200/50 dark:border-stone-800/50 flex items-center justify-between w-full">
-          <h1 className="text-2xl font-black text-stone-800 dark:text-stone-100 flex items-center gap-2">
-            친구 탭
-          </h1>
-          <button
-            onClick={() => setIsSettingsModalOpen(true)}
-            className="p-2 text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 transition-colors bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-full shadow-sm"
-            aria-label="환경 설정"
-          >
-            <Settings size={20} />
-          </button>
-        </header>
+        {/* Sticky 고정 래퍼 */}
+        <div className="sticky top-0 z-40 bg-stone-50 dark:bg-stone-950 w-full flex flex-col shadow-sm border-b border-stone-200/50 dark:border-stone-800/50">
+          {/* 헤더 */}
+          <header className="pt-6 pb-2 px-6 flex items-center justify-between w-full">
+            <h1 className="text-2xl font-black text-stone-800 dark:text-stone-100 flex items-center gap-2">
+              친구 탭
+            </h1>
+          </header>
 
-        {/* 상단 공통 구역 (소셜 액션) */}
-        <div className="px-4 py-3 bg-white dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800 flex flex-col sm:flex-row gap-2">
-          <button
-            onClick={handleInvite}
-            className="flex-1 flex items-center justify-center gap-2 bg-[#FEE500] hover:bg-[#FDD800] text-black text-sm font-bold py-2.5 rounded-xl transition-colors shadow-sm"
-          >
-            <Share2 size={16} />
-            친구에게 One Verse 추천하기
-          </button>
-          <button
-            onClick={handleCopyNickname}
-            className="flex-1 flex items-center justify-center gap-2 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 text-sm font-bold py-2.5 rounded-xl transition-colors shadow-sm"
-          >
-            <Copy size={16} />
-            내 닉네임 복사하기
-          </button>
-        </div>
+          {/* 상단 공통 구역 (소셜 액션) */}
+          <div className="px-4 py-3 flex flex-col sm:flex-row gap-2">
+            <button
+              onClick={handleInvite}
+              className="flex-1 flex items-center justify-center gap-2 bg-[#FEE500] hover:bg-[#FDD800] text-black text-sm font-bold py-2.5 rounded-xl transition-colors shadow-sm"
+            >
+              <Share2 size={16} />
+              친구에게 One Verse 추천하기
+            </button>
+            <button
+              onClick={handleCopyNickname}
+              className="flex-1 flex items-center justify-center gap-2 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 text-sm font-bold py-2.5 rounded-xl transition-colors shadow-sm"
+            >
+              <Copy size={16} />
+              내 닉네임 복사하기
+            </button>
+          </div>
 
-        <div className="flex px-4 pt-2 border-b border-stone-100 dark:border-stone-800">
+          <div className="flex px-4 pt-1">
           <button 
             onClick={() => setActiveTab("friends")}
             className={`flex-1 pb-3 font-semibold border-b-2 transition-colors ${activeTab === "friends" ? "border-stone-800 text-stone-800 dark:border-stone-200 dark:text-stone-200" : "border-transparent text-stone-400 hover:text-stone-600"}`}
@@ -288,6 +282,7 @@ export default function FriendsPage() {
           >
             친구 찾기
           </button>
+        </div>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-stone-50 dark:bg-stone-950">
@@ -507,11 +502,6 @@ export default function FriendsPage() {
           )}
         </div>
       </div>
-      <SettingsModal 
-        isOpen={isSettingsModalOpen}
-        onClose={() => setIsSettingsModalOpen(false)}
-        onLogout={handleLogout}
-      />
     </div>
   );
 }
