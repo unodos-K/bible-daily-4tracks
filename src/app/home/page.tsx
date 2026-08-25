@@ -302,21 +302,20 @@ export default function HomePage() {
                   <div 
                     key={dayData.day} 
                     ref={isTargetDay ? targetDayRef : null}
-                    className={`flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-xl border ${
+                    className={`flex flex-col sm:flex-row sm:items-center justify-between py-2 px-3 rounded-xl border ${
                       isTargetDay 
-                        ? 'bg-sky-50 dark:bg-sky-900/20 border-sky-200 dark:border-sky-800/50 shadow-sm' 
+                        ? 'bg-sky-50 dark:bg-sky-900/20 border-sky-300 dark:border-sky-700 shadow-sm' 
                         : isCompleted
-                          ? 'bg-stone-50 dark:bg-stone-900/50 border-transparent opacity-70'
+                          ? 'bg-stone-50 dark:bg-stone-900/50 border-green-500 dark:border-green-600/60 opacity-90'
                           : 'bg-white dark:bg-stone-900 border-stone-100 dark:border-stone-800'
                     }`}
                   >
-                    <div className="flex items-center gap-3 mb-1.5 sm:mb-0">
+                    <div className="flex items-center mb-0.5 sm:mb-0">
                       <span className={`font-black w-14 whitespace-nowrap flex-shrink-0 ${
-                        isTargetDay ? 'text-sky-600 dark:text-sky-400' : isCompleted ? 'text-stone-400' : 'text-stone-700 dark:text-stone-300'
+                        isTargetDay ? 'text-sky-600 dark:text-sky-400' : isCompleted ? 'text-stone-500' : 'text-stone-700 dark:text-stone-300'
                       }`}>
                         Day {dayData.day}
                       </span>
-                      {isCompleted && <CheckCircle2 size={16} className="text-emerald-500" />}
                     </div>
                     <span className={`text-[13px] font-semibold flex flex-wrap gap-2 sm:justify-end leading-snug ${
                       isTargetDay ? 'text-stone-800 dark:text-stone-200' : isCompleted ? 'text-stone-400' : 'text-stone-600 dark:text-stone-400'
