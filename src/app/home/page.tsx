@@ -53,15 +53,37 @@ const BIBLE_ABBREVIATIONS: Record<string, string> = {
 };
 
 function formatSchedule(dayData: any) {
-  if (!dayData) return "";
+  if (!dayData) return [];
   const tracks = dayData.tracks;
-  const parts = [];
+  const parts: { category: string; text: string }[] = [];
   const getAbbr = (bookName: string) => BIBLE_ABBREVIATIONS[bookName] || bookName.substring(0, 1);
-  if (tracks["구약"]) parts.push(`${getAbbr(tracks["구약"].Book)} ${tracks["구약"].startChapter}${tracks["구약"].endChapter && tracks["구약"].endChapter !== tracks["구약"].startChapter ? `-${tracks["구약"].endChapter}` : ''}`);
-  if (tracks["신약"]) parts.push(`${getAbbr(tracks["신약"].Book)} ${tracks["신약"].startChapter}${tracks["신약"].endChapter && tracks["신약"].endChapter !== tracks["신약"].startChapter ? `-${tracks["신약"].endChapter}` : ''}`);
-  if (tracks["시편"]) parts.push(`${getAbbr(tracks["시편"].Book)} ${tracks["시편"].startChapter}${tracks["시편"].endChapter && tracks["시편"].endChapter !== tracks["시편"].startChapter ? `-${tracks["시편"].endChapter}` : ''}`);
-  if (tracks["잠언"]) parts.push(`${getAbbr(tracks["잠언"].Book)} ${tracks["잠언"].startChapter}${tracks["잠언"].endChapter && tracks["잠언"].endChapter !== tracks["잠언"].startChapter ? `-${tracks["잠언"].endChapter}` : ''}`);
-  return parts.join(", ");
+  
+  const formatTrack = (category: string, tData: any) => {
+    if (!tData) return;
+    const abbr = getAbbr(tData.Book);
+    let rangeStr = "";
+    if (tData.startChapter === tData.endChapter) {
+      if (tData.startVerse === null || tData.endVerse === null) {
+        rangeStr = `${tData.startChapter}`;
+      } else {
+        rangeStr = `${tData.startChapter}:${tData.startVerse}-${tData.endVerse}`;
+      }
+    } else {
+      if (tData.startVerse === null || tData.endVerse === null) {
+        rangeStr = `${tData.startChapter}-${tData.endChapter}`;
+      } else {
+        rangeStr = `${tData.startChapter}:${tData.startVerse}-${tData.endChapter}:${tData.endVerse}`;
+      }
+    }
+    parts.push({ category, text: `${abbr} ${rangeStr}` });
+  };
+
+  formatTrack("구약", tracks["구약"]);
+  formatTrack("신약", tracks["신약"]);
+  formatTrack("시편", tracks["시편"]);
+  formatTrack("잠언", tracks["잠언"]);
+  
+  return parts;
 }
 
 export default function HomePage() {
@@ -153,8 +175,13 @@ export default function HomePage() {
                 Target Day {daysSince}
               </span>
             </div>
-            <div className="text-lg font-black text-stone-800 dark:text-stone-100 mb-4">
-              {formatSchedule(scheduleData[daysSince - 1])}
+            <div className="text-lg font-black text-stone-800 dark:text-stone-100 mb-4 flex flex-wrap gap-x-2 gap-y-1">
+              {formatSchedule(scheduleData[daysSince - 1]).map((p, i, arr) => (
+                <span key={p.category} className="inline-flex items-center">
+                  <span className="text-sm font-bold text-stone-500 dark:text-stone-400 mr-1">[{p.category}]</span>
+                  <span>{p.text}{i < arr.length - 1 ? ',' : ''}</span>
+                </span>
+              ))}
             </div>
             <button 
               onClick={() => setIsScheduleSheetOpen(true)}
@@ -265,7 +292,7 @@ export default function HomePage() {
                 <X size={20} />
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto p-5 pb-20 flex flex-col gap-3">
+            <div className="flex-1 overflow-y-auto p-4 pb-20 flex flex-col gap-2 overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }}>
               {scheduleData.map((dayData, index) => {
                 const dayStr = String(dayData.day);
                 const isCompleted = records[dayStr]?.completedAt || records[dayStr]?.readDate;
@@ -275,7 +302,7 @@ export default function HomePage() {
                   <div 
                     key={dayData.day} 
                     ref={isTargetDay ? targetDayRef : null}
-                    className={`flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl border ${
+                    className={`flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-xl border ${
                       isTargetDay 
                         ? 'bg-sky-50 dark:bg-sky-900/20 border-sky-200 dark:border-sky-800/50 shadow-sm' 
                         : isCompleted
@@ -283,7 +310,7 @@ export default function HomePage() {
                           : 'bg-white dark:bg-stone-900 border-stone-100 dark:border-stone-800'
                     }`}
                   >
-                    <div className="flex items-center gap-3 mb-2 sm:mb-0">
+                    <div className="flex items-center gap-3 mb-1.5 sm:mb-0">
                       <span className={`font-black w-14 whitespace-nowrap flex-shrink-0 ${
                         isTargetDay ? 'text-sky-600 dark:text-sky-400' : isCompleted ? 'text-stone-400' : 'text-stone-700 dark:text-stone-300'
                       }`}>
@@ -291,10 +318,23 @@ export default function HomePage() {
                       </span>
                       {isCompleted && <CheckCircle2 size={16} className="text-emerald-500" />}
                     </div>
-                    <span className={`text-sm font-semibold ${
+                    <span className={`text-[13px] font-semibold flex flex-wrap gap-2 sm:justify-end leading-snug ${
                       isTargetDay ? 'text-stone-800 dark:text-stone-200' : isCompleted ? 'text-stone-400' : 'text-stone-600 dark:text-stone-400'
                     }`}>
-                      {formatSchedule(dayData)}
+                      {formatSchedule(dayData).map(p => (
+                        <span key={p.category} className="inline-flex items-center gap-1">
+                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-sm ${
+                            isTargetDay 
+                              ? 'bg-sky-100 dark:bg-sky-900/50 text-sky-700 dark:text-sky-300' 
+                              : isCompleted
+                                ? 'bg-stone-100 dark:bg-stone-800 text-stone-400'
+                                : 'bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400'
+                          }`}>
+                            {p.category}
+                          </span>
+                          <span>{p.text}</span>
+                        </span>
+                      ))}
                     </span>
                   </div>
                 );
