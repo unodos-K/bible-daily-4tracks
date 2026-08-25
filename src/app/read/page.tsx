@@ -289,10 +289,10 @@ export default function BibleViewerPage() {
     }
   };
 
-  const handleMemoSave = async (dayIndex: number, newMemo: string) => {
+  const handleMemoSave = async (dayIndex: number, newMemo: string | import('@/lib/storage').MemoData) => {
     const record = records[dayIndex];
     if (!record || !record.oneVerse) return;
-    if (record.oneVerse.memo === newMemo) return;
+    if (JSON.stringify(record.oneVerse.memo) === JSON.stringify(newMemo)) return;
     
     const updatedVerse = { ...record.oneVerse, memo: newMemo, memoUpdatedAt: new Date().toISOString() };
     setRecords(prev => ({
@@ -1134,7 +1134,7 @@ export default function BibleViewerPage() {
           memoUpdatedAt={records[memoModalState.dayIndex!].oneVerse!.memoUpdatedAt}
           onSave={handleMemoSave}
           initialMode={memoModalState.initialMode}
-          onShare={() => handleShareOneVerseClick(records[memoModalState.dayIndex!])}
+          onShare={(options) => shareOneVerse(records[memoModalState.dayIndex!], authUser?.nickname || "친구", options)}
         />
       )}
 

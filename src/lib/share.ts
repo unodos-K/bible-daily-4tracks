@@ -1,11 +1,30 @@
 import { DayRecord, OneVerse } from "./storage";
 
-export const shareOneVerse = async (record: DayRecord, nickname: string) => {
+export const shareOneVerse = async (
+  record: DayRecord, 
+  nickname: string, 
+  shareOptions: { meditation: boolean, prayer: boolean, thanks: boolean, application: boolean } = { meditation: true, prayer: true, thanks: true, application: true }
+) => {
   if (typeof window === "undefined") return;
 
   const displayTxt = record.oneVerse?.displayText || record.oneVerse?.rawText || '';
   const formattedRef = `${record.oneVerse?.book} ${record.oneVerse?.chapter}장 ${record.oneVerse?.verse}절`;
-  const memoTxt = record.oneVerse?.memo ? `\n\n[묵상 노트]\n${record.oneVerse.memo}` : '';
+  
+  let memoTxt = '';
+  const memo = record.oneVerse?.memo;
+  
+  if (memo) {
+    if (typeof memo === 'string') {
+      if (shareOptions.meditation) memoTxt += `\n\n[묵상]\n${memo}`;
+    } else {
+      if (shareOptions.meditation && memo.meditation) memoTxt += `\n\n[묵상]\n${memo.meditation}`;
+      if (shareOptions.prayer && memo.prayer) memoTxt += `\n\n[기도]\n${memo.prayer}`;
+      if (shareOptions.thanks && memo.thanks) memoTxt += `\n\n[감사하기]\n${memo.thanks}`;
+      if (shareOptions.application && memo.application && memo.application.length > 0) {
+        memoTxt += `\n\n[삶에 적용하기]\n` + memo.application.map(a => `[${a.checked ? 'v' : ' '}] ${a.text}`).join('\n');
+      }
+    }
+  }
   
   const textToShare = `[One Verse]\n${nickname}님이 오늘의 One Verse를 보냈어요!\n\n"${displayTxt}"\n\n${formattedRef}${memoTxt}`;
   

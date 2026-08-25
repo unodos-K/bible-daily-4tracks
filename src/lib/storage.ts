@@ -6,6 +6,13 @@ export interface ReadingSettings {
   hasStarted: boolean; // 온보딩 완료 여부
 }
 
+export interface MemoData {
+  meditation?: string;
+  prayer?: string;
+  thanks?: string;
+  application?: { text: string; checked: boolean }[];
+}
+
 export interface OneVerse {
   trackType: string;
   book: string;
@@ -17,7 +24,7 @@ export interface OneVerse {
   reference: string;
   isMemorized?: boolean;
   memorizedAt?: string; // ISO String
-  memo?: string;
+  memo?: string | MemoData;
   memoUpdatedAt?: string; // ISO String
 }
 
