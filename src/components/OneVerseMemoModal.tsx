@@ -9,7 +9,7 @@ interface OneVerseMemoModalProps {
   initialMemo: string | MemoData | undefined;
   memoUpdatedAt?: string;
   onSave: (dayIndex: number, newMemo: MemoData) => Promise<void>;
-  onShare?: (options: { meditation: boolean, prayer: boolean, thanks: boolean, application: boolean }) => void;
+  onShare?: () => void;
   initialMode?: 'view' | 'edit';
 }
 
@@ -49,10 +49,6 @@ export default function OneVerseMemoModal({
   const [memoData, setMemoData] = useState<MemoData>(parseInitialMemo(initialMemo));
   const [appText, setAppText] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  const [shareOptions, setShareOptions] = useState({
-    meditation: true, prayer: true, thanks: true, application: true
-  });
 
   useEffect(() => {
     if (isOpen) {
@@ -60,7 +56,6 @@ export default function OneVerseMemoModal({
       setMemoData(md);
       setAppText(appToString(md.application));
       setMode(initialMode || (Object.keys(md).length > 0 ? 'view' : 'edit'));
-      setIsShareModalOpen(false);
     }
   }, [isOpen, initialMemo, initialMode]);
 
@@ -139,54 +134,16 @@ export default function OneVerseMemoModal({
         className="w-full max-w-md bg-stone-900 border border-stone-700/50 rounded-2xl overflow-hidden shadow-2xl flex flex-col relative max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
-        {isShareModalOpen ? (
-          <div className="flex flex-col p-6 h-full">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-stone-100">어떤 항목을 공유할까요?</h3>
-              <button onClick={() => setIsShareModalOpen(false)} className="text-stone-400 hover:text-stone-200"><X size={24} /></button>
-            </div>
-            <div className="flex flex-col gap-4 flex-1 overflow-y-auto">
-              {memoData.meditation && (
-                <label className="flex items-center gap-3 p-3 bg-stone-800 rounded-xl cursor-pointer">
-                  <input type="checkbox" checked={shareOptions.meditation} onChange={e => setShareOptions({...shareOptions, meditation: e.target.checked})} className="w-5 h-5 accent-sky-500" />
-                  <span className="text-stone-200">묵상</span>
-                </label>
-              )}
-              {memoData.prayer && (
-                <label className="flex items-center gap-3 p-3 bg-stone-800 rounded-xl cursor-pointer">
-                  <input type="checkbox" checked={shareOptions.prayer} onChange={e => setShareOptions({...shareOptions, prayer: e.target.checked})} className="w-5 h-5 accent-sky-500" />
-                  <span className="text-stone-200">기도</span>
-                </label>
-              )}
-              {memoData.thanks && (
-                <label className="flex items-center gap-3 p-3 bg-stone-800 rounded-xl cursor-pointer">
-                  <input type="checkbox" checked={shareOptions.thanks} onChange={e => setShareOptions({...shareOptions, thanks: e.target.checked})} className="w-5 h-5 accent-sky-500" />
-                  <span className="text-stone-200">감사하기</span>
-                </label>
-              )}
-              {memoData.application && memoData.application.length > 0 && (
-                <label className="flex items-center gap-3 p-3 bg-stone-800 rounded-xl cursor-pointer">
-                  <input type="checkbox" checked={shareOptions.application} onChange={e => setShareOptions({...shareOptions, application: e.target.checked})} className="w-5 h-5 accent-sky-500" />
-                  <span className="text-stone-200">삶에 적용하기</span>
-                </label>
-              )}
-            </div>
-            <div className="mt-6 flex gap-3">
-              <button onClick={() => setIsShareModalOpen(false)} className="flex-1 py-4 bg-stone-800 text-stone-300 font-bold rounded-xl">취소</button>
-              <button onClick={() => { onShare?.(shareOptions); setIsShareModalOpen(false); }} className="flex-1 py-4 bg-sky-600 text-white font-bold rounded-xl">공유하기</button>
-            </div>
-          </div>
-        ) : (
-          <>
-            {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-stone-800 bg-stone-900/50 flex-shrink-0">
+        <>
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b border-stone-800 bg-stone-900/50 flex-shrink-0">
               <h2 className="text-lg font-bold text-stone-100 flex items-center gap-2">
                 {mode === 'view' ? '묵상 노트' : '노트 작성'}
               </h2>
               <div className="flex items-center gap-2">
                 {mode === 'view' && onShare && (
                   <button 
-                    onClick={() => setIsShareModalOpen(true)}
+                    onClick={() => onShare()}
                     className="p-2 rounded-full hover:bg-stone-800 text-stone-400 hover:text-stone-200 transition-colors"
                     title="공유하기"
                   >
@@ -316,7 +273,6 @@ export default function OneVerseMemoModal({
               )}
             </div>
           </>
-        )}
       </div>
     </div>
   );

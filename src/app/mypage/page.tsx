@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, BrainCircuit, X, Flame, Settings, Share2, PencilLine, FileText } from "lucide-react";
+import { ChevronLeft, ChevronRight, BrainCircuit, X, Flame, Settings, Share2, PencilLine, FileText, BookOpen } from "lucide-react";
 import { 
   ReadingSettings, 
   ReadRecordsMap, 
@@ -496,47 +496,45 @@ export default function MyPage() {
                         <div className="text-right text-stone-500 dark:text-stone-400 font-bold text-xs sm:text-sm">
                           - {formattedRef} -
                         </div>
-                        <div className="grid grid-cols-2 gap-x-2 mt-4 pt-4 border-t border-stone-100 dark:border-stone-800">
+                        <div className="grid grid-cols-4 gap-1 mt-6 pt-4 border-t border-stone-100 dark:border-stone-800">
                           <button
                             onClick={() => setMemoModalState({ isOpen: true, dayIndex: record.dayIndex, initialMode: verse.memo ? 'view' : 'edit' })}
-                            className="w-full py-2 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
+                            className="flex flex-col items-center justify-center gap-1.5 py-3 text-stone-500 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 rounded-xl transition-colors"
                           >
-                            <FileText size={16} />
-                            {verse.memo ? "메모 보기" : "메모 작성"}
+                            <FileText size={20} strokeWidth={2.5} />
+                            <span className="text-[10px] sm:text-xs font-bold tracking-tight">{verse.memo ? "메모 보기" : "메모 작성"}</span>
                           </button>
                           <button
                             onClick={() => handleShareOneVerse(record)}
-                            className="w-full py-2 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
+                            className="flex flex-col items-center justify-center gap-1.5 py-3 text-stone-500 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 rounded-xl transition-colors"
                           >
-                            <Share2 size={16} />
-                            공유하기
+                            <Share2 size={20} strokeWidth={2.5} />
+                            <span className="text-[10px] sm:text-xs font-bold tracking-tight">공유하기</span>
+                          </button>
+                          <button
+                            onClick={() => {
+                              setSelectedRecordStr(record.readDate);
+                              setSelectedDayIndexForMemory(record.dayIndex);
+                              setIsMemoryModalOpen(true);
+                            }}
+                            className="flex flex-col items-center justify-center gap-1.5 py-3 text-stone-500 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 rounded-xl transition-colors"
+                          >
+                            <BrainCircuit size={20} strokeWidth={2.5} />
+                            <span className="text-[10px] sm:text-xs font-bold tracking-tight">{isMem ? '암송 복습' : '암송 훈련'}</span>
+                          </button>
+                          <button
+                            onClick={() => {
+                              try {
+                                saveViewerDay(record.dayIndex);
+                              } catch {}
+                              router.push("/read?day=" + record.dayIndex);
+                            }}
+                            className="flex flex-col items-center justify-center gap-1.5 py-3 text-stone-500 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 rounded-xl transition-colors"
+                          >
+                            <BookOpen size={20} strokeWidth={2.5} />
+                            <span className="text-[10px] sm:text-xs font-bold tracking-tight">본문 보기</span>
                           </button>
                         </div>
-                      </div>
-
-                      <div className="flex border-t border-stone-100 dark:border-stone-800 bg-white dark:bg-stone-900">
-                        <button
-                          onClick={() => {
-                            setSelectedRecordStr(record.readDate);
-                            setSelectedDayIndexForMemory(record.dayIndex);
-                            setIsMemoryModalOpen(true);
-                          }}
-                          className="flex-1 py-3 text-xs sm:text-sm font-bold text-amber-600 dark:text-amber-500 hover:bg-amber-50 dark:hover:bg-stone-800 flex items-center justify-center gap-1.5 transition-colors border-r border-stone-100 dark:border-stone-800"
-                        >
-                          <BrainCircuit size={16} />
-                          {isMem ? '암송 복습' : '암송 훈련'}
-                        </button>
-                        <button
-                          onClick={() => {
-                            try {
-                              saveViewerDay(record.dayIndex);
-                            } catch {}
-                            router.push("/read?day=" + record.dayIndex);
-                          }}
-                          className="flex-1 py-3 text-xs sm:text-sm font-bold text-sky-600 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-stone-800 flex items-center justify-center gap-1.5 transition-colors border-r border-stone-100 dark:border-stone-800"
-                        >
-                          📖 본문 보기
-                        </button>
                       </div>
                     </div>
                   );
