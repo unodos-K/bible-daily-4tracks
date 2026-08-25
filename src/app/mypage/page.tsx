@@ -23,7 +23,6 @@ import { shareOneVerse } from "@/lib/share";
 import ShareModal from "@/components/ShareModal";
 import MemoryTrainerModal from "@/components/MemoryTrainerModal";
 import SettingsModal from "@/components/SettingsModal";
-import OneVerseMemoModal from "@/components/OneVerseMemoModal";
 
 function getDaysInMonth(year: number, month: number) {
   return new Date(year, month, 0).getDate();
@@ -74,7 +73,6 @@ export default function MyPage() {
   const [selectedDayIndexForMemory, setSelectedDayIndexForMemory] = useState<number | null>(null);
   const [isMemoryModalOpen, setIsMemoryModalOpen] = useState(false);
   
-  const [memoModalState, setMemoModalState] = useState<{ isOpen: boolean, dayIndex: number | null, initialMode?: 'view' | 'edit' }>({ isOpen: false, dayIndex: null });
   const [selectedRecordToShare, setSelectedRecordToShare] = useState<DayRecord | null>(null);
   
   // 캐러셀 관련 상태 및 Ref
@@ -105,7 +103,7 @@ export default function MyPage() {
   }, [router]);
 
   useEffect(() => {
-    if (selectedRecordStr || isMemoryModalOpen || memoModalState.isOpen) {
+    if (selectedRecordStr || isMemoryModalOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
@@ -113,7 +111,7 @@ export default function MyPage() {
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [selectedRecordStr, isMemoryModalOpen, memoModalState.isOpen]);
+  }, [selectedRecordStr, isMemoryModalOpen]);
 
   useEffect(() => {
     const handleRecordsUpdated = async () => {
@@ -210,27 +208,6 @@ export default function MyPage() {
   const handleDayClick = (dateStr: string) => {
     setSelectedRecordStr(dateStr);
     setCurrentSlideIndex(0);
-  };
-
-
-
-  const handleMemoSave = async (dayIndex: number, newMemo: MemoData) => {
-    const record = records[dayIndex];
-    if (!record || !record.oneVerse) return;
-    // Remove strict equality check since newMemo is an object now
-    // if (record.oneVerse.memo === newMemo) return;
-    
-    const updatedVerse = { ...record.oneVerse, memo: newMemo, memoUpdatedAt: new Date().toISOString() };
-    setRecords(prev => ({
-      ...prev,
-      [dayIndex]: {
-        ...prev[dayIndex],
-        oneVerse: updatedVerse
-      }
-    }));
-    await updateReadRecordOneVerse(dayIndex, updatedVerse);
-    setToastMessage("오늘도 꾸준하게 은혜의 발자국을 남기셨네요! 👣");
-    setTimeout(() => setToastMessage(null), 3000);
   };
 
   const nextUnreadDay = getNextUnreadDay(records);
@@ -498,7 +475,7 @@ export default function MyPage() {
                         </div>
                         <div className="grid grid-cols-4 gap-1 mt-6 pt-4 border-t border-stone-100 dark:border-stone-800">
                           <button
-                            onClick={() => setMemoModalState({ isOpen: true, dayIndex: record.dayIndex, initialMode: verse.memo ? 'view' : 'edit' })}
+                            onClick={() => router.push(`/memo?day=${record.dayIndex}&mode=${verse.memo ? 'view' : 'edit'}`)}
                             className="flex flex-col items-center justify-center gap-1.5 py-3 bg-stone-100 dark:bg-white/5 hover:bg-stone-200 dark:hover:bg-white/10 text-stone-600 dark:text-stone-300 rounded-xl transition-all active:scale-95"
                           >
                             <FileText size={20} strokeWidth={2.5} className="text-emerald-500 dark:text-emerald-400" />
@@ -687,17 +664,17 @@ export default function MyPage() {
                                   - {formattedRef} -
                                 </div>
                                 <div className="flex items-center gap-2 mt-4 pt-4 border-t border-stone-100 dark:border-stone-800">
-                                  <button
-                                    onClick={() => setMemoModalState({ isOpen: true, dayIndex: record.dayIndex, initialMode: 'edit' })}
-                                    className="flex-1 py-2 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
+                                  <button 
+                                    onClick={() => router.push(`/memo?day=${record.dayIndex}&mode=edit`)}
+                                    className="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 dark:bg-white/10 dark:hover:bg-white/20 text-stone-700 dark:text-stone-300 rounded-lg text-sm font-medium flex items-center gap-1 transition-colors active:scale-95"
                                   >
                                     <PencilLine size={16} />
                                     {verse.memo ? "메모 수정" : "메모 작성"}
                                   </button>
                                   {verse.memo && (
-                                    <button
-                                      onClick={() => setMemoModalState({ isOpen: true, dayIndex: record.dayIndex, initialMode: 'view' })}
-                                      className="flex-1 py-2 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
+                                    <button 
+                                      onClick={() => router.push(`/memo?day=${record.dayIndex}&mode=view`)}
+                                      className="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 dark:bg-white/10 dark:hover:bg-white/20 text-stone-700 dark:text-stone-300 rounded-lg text-sm font-medium flex items-center gap-1 transition-colors active:scale-95"
                                     >
                                       <FileText size={16} />
                                       메모 보기
@@ -795,25 +772,6 @@ export default function MyPage() {
         isOpen={isSettingsModalOpen}
         onClose={() => setIsSettingsModalOpen(false)}
       />
-
-      {memoModalState.isOpen && memoModalState.dayIndex !== null && records[memoModalState.dayIndex]?.oneVerse && (
-        <OneVerseMemoModal
-          isOpen={memoModalState.isOpen}
-          onClose={() => setMemoModalState({ isOpen: false, dayIndex: null })}
-          dayIndex={memoModalState.dayIndex}
-          initialMemo={records[memoModalState.dayIndex].oneVerse!.memo || ""}
-          memoUpdatedAt={records[memoModalState.dayIndex].oneVerse!.memoUpdatedAt}
-          onSave={handleMemoSave}
-          initialMode={memoModalState.initialMode}
-          onShare={() => handleShareOneVerse(records[memoModalState.dayIndex!])}
-          verseText={records[memoModalState.dayIndex].oneVerse!.displayText || records[memoModalState.dayIndex].oneVerse!.rawText}
-          verseRef={
-            records[memoModalState.dayIndex].oneVerse!.book === "시편"
-              ? `${records[memoModalState.dayIndex].oneVerse!.book} ${records[memoModalState.dayIndex].oneVerse!.chapter}편 ${records[memoModalState.dayIndex].oneVerse!.verse}절`
-              : `${records[memoModalState.dayIndex].oneVerse!.book} ${records[memoModalState.dayIndex].oneVerse!.chapter}장 ${records[memoModalState.dayIndex].oneVerse!.verse}절`
-          }
-        />
-      )}
 
       <ShareModal
         isOpen={!!selectedRecordToShare}

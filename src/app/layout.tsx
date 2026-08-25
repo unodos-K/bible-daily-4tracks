@@ -4,6 +4,7 @@ import { BottomNavigation } from "@/components/BottomNavigation";
 import { SettingsProvider } from "@/contexts/SettingsContext";
 import KakaoInit from "@/components/KakaoInit";
 import NicknameGuard from "@/components/NicknameGuard";
+import MainLayout from "@/components/MainLayout";
 import Script from "next/script";
 import AuthProvider from "@/components/AuthProvider";
 
@@ -53,12 +54,9 @@ export default function RootLayout({
         <NicknameGuard />
         <SettingsProvider>
           <AuthProvider>
-            <div className="w-full max-w-2xl h-[100dvh] bg-stone-50 dark:bg-stone-950 shadow-xl flex flex-col relative border-x border-stone-200 dark:border-stone-800 overflow-hidden pt-[env(safe-area-inset-top)]">
-              <main className="flex-1 w-full overflow-y-auto overscroll-y-contain pb-[calc(80px+env(safe-area-inset-bottom))] bg-stone-50 dark:bg-stone-950">
-                {children}
-              </main>
-              <BottomNavigation />
-            </div>
+            <MainLayout>
+              {children}
+            </MainLayout>
           </AuthProvider>
         </SettingsProvider>
       </body>

@@ -23,7 +23,6 @@ import {
 } from "@/lib/storage";
 import { getAuthUser, AuthUser } from "@/lib/auth";
 import { shareOneVerse } from "@/lib/share";
-import OneVerseMemoModal from "@/components/OneVerseMemoModal";
 import ShareModal from "@/components/ShareModal";
 import { signInWithKakao } from "@/lib/supabase";
 import { useSettings } from "@/contexts/SettingsContext";
@@ -82,7 +81,6 @@ export default function BibleViewerPage() {
   const [selectedVerse, setSelectedVerse] = useState<OneVerse | null>(null);
   const [confirmedVerse, setConfirmedVerse] = useState<OneVerse | null>(null);
   const [isMemoryModalOpen, setIsMemoryModalOpen] = useState(false);
-  const [memoModalState, setMemoModalState] = useState<{ isOpen: boolean, dayIndex: number | null, initialMode?: 'view' | 'edit' }>({ isOpen: false, dayIndex: null });
   const [showWarningModal, setShowWarningModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [verseToReplace, setVerseToReplace] = useState<OneVerse | null>(null);
@@ -573,7 +571,7 @@ export default function BibleViewerPage() {
       {showWarningModal && (
         <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
           <div className="bg-white dark:bg-stone-900 rounded-2xl p-6 shadow-xl w-full max-w-sm flex flex-col items-center gap-4 animate-in zoom-in-95">
-            <div className="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-2">
+            <div className="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:bg-amber-400 flex items-center justify-center mb-2">
               <Bookmark size={24} />
             </div>
             <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 text-center">One Verse를 선택해주세요 ✨</h3>
@@ -1004,7 +1002,7 @@ export default function BibleViewerPage() {
                                   {actionArea}
                                   <div className="pl-[2ch] sm:pl-[2.5ch] mt-4 flex items-center gap-2 border-t border-stone-200 dark:border-stone-800/50 pt-3">
                                     <button
-                                      onClick={(e) => { e.stopPropagation(); setMemoModalState({ isOpen: true, dayIndex, initialMode: 'edit' }); }}
+                                      onClick={(e) => { e.stopPropagation(); router.push(`/memo?day=${dayIndex}&mode=edit`); }}
                                       className="flex-1 py-2 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors border border-stone-200 dark:border-stone-700 shadow-sm"
                                     >
                                       <PencilLine size={16} />
@@ -1012,7 +1010,7 @@ export default function BibleViewerPage() {
                                     </button>
                                     {confirmedVerse.memo && (
                                       <button
-                                        onClick={(e) => { e.stopPropagation(); setMemoModalState({ isOpen: true, dayIndex, initialMode: 'view' }); }}
+                                        onClick={(e) => { e.stopPropagation(); router.push(`/memo?day=${dayIndex}&mode=view`); }}
                                         className="flex-1 py-2 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors border border-stone-200 dark:border-stone-700 shadow-sm"
                                       >
                                         <FileText size={16} />
@@ -1123,21 +1121,6 @@ export default function BibleViewerPage() {
           oneVerse={confirmedVerse}
           onClose={() => setIsMemoryModalOpen(false)}
           onComplete={handleMemoryComplete}
-        />
-      )}
-
-      {memoModalState.isOpen && memoModalState.dayIndex !== null && records[memoModalState.dayIndex]?.oneVerse && (
-        <OneVerseMemoModal
-          isOpen={memoModalState.isOpen}
-          onClose={() => setMemoModalState({ isOpen: false, dayIndex: null })}
-          dayIndex={memoModalState.dayIndex}
-          initialMemo={records[memoModalState.dayIndex!].oneVerse!.memo || ""}
-          memoUpdatedAt={records[memoModalState.dayIndex!].oneVerse!.memoUpdatedAt}
-          onSave={handleMemoSave}
-          initialMode={memoModalState.initialMode}
-          onShare={() => handleShareOneVerseClick(records[memoModalState.dayIndex!])}
-          verseText={records[memoModalState.dayIndex!].oneVerse!.displayText || records[memoModalState.dayIndex!].oneVerse!.rawText}
-          verseRef={formatReference(records[memoModalState.dayIndex!].oneVerse!.book, records[memoModalState.dayIndex!].oneVerse!.chapter, records[memoModalState.dayIndex!].oneVerse!.verse)}
         />
       )}
 
