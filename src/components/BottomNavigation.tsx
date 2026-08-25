@@ -39,11 +39,11 @@ export function BottomNavigation() {
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 w-full z-50 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border-t border-stone-200 dark:border-stone-800 pb-[env(safe-area-inset-bottom)] min-h-[64px] box-border ios-pwa-bottom-safe">
+    <nav className="fixed bottom-0 left-0 w-full z-50 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border-t border-stone-200 dark:border-stone-800 pb-[env(safe-area-inset-bottom)] box-border">
       <div className="max-w-md mx-auto flex">
         <Link 
           href="/home"
-          className={`flex-1 py-3 flex flex-col items-center justify-center gap-1 font-semibold transition-colors ${
+          className={`flex-1 pt-2.5 pb-2 flex flex-col items-center justify-center gap-1 font-semibold transition-colors ${
             pathname === "/home" 
               ? "text-sky-700 dark:text-sky-400" 
               : "text-stone-400 hover:text-stone-600 dark:hover:text-stone-300"
@@ -54,7 +54,7 @@ export function BottomNavigation() {
         </Link>
         <Link 
           href="/read"
-          className={`flex-1 py-3 flex flex-col items-center justify-center gap-1 font-semibold transition-colors ${
+          className={`flex-1 pt-2.5 pb-2 flex flex-col items-center justify-center gap-1 font-semibold transition-colors ${
             pathname === "/read" 
               ? "text-sky-700 dark:text-sky-400" 
               : "text-stone-400 hover:text-stone-600 dark:hover:text-stone-300"
@@ -65,7 +65,7 @@ export function BottomNavigation() {
         </Link>
         <Link 
           href="/friends"
-          className={`flex-1 py-3 flex flex-col items-center justify-center gap-1 font-semibold transition-colors ${
+          className={`flex-1 pt-2.5 pb-2 flex flex-col items-center justify-center gap-1 font-semibold transition-colors ${
             pathname.startsWith("/friends") || pathname.startsWith("/friend/")
               ? "text-sky-700 dark:text-sky-400" 
               : "text-stone-400 hover:text-stone-600 dark:hover:text-stone-300"
@@ -81,7 +81,7 @@ export function BottomNavigation() {
         </Link>
         <Link 
           href="/mypage"
-          className={`flex-1 py-3 flex flex-col items-center justify-center gap-1 font-semibold transition-colors ${
+          className={`flex-1 pt-2.5 pb-2 flex flex-col items-center justify-center gap-1 font-semibold transition-colors ${
             pathname === "/mypage" 
               ? "text-sky-700 dark:text-sky-400" 
               : "text-stone-400 hover:text-stone-600 dark:hover:text-stone-300"
