@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { BookOpen, CheckCircle2, AlertCircle } from "lucide-react";
+import { BookOpen, CheckCircle2, AlertCircle, CalendarDays, X, ChevronRight } from "lucide-react";
+import scheduleData from "@/data/Bible_Reading_Schedule_365.json";
 import { 
   ReadingSettings, 
   ReadRecordsMap, 
@@ -33,6 +34,17 @@ function calculateDaysSince(startDateStr: string): number {
   return Math.max(1, diffDays + 1);
 }
 
+function formatSchedule(dayData: any) {
+  if (!dayData) return "";
+  const tracks = dayData.tracks;
+  const parts = [];
+  if (tracks["구약"]) parts.push(`${tracks["구약"].Book.substring(0, 1)} ${tracks["구약"].startChapter}${tracks["구약"].endChapter && tracks["구약"].endChapter !== tracks["구약"].startChapter ? `-${tracks["구약"].endChapter}` : ''}`);
+  if (tracks["신약"]) parts.push(`${tracks["신약"].Book.substring(0, 1)} ${tracks["신약"].startChapter}${tracks["신약"].endChapter && tracks["신약"].endChapter !== tracks["신약"].startChapter ? `-${tracks["신약"].endChapter}` : ''}`);
+  if (tracks["시편"]) parts.push(`${tracks["시편"].Book.substring(0, 1)} ${tracks["시편"].startChapter}${tracks["시편"].endChapter && tracks["시편"].endChapter !== tracks["시편"].startChapter ? `-${tracks["시편"].endChapter}` : ''}`);
+  if (tracks["잠언"]) parts.push(`${tracks["잠언"].Book.substring(0, 1)} ${tracks["잠언"].startChapter}${tracks["잠언"].endChapter && tracks["잠언"].endChapter !== tracks["잠언"].startChapter ? `-${tracks["잠언"].endChapter}` : ''}`);
+  return parts.join(", ");
+}
+
 export default function HomePage() {
   const router = useRouter();
   
@@ -41,6 +53,8 @@ export default function HomePage() {
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [isClient, setIsClient] = useState(false);
   const [nextUnreadDay, setNextUnreadDay] = useState(1);
+  const [isScheduleSheetOpen, setIsScheduleSheetOpen] = useState(false);
+  const targetDayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setIsClient(true);
@@ -57,6 +71,14 @@ export default function HomePage() {
       }
     });
   }, []);
+
+  useEffect(() => {
+    if (isScheduleSheetOpen && targetDayRef.current) {
+      setTimeout(() => {
+        targetDayRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 100);
+    }
+  }, [isScheduleSheetOpen]);
 
 
 
@@ -98,6 +120,30 @@ export default function HomePage() {
 
         {/* 메인 컨텐츠 영역 */}
         <div className="flex flex-col gap-8 px-6">
+          
+          {/* 오늘의 분량 미니 스케줄 */}
+          <div className="bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl p-5 flex flex-col shadow-sm">
+            <div className="flex justify-between items-center mb-3">
+              <div className="flex items-center gap-2">
+                <CalendarDays size={18} className="text-sky-500" />
+                <span className="font-bold text-stone-700 dark:text-stone-300">
+                  {new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' })}
+                </span>
+              </div>
+              <span className="text-xs font-bold bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-400 px-2 py-1 rounded-md">
+                Target Day {daysSince}
+              </span>
+            </div>
+            <div className="text-lg font-black text-stone-800 dark:text-stone-100 mb-4">
+              {formatSchedule(scheduleData[daysSince - 1])}
+            </div>
+            <button 
+              onClick={() => setIsScheduleSheetOpen(true)}
+              className="self-end flex items-center gap-1 text-sm font-semibold text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200 transition-colors"
+            >
+              전체 일정 보기 <ChevronRight size={16} />
+            </button>
+          </div>
           {/* 통독 요약 위젯 */}
         <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 p-5 flex flex-col gap-4">
           <div className="flex justify-between items-end">
@@ -180,6 +226,64 @@ export default function HomePage() {
 
         </div>
       </div>
+
+      {/* 365일 바텀 시트 */}
+      {isScheduleSheetOpen && (
+        <div className="fixed inset-0 z-50 flex justify-center items-end">
+          <div 
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={() => setIsScheduleSheetOpen(false)}
+          />
+          <div className="relative w-full max-w-xl bg-white dark:bg-stone-950 rounded-t-3xl h-[80vh] flex flex-col shadow-2xl overflow-hidden animate-in slide-in-from-bottom duration-300">
+            <div className="flex justify-between items-center p-5 border-b border-stone-200 dark:border-stone-800 shrink-0">
+              <h2 className="text-xl font-black text-stone-800 dark:text-stone-100 flex items-center gap-2">
+                <CalendarDays size={20} className="text-sky-500" /> 365일 전체 일정
+              </h2>
+              <button 
+                onClick={() => setIsScheduleSheetOpen(false)}
+                className="p-2 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-500 transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-5 pb-20 flex flex-col gap-3">
+              {scheduleData.map((dayData, index) => {
+                const dayStr = String(dayData.day);
+                const isCompleted = records[dayStr]?.completedAt || records[dayStr]?.readDate;
+                const isTargetDay = dayData.day === daysSince;
+
+                return (
+                  <div 
+                    key={dayData.day} 
+                    ref={isTargetDay ? targetDayRef : null}
+                    className={`flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl border ${
+                      isTargetDay 
+                        ? 'bg-sky-50 dark:bg-sky-900/20 border-sky-200 dark:border-sky-800/50 shadow-sm' 
+                        : isCompleted
+                          ? 'bg-stone-50 dark:bg-stone-900/50 border-transparent opacity-70'
+                          : 'bg-white dark:bg-stone-900 border-stone-100 dark:border-stone-800'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 mb-2 sm:mb-0">
+                      <span className={`font-black w-14 ${
+                        isTargetDay ? 'text-sky-600 dark:text-sky-400' : isCompleted ? 'text-stone-400' : 'text-stone-700 dark:text-stone-300'
+                      }`}>
+                        Day {dayData.day}
+                      </span>
+                      {isCompleted && <CheckCircle2 size={16} className="text-emerald-500" />}
+                    </div>
+                    <span className={`text-sm font-semibold ${
+                      isTargetDay ? 'text-stone-800 dark:text-stone-200' : isCompleted ? 'text-stone-400' : 'text-stone-600 dark:text-stone-400'
+                    }`}>
+                      {formatSchedule(dayData)}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
