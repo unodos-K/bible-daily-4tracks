@@ -52,6 +52,16 @@ const BIBLE_ABBREVIATIONS: Record<string, string> = {
   "유다서": "유", "요한계시록": "계"
 };
 
+const getCategoryColor = (category: string) => {
+  switch(category) {
+    case '구약': return 'text-sky-600 dark:text-sky-300';
+    case '신약': return 'text-rose-600 dark:text-rose-300';
+    case '시편': return 'text-purple-600 dark:text-purple-300';
+    case '잠언': return 'text-amber-600 dark:text-amber-300';
+    default: return 'text-stone-600 dark:text-stone-300';
+  }
+};
+
 function formatSchedule(dayData: any) {
   if (!dayData) return [];
   const tracks = dayData.tracks;
@@ -172,14 +182,16 @@ export default function HomePage() {
                 </span>
               </div>
               <span className="text-xs font-bold bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-400 px-2 py-1 rounded-md">
-                Target Day {daysSince}
+                Day {daysSince}
               </span>
             </div>
-            <div className="text-lg font-black text-stone-800 dark:text-stone-100 mb-4 flex flex-wrap gap-x-2 gap-y-1">
+            <div className="text-lg font-black text-stone-800 dark:text-stone-100 mb-4 flex flex-wrap gap-x-3 gap-y-2">
               {formatSchedule(scheduleData[daysSince - 1]).map((p, i, arr) => (
                 <span key={p.category} className="inline-flex items-center">
-                  <span className="text-sm font-bold text-stone-500 dark:text-stone-400 mr-1">[{p.category}]</span>
-                  <span>{p.text}{i < arr.length - 1 ? ',' : ''}</span>
+                  <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-medium bg-stone-100 dark:bg-stone-800 ${getCategoryColor(p.category)}`}>
+                    {p.category}
+                  </span>
+                  <span className="ml-1.5">{p.text}{i < arr.length - 1 ? ',' : ''}</span>
                 </span>
               ))}
             </div>
@@ -320,18 +332,16 @@ export default function HomePage() {
                     <span className={`text-[13px] font-semibold flex flex-wrap gap-2 sm:justify-end leading-snug ${
                       isTargetDay ? 'text-stone-800 dark:text-stone-200' : isCompleted ? 'text-stone-400' : 'text-stone-600 dark:text-stone-400'
                     }`}>
-                      {formatSchedule(dayData).map(p => (
-                        <span key={p.category} className="inline-flex items-center gap-1">
-                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-sm ${
-                            isTargetDay 
-                              ? 'bg-sky-100 dark:bg-sky-900/50 text-sky-700 dark:text-sky-300' 
-                              : isCompleted
+                      {formatSchedule(dayData).map((p, i, arr) => (
+                        <span key={p.category} className="inline-flex items-center">
+                          <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-medium ${
+                            isCompleted
                                 ? 'bg-stone-100 dark:bg-stone-800 text-stone-400'
-                                : 'bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400'
+                                : `bg-stone-100 dark:bg-stone-800 ${getCategoryColor(p.category)}`
                           }`}>
                             {p.category}
                           </span>
-                          <span>{p.text}</span>
+                          <span className="ml-1.5">{p.text}{i < arr.length - 1 ? ',' : ''}</span>
                         </span>
                       ))}
                     </span>
