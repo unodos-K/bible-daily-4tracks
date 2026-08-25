@@ -207,7 +207,25 @@ export default function FriendsPage() {
 
     const success = await toggleLike(friendId, item.day_index);
     if (!success) {
-      console.error("좋아요 처리 실패");
+      console.error("좋아요 처리 실패, 롤백합니다.");
+      // 롤백 (이전 상태로 복구)
+      setFriendsFeed(prev => {
+        const friendFeed = prev[friendId];
+        if (!friendFeed) return prev;
+        
+        const newFeed = friendFeed.map(rec => {
+          if (rec.day_index === item.day_index) {
+            return {
+              ...rec,
+              is_liked_by_me: item.is_liked_by_me,
+              like_count: item.like_count
+            };
+          }
+          return rec;
+        });
+
+        return { ...prev, [friendId]: newFeed };
+      });
     }
   };
 
@@ -294,28 +312,30 @@ export default function FriendsPage() {
                         onTouchCancel={handleTouchEnd}
                       >
                         <Link href={`/friend/${friend.id}`} className="flex flex-col gap-3 cursor-pointer group/link">
-                          <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden flex-shrink-0 group-hover/link:ring-2 ring-sky-500 transition-all">
-                              {friend.avatar_url ? (
-                                <img src={friend.avatar_url} alt={friend.name} className="w-full h-full object-cover" />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center text-stone-400">
-                                  <UserCheck size={24} />
-                                </div>
-                              )}
-                            </div>
-                            <div className="flex flex-col flex-1">
-                              <span className="font-bold text-lg text-stone-800 dark:text-stone-100 group-hover/link:text-sky-600 dark:group-hover/link:text-sky-400 transition-colors break-words">
-                                {(friend.nickname || friend.name).split('#')[0]}
-                              </span>
-                              <div className="relative">
-                                <span className={`block text-sm font-medium text-stone-400 mt-0.5 transition-opacity duration-300 ${pressedId === friend.id ? 'opacity-0' : 'opacity-100 md:group-hover:opacity-0'}`}>
-                                  {friend.nickname?.includes('#') ? `#${friend.nickname.split('#')[1]}` : '\u00A0'}
-                                </span>
-                                <span className={`absolute left-0 top-0.5 text-sm font-medium text-amber-500 transition-opacity duration-300 flex items-center gap-1 w-full pointer-events-none ${pressedId === friend.id ? 'opacity-100' : 'opacity-0 md:group-hover:opacity-100'}`}>
-                                  <MessageCircle size={14} className="flex-shrink-0" /> <span className="truncate">Kakao: {friend.name}</span>
-                                </span>
+                          <div className="flex justify-between items-center w-full">
+                            <div className="flex items-center gap-3">
+                              <div className="w-12 h-12 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden flex-shrink-0 group-hover/link:ring-2 ring-sky-500 transition-all">
+                                {friend.avatar_url ? (
+                                  <img src={friend.avatar_url} alt={friend.name} className="w-full h-full object-cover" />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center text-stone-400">
+                                    <UserCheck size={24} />
+                                  </div>
+                                )}
                               </div>
+                              <div className="flex items-center gap-1.5">
+                                <span className="font-bold text-lg text-stone-800 dark:text-stone-100 group-hover/link:text-sky-600 dark:group-hover/link:text-sky-400 transition-colors break-words">
+                                  {(friend.nickname || friend.name).split('#')[0]}
+                                </span>
+                                {friend.nickname?.includes('#') && (
+                                  <span className="text-sm font-medium text-stone-500 mt-0.5">
+                                    #{friend.nickname.split('#')[1]}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="text-xs font-medium text-stone-400 shrink-0 ml-2">
+                              Kakao: {friend.name}
                             </div>
                           </div>
                         </Link>
@@ -369,22 +389,24 @@ export default function FriendsPage() {
                         onTouchEnd={handleTouchEnd}
                         onTouchCancel={handleTouchEnd}
                       >
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden flex-shrink-0">
-                            {req.profile.avatar_url && <img src={req.profile.avatar_url} alt={req.profile.name} className="w-full h-full object-cover" />}
-                          </div>
-                          <div className="flex flex-col flex-1">
-                            <span className="font-bold text-lg text-stone-800 dark:text-stone-100 break-words">
-                              {(req.profile.nickname || req.profile.name).split('#')[0]}
-                            </span>
-                            <div className="relative">
-                              <span className={`block text-sm font-medium text-stone-400 mt-0.5 transition-opacity duration-300 ${pressedId === req.id ? 'opacity-0' : 'opacity-100 md:group-hover:opacity-0'}`}>
-                                {req.profile.nickname?.includes('#') ? `#${req.profile.nickname.split('#')[1]}` : '\u00A0'}
-                              </span>
-                              <span className={`absolute left-0 top-0.5 text-sm font-medium text-amber-500 transition-opacity duration-300 flex items-center gap-1 w-full pointer-events-none ${pressedId === req.id ? 'opacity-100' : 'opacity-0 md:group-hover:opacity-100'}`}>
-                                <MessageCircle size={14} className="flex-shrink-0" /> <span className="truncate">Kakao: {req.profile.name}</span>
-                              </span>
+                        <div className="flex justify-between items-center w-full">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden flex-shrink-0">
+                              {req.profile.avatar_url && <img src={req.profile.avatar_url} alt={req.profile.name} className="w-full h-full object-cover" />}
                             </div>
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-bold text-lg text-stone-800 dark:text-stone-100 break-words">
+                                {(req.profile.nickname || req.profile.name).split('#')[0]}
+                              </span>
+                              {req.profile.nickname?.includes('#') && (
+                                <span className="text-sm font-medium text-stone-500 mt-0.5">
+                                  #{req.profile.nickname.split('#')[1]}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-xs font-medium text-stone-400 shrink-0 ml-2">
+                            Kakao: {req.profile.name}
                           </div>
                         </div>
                         <div className="flex items-center justify-end gap-2 mt-2">
@@ -439,22 +461,24 @@ export default function FriendsPage() {
                           onTouchEnd={handleTouchEnd}
                           onTouchCancel={handleTouchEnd}
                         >
-                          <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden flex-shrink-0">
-                              {user.avatar_url && <img src={user.avatar_url} alt={user.name} className="w-full h-full object-cover" />}
-                            </div>
-                            <div className="flex flex-col flex-1">
-                              <span className="font-bold text-lg text-stone-800 dark:text-stone-100 break-words">
-                                {(user.nickname || user.name).split('#')[0]}
-                              </span>
-                              <div className="relative">
-                                <span className={`block text-sm font-medium text-stone-400 mt-0.5 transition-opacity duration-300 ${pressedId === user.id ? 'opacity-0' : 'opacity-100 md:group-hover:opacity-0'}`}>
-                                  {user.nickname?.includes('#') ? `#${user.nickname.split('#')[1]}` : '\u00A0'}
-                                </span>
-                                <span className={`absolute left-0 top-0.5 text-sm font-medium text-amber-500 transition-opacity duration-300 flex items-center gap-1 w-full pointer-events-none ${pressedId === user.id ? 'opacity-100' : 'opacity-0 md:group-hover:opacity-100'}`}>
-                                  <MessageCircle size={14} className="flex-shrink-0" /> <span className="truncate">Kakao: {user.name}</span>
-                                </span>
+                          <div className="flex justify-between items-center w-full">
+                            <div className="flex items-center gap-3">
+                              <div className="w-12 h-12 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden flex-shrink-0">
+                                {user.avatar_url && <img src={user.avatar_url} alt={user.name} className="w-full h-full object-cover" />}
                               </div>
+                              <div className="flex items-center gap-1.5">
+                                <span className="font-bold text-lg text-stone-800 dark:text-stone-100 break-words">
+                                  {(user.nickname || user.name).split('#')[0]}
+                                </span>
+                                {user.nickname?.includes('#') && (
+                                  <span className="text-sm font-medium text-stone-500 mt-0.5">
+                                    #{user.nickname.split('#')[1]}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="text-xs font-medium text-stone-400 shrink-0 ml-2">
+                              Kakao: {user.name}
                             </div>
                           </div>
                           
