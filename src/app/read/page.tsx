@@ -24,6 +24,7 @@ import {
 import { getAuthUser, AuthUser } from "@/lib/auth";
 import { shareOneVerse } from "@/lib/share";
 import OneVerseMemoModal from "@/components/OneVerseMemoModal";
+import ShareModal from "@/components/ShareModal";
 import { signInWithKakao } from "@/lib/supabase";
 import { useSettings } from "@/contexts/SettingsContext";
 
@@ -88,6 +89,8 @@ export default function BibleViewerPage() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showAccessDeniedModal, setShowAccessDeniedModal] = useState(false);
   const [showDailyLimitModal, setShowDailyLimitModal] = useState(false);
+  
+  const [selectedRecordToShare, setSelectedRecordToShare] = useState<DayRecord | null>(null);
   
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -306,9 +309,7 @@ export default function BibleViewerPage() {
   };
 
   const handleShareOneVerseClick = async (record: DayRecord) => {
-    const user = await getAuthUser();
-    const nickname = user ? (user.nickname || user.name).split('#')[0] : '순례자';
-    shareOneVerse(record, nickname);
+    setSelectedRecordToShare(record);
   };
 
   const handleConfirmVerse = async (verse: OneVerse, e: React.MouseEvent) => {
@@ -1134,9 +1135,20 @@ export default function BibleViewerPage() {
           memoUpdatedAt={records[memoModalState.dayIndex!].oneVerse!.memoUpdatedAt}
           onSave={handleMemoSave}
           initialMode={memoModalState.initialMode}
-          onShare={(options) => shareOneVerse(records[memoModalState.dayIndex!], authUser?.nickname || "친구", options)}
+          onShare={() => handleShareOneVerseClick(records[memoModalState.dayIndex!])}
         />
       )}
+
+      <ShareModal 
+        isOpen={!!selectedRecordToShare} 
+        onClose={() => setSelectedRecordToShare(null)} 
+        record={selectedRecordToShare} 
+        onShare={(orderedItems) => {
+          const nickname = authUser ? (authUser.nickname || authUser.name).split('#')[0] : '순례자';
+          shareOneVerse(selectedRecordToShare!, nickname, orderedItems);
+          setSelectedRecordToShare(null);
+        }}
+      />
 
     </div>
   );
