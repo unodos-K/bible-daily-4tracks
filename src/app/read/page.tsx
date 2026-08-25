@@ -1052,7 +1052,7 @@ export default function BibleViewerPage() {
                                 </div>
                               );
                             } else {
-                              wrapperClass += "hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-800 dark:text-stone-200 border border-transparent";
+                              wrapperClass += "text-stone-800 dark:text-stone-200 border border-transparent";
                               verseNumberClass = "text-stone-400 dark:text-stone-500 font-semibold";
                             }
                             
