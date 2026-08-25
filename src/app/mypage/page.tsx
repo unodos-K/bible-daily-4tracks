@@ -20,6 +20,7 @@ import {
 import { getAuthUser, AuthUser } from "@/lib/auth";
 import { signOut, signInWithKakao } from "@/lib/supabase";
 import { shareOneVerse } from "@/lib/share";
+import ShareModal from "@/components/ShareModal";
 import MemoryTrainerModal from "@/components/MemoryTrainerModal";
 import SettingsModal from "@/components/SettingsModal";
 import OneVerseMemoModal from "@/components/OneVerseMemoModal";
@@ -74,6 +75,7 @@ export default function MyPage() {
   const [isMemoryModalOpen, setIsMemoryModalOpen] = useState(false);
   
   const [memoModalState, setMemoModalState] = useState<{ isOpen: boolean, dayIndex: number | null, initialMode?: 'view' | 'edit' }>({ isOpen: false, dayIndex: null });
+  const [selectedRecordToShare, setSelectedRecordToShare] = useState<DayRecord | null>(null);
   
   // 캐러셀 관련 상태 및 Ref
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
@@ -198,8 +200,7 @@ export default function MyPage() {
   };
 
   const handleShareOneVerse = (record: DayRecord) => {
-    const nickname = authUser ? (authUser.nickname || authUser.name).split('#')[0] : '순례자';
-    shareOneVerse(record, nickname);
+    setSelectedRecordToShare(record);
   };
 
   if (!isClient || !settings || !settings.hasStarted) {
@@ -495,26 +496,17 @@ export default function MyPage() {
                         <div className="text-right text-stone-500 dark:text-stone-400 font-bold text-xs sm:text-sm">
                           - {formattedRef} -
                         </div>
-                        <div className="flex items-center gap-2 mt-4 pt-4 border-t border-stone-100 dark:border-stone-800">
+                        <div className="grid grid-cols-2 gap-x-2 mt-4 pt-4 border-t border-stone-100 dark:border-stone-800">
                           <button
-                            onClick={() => setMemoModalState({ isOpen: true, dayIndex: record.dayIndex, initialMode: 'edit' })}
-                            className="flex-1 py-2 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
+                            onClick={() => setMemoModalState({ isOpen: true, dayIndex: record.dayIndex, initialMode: verse.memo ? 'view' : 'edit' })}
+                            className="w-full py-2 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
                           >
-                            <PencilLine size={16} />
-                            {verse.memo ? "메모 수정" : "메모 작성"}
+                            <FileText size={16} />
+                            {verse.memo ? "메모 보기" : "메모 작성"}
                           </button>
-                          {verse.memo && (
-                            <button
-                              onClick={() => setMemoModalState({ isOpen: true, dayIndex: record.dayIndex, initialMode: 'view' })}
-                              className="flex-1 py-2 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
-                            >
-                              <FileText size={16} />
-                              메모 보기
-                            </button>
-                          )}
                           <button
                             onClick={() => handleShareOneVerse(record)}
-                            className="flex-1 py-2 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
+                            className="w-full py-2 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
                           >
                             <Share2 size={16} />
                             공유하기
@@ -818,6 +810,18 @@ export default function MyPage() {
           onShare={() => handleShareOneVerse(records[memoModalState.dayIndex!])}
         />
       )}
+
+      <ShareModal
+        isOpen={!!selectedRecordToShare}
+        onClose={() => setSelectedRecordToShare(null)}
+        record={selectedRecordToShare}
+        onShare={(orderedItems) => {
+          if (selectedRecordToShare) {
+            const nickname = authUser ? (authUser.nickname || authUser.name).split('#')[0] : '순례자';
+            shareOneVerse(selectedRecordToShare, nickname, orderedItems);
+          }
+        }}
+      />
 
       {toastMessage && (
         <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-stone-800 text-white px-4 py-2 rounded-full shadow-lg z-[100] animate-fade-in-up text-sm whitespace-nowrap">

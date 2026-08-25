@@ -1,32 +1,39 @@
-import { DayRecord, OneVerse } from "./storage";
+import { DayRecord, MemoData } from "./storage";
 
 export const shareOneVerse = async (
   record: DayRecord, 
   nickname: string, 
-  shareOptions: { meditation: boolean, prayer: boolean, thanks: boolean, application: boolean } = { meditation: true, prayer: true, thanks: true, application: true }
+  orderedItems: string[] = ['word', 'prayer', 'thanks', 'application']
 ) => {
   if (typeof window === "undefined") return;
 
   const displayTxt = record.oneVerse?.displayText || record.oneVerse?.rawText || '';
   const formattedRef = `${record.oneVerse?.book} ${record.oneVerse?.chapter}장 ${record.oneVerse?.verse}절`;
   
-  let memoTxt = '';
-  const memo = record.oneVerse?.memo;
+  const memo = record.oneVerse?.memo as MemoData | undefined;
   
-  if (memo) {
-    if (typeof memo === 'string') {
-      if (shareOptions.meditation) memoTxt += `\n\n[묵상]\n${memo}`;
-    } else {
-      if (shareOptions.meditation && memo.meditation) memoTxt += `\n\n[묵상]\n${memo.meditation}`;
-      if (shareOptions.prayer && memo.prayer) memoTxt += `\n\n[기도]\n${memo.prayer}`;
-      if (shareOptions.thanks && memo.thanks) memoTxt += `\n\n[감사하기]\n${memo.thanks}`;
-      if (shareOptions.application && memo.application && memo.application.length > 0) {
-        memoTxt += `\n\n[삶에 적용하기]\n` + memo.application.map(a => `[${a.checked ? 'v' : ' '}] ${a.text}`).join('\n');
-      }
+  let textToShare = `[One Verse]\n${nickname}님이 오늘의 One Verse를 보냈어요!\n\n`;
+
+  for (let i = 0; i < orderedItems.length; i++) {
+    const item = orderedItems[i];
+    
+    if (item === 'word') {
+      textToShare += `📖 말씀\n"${displayTxt}"\n- ${formattedRef}\n\n`;
+    } 
+    else if (item === 'prayer' && memo?.prayer) {
+      textToShare += `🙏 기도\n${memo.prayer}\n\n`;
+    }
+    else if (item === 'thanks' && memo?.thanks) {
+      // It might already be formatted with bullets, but just in case we print it
+      textToShare += `💛 감사\n${memo.thanks}\n\n`;
+    }
+    else if (item === 'application' && memo?.application && memo.application.length > 0) {
+      textToShare += `✍️ 삶에 적용하기\n` + memo.application.map(a => `[${a.checked ? 'v' : ' '}] ${a.text}`).join('\n') + `\n\n`;
     }
   }
-  
-  const textToShare = `[One Verse]\n${nickname}님이 오늘의 One Verse를 보냈어요!\n\n"${displayTxt}"\n\n${formattedRef}${memoTxt}`;
+
+  // Remove trailing newlines
+  textToShare = textToShare.trimEnd();
   
   const shareData = {
     title: 'One Verse',
@@ -59,7 +66,7 @@ export const shareOneVerse = async (
 
   // Clipboard copy fallback
   try {
-    await navigator.clipboard.writeText(`${textToShare}\n${window.location.origin}`);
+    await navigator.clipboard.writeText(`${textToShare}\n\n${window.location.origin}`);
     alert("공유 링크가 클립보드에 복사되었습니다!");
   } catch (e) {
     alert("공유 기능을 지원하지 않는 브라우저입니다.");
