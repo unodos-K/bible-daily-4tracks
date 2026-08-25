@@ -28,7 +28,7 @@ export const shareOneVerse = async (
       textToShare += `💛 감사\n${memo.thanks}\n\n`;
     }
     else if (item === 'application' && memo?.application && memo.application.length > 0) {
-      textToShare += `✍️ 삶에 적용하기\n` + memo.application.map(a => `[${a.checked ? 'v' : ' '}] ${a.text}`).join('\n') + `\n\n`;
+      textToShare += `✍️ 삶에 적용하기\n` + memo.application.map(a => `${a.checked ? '✅' : '⬜'} ${a.text}`).join('\n') + `\n\n`;
     }
   }
 

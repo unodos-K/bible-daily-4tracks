@@ -499,16 +499,16 @@ export default function MyPage() {
                         <div className="grid grid-cols-4 gap-1 mt-6 pt-4 border-t border-stone-100 dark:border-stone-800">
                           <button
                             onClick={() => setMemoModalState({ isOpen: true, dayIndex: record.dayIndex, initialMode: verse.memo ? 'view' : 'edit' })}
-                            className="flex flex-col items-center justify-center gap-1.5 py-3 text-stone-500 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 rounded-xl transition-colors"
+                            className="flex flex-col items-center justify-center gap-1.5 py-3 bg-stone-100 dark:bg-white/5 hover:bg-stone-200 dark:hover:bg-white/10 text-stone-600 dark:text-stone-300 rounded-xl transition-all active:scale-95"
                           >
-                            <FileText size={20} strokeWidth={2.5} />
+                            <FileText size={20} strokeWidth={2.5} className="text-emerald-500 dark:text-emerald-400" />
                             <span className="text-[10px] sm:text-xs font-bold tracking-tight">{verse.memo ? "메모 보기" : "메모 작성"}</span>
                           </button>
                           <button
                             onClick={() => handleShareOneVerse(record)}
-                            className="flex flex-col items-center justify-center gap-1.5 py-3 text-stone-500 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 rounded-xl transition-colors"
+                            className="flex flex-col items-center justify-center gap-1.5 py-3 bg-stone-100 dark:bg-white/5 hover:bg-stone-200 dark:hover:bg-white/10 text-stone-600 dark:text-stone-300 rounded-xl transition-all active:scale-95"
                           >
-                            <Share2 size={20} strokeWidth={2.5} />
+                            <Share2 size={20} strokeWidth={2.5} className="text-sky-500 dark:text-sky-400" />
                             <span className="text-[10px] sm:text-xs font-bold tracking-tight">공유하기</span>
                           </button>
                           <button
@@ -517,9 +517,9 @@ export default function MyPage() {
                               setSelectedDayIndexForMemory(record.dayIndex);
                               setIsMemoryModalOpen(true);
                             }}
-                            className="flex flex-col items-center justify-center gap-1.5 py-3 text-stone-500 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 rounded-xl transition-colors"
+                            className="flex flex-col items-center justify-center gap-1.5 py-3 bg-stone-100 dark:bg-white/5 hover:bg-stone-200 dark:hover:bg-white/10 text-stone-600 dark:text-stone-300 rounded-xl transition-all active:scale-95"
                           >
-                            <BrainCircuit size={20} strokeWidth={2.5} />
+                            <BrainCircuit size={20} strokeWidth={2.5} className="text-amber-500 dark:text-amber-400" />
                             <span className="text-[10px] sm:text-xs font-bold tracking-tight">{isMem ? '암송 복습' : '암송 훈련'}</span>
                           </button>
                           <button
@@ -529,9 +529,9 @@ export default function MyPage() {
                               } catch {}
                               router.push("/read?day=" + record.dayIndex);
                             }}
-                            className="flex flex-col items-center justify-center gap-1.5 py-3 text-stone-500 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 rounded-xl transition-colors"
+                            className="flex flex-col items-center justify-center gap-1.5 py-3 bg-stone-100 dark:bg-white/5 hover:bg-stone-200 dark:hover:bg-white/10 text-stone-600 dark:text-stone-300 rounded-xl transition-all active:scale-95"
                           >
-                            <BookOpen size={20} strokeWidth={2.5} />
+                            <BookOpen size={20} strokeWidth={2.5} className="text-indigo-500 dark:text-indigo-400" />
                             <span className="text-[10px] sm:text-xs font-bold tracking-tight">본문 보기</span>
                           </button>
                         </div>
