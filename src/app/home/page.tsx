@@ -251,13 +251,30 @@ export default function HomePage() {
         </div>
 
         {/* CTA 버튼 */}
-        <button
-          onClick={() => router.push("/read")}
-          className="w-full py-4 bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white font-black rounded-2xl transition-transform hover:-translate-y-1 shadow-lg shadow-sky-500/25 flex items-center justify-center gap-2 text-lg active:translate-y-0"
-        >
-          <BookOpen size={22} />
-          오늘의 말씀 읽기
-        </button>
+        <div className="flex flex-col gap-3">
+          <button
+            onClick={() => {
+              if (Object.keys(records).length === 0) {
+                alert("아직 읽은 기록이 없어요. 오늘 진도부터 시작해 보세요!");
+                return;
+              }
+              const nextDay = getNextUnreadDay(records);
+              router.push("/read?day=" + nextDay);
+            }}
+            className="w-full py-3.5 bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-bold rounded-2xl transition-transform hover:-translate-y-1 shadow-sm flex items-center justify-center gap-2 text-[15px] sm:text-base active:translate-y-0 disabled:opacity-50 disabled:hover:translate-y-0"
+          >
+            <BookOpen size={20} />
+            마지막 읽은 본문 이어서 읽기
+          </button>
+          
+          <button
+            onClick={() => router.push("/read?day=" + daysSince)}
+            className="w-full py-4 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-black rounded-2xl transition-transform hover:-translate-y-1 shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 text-lg active:translate-y-0"
+          >
+            <CalendarDays size={22} />
+            오늘 목표 진도 읽기 (Day {daysSince})
+          </button>
+        </div>
 
         {/* 앱 활용 가이드 */}
         <div className="flex flex-col gap-3 mt-2 mb-8 text-sm text-stone-500 dark:text-stone-400 leading-relaxed px-1 break-keep">
