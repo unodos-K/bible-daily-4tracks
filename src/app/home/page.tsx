@@ -62,7 +62,7 @@ const getCategoryColor = (category: string) => {
   }
 };
 
-function formatSchedule(dayData: any) {
+function formatSchedule(dayData: Record<string, any>) {
   if (!dayData) return [];
   const tracks = dayData.tracks;
   const parts: { category: string; text: string }[] = [];
@@ -235,7 +235,6 @@ export default function HomePage() {
             <DashboardSkeleton />
           ) : (
             <>
-              {/* 오늘의 분량 미니 스케줄 */}
               <div className="bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl p-5 flex flex-col shadow-sm">
             <div className="flex justify-between items-center mb-3">
               <div className="flex items-center gap-2">
@@ -321,8 +320,7 @@ export default function HomePage() {
                 alert("아직 읽은 기록이 없어요. 오늘 진도부터 시작해 보세요!");
                 return;
               }
-              const nextDay = getNextUnreadDay(records);
-              router.push("/read?day=" + nextDay);
+              router.push("/read?day=" + nextUnreadDay);
             }}
             className="w-full py-3.5 bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-bold rounded-2xl transition-transform hover:-translate-y-1 shadow-sm flex items-center justify-center gap-2 text-[15px] sm:text-base active:translate-y-0 disabled:opacity-50 disabled:hover:translate-y-0"
           >
@@ -353,15 +351,16 @@ export default function HomePage() {
             </li>
             <li className="flex items-start gap-2">
               <span className="mt-[1px]">•</span>
-              <span><strong>암송 기능:</strong> 빈칸 채우기 기반의 '뇌새김' 방식을 통해, 오늘 내게 주신 말씀을 하루 종일 머리와 가슴에 깊이 새겨보세요.</span>
+              <span><strong>암송 기능:</strong> 빈칸 채우기 기반의 &apos;뇌새김&apos; 방식을 통해, 오늘 내게 주신 말씀을 하루 종일 머리와 가슴에 깊이 새겨보세요.</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="mt-[1px]">•</span>
-              <span><strong>홈 화면 설치:</strong> 브라우저 메뉴에서 '홈 화면에 추가'를 누르면 네이티브 앱처럼 편하게 쓸 수 있어요. (Safari: 하단 공유 아이콘 ➔ 홈 화면에 추가 / Chrome: 우측 상단 메뉴 ➔ 앱 설치)</span>
+              <span><strong>홈 화면 설치:</strong> 브라우저 메뉴에서 &apos;홈 화면에 추가&apos;를 누르면 네이티브 앱처럼 편하게 쓸 수 있어요. (Safari: 하단 공유 아이콘 ➔ 홈 화면에 추가 / Chrome: 우측 상단 메뉴 ➔ 앱 설치)</span>
             </li>
           </ul>
         </div>
-
+            </>
+          )}
         </div>
       </div>
 
@@ -385,9 +384,9 @@ export default function HomePage() {
               </button>
             </div>
             <div className="flex-1 overflow-y-auto p-4 pb-20 flex flex-col gap-2 overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }}>
-              {scheduleData.map((dayData, index) => {
+              {scheduleData.map((dayData) => {
                 const dayStr = String(dayData.day);
-                const isCompleted = records[dayStr]?.completedAt || records[dayStr]?.readDate;
+                const isCompleted = (records as any)[dayStr]?.completedAt || (records as any)[dayStr]?.readDate;
                 const isTargetDay = dayData.day === daysSince;
 
                 return (

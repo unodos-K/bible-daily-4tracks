@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { X, PencilLine, Share2, CheckSquare, ChevronLeft } from "lucide-react";
+import { CheckSquare, ChevronLeft } from "lucide-react";
 import { MemoData, fetchReadRecords, updateReadRecordOneVerse, DayRecord } from "@/lib/storage";
 
 const parseInitialMemo = (m: string | MemoData | undefined): MemoData => {
@@ -229,7 +229,7 @@ function MemoEditorContent() {
         {verseText && verseRef && (
           <div className="mb-6 bg-stone-100 dark:bg-white/5 p-4 rounded-xl border border-stone-200 dark:border-stone-800">
             <blockquote className="text-[15px] sm:text-base text-stone-800 dark:text-stone-200 leading-relaxed italic break-keep mb-3">
-              "{verseText}"
+              &quot;{verseText}&quot;
             </blockquote>
             <div className="text-right text-stone-500 dark:text-stone-400 font-bold text-xs">
               - {verseRef} -
@@ -309,7 +309,7 @@ function MemoEditorContent() {
                   <div key={idx} className="flex items-start gap-2 group">
                     <span className="text-stone-500 mt-1 select-none flex-shrink-0 text-[10px] sm:text-xs">●</span>
                     <input
-                      ref={el => thanksRefs.current[idx] = el}
+                      ref={el => { thanksRefs.current[idx] = el; }}
                       value={val}
                       onChange={e => updateThanksItem(idx, e.target.value)}
                       onKeyDown={e => handleThanksKeyDown(e, idx)}
@@ -336,7 +336,7 @@ function MemoEditorContent() {
                       )}
                     </div>
                     <input
-                      ref={el => appRefs.current[idx] = el}
+                      ref={el => { appRefs.current[idx] = el; }}
                       value={item.text}
                       onChange={e => updateAppItem(idx, e.target.value)}
                       onKeyDown={e => handleAppKeyDown(e, idx)}

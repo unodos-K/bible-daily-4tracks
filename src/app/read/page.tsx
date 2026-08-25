@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ZoomIn, ZoomOut, ChevronDown, CheckCircle2, Bookmark, BrainCircuit, AlertCircle, Leaf, Crown, X, Share2, PencilLine, FileText } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ChevronDown, CheckCircle2, Bookmark, BrainCircuit, AlertCircle, Leaf, Crown, X, Share2, PencilLine, FileText } from "lucide-react";
 import { getDailyReadingByIndex, getAllSchedules, TRACK_INFO } from "@/lib/bible";
 import MemoryTrainerModal from "@/components/MemoryTrainerModal";
 import { 
@@ -67,13 +67,9 @@ export default function BibleViewerPage() {
   const [settings, setSettings] = useState<ReadingSettings | null>(null);
   const [records, setRecords] = useState<ReadRecordsMap>({});
   
-  const [loginId, setLoginId] = useState("");
-  const [loginPw, setLoginPw] = useState("");
-  const [loginError, setLoginError] = useState("");
-
 
   const [dayIndex, setDayIndex] = useState<number>(1);
-  const { fontSize, setFontSize } = useSettings();
+  const { fontSize } = useSettings();
   const [isDaySelectorOpen, setIsDaySelectorOpen] = useState(false);
   
   const [isCompletedDay, setIsCompletedDay] = useState(false);
@@ -258,11 +254,6 @@ export default function BibleViewerPage() {
 
 
 
-  const handleFontSizeChange = (newSize: number) => {
-    setFontSize(newSize);
-  };
-
-
   const handleVerseClick = async (trackType: string, book: string, chapter: number, verse: number, rawText: string, displayText: string, chunks: string[]) => {
     const verseObj = {
       trackType,
@@ -290,21 +281,7 @@ export default function BibleViewerPage() {
     }
   };
 
-  const handleMemoSave = async (dayIndex: number, newMemo: string | import('@/lib/storage').MemoData) => {
-    const record = records[dayIndex];
-    if (!record || !record.oneVerse) return;
-    if (JSON.stringify(record.oneVerse.memo) === JSON.stringify(newMemo)) return;
-    
-    const updatedVerse = { ...record.oneVerse, memo: newMemo, memoUpdatedAt: new Date().toISOString() };
-    setRecords(prev => ({
-      ...prev,
-      [dayIndex]: {
-        ...prev[dayIndex],
-        oneVerse: updatedVerse
-      }
-    }));
-    await updateReadRecordOneVerse(dayIndex, updatedVerse);
-  };
+
 
   const handleShareOneVerseClick = async (record: DayRecord) => {
     setSelectedRecordToShare(record);
@@ -538,7 +515,7 @@ export default function BibleViewerPage() {
             <div className="bg-stone-800/50 p-4 rounded-xl mb-4 w-full text-left">
               <div className="text-xs text-stone-400 mb-1 font-bold">기존 One Verse</div>
               <p className="text-stone-300 text-sm leading-relaxed mb-2 line-clamp-3">
-                "{confirmedVerse.displayText}"
+                &quot;{confirmedVerse.displayText}&quot;
               </p>
               <div className="text-xs text-stone-500 font-bold">
                 {confirmedVerse.book} {confirmedVerse.chapter}:{confirmedVerse.verse}
