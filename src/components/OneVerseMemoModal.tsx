@@ -105,6 +105,7 @@ export default function OneVerseMemoModal({
 
   // Thanks Handlers
   const handleThanksKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, idx: number) => {
+    if (e.nativeEvent.isComposing) return;
     if (e.key === 'Enter') {
       e.preventDefault();
       const newItems = [...thanksItems];
@@ -130,6 +131,7 @@ export default function OneVerseMemoModal({
 
   // Application Handlers
   const handleAppKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, idx: number) => {
+    if (e.nativeEvent.isComposing) return;
     if (e.key === 'Enter') {
       e.preventDefault();
       const newItems = [...appItems];
