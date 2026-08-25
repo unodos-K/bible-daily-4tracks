@@ -8,12 +8,15 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const pathname = usePathname();
   const isMemoPage = pathname?.startsWith("/memo");
 
+  const isVersePage = pathname?.startsWith("/verse");
+  const hideBottomNav = isMemoPage || isVersePage;
+
   return (
     <div className="w-full max-w-2xl h-[100dvh] bg-stone-50 dark:bg-stone-950 shadow-xl flex flex-col relative border-x border-stone-200 dark:border-stone-800 overflow-hidden pt-[env(safe-area-inset-top)]">
-      <main className={`flex-1 w-full overflow-y-auto overscroll-y-contain ${isMemoPage ? '' : 'pb-[calc(80px+env(safe-area-inset-bottom))]'} bg-stone-50 dark:bg-stone-950`}>
+      <main className={`flex-1 w-full overflow-y-auto overscroll-y-contain ${hideBottomNav ? '' : 'pb-[calc(80px+env(safe-area-inset-bottom))]'} bg-stone-50 dark:bg-stone-950`}>
         {children}
       </main>
-      {!isMemoPage && <BottomNavigation />}
+      {!hideBottomNav && <BottomNavigation />}
     </div>
   );
 }
