@@ -155,6 +155,29 @@ export default function HomePage() {
           오늘의 말씀 읽기
         </button>
 
+        {/* 앱 활용 가이드 */}
+        <div className="flex flex-col gap-3 mt-2 mb-8 text-sm text-stone-500 dark:text-stone-400 leading-relaxed px-1 break-keep">
+          <h3 className="font-semibold text-stone-700 dark:text-stone-300">💡 One Verse 100% 활용 가이드</h3>
+          <ul className="flex flex-col space-y-3 pl-0.5">
+            <li className="flex items-start gap-2">
+              <span className="mt-[1px]">•</span>
+              <span><strong>말씀 읽기:</strong> 매일 구약, 신약, 시편, 잠언으로 구성된 분량을 읽으며 1년 1독에 도전해 보세요. 마음에 와닿는 단 하나의 구절(One Verse)에 나만의 묵상 메모를 남기고 카카오톡으로 공유할 수도 있습니다.</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="mt-[1px]">•</span>
+              <span><strong>친구:</strong> 카카오톡 친구를 앱으로 초대해 보세요. 서로가 선택한 One Verse와 묵상을 나누며 함께 은혜를 풍성하게 누릴 수 있습니다.</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="mt-[1px]">•</span>
+              <span><strong>암송 기능:</strong> 빈칸 채우기 기반의 '뇌새김' 방식을 통해, 오늘 내게 주신 말씀을 하루 종일 머리와 가슴에 깊이 새겨보세요.</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="mt-[1px]">•</span>
+              <span><strong>홈 화면 설치:</strong> 브라우저 메뉴에서 '홈 화면에 추가'를 누르면 네이티브 앱처럼 편하게 쓸 수 있어요. (Safari: 하단 공유 아이콘 ➔ 홈 화면에 추가 / Chrome: 우측 상단 메뉴 ➔ 앱 설치)</span>
+            </li>
+          </ul>
+        </div>
+
         </div>
       </div>
     </div>
