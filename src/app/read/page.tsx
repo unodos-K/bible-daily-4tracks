@@ -92,6 +92,26 @@ export default function BibleViewerPage() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLElement>(null);
+  const [headerHeight, setHeaderHeight] = useState<number>(64);
+
+  useEffect(() => {
+    if (!headerRef.current) return;
+    const updateHeight = () => {
+      if (headerRef.current) {
+        setHeaderHeight(headerRef.current.offsetHeight);
+      }
+    };
+    updateHeight();
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(headerRef.current);
+    window.addEventListener("resize", updateHeight);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", updateHeight);
+    };
+  }, [isClient]);
+
   const allSchedules = getAllSchedules();
 
   const handleSetDay = (newDay: number, currentRecords: ReadRecordsMap = records) => {
@@ -437,7 +457,10 @@ export default function BibleViewerPage() {
       
       {/* Toast */}
       {toastMessage && (
-        <div className="fixed top-[64px] left-1/2 -translate-x-1/2 z-50 bg-stone-800 text-white dark:bg-stone-200 dark:text-stone-900 px-4 py-2 rounded-full shadow-lg text-sm font-medium animate-in fade-in slide-in-from-top-4">
+        <div 
+          style={{ top: `${headerHeight + 12}px` }}
+          className="fixed left-1/2 -translate-x-1/2 z-50 bg-stone-800 text-white dark:bg-stone-200 dark:text-stone-900 px-4 py-2 rounded-full shadow-lg text-sm font-medium animate-in fade-in slide-in-from-top-4"
+        >
           {toastMessage}
         </div>
       )}
@@ -744,7 +767,10 @@ export default function BibleViewerPage() {
       <div className="w-full max-w-2xl bg-transparent shadow-2xl flex flex-col relative min-h-full">
         
         {/* 상단 네비게이터 */}
-        <header className="sticky top-0 z-30 bg-stone-50/95 dark:bg-stone-950/95 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 shadow-sm flex flex-col px-3 py-2 gap-2">
+        <header 
+          ref={headerRef}
+          className="sticky top-0 z-30 bg-stone-50/95 dark:bg-stone-950/95 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 shadow-sm flex flex-col px-3 py-2 gap-2"
+        >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1 sm:gap-2">
               <button
@@ -805,7 +831,10 @@ export default function BibleViewerPage() {
 
         {/* Day 빠른 이동 드롭다운 / 모달 */}
         {isDaySelectorOpen && (
-          <div className="absolute top-[104px] left-0 right-0 z-40 bg-white dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800 shadow-2xl flex flex-col animate-in slide-in-from-top-2 h-[75vh] max-h-[600px]">
+          <div 
+            style={{ top: `${headerHeight}px` }}
+            className="absolute left-0 right-0 z-40 bg-white dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800 shadow-2xl flex flex-col animate-in slide-in-from-top-2 h-[75vh] max-h-[600px]"
+          >
             {/* Day 리스트 */}
             <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-2 flex flex-col gap-1">
               <button
@@ -891,13 +920,19 @@ export default function BibleViewerPage() {
             const icon = TRACK_ICONS[trackReading.track.type as keyof typeof TRACK_ICONS] || "📖";
             
             return (
-              <div key={trackReading.track.type} id={TRACK_ID_MAP[trackReading.track.type as keyof typeof TRACK_ID_MAP]} className="flex flex-col border-b border-stone-200 dark:border-stone-800/60 pb-10 scroll-mt-[52px]">
+              <div 
+                key={trackReading.track.type} 
+                id={TRACK_ID_MAP[trackReading.track.type as keyof typeof TRACK_ID_MAP]} 
+                className="flex flex-col border-b border-stone-200 dark:border-stone-800/60 pb-10"
+                style={{ scrollMarginTop: `${headerHeight}px` }}
+              >
                 {/* 섹션 헤더 */}
                 <div 
-                  className="sticky top-[52px] z-20 py-2 px-4 text-sm font-semibold bg-stone-900/90 backdrop-blur border-b border-stone-800"
+                  className="sticky z-20 py-2 px-4 text-sm font-semibold bg-stone-50/95 dark:bg-stone-900/90 backdrop-blur border-b border-stone-200 dark:border-stone-800 shadow-sm transition-colors"
+                  style={{ top: `${headerHeight}px` }}
                 >
                   <h2 className="flex items-center gap-2" style={{ color: trackInfo.accentColor }}>
-                    <span>{icon}</span> {trackInfo.title.split(" ")[0]} <span className="text-stone-500 font-normal mx-0.5">·</span> <span className="text-stone-300">{trackReading.track.range}</span>
+                    <span>{icon}</span> {trackInfo.title.split(" ")[0]} <span className="text-stone-500 font-normal mx-0.5">·</span> <span className="text-stone-700 dark:text-stone-300">{trackReading.track.range}</span>
                   </h2>
                 </div>
 
