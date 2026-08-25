@@ -96,6 +96,64 @@ function formatSchedule(dayData: any) {
   return parts;
 }
 
+function DashboardSkeleton() {
+  return (
+    <div className="flex flex-col gap-8 w-full animate-pulse">
+      {/* 미니 스케줄 스켈레톤 */}
+      <div className="bg-stone-100 dark:bg-stone-800 rounded-2xl p-5 flex flex-col shadow-sm border border-stone-200 dark:border-stone-700">
+        <div className="flex justify-between items-center mb-3">
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-5 bg-stone-300 dark:bg-stone-700 rounded-full"></div>
+            <div className="w-20 h-5 bg-stone-300 dark:bg-stone-700 rounded-md"></div>
+          </div>
+          <div className="w-16 h-6 bg-stone-300 dark:bg-stone-700 rounded-md"></div>
+        </div>
+        <div className="flex flex-wrap gap-2 mb-4 mt-2">
+          <div className="w-32 h-6 bg-stone-300 dark:bg-stone-700 rounded-md"></div>
+          <div className="w-24 h-6 bg-stone-300 dark:bg-stone-700 rounded-md"></div>
+        </div>
+        <div className="w-24 h-4 bg-stone-300 dark:bg-stone-700 rounded-md self-end mt-2"></div>
+      </div>
+
+      {/* 요약 위젯 스켈레톤 */}
+      <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 p-5 flex flex-col gap-4">
+        <div className="flex justify-between items-end">
+          <div>
+            <div className="w-20 h-4 bg-stone-200 dark:bg-stone-800 rounded-md mb-2"></div>
+            <div className="w-28 h-8 bg-stone-200 dark:bg-stone-800 rounded-md"></div>
+          </div>
+          <div className="w-20 h-6 bg-stone-200 dark:bg-stone-800 rounded-full"></div>
+        </div>
+        <div className="w-full h-2.5 bg-stone-200 dark:bg-stone-800 rounded-full mt-1"></div>
+        
+        <div className="grid grid-cols-2 gap-3 mt-4">
+          <div className="bg-stone-100 dark:bg-stone-800 rounded-xl p-3 flex flex-col items-center justify-center h-20">
+            <div className="w-16 h-3 bg-stone-200 dark:bg-stone-700 rounded-md mb-2"></div>
+            <div className="w-16 h-5 bg-stone-200 dark:bg-stone-700 rounded-md"></div>
+          </div>
+          <div className="bg-stone-100 dark:bg-stone-800 rounded-xl p-3 flex flex-col items-center justify-center h-20">
+            <div className="w-16 h-3 bg-stone-200 dark:bg-stone-700 rounded-md mb-2"></div>
+            <div className="w-16 h-5 bg-stone-200 dark:bg-stone-700 rounded-md"></div>
+          </div>
+          <div className="bg-stone-100 dark:bg-stone-800 rounded-xl p-4 flex flex-col items-center justify-center col-span-2 h-16">
+             <div className="w-48 h-4 bg-stone-200 dark:bg-stone-700 rounded-md"></div>
+          </div>
+        </div>
+        
+        {/* 주간 스트릭 스켈레톤 */}
+        <div className="flex justify-between items-center mt-2 px-2">
+          {[...Array(7)].map((_, i) => (
+            <div key={i} className="w-6 h-6 bg-stone-200 dark:bg-stone-800 rounded-full"></div>
+          ))}
+        </div>
+      </div>
+      
+      {/* 액션 버튼 스켈레톤 */}
+      <div className="w-full h-14 bg-stone-200 dark:bg-stone-800 rounded-2xl mt-4"></div>
+    </div>
+  );
+}
+
 export default function HomePage() {
   const router = useRouter();
   
@@ -105,6 +163,7 @@ export default function HomePage() {
   const [isClient, setIsClient] = useState(false);
   const [nextUnreadDay, setNextUnreadDay] = useState(1);
   const [isScheduleSheetOpen, setIsScheduleSheetOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const targetDayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -120,6 +179,7 @@ export default function HomePage() {
           setNextUnreadDay(await getNextUnreadDay(r));
         }
       }
+      setIsLoading(false);
     });
   }, []);
 
@@ -171,9 +231,12 @@ export default function HomePage() {
 
         {/* 메인 컨텐츠 영역 */}
         <div className="flex flex-col gap-8 px-6">
-          
-          {/* 오늘의 분량 미니 스케줄 */}
-          <div className="bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl p-5 flex flex-col shadow-sm">
+          {isLoading ? (
+            <DashboardSkeleton />
+          ) : (
+            <>
+              {/* 오늘의 분량 미니 스케줄 */}
+              <div className="bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl p-5 flex flex-col shadow-sm">
             <div className="flex justify-between items-center mb-3">
               <div className="flex items-center gap-2">
                 <CalendarDays size={18} className="text-sky-500" />
