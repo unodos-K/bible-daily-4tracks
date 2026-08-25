@@ -9,6 +9,7 @@ import {
   ReadRecordsMap, 
   DayRecord,
   OneVerse,
+  MemoData,
   fetchReadingSettings, 
   fetchReadRecords, 
   updateMemorizeRecord,
@@ -79,6 +80,8 @@ export default function MyPage() {
   const carouselRef = useRef<HTMLDivElement>(null);
   
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   useEffect(() => {
     setIsClient(true);
@@ -210,10 +213,11 @@ export default function MyPage() {
 
 
 
-  const handleMemoSave = async (dayIndex: number, newMemo: string) => {
+  const handleMemoSave = async (dayIndex: number, newMemo: MemoData) => {
     const record = records[dayIndex];
     if (!record || !record.oneVerse) return;
-    if (record.oneVerse.memo === newMemo) return;
+    // Remove strict equality check since newMemo is an object now
+    // if (record.oneVerse.memo === newMemo) return;
     
     const updatedVerse = { ...record.oneVerse, memo: newMemo, memoUpdatedAt: new Date().toISOString() };
     setRecords(prev => ({
@@ -224,6 +228,8 @@ export default function MyPage() {
       }
     }));
     await updateReadRecordOneVerse(dayIndex, updatedVerse);
+    setToastMessage("오늘도 꾸준하게 은혜의 발자국을 남기셨네요! 👣");
+    setTimeout(() => setToastMessage(null), 3000);
   };
 
   const nextUnreadDay = getNextUnreadDay(records);
@@ -811,6 +817,12 @@ export default function MyPage() {
           initialMode={memoModalState.initialMode}
           onShare={() => handleShareOneVerse(records[memoModalState.dayIndex!])}
         />
+      )}
+
+      {toastMessage && (
+        <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-stone-800 text-white px-4 py-2 rounded-full shadow-lg z-[100] animate-fade-in-up text-sm whitespace-nowrap">
+          {toastMessage}
+        </div>
       )}
 
     </div>

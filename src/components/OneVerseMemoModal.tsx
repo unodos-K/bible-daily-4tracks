@@ -77,8 +77,21 @@ export default function OneVerseMemoModal({
       await onSave(dayIndex, finalMemoData);
       setMemoData(finalMemoData);
       setMode('view');
+      onClose();
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleThanksFocus = () => {
+    if (!memoData.thanks || memoData.thanks.trim() === '') {
+      setMemoData({ ...memoData, thanks: '• ' });
+    }
+  };
+
+  const handleAppFocus = () => {
+    if (!appText || appText.trim() === '') {
+      setAppText('- [ ] ');
     }
   };
 
@@ -262,6 +275,7 @@ export default function OneVerseMemoModal({
                       value={memoData.thanks || ""}
                       onChange={e => setMemoData({...memoData, thanks: e.target.value})}
                       onKeyDown={handleThanksKeyDown}
+                      onFocus={handleThanksFocus}
                       placeholder="• 오늘 하루 감사한 일은 무엇인가요?"
                       className="w-full bg-transparent text-[15px] text-stone-200 placeholder-stone-600 focus:outline-none resize-none min-h-[100px] leading-relaxed"
                     />
@@ -272,6 +286,7 @@ export default function OneVerseMemoModal({
                       value={appText}
                       onChange={e => setAppText(e.target.value)}
                       onKeyDown={handleAppKeyDown}
+                      onFocus={handleAppFocus}
                       placeholder="- [ ] 오늘 실천할 내용을 적어보세요."
                       className="w-full bg-transparent text-[15px] text-stone-200 placeholder-stone-600 focus:outline-none resize-none min-h-[100px] leading-relaxed"
                     />
