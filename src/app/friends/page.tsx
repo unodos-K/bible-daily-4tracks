@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { X, Search, UserPlus, Check, X as RejectIcon, UserCheck, Flame, BookOpen, Heart, MessageCircle } from "lucide-react";
+import { X, Search, UserPlus, Check, X as RejectIcon, UserCheck, Flame, BookOpen, Heart, MessageCircle, Settings, Share2, Copy } from "lucide-react";
 import { 
   FriendProfile, 
   searchUsersByNickname, 
@@ -15,9 +15,14 @@ import {
   toggleLike,
   getSentRequests
 } from "@/lib/social";
+import { getAuthUser, AuthUser } from "@/lib/auth";
+import { signOut } from "@/lib/supabase";
+import SettingsModal from "@/components/SettingsModal";
 
 export default function FriendsPage() {
   const [activeTab, setActiveTab] = useState<"friends" | "requests" | "search">("friends");
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   
   const [friends, setFriends] = useState<FriendProfile[]>([]);
   const [requests, setRequests] = useState<{ id: string; profile: FriendProfile }[]>([]);
@@ -46,6 +51,7 @@ export default function FriendsPage() {
 
   useEffect(() => {
     loadData();
+    getAuthUser().then(user => setAuthUser(user));
   }, []);
 
   const loadData = async () => {
@@ -76,6 +82,78 @@ export default function FriendsPage() {
       console.error(e);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    await signOut();
+    setAuthUser(null);
+    window.location.href = "/";
+  };
+
+  const handleInvite = async () => {
+    if (!authUser) {
+      alert("로그인이 필요합니다.");
+      return;
+    }
+    
+    const inviteUrl = window.location.origin || process.env.NEXT_PUBLIC_BASE_URL || "";
+    const shareData = {
+      title: 'One Verse',
+      text: '매일 말씀을 읽고 내게 주신 한 구절을 암송하세요\\n말씀읽기 & 뇌새김 말씀 암송',
+      url: inviteUrl,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        console.error("공유 실패:", err);
+      }
+    } else if (typeof window !== "undefined" && window.Kakao) {
+      window.Kakao.Share.sendDefault({
+        objectType: 'feed',
+        content: {
+          title: shareData.title,
+          description: shareData.text,
+          imageUrl: 'https://images.unsplash.com/photo-1504052434569-70ad5836ab65?q=80&w=800&auto=format&fit=crop',
+          link: {
+            mobileWebUrl: inviteUrl,
+            webUrl: inviteUrl,
+          },
+        },
+        buttons: [
+          {
+            title: '함께 시작하기',
+            link: {
+              mobileWebUrl: inviteUrl,
+              webUrl: inviteUrl,
+            },
+          },
+        ],
+      });
+    } else {
+      try {
+        await navigator.clipboard.writeText(`${shareData.text}\\n${shareData.url}`);
+        alert("초대 링크가 클립보드에 복사되었습니다!");
+      } catch (e) {
+        alert("공유 기능을 지원하지 않는 브라우저입니다.");
+      }
+    }
+  };
+
+  const handleCopyNickname = async () => {
+    if (!authUser) {
+      alert("로그인이 필요합니다.");
+      return;
+    }
+    const nickname = (authUser.nickname || authUser.name).split('#')[0];
+    const textToCopy = `One Verse에서 저와 함께 말씀 통독을 해요! 제 닉네임은 ${nickname}입니다. (친구 탭에서 검색해 주세요!)`;
+    try {
+      await navigator.clipboard.writeText(textToCopy);
+      alert("클립보드에 복사되었습니다!");
+    } catch (e) {
+      alert("복사에 실패했습니다.");
     }
   };
 
@@ -141,7 +219,32 @@ export default function FriendsPage() {
           <h1 className="text-2xl font-black text-stone-800 dark:text-stone-100 flex items-center gap-2">
             친구 탭
           </h1>
+          <button
+            onClick={() => setIsSettingsModalOpen(true)}
+            className="p-2 text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 transition-colors bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-full shadow-sm"
+            aria-label="환경 설정"
+          >
+            <Settings size={20} />
+          </button>
         </header>
+
+        {/* 상단 공통 구역 (소셜 액션) */}
+        <div className="px-4 py-3 bg-white dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800 flex flex-col sm:flex-row gap-2">
+          <button
+            onClick={handleInvite}
+            className="flex-1 flex items-center justify-center gap-2 bg-[#FEE500] hover:bg-[#FDD800] text-black text-sm font-bold py-2.5 rounded-xl transition-colors shadow-sm"
+          >
+            <Share2 size={16} />
+            친구에게 One Verse 추천하기
+          </button>
+          <button
+            onClick={handleCopyNickname}
+            className="flex-1 flex items-center justify-center gap-2 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 text-sm font-bold py-2.5 rounded-xl transition-colors shadow-sm"
+          >
+            <Copy size={16} />
+            내 닉네임 복사하기
+          </button>
+        </div>
 
         <div className="flex px-4 pt-2 border-b border-stone-100 dark:border-stone-800">
           <button 
@@ -380,6 +483,11 @@ export default function FriendsPage() {
           )}
         </div>
       </div>
+      <SettingsModal 
+        isOpen={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
+        onLogout={handleLogout}
+      />
     </div>
   );
 }

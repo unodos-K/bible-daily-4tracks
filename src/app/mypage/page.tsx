@@ -22,7 +22,6 @@ import { signOut, signInWithKakao } from "@/lib/supabase";
 import { shareOneVerse } from "@/lib/share";
 import ShareModal from "@/components/ShareModal";
 import MemoryTrainerModal from "@/components/MemoryTrainerModal";
-import SettingsModal from "@/components/SettingsModal";
 
 function getDaysInMonth(year: number, month: number) {
   return new Date(year, month, 0).getDate();
@@ -79,7 +78,7 @@ export default function MyPage() {
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const carouselRef = useRef<HTMLDivElement>(null);
   
-  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  // 캐러셀 관련 상태 및 Ref (removed)
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -130,72 +129,7 @@ export default function MyPage() {
     window.location.href = "/";
   };
 
-  const handleInvite = async () => {
-    if (!authUser) {
-      alert("로그인이 필요합니다.");
-      return;
-    }
-    
-    const inviteUrl = window.location.origin || process.env.NEXT_PUBLIC_BASE_URL || "";
-    const shareData = {
-      title: 'One Verse',
-      text: '매일 말씀을 읽고 내게 주신 한 구절을 암송하세요\n말씀읽기 & 뇌새김 말씀 암송',
-      url: inviteUrl,
-    };
-
-    if (navigator.share) {
-      try {
-        await navigator.share(shareData);
-      } catch (err) {
-        console.error("공유 실패:", err);
-      }
-    } else if (typeof window !== "undefined" && window.Kakao) {
-      window.Kakao.Share.sendDefault({
-        objectType: 'feed',
-        content: {
-          title: shareData.title,
-          description: shareData.text,
-          imageUrl: 'https://images.unsplash.com/photo-1504052434569-70ad5836ab65?q=80&w=800&auto=format&fit=crop',
-          link: {
-            mobileWebUrl: inviteUrl,
-            webUrl: inviteUrl,
-          },
-        },
-        buttons: [
-          {
-            title: '함께 시작하기',
-            link: {
-              mobileWebUrl: inviteUrl,
-              webUrl: inviteUrl,
-            },
-          },
-        ],
-      });
-    } else {
-      // 클립보드 복사 폴백
-      try {
-        await navigator.clipboard.writeText(`${shareData.text}\n${shareData.url}`);
-        alert("초대 링크가 클립보드에 복사되었습니다!");
-      } catch (e) {
-        alert("공유 기능을 지원하지 않는 브라우저입니다.");
-      }
-    }
-  };
-
-  const handleCopyNickname = async () => {
-    if (!authUser) {
-      alert("로그인이 필요합니다.");
-      return;
-    }
-    const nickname = (authUser.nickname || authUser.name).split('#')[0];
-    const textToCopy = `One Verse에서 저와 함께 말씀 통독을 해요! 제 닉네임은 ${nickname}입니다. (친구 탭에서 검색해 주세요!)`;
-    try {
-      await navigator.clipboard.writeText(textToCopy);
-      alert("클립보드에 복사되었습니다!");
-    } catch (e) {
-      alert("복사에 실패했습니다.");
-    }
-  };
+  // Social functions moved to friends page
 
   const handleShareOneVerse = (record: DayRecord) => {
     setSelectedRecordToShare(record);
@@ -279,16 +213,20 @@ export default function MyPage() {
         {/* 헤더 및 프로필 (고정 헤더) */}
         <header className="sticky top-0 z-40 bg-stone-50/95 dark:bg-stone-950/95 backdrop-blur-md pt-6 pb-4 px-6 border-b border-stone-200/50 dark:border-stone-800/50 flex items-center justify-between w-full mb-6">
           <h1 className="text-2xl font-black text-stone-800 dark:text-stone-100 flex items-center gap-2">
-            나의 기록 보관소
+            나의 발자국 보관소
           </h1>
           <div className="flex items-center gap-3">
             {authUser ? (
-              <button
-                onClick={handleLogout}
-                className="text-xs sm:text-sm font-semibold text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 transition-colors whitespace-nowrap"
-              >
-                🚪 로그아웃
-              </button>
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-stone-100 dark:bg-stone-800 rounded-full border border-stone-200 dark:border-stone-700 shadow-inner">
+                <div className="w-5 h-5 rounded-full bg-stone-300 dark:bg-stone-700 flex items-center justify-center text-[10px] font-bold text-stone-600 dark:text-stone-300 overflow-hidden">
+                  {authUser.avatarUrl ? (
+                    <img src={authUser.avatarUrl} alt={authUser.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <span>{authUser.name.substring(0, 1)}</span>
+                  )}
+                </div>
+                <span className="font-bold text-sm text-stone-700 dark:text-stone-200">{authUser.nickname ? authUser.nickname.split('#')[0] : authUser.name.split('#')[0]}</span>
+              </div>
             ) : (
               <button
                 onClick={signInWithKakao}
@@ -297,13 +235,6 @@ export default function MyPage() {
                 💬 카카오 로그인
               </button>
             )}
-            <button
-              onClick={() => setIsSettingsModalOpen(true)}
-              className="p-2 text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 transition-colors bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-full shadow-sm"
-              aria-label="환경 설정"
-            >
-              <Settings size={20} />
-            </button>
           </div>
         </header>
 
@@ -478,7 +409,7 @@ export default function MyPage() {
                             className="flex flex-col items-center justify-center gap-1.5 py-3 bg-stone-100 dark:bg-white/5 hover:bg-stone-200 dark:hover:bg-white/10 text-stone-600 dark:text-stone-300 rounded-xl transition-all active:scale-95"
                           >
                             <FileText size={20} strokeWidth={2.5} className="text-emerald-500 dark:text-emerald-400" />
-                            <span className="text-[10px] sm:text-xs font-bold tracking-tight">{verse.memo ? "메모 보기" : "메모 작성"}</span>
+                            <span className="text-[10px] sm:text-xs font-bold tracking-tight">{verse.memo ? "발자국 보기" : "발자국 남기기"}</span>
                           </button>
                           <button
                             onClick={() => handleShareOneVerse(record)}
@@ -518,27 +449,6 @@ export default function MyPage() {
               </div>
             )}
           </div>
-
-          {/* 소셜 및 기능 섹션 */}
-          <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 p-4 sm:p-6 flex flex-col gap-4">
-            <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 flex items-center gap-2 mb-2">
-              🤝 소셜 및 설정
-            </h3>
-            <div className="grid grid-cols-1 gap-3">
-              <button
-                onClick={handleInvite}
-                className="flex items-center justify-center gap-2 bg-[#FEE500] hover:bg-[#FDD800] text-black font-bold py-3.5 rounded-xl transition-colors shadow-sm w-full"
-              >
-                친구에게 One Verse 추천하기
-              </button>
-              <button
-                onClick={handleCopyNickname}
-                className="flex items-center justify-center gap-2 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 font-bold py-3.5 rounded-xl transition-colors shadow-sm w-full"
-              >
-                내 닉네임 복사하기
-              </button>
-            </div>
-          </div>
         </div>
 
 
@@ -561,11 +471,6 @@ export default function MyPage() {
           }}
         />
       )}
-
-      <SettingsModal 
-        isOpen={isSettingsModalOpen}
-        onClose={() => setIsSettingsModalOpen(false)}
-      />
 
       <ShareModal
         isOpen={!!selectedRecordToShare}

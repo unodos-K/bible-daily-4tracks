@@ -74,7 +74,7 @@ export default function VerseDetailPage() {
       <main className="flex-1 w-full overflow-y-auto pb-20 px-4 sm:px-6">
         {dayRecords.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-64 text-center mt-10">
-            <p className="text-stone-500 dark:text-stone-400 font-medium">해당 날짜에는 기록된 One Verse가 없습니다.</p>
+            <p className="text-stone-500 dark:text-stone-400 font-medium">해당 날짜에는 남겨진 발자국이 없어요.</p>
           </div>
         ) : (
           <div className="flex flex-col gap-6 w-full max-w-2xl mx-auto mt-6 md:mt-10">
@@ -128,7 +128,7 @@ export default function VerseDetailPage() {
                       ) : (
                         <PencilLine size={22} strokeWidth={2.5} className="text-emerald-500 dark:text-emerald-400" />
                       )}
-                      <span className="text-xs font-bold tracking-tight">{verse.memo ? "메모 보기" : "메모 작성"}</span>
+                      <span className="text-xs font-bold tracking-tight">{verse.memo ? "발자국 보기" : "발자국 남기기"}</span>
                     </button>
                     <button
                       onClick={() => handleShareOneVerse(record)}

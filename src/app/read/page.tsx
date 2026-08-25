@@ -524,7 +524,7 @@ export default function BibleViewerPage() {
 
             <p className="text-red-400 text-sm mb-6 font-bold flex items-center justify-center gap-1.5 leading-relaxed bg-red-950/30 p-3 rounded-lg w-full">
               <AlertCircle size={16} className="shrink-0" />
-              One Verse를 교체할 경우 메모 기록과 암송 데이터는 복구할 수 없습니다.
+              One Verse를 교체할 경우 남겨둔 발자국과 암송 데이터는 복구할 수 없습니다.
             </p>
             
             <div className="flex gap-3 w-full">
@@ -983,7 +983,7 @@ export default function BibleViewerPage() {
                                       className="flex-1 py-2 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors border border-stone-200 dark:border-stone-700 shadow-sm"
                                     >
                                       <PencilLine size={16} />
-                                      {confirmedVerse.memo ? "메모 수정" : "메모 작성"}
+                                      {confirmedVerse.memo ? "발자국 수정" : "발자국 남기기"}
                                     </button>
                                     {confirmedVerse.memo && (
                                       <button
@@ -991,7 +991,7 @@ export default function BibleViewerPage() {
                                         className="flex-1 py-2 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors border border-stone-200 dark:border-stone-700 shadow-sm"
                                       >
                                         <FileText size={16} />
-                                        메모 보기
+                                        발자국 보기
                                       </button>
                                     )}
                                     <button

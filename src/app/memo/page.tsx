@@ -202,7 +202,7 @@ function MemoEditorContent() {
           <span className="text-sm font-medium">취소</span>
         </button>
         <h2 className="text-lg font-bold text-stone-100 absolute left-1/2 -translate-x-1/2">
-          {mode === 'view' ? '묵상 노트' : '노트 작성'}
+          {mode === 'view' ? '발자국 보기' : '발자국 남기기'}
         </h2>
         <div>
           {mode === 'view' ? (

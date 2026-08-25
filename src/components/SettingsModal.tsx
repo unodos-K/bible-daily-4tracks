@@ -155,7 +155,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             className="flex items-center justify-center gap-2 w-full py-4 bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/40 text-red-600 dark:text-red-400 font-bold rounded-xl transition-colors border border-red-100 dark:border-red-900/30"
           >
             <RotateCcw size={18} />
-            통독 기록 초기화 및 재설정
+            통독 발자국 초기화 및 재설정
           </button>
         </div>
       </div>
@@ -169,7 +169,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             </div>
             <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100">정말 초기화하시겠습니까?</h3>
             <p className="text-stone-500 dark:text-stone-400 text-sm break-keep">
-              지금까지의 통독 기록과 암송 데이터가 모두 삭제되며, 처음부터 다시 시작하게 됩니다. 이 작업은 되돌릴 수 없습니다.
+              지금까지의 통독 발자국과 암송 데이터가 모두 삭제되며, 처음부터 다시 시작하게 됩니다. 이 작업은 되돌릴 수 없습니다.
             </p>
             <div className="flex gap-3 mt-2">
               <button

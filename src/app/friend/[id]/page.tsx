@@ -107,7 +107,7 @@ export default function FriendProfilePage() {
             <ChevronLeft size={24} />
           </button>
           <h1 className="text-lg font-bold text-stone-800 dark:text-stone-100 ml-2">
-            친구 묵상 기록
+            친구 발자국
           </h1>
         </div>
       </header>
@@ -163,7 +163,7 @@ export default function FriendProfilePage() {
           </h3>
           {thisMonthRecords.length === 0 ? (
             <div className="text-center py-12 text-stone-500 bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-sm">
-              <p>이번 달에 기록한 One Verse가 없습니다.</p>
+              <p>이번 달에 남긴 발자국이 없어요.</p>
             </div>
           ) : (
             thisMonthRecords.map((record) => (
@@ -205,11 +205,11 @@ export default function FriendProfilePage() {
           )}
         </div>
         
-        {/* 이전 기록 보기 (추후 구현 가능) */}
+        {/* 이전 발자국 보기 (추후 구현 가능) */}
         {records.length > thisMonthRecords.length && (
-          <div className="text-center mt-4">
-            <button className="text-sm font-semibold text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 transition-colors">
-              이전 기록 모두 보기 ({records.length - thisMonthRecords.length}개)
+          <div className="mt-4 px-4 sm:px-6 mb-8">
+            <button className="w-full py-3 bg-stone-100 dark:bg-stone-900 text-stone-600 dark:text-stone-300 font-bold rounded-xl text-sm hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors">
+              이전 발자국 모두 보기 ({records.length - thisMonthRecords.length}개)
             </button>
           </div>
         )}

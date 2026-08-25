@@ -317,7 +317,7 @@ export default function HomePage() {
           <button
             onClick={() => {
               if (Object.keys(records).length === 0) {
-                alert("아직 읽은 기록이 없어요. 오늘 진도부터 시작해 보세요!");
+                alert("아직 남겨진 발자국이 없어요. 오늘 진도부터 시작해 보세요!");
                 return;
               }
               router.push("/read?day=" + nextUnreadDay);
@@ -343,7 +343,7 @@ export default function HomePage() {
           <ul className="flex flex-col space-y-3 pl-0.5">
             <li className="flex items-start gap-2">
               <span className="mt-[1px]">•</span>
-              <span><strong>말씀 읽기:</strong> 매일 구약, 신약, 시편, 잠언으로 구성된 분량을 읽으며 1년 1독에 도전해 보세요. 마음에 와닿는 단 하나의 구절(One Verse)에 나만의 묵상 메모를 남기고 카카오톡으로 공유할 수도 있습니다.</span>
+              <span><strong>말씀 읽기:</strong> 매일 구약, 신약, 시편, 잠언으로 구성된 분량을 읽으며 1년 1독에 도전해 보세요. 마음에 와닿는 단 하나의 구절(One Verse)에 나만의 묵상 발자국을 남기고 카카오톡으로 공유할 수도 있습니다.</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="mt-[1px]">•</span>
