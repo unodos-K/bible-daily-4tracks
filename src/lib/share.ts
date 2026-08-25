@@ -3,7 +3,7 @@ import { DayRecord, MemoData } from "./storage";
 export const shareOneVerse = async (
   record: DayRecord, 
   nickname: string, 
-  orderedItems: string[] = ['word', 'prayer', 'thanks', 'application']
+  orderedItems: string[] = ['word', 'meditation', 'prayer', 'thanks', 'application']
 ) => {
   if (typeof window === "undefined") return;
 
@@ -20,6 +20,9 @@ export const shareOneVerse = async (
     if (item === 'word') {
       textToShare += `📖 말씀\n"${displayTxt}"\n- ${formattedRef}\n\n`;
     } 
+    else if (item === 'meditation' && memo?.meditation) {
+      textToShare += `💭 묵상\n${memo.meditation}\n\n`;
+    }
     else if (item === 'prayer' && memo?.prayer) {
       textToShare += `🙏 기도\n${memo.prayer}\n\n`;
     }

@@ -20,6 +20,7 @@ export default function ShareModal({ isOpen, onClose, record, onShare }: ShareMo
       // 말씀 (Always available since it's the verse)
       newItems.push({ id: 'word', label: '말씀', checked: true });
       
+      if (memo?.meditation) newItems.push({ id: 'meditation', label: '묵상', checked: true });
       if (memo?.prayer) newItems.push({ id: 'prayer', label: '기도', checked: true });
       if (memo?.thanks) newItems.push({ id: 'thanks', label: '감사', checked: true });
       if (memo?.application && memo.application.length > 0) newItems.push({ id: 'application', label: '적용', checked: true });
