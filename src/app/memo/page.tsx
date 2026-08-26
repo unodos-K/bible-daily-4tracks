@@ -84,7 +84,12 @@ function MemoEditorContent() {
   }, [dayIndexParam, modeParam, router]);
 
   if (isLoading || !record || dayIndex === null) {
-    return <div className="min-h-[100dvh] bg-stone-50 dark:bg-stone-950 flex justify-center items-center">Loading...</div>;
+    return (
+      <div className="min-h-[100dvh] bg-stone-50 dark:bg-stone-950 flex flex-col items-center justify-center gap-3 text-stone-500">
+        <Footprints className="animate-pulse w-8 h-8" />
+        <span className="text-sm font-medium">발자국을 확인하는 중...</span>
+      </div>
+    );
   }
 
   const memoUpdatedAt = record.oneVerse?.memoUpdatedAt;
@@ -358,7 +363,12 @@ function MemoEditorContent() {
 
 export default function MemoPage() {
   return (
-    <Suspense fallback={<div className="min-h-[100dvh] bg-stone-50 dark:bg-stone-950 flex justify-center items-center">Loading...</div>}>
+    <Suspense fallback={
+      <div className="min-h-[100dvh] bg-stone-50 dark:bg-stone-950 flex flex-col items-center justify-center gap-3 text-stone-500">
+        <Footprints className="animate-pulse w-8 h-8" />
+        <span className="text-sm font-medium">발자국을 확인하는 중...</span>
+      </div>
+    }>
       <MemoEditorContent />
     </Suspense>
   );

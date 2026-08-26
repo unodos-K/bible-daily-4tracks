@@ -22,7 +22,12 @@ export default function MyPage() {
   const stats = useMyPageStats();
 
   if (!stats.isClient || !stats.settings || !stats.settings.hasStarted) {
-    return <div className="min-h-[calc(100vh-52px)] bg-stone-50 dark:bg-stone-950 flex justify-center items-center">Loading...</div>;
+    return (
+      <div className="min-h-[calc(100vh-52px)] bg-stone-50 dark:bg-stone-950 flex flex-col items-center justify-center gap-3 text-stone-500">
+        <Footprints className="animate-pulse w-8 h-8" />
+        <span className="text-sm font-medium">발자국을 확인하는 중...</span>
+      </div>
+    );
   }
 
   const handleDayClick = (dateStr: string) => {

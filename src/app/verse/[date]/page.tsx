@@ -39,7 +39,12 @@ export default function VerseDetailPage() {
   }, []);
 
   if (!isClient) {
-    return <div className="min-h-[100dvh] bg-stone-50 dark:bg-stone-950 flex justify-center items-center">Loading...</div>;
+    return (
+      <div className="min-h-[100dvh] bg-stone-50 dark:bg-stone-950 flex flex-col items-center justify-center gap-3 text-stone-500">
+        <BookOpen className="animate-pulse w-8 h-8" />
+        <span className="text-sm font-medium">오늘의 말씀을 펴는 중...</span>
+      </div>
+    );
   }
 
   // Parse date for title

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef } from "react";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, BookOpen } from "lucide-react";
 import { getDailyReadingByIndex, getAllSchedules } from "@/lib/bible";
 import MemoryTrainerModal from "@/components/MemoryTrainerModal";
 import ShareModal from "@/components/ShareModal";
@@ -63,6 +63,7 @@ export default function BibleViewerPage() {
     toastMessage,
     headerRef,
     headerHeight,
+    isDataLoaded,
     handleSetDay,
     handleGoToLastRead,
     handleVerseClick,
@@ -80,7 +81,12 @@ export default function BibleViewerPage() {
 
 
   if (!isClient) {
-    return <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex justify-center items-center text-stone-500">Loading...</div>;
+    return (
+      <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex flex-col items-center justify-center gap-3 text-stone-500">
+        <BookOpen className="animate-pulse w-8 h-8" />
+        <span className="text-sm font-medium">오늘의 말씀을 펴는 중...</span>
+      </div>
+    );
   }
 
   // 첫 화면: 로그인 전용 랜딩

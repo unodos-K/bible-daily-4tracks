@@ -75,8 +75,9 @@ export default function FriendProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex justify-center items-center">
-        <Loader2 className="animate-spin text-stone-400" size={32} />
+      <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex flex-col items-center justify-center gap-3 text-stone-500">
+        <Loader2 className="animate-spin text-stone-400 w-8 h-8" />
+        <span className="text-sm font-medium">데이터를 불러오는 중...</span>
       </div>
     );
   }
