@@ -33,7 +33,7 @@ export default function MemoryTrainerIntro({
     <div className="flex flex-col gap-6 animate-in slide-in-from-bottom-4">
       <div className="text-center">
         <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-1">
-          오늘의 One Verse 암송하기
+          오늘의 One Verse 마음 새김하기
         </h3>
         <p className="text-sm font-semibold text-stone-400 dark:text-stone-500">
           {oneVerse.reference}
@@ -64,11 +64,10 @@ export default function MemoryTrainerIntro({
           </div>
           <button
             onClick={toggleTTS}
-            className={`flex items-center gap-1.5 px-4 py-2.5 rounded-lg font-bold text-xs sm:text-sm transition-colors flex-shrink-0 shadow-sm ${
-              isPlayingTTS
-                ? "bg-stone-200 hover:bg-stone-300 text-stone-700 dark:bg-stone-700 dark:hover:bg-stone-600 dark:text-stone-300"
-                : "bg-sky-500 hover:bg-sky-600 text-white"
-            }`}
+            className={`flex items-center gap-1.5 px-4 py-2.5 rounded-lg font-bold text-xs sm:text-sm transition-colors flex-shrink-0 shadow-sm ${isPlayingTTS
+              ? "bg-stone-200 hover:bg-stone-300 text-stone-700 dark:bg-stone-700 dark:hover:bg-stone-600 dark:text-stone-300"
+              : "bg-sky-500 hover:bg-sky-600 text-white"
+              }`}
           >
             {isPlayingTTS ? (
               <><Square size={16} fill="currentColor" /> 정지</>
@@ -92,11 +91,10 @@ export default function MemoryTrainerIntro({
             <button
               key={opt.value}
               onClick={() => setIntervalSeconds(opt.value)}
-              className={`py-2 px-1 flex flex-col items-center justify-center gap-0.5 rounded-lg text-xs sm:text-sm font-bold transition-all duration-200 ${
-                intervalSeconds === opt.value
-                  ? "bg-white dark:bg-stone-900 text-sky-600 dark:text-sky-400 shadow-sm border border-stone-200 dark:border-stone-700 scale-[1.02]"
-                  : "text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 hover:bg-stone-200/50 dark:hover:bg-stone-700/50 border border-transparent"
-              }`}
+              className={`py-2 px-1 flex flex-col items-center justify-center gap-0.5 rounded-lg text-xs sm:text-sm font-bold transition-all duration-200 ${intervalSeconds === opt.value
+                ? "bg-white dark:bg-stone-900 text-sky-600 dark:text-sky-400 shadow-sm border border-stone-200 dark:border-stone-700 scale-[1.02]"
+                : "text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 hover:bg-stone-200/50 dark:hover:bg-stone-700/50 border border-transparent"
+                }`}
             >
               <span className="whitespace-nowrap">{opt.label}</span>
               <span className="text-[10px] sm:text-xs font-medium opacity-70 whitespace-nowrap">({opt.value}초)</span>
