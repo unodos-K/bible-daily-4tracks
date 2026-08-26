@@ -8,6 +8,7 @@ import {
 import { getAuthUser, AuthUser } from "@/lib/auth";
 export function useBibleReader() {
   const [isClient, setIsClient] = useState(false);
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [settings, setSettings] = useState<ReadingSettings | null>(null);
   const [records, setRecords] = useState<ReadRecordsMap>({});
@@ -149,6 +150,8 @@ export function useBibleReader() {
         setDayIndex(initialDay);
       } catch {
         // ignore
+      } finally {
+        setIsDataLoaded(true);
       }
     });
 
@@ -335,6 +338,7 @@ export function useBibleReader() {
     toastMessage,
     headerRef,
     headerHeight,
+    isDataLoaded,
     handleSetDay,
     handleGoToLastRead,
     handleVerseClick,
