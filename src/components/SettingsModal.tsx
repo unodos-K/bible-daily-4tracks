@@ -154,18 +154,18 @@ export default function SettingsModal({ isOpen, onClose, onLogout }: SettingsMod
           </div>
         )}
 
-        {/* Danger Zone */}
-        <div className="flex flex-col gap-4">
-          <label className="text-sm font-semibold text-red-500 flex items-center gap-1">
-            <AlertCircle size={16} /> Danger Zone
-          </label>
+        {/* 설정 초기화 영역 */}
+        <div className="flex flex-col gap-2">
           <button
             onClick={() => setIsResetModalOpen(true)}
             className="flex items-center justify-center gap-2 w-full py-4 bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/40 text-red-600 dark:text-red-400 font-bold rounded-xl transition-colors border border-red-100 dark:border-red-900/30"
           >
             <Footprints size={18} />
-            통독 발자국 초기화 및 재설정
+            설정 초기화 및 통독 다시 시작하기
           </button>
+          <p className="text-xs text-red-500 dark:text-red-400 text-center font-medium">
+            모든 읽기 기록과 발자국, 마음 새김 기록이 삭제 됩니다
+          </p>
         </div>
       </div>
 
@@ -176,9 +176,9 @@ export default function SettingsModal({ isOpen, onClose, onLogout }: SettingsMod
             <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 text-red-500 mx-auto flex items-center justify-center mb-2">
               <AlertCircle size={24} />
             </div>
-            <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100">정말 초기화하시겠습니까?</h3>
+            <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100">정말 모든 기록을 삭제하고 처음부터 다시 시작하시겠습니까?</h3>
             <p className="text-stone-500 dark:text-stone-400 text-sm break-keep">
-              지금까지의 통독 발자국과 암송 데이터가 모두 삭제되며, 처음부터 다시 시작하게 됩니다. 이 작업은 되돌릴 수 없습니다.
+              이 작업은 되돌릴 수 없습니다.
             </p>
             <div className="flex gap-3 mt-2">
               <button
