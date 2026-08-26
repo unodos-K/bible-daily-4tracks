@@ -89,7 +89,11 @@ export default function LikeButton({ item, onLike }: LikeButtonProps) {
   }, [showTooltip]);
 
   return (
-    <div className="relative flex flex-col items-end" ref={tooltipRef}>
+    <div 
+      className="relative flex flex-col items-end" 
+      ref={tooltipRef}
+      style={{ WebkitTouchCallout: 'none', WebkitUserSelect: 'none', userSelect: 'none' }}
+    >
       <button 
         onClick={handleClick}
         onMouseEnter={handleMouseEnter}
