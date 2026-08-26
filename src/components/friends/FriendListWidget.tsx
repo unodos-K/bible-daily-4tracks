@@ -1,7 +1,8 @@
 import React from "react";
 import Link from "next/link";
-import { UserCheck, Heart } from "lucide-react";
+import { UserCheck } from "lucide-react";
 import { FriendProfile, FriendFeedItem } from "@/lib/social";
+import LikeButton from "./LikeButton";
 
 interface FriendListWidgetProps {
   friends: FriendProfile[];
@@ -78,17 +79,7 @@ export default function FriendListWidget({
               
               {/* 좋아요 버튼 연동 */}
               <div className="flex justify-end pt-1 mt-1 border-t border-stone-200 dark:border-stone-800/50">
-                <button 
-                  onClick={() => handleLike(friend.id, friendsFeed[friend.id][0])}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-colors ${
-                    friendsFeed[friend.id][0].is_liked_by_me 
-                      ? "bg-red-50 dark:bg-red-950/30 text-red-500" 
-                      : "bg-stone-100 dark:bg-stone-800 text-stone-500 hover:bg-stone-200 dark:hover:bg-stone-700"
-                  }`}
-                >
-                  <Heart size={16} fill={friendsFeed[friend.id][0].is_liked_by_me ? "currentColor" : "none"} />
-                  <span className="text-xs font-bold">{friendsFeed[friend.id][0].like_count > 0 ? friendsFeed[friend.id][0].like_count : '좋아요'}</span>
-                </button>
+                <LikeButton item={friendsFeed[friend.id][0]} onLike={() => handleLike(friend.id, friendsFeed[friend.id][0])} />
               </div>
             </div>
           ) : (

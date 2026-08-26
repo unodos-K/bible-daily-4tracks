@@ -20,6 +20,7 @@ export interface FriendFeedItem {
   one_verse: OneVerse; // from OneVerse type
   like_count: number;
   is_liked_by_me: boolean;
+  liked_by_users?: { id: string; name: string }[];
 }
 
 // 1. 친구 검색 (닉네임 기준) 또는 전체 디렉토리 조회
@@ -226,7 +227,7 @@ export async function getFriendRecords(friendId: string): Promise<FriendFeedItem
   // 좋아요 데이터 가져오기
   const { data: likes } = await supabase
     .from('one_verse_likes')
-    .select('liker_id, author_id, day_index')
+    .select('liker_id, author_id, day_index, profiles!liker_id(name, nickname)')
     .eq('author_id', friendId);
 
   // 친구 프로필 가져오기
@@ -238,6 +239,14 @@ export async function getFriendRecords(friendId: string): Promise<FriendFeedItem
   const feedItems: FriendFeedItem[] = records.map(record => {
     const recordLikes = likes ? likes.filter(l => l.day_index === record.day_index) : [];
     const isLikedByMe = myUserId ? recordLikes.some(l => l.liker_id === myUserId) : false;
+    const likedByUsers = recordLikes.map(l => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const p = Array.isArray(l.profiles) ? l.profiles[0] : (l.profiles as any);
+      return {
+        id: l.liker_id,
+        name: p?.nickname || p?.name || '알 수 없음'
+      };
+    });
 
     return {
       user_id: record.user_id,
@@ -249,7 +258,8 @@ export async function getFriendRecords(friendId: string): Promise<FriendFeedItem
       completed_at: record.completed_at,
       one_verse: record.one_verse,
       like_count: recordLikes.length,
-      is_liked_by_me: isLikedByMe
+      is_liked_by_me: isLikedByMe,
+      liked_by_users: likedByUsers
     };
   });
 

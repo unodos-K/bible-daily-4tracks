@@ -173,10 +173,18 @@ export function useFriends() {
       
       const newFeed = friendFeed.map(rec => {
         if (rec.day_index === item.day_index) {
+          const isLiking = !rec.is_liked_by_me;
+          let newLikedByUsers = [...(rec.liked_by_users || [])];
+          if (isLiking && authUser) {
+            newLikedByUsers.push({ id: authUser.id, name: authUser.name || '나' });
+          } else if (!isLiking && authUser) {
+            newLikedByUsers = newLikedByUsers.filter(u => u.id !== authUser.id);
+          }
           return {
             ...rec,
-            is_liked_by_me: !rec.is_liked_by_me,
-            like_count: rec.is_liked_by_me ? Math.max(0, rec.like_count - 1) : rec.like_count + 1
+            is_liked_by_me: isLiking,
+            like_count: isLiking ? rec.like_count + 1 : Math.max(0, rec.like_count - 1),
+            liked_by_users: newLikedByUsers
           };
         }
         return rec;
@@ -198,7 +206,8 @@ export function useFriends() {
             return {
               ...rec,
               is_liked_by_me: item.is_liked_by_me,
-              like_count: item.like_count
+              like_count: item.like_count,
+              liked_by_users: item.liked_by_users
             };
           }
           return rec;

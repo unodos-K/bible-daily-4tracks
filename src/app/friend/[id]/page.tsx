@@ -2,8 +2,9 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ChevronLeft, Heart, Footprints, Loader2 } from "lucide-react";
+import { ChevronLeft, Footprints, Loader2 } from "lucide-react";
 import { getFriendRecords, getFriendProfile, toggleLike, getFriendStats, FriendFeedItem, FriendProfile } from "@/lib/social";
+import LikeButton from "@/components/friends/LikeButton";
 import { getAuthUser, AuthUser } from "@/lib/auth";
 
 export default function FriendProfilePage() {
@@ -58,10 +59,18 @@ export default function FriendProfilePage() {
     // 낙관적 업데이트
     setRecords(prev => prev.map(rec => {
       if (rec.day_index === item.day_index) {
+        const isLiking = !rec.is_liked_by_me;
+        let newLikedByUsers = [...(rec.liked_by_users || [])];
+        if (isLiking && authUser) {
+          newLikedByUsers.push({ id: authUser.id, name: authUser.name || '나' });
+        } else if (!isLiking && authUser) {
+          newLikedByUsers = newLikedByUsers.filter(u => u.id !== authUser.id);
+        }
         return {
           ...rec,
-          is_liked_by_me: !rec.is_liked_by_me,
-          like_count: rec.is_liked_by_me ? Math.max(0, rec.like_count - 1) : rec.like_count + 1
+          is_liked_by_me: isLiking,
+          like_count: isLiking ? rec.like_count + 1 : Math.max(0, rec.like_count - 1),
+          liked_by_users: newLikedByUsers
         };
       }
       return rec;
@@ -190,17 +199,7 @@ export default function FriendProfilePage() {
                 </div>
 
                 <div className="flex justify-end pt-1">
-                  <button 
-                    onClick={() => handleLike(record)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-colors ${
-                      record.is_liked_by_me 
-                        ? "bg-red-50 dark:bg-red-950/30 text-red-500" 
-                        : "bg-stone-100 dark:bg-stone-800 text-stone-500 hover:bg-stone-200 dark:hover:bg-stone-700"
-                    }`}
-                  >
-                    <Heart size={16} fill={record.is_liked_by_me ? "currentColor" : "none"} />
-                    <span className="text-xs font-bold">{record.like_count > 0 ? record.like_count : '좋아요'}</span>
-                  </button>
+                  <LikeButton item={record} onLike={() => handleLike(record)} />
                 </div>
               </div>
             ))
