@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect } from 'react';
-import { X, Heart } from 'lucide-react';
+import React, { useEffect, useState, useRef } from 'react';
+import { X, Heart, Music } from 'lucide-react';
 import { OneVerse } from '@/lib/storage';
 import { useMemoryTrainer } from '@/hooks/useMemoryTrainer';
 import MemoryTrainerIntro from '@/components/memory/MemoryTrainerIntro';
@@ -35,6 +35,34 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
     };
   }, []);
 
+  const [isBgmEnabled, setIsBgmEnabled] = useState(true);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    const audio = new Audio('/training-bgm.mp3');
+    audio.loop = true;
+    audio.volume = 0.2;
+    audioRef.current = audio;
+
+    return () => {
+      audio.pause();
+      audioRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const shouldPlay = isBgmEnabled && trainerState.stepState !== 'intro' && !trainerState.isTrainingFinished;
+
+    if (shouldPlay) {
+      audio.play().catch(e => console.log('BGM play blocked:', e));
+    } else {
+      audio.pause();
+    }
+  }, [isBgmEnabled, trainerState.stepState, trainerState.isTrainingFinished]);
+
   return (
     <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in md:p-4">
       <div className="bg-white dark:bg-stone-900 rounded-none md:rounded-3xl px-6 md:px-8 shadow-2xl w-full h-full md:h-auto md:max-h-[85vh] max-w-lg flex flex-col relative animate-in zoom-in-95 border-0 md:border border-stone-200 dark:border-stone-800 overflow-y-auto pt-[calc(2rem+env(safe-area-inset-top))] pb-[calc(2rem+env(safe-area-inset-bottom))] md:py-8">
@@ -44,12 +72,21 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
             <Heart size={24} />
             <h2>마음새김 트레이너</h2>
           </div>
-          <button 
-            onClick={onClose}
-            className="p-2 bg-stone-100 dark:bg-stone-800 rounded-full text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 transition-colors"
-          >
-            <X size={20} />
-          </button>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setIsBgmEnabled(!isBgmEnabled)} 
+              className={`w-6 h-6 p-1 rounded-full transition-all flex items-center justify-center ${isBgmEnabled ? 'text-stone-600 dark:text-stone-300 opacity-100 bg-stone-100 dark:bg-stone-800' : 'text-stone-400 opacity-50 hover:opacity-100'}`}
+              title="BGM 토글"
+            >
+              <Music size={14} className={!isBgmEnabled ? "opacity-50" : ""} />
+            </button>
+            <button 
+              onClick={onClose}
+              className="p-2 bg-stone-100 dark:bg-stone-800 rounded-full text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 transition-colors"
+            >
+              <X size={20} />
+            </button>
+          </div>
         </div>
 
         {trainerState.stepState === 'intro' ? (
