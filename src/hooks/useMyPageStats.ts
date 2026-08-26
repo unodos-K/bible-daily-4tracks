@@ -25,7 +25,6 @@ export function useMyPageStats() {
   const [isMemoryModalOpen, setIsMemoryModalOpen] = useState(false);
   
   const [selectedRecordToShare, setSelectedRecordToShare] = useState<DayRecord | null>(null);
-  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -96,8 +95,6 @@ export function useMyPageStats() {
     setIsMemoryModalOpen,
     selectedRecordToShare,
     setSelectedRecordToShare,
-    isSettingsModalOpen,
-    setIsSettingsModalOpen,
     toastMessage,
     setToastMessage,
     handleLogout,

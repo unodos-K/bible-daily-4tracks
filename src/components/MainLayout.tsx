@@ -9,7 +9,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const isMemoPage = pathname?.startsWith("/memo");
 
   const isVersePage = pathname?.startsWith("/verse");
-  const hideBottomNav = isMemoPage || isVersePage;
+  const isSettingsPage = pathname?.startsWith("/settings");
+  const hideBottomNav = isMemoPage || isVersePage || isSettingsPage;
 
   return (
     <div className="w-full max-w-2xl h-[100dvh] bg-stone-50 dark:bg-stone-950 shadow-xl flex flex-col relative border-x border-stone-200 dark:border-stone-800 overflow-hidden pt-[env(safe-area-inset-top)]">

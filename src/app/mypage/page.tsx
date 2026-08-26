@@ -12,7 +12,6 @@ import { signInWithKakao } from "@/lib/supabase";
 import { shareOneVerse } from "@/lib/share";
 import ShareModal from "@/components/ShareModal";
 import MemoryTrainerModal from "@/components/MemoryTrainerModal";
-import SettingsModal from "@/components/SettingsModal";
 
 import { useMyPageStats } from "@/hooks/useMyPageStats";
 import MyPageCalendar from "@/components/mypage/MyPageCalendar";
@@ -101,7 +100,7 @@ export default function MyPage() {
 
           {/* 우측 설정 버튼 */}
           <button
-            onClick={() => stats.setIsSettingsModalOpen(true)}
+            onClick={() => stats.router.push("/settings")}
             className="p-2 text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 transition-colors bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-full shadow-sm shrink-0"
             aria-label="환경 설정"
           >
@@ -172,12 +171,6 @@ export default function MyPage() {
           {stats.toastMessage}
         </div>
       )}
-
-      <SettingsModal
-        isOpen={stats.isSettingsModalOpen}
-        onClose={() => stats.setIsSettingsModalOpen(false)}
-        onLogout={stats.handleLogout}
-      />
     </div>
   );
 }
