@@ -89,6 +89,44 @@ export default function BibleViewerPage() {
     );
   }
 
+  // 스켈레톤 UI (로딩 중)
+  if (!isDataLoaded) {
+    return (
+      <div className="w-full min-h-screen bg-stone-50 dark:bg-stone-950 flex justify-center pb-20">
+        <div className="w-full max-w-2xl bg-white dark:bg-stone-900 min-h-screen shadow-sm flex flex-col relative pb-32">
+          {/* Header Skeleton */}
+          <div className="sticky top-0 z-40 bg-stone-50/95 dark:bg-stone-950/95 backdrop-blur border-b border-stone-200/50 dark:border-stone-800/50 flex flex-col pt-6 pb-2 px-6">
+            <div className="flex items-center gap-2">
+              <div className="w-16 h-8 bg-stone-200 dark:bg-stone-800 rounded animate-pulse"></div>
+            </div>
+          </div>
+          
+          {/* Content Skeleton */}
+          <div className="flex-1 p-6 space-y-12">
+            {[1, 2].map((i) => (
+              <div key={i} className="space-y-6">
+                {/* Track Title Skeleton */}
+                <div className="w-24 h-6 bg-stone-200 dark:bg-stone-800 rounded animate-pulse"></div>
+                {/* Verses Skeleton */}
+                <div className="space-y-4">
+                  {[1, 2, 3].map((v) => (
+                    <div key={v} className="flex gap-4">
+                      <div className="w-4 h-4 mt-1 bg-stone-200 dark:bg-stone-800 rounded-full shrink-0 animate-pulse"></div>
+                      <div className="flex-1 space-y-2">
+                        <div className="w-full h-5 bg-stone-200 dark:bg-stone-800 rounded animate-pulse"></div>
+                        <div className="w-5/6 h-5 bg-stone-200 dark:bg-stone-800 rounded animate-pulse"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // 첫 화면: 로그인 전용 랜딩
   if (!authUser) {
     return (
