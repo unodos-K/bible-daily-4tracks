@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Loader2, Footprints } from "lucide-react";
+import { Footprints } from "lucide-react";
 import { getFriendsList, FriendProfile } from "@/lib/social";
 import { getAuthUser, AuthUser } from "@/lib/auth";
 
@@ -34,8 +34,19 @@ export default function FriendsList() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center py-8">
-        <Loader2 className="animate-spin text-stone-400" size={24} />
+      <div className="flex flex-col gap-3 mt-4">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="flex items-center justify-between p-4 bg-white dark:bg-stone-900 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 animate-pulse">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-stone-200 dark:bg-stone-800 shrink-0"></div>
+              <div className="flex flex-col gap-2">
+                <div className="w-24 h-4 bg-stone-200 dark:bg-stone-800 rounded"></div>
+                <div className="w-16 h-3 bg-stone-200 dark:bg-stone-800 rounded"></div>
+              </div>
+            </div>
+            <div className="w-6 h-6 bg-stone-200 dark:bg-stone-800 rounded"></div>
+          </div>
+        ))}
       </div>
     );
   }
