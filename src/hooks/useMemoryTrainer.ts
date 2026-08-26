@@ -219,6 +219,18 @@ export function useMemoryTrainer({ oneVerse, onComplete }: { oneVerse: OneVerse,
     setIsPlaying(true);
   };
 
+  const handleDirectChallenge = () => {
+    window.speechSynthesis.cancel();
+    setIsPlayingTTS(false);
+    setStepState('training');
+    const index = steps.findIndex(s => s.phase === 5);
+    if (index !== -1) {
+      setStepIndex(index);
+      setElapsed(0);
+      setIsPlaying(true);
+    }
+  };
+
   const handleRestart = () => {
     window.speechSynthesis.cancel();
     setIsPlayingTTS(false);
@@ -303,6 +315,7 @@ export function useMemoryTrainer({ oneVerse, onComplete }: { oneVerse: OneVerse,
     handleStartListening,
     handleStopListening,
     handleStartTraining,
+    handleDirectChallenge,
     handleRestart,
     jumpToPhase,
     handleComplete

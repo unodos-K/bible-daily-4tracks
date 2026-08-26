@@ -43,6 +43,12 @@ export default function MemoryTrainerProgress({
             Step {phaseNum}
           </button>
         ))}
+        <button
+          onClick={() => jumpToPhase(5)}
+          className="flex-1 min-w-[3rem] px-2 py-1.5 md:px-3 md:py-2 rounded-lg text-xs md:text-sm font-bold whitespace-nowrap transition-colors bg-orange-500 hover:bg-orange-600 text-white shadow-sm"
+        >
+          도전
+        </button>
       </div>
 
       <div className="flex justify-center items-center mb-4 mt-2">

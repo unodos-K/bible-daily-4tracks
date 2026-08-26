@@ -13,6 +13,7 @@ interface MemoryTrainerIntroProps {
   intervalSeconds: number;
   setIntervalSeconds: (sec: number) => void;
   handleStartTraining: () => void;
+  handleDirectChallenge: () => void;
 }
 
 export default function MemoryTrainerIntro({
@@ -25,7 +26,8 @@ export default function MemoryTrainerIntro({
   toggleTTS,
   intervalSeconds,
   setIntervalSeconds,
-  handleStartTraining
+  handleStartTraining,
+  handleDirectChallenge
 }: MemoryTrainerIntroProps) {
   return (
     <div className="flex flex-col gap-6 animate-in slide-in-from-bottom-4">
@@ -103,13 +105,21 @@ export default function MemoryTrainerIntro({
         </div>
       </div>
 
-      <button
-        onClick={handleStartTraining}
-        className="mt-2 w-full py-4 bg-sky-600 hover:bg-sky-700 text-white font-bold text-lg rounded-2xl shadow-lg transition-transform hover:-translate-y-1 flex items-center justify-center gap-2"
-      >
-        <Rocket size={24} />
-        암송 훈련 시작하기
-      </button>
+      <div className="mt-2 flex flex-col gap-2 w-full">
+        <button
+          onClick={handleStartTraining}
+          className="w-full py-4 bg-sky-600 hover:bg-sky-700 text-white font-bold text-lg rounded-2xl shadow-lg transition-transform hover:-translate-y-1 flex items-center justify-center gap-2"
+        >
+          <Rocket size={24} />
+          암송 훈련 시작하기
+        </button>
+        <button
+          onClick={handleDirectChallenge}
+          className="w-full py-3 bg-stone-200 hover:bg-stone-300 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-bold rounded-2xl transition-colors"
+        >
+          바로 도전하기
+        </button>
+      </div>
     </div>
   );
 }

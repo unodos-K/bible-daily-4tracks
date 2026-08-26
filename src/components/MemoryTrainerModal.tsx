@@ -64,6 +64,7 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
             intervalSeconds={trainerState.intervalSeconds}
             setIntervalSeconds={trainerState.setIntervalSeconds}
             handleStartTraining={trainerState.handleStartTraining}
+            handleDirectChallenge={trainerState.handleDirectChallenge}
           />
         ) : (
           <div className="flex flex-col gap-0 animate-in fade-in zoom-in-95">

@@ -37,7 +37,7 @@ export default function MemoryTrainerContent({
       {isTrainingFinished && testResult === 'none' && !isListening && (
         <div className="mb-6 p-4 bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40 rounded-2xl border border-amber-200 dark:border-amber-800 text-center animate-in slide-in-from-top-2 shadow-sm">
           <span className="font-bold text-amber-700 dark:text-amber-400 text-lg flex items-center justify-center gap-2">
-            🎉 마지막 단계! 음성으로 암송해보세요
+            🎤 오늘의 OneVerse를 암송해보세요
           </span>
         </div>
       )}
