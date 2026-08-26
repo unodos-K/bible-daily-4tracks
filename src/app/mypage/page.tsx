@@ -60,21 +60,23 @@ export default function MyPage() {
       <div className="w-full max-w-2xl flex flex-col">
         
         {/* 헤더 및 프로필 (고정 헤더) */}
-        <header className="sticky top-0 z-40 bg-stone-50/95 dark:bg-stone-950/95 backdrop-blur-md pt-6 pb-4 px-6 border-b border-stone-200/50 dark:border-stone-800/50 flex flex-row items-center justify-between w-full mb-6">
-          <h1 className="text-xl sm:text-2xl font-black text-stone-800 dark:text-stone-100 flex items-center gap-2 truncate">
+        <header className="sticky top-0 z-40 bg-stone-50/95 dark:bg-stone-950/95 backdrop-blur-md pt-6 pb-4 px-4 sm:px-6 border-b border-stone-200/50 dark:border-stone-800/50 flex flex-row items-center justify-between w-full mb-6 gap-2">
+          <h1 className="text-lg sm:text-2xl font-black text-stone-800 dark:text-stone-100 shrink-0">
             나의 발자국 보관소
           </h1>
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-2 min-w-0 justify-end">
             {stats.authUser ? (
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-stone-100 dark:bg-stone-800 rounded-full border border-stone-200 dark:border-stone-700 shadow-inner">
-                <div className="w-5 h-5 rounded-full bg-stone-300 dark:bg-stone-700 flex items-center justify-center text-[10px] font-bold text-stone-600 dark:text-stone-300 overflow-hidden">
+              <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 bg-stone-100 dark:bg-stone-800 rounded-full border border-stone-200 dark:border-stone-700 shadow-inner min-w-0">
+                <div className="w-5 h-5 rounded-full bg-stone-300 dark:bg-stone-700 flex items-center justify-center text-[10px] font-bold text-stone-600 dark:text-stone-300 overflow-hidden shrink-0">
                   {stats.authUser.avatar_url ? (
                     <img src={stats.authUser.avatar_url} alt={stats.authUser.name} className="w-full h-full object-cover" />
                   ) : (
                     <span>{stats.authUser.name.substring(0, 1)}</span>
                   )}
                 </div>
-                <span className="font-bold text-sm text-stone-700 dark:text-stone-200">{stats.authUser.nickname ? stats.authUser.nickname.split('#')[0] : stats.authUser.name.split('#')[0]}</span>
+                <span className="font-bold text-xs sm:text-sm text-stone-700 dark:text-stone-200 truncate">
+                  {stats.authUser.nickname ? stats.authUser.nickname.split('#')[0] : stats.authUser.name.split('#')[0]}
+                </span>
               </div>
             ) : (
               <button
