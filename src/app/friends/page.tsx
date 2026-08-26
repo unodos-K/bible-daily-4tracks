@@ -1,232 +1,14 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import Link from "next/link";
-import { X, Search, UserPlus, Check, X as RejectIcon, UserCheck, Flame, BookOpen, Heart, MessageCircle, Share2, Copy } from "lucide-react";
-import { 
-  FriendProfile, 
-  searchUsersByNickname, 
-  sendFriendRequest, 
-  getPendingRequests, 
-  respondToFriendRequest, 
-  getFriendsList,
-  FriendFeedItem,
-  getFriendRecords,
-  toggleLike,
-  getSentRequests
-} from "@/lib/social";
-import { getAuthUser, AuthUser } from "@/lib/auth";
-import { signOut } from "@/lib/supabase";
-import SettingsModal from "@/components/SettingsModal";
+import React from "react";
+import { Share2, Copy } from "lucide-react";
+import { useFriends } from "@/hooks/useFriends";
+import FriendListWidget from "@/components/friends/FriendListWidget";
+import FriendRequestList from "@/components/friends/FriendRequestList";
+import FriendSearchBox from "@/components/friends/FriendSearchBox";
 
 export default function FriendsPage() {
-  const [activeTab, setActiveTab] = useState<"friends" | "requests" | "search">("friends");
-  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
-  
-  const [friends, setFriends] = useState<FriendProfile[]>([]);
-  const [requests, setRequests] = useState<{ id: string; profile: FriendProfile }[]>([]);
-  const [sentRequests, setSentRequests] = useState<string[]>([]);
-  
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<FriendProfile[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  
-  const [friendsFeed, setFriendsFeed] = useState<Record<string, FriendFeedItem[]>>({});
-  const [isLoading, setIsLoading] = useState(true);
-
-  const [pressedId, setPressedId] = useState<string | null>(null);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-
-  const handleTouchStart = (id: string) => {
-    timerRef.current = setTimeout(() => {
-      setPressedId(id);
-    }, 500);
-  };
-
-  const handleTouchEnd = () => {
-    if (timerRef.current) clearTimeout(timerRef.current);
-    setPressedId(null);
-  };
-
-  useEffect(() => {
-    loadData();
-    getAuthUser().then(user => setAuthUser(user));
-  }, []);
-
-  const loadData = async () => {
-    setIsLoading(true);
-    try {
-      const fList = await getFriendsList();
-      setFriends(fList);
-      
-      const rList = await getPendingRequests();
-      setRequests(rList);
-      
-      // Fetch sent requests
-      const sentList = await getSentRequests();
-      setSentRequests(sentList);
-
-      // Fetch initial directory
-      const directory = await searchUsersByNickname("");
-      setSearchResults(directory);
-
-      // Fetch feed for friends
-      const feeds: Record<string, FriendFeedItem[]> = {};
-      for (const friend of fList) {
-        const records = await getFriendRecords(friend.id);
-        feeds[friend.id] = records;
-      }
-      setFriendsFeed(feeds);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    await signOut();
-    setAuthUser(null);
-    window.location.href = "/";
-  };
-
-  const handleInvite = async () => {
-    if (!authUser) {
-      alert("로그인이 필요합니다.");
-      return;
-    }
-    
-    const inviteUrl = window.location.origin || process.env.NEXT_PUBLIC_BASE_URL || "";
-    const shareData = {
-      title: 'One Verse',
-      text: '매일 말씀을 읽고 내게 주신 한 구절을 암송하세요\\n말씀읽기 & 뇌새김 말씀 암송',
-      url: inviteUrl,
-    };
-
-    if (navigator.share) {
-      try {
-        await navigator.share(shareData);
-      } catch (err) {
-        console.error("공유 실패:", err);
-      }
-    } else if (typeof window !== "undefined" && window.Kakao) {
-      window.Kakao.Share.sendDefault({
-        objectType: 'feed',
-        content: {
-          title: shareData.title,
-          description: shareData.text,
-          imageUrl: 'https://images.unsplash.com/photo-1504052434569-70ad5836ab65?q=80&w=800&auto=format&fit=crop',
-          link: {
-            mobileWebUrl: inviteUrl,
-            webUrl: inviteUrl,
-          },
-        },
-        buttons: [
-          {
-            title: '함께 시작하기',
-            link: {
-              mobileWebUrl: inviteUrl,
-              webUrl: inviteUrl,
-            },
-          },
-        ],
-      });
-    } else {
-      try {
-        await navigator.clipboard.writeText(`${shareData.text}\\n${shareData.url}`);
-        alert("초대 링크가 클립보드에 복사되었습니다!");
-      } catch (e) {
-        alert("공유 기능을 지원하지 않는 브라우저입니다.");
-      }
-    }
-  };
-
-  const handleCopyNickname = async () => {
-    if (!authUser) {
-      alert("로그인이 필요합니다.");
-      return;
-    }
-    const nickname = (authUser.nickname || authUser.name).split('#')[0];
-    const textToCopy = `One Verse에서 저와 함께 말씀 통독을 해요! 제 닉네임은 ${nickname}입니다. (친구 탭에서 검색해 주세요!)`;
-    try {
-      await navigator.clipboard.writeText(textToCopy);
-      alert("클립보드에 복사되었습니다!");
-    } catch (e) {
-      alert("복사에 실패했습니다.");
-    }
-  };
-
-  const handleSearch = async () => {
-    if (!searchQuery.trim()) return;
-    setIsSearching(true);
-    const results = await searchUsersByNickname(searchQuery);
-    setSearchResults(results);
-    setIsSearching(false);
-  };
-
-  const handleSendRequest = async (friendId: string) => {
-    const success = await sendFriendRequest(friendId);
-    if (success) {
-      setSentRequests(prev => [...prev, friendId]);
-    } else {
-      alert("친구 요청에 실패했거나 이미 요청을 보낸 사용자입니다.");
-    }
-  };
-
-  const handleRespondRequest = async (requesterId: string, accept: boolean) => {
-    const success = await respondToFriendRequest(requesterId, accept);
-    if (success) {
-      alert(accept ? "친구 요청을 수락했습니다." : "친구 요청을 거절했습니다.");
-      loadData(); // 리로드
-      window.dispatchEvent(new CustomEvent('friend_requests_updated'));
-    } else {
-      alert("처리에 실패했습니다.");
-    }
-  };
-
-  const handleLike = async (friendId: string, item: FriendFeedItem) => {
-    // 낙관적 업데이트
-    setFriendsFeed(prev => {
-      const friendFeed = prev[friendId];
-      if (!friendFeed) return prev;
-      
-      const newFeed = friendFeed.map(rec => {
-        if (rec.day_index === item.day_index) {
-          return {
-            ...rec,
-            is_liked_by_me: !rec.is_liked_by_me,
-            like_count: rec.is_liked_by_me ? Math.max(0, rec.like_count - 1) : rec.like_count + 1
-          };
-        }
-        return rec;
-      });
-
-      return { ...prev, [friendId]: newFeed };
-    });
-
-    const success = await toggleLike(friendId, item.day_index);
-    if (!success) {
-      console.error("좋아요 처리 실패, 롤백합니다.");
-      // 롤백 (이전 상태로 복구)
-      setFriendsFeed(prev => {
-        const friendFeed = prev[friendId];
-        if (!friendFeed) return prev;
-        
-        const newFeed = friendFeed.map(rec => {
-          if (rec.day_index === item.day_index) {
-            return {
-              ...rec,
-              is_liked_by_me: item.is_liked_by_me,
-              like_count: item.like_count
-            };
-          }
-          return rec;
-        });
-
-        return { ...prev, [friendId]: newFeed };
-      });
-    }
-  };
+  const friendsState = useFriends();
 
   return (
     <div className="w-full min-h-[calc(100vh-64px)] bg-stone-50 dark:bg-stone-950 flex flex-col pb-20">
@@ -243,14 +25,14 @@ export default function FriendsPage() {
           {/* 상단 공통 구역 (소셜 액션) */}
           <div className="px-4 py-3 flex flex-col sm:flex-row gap-2">
             <button
-              onClick={handleInvite}
+              onClick={friendsState.handleInvite}
               className="flex-1 flex items-center justify-center gap-2 bg-[#FEE500] hover:bg-[#FDD800] text-black text-sm font-bold py-2.5 rounded-xl transition-colors shadow-sm"
             >
               <Share2 size={16} />
               친구에게 One Verse 추천하기
             </button>
             <button
-              onClick={handleCopyNickname}
+              onClick={friendsState.handleCopyNickname}
               className="flex-1 flex items-center justify-center gap-2 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 text-sm font-bold py-2.5 rounded-xl transition-colors shadow-sm"
             >
               <Copy size={16} />
@@ -259,244 +41,69 @@ export default function FriendsPage() {
           </div>
 
           <div className="flex px-4 pt-1">
-          <button 
-            onClick={() => setActiveTab("friends")}
-            className={`flex-1 pb-3 font-semibold border-b-2 transition-colors ${activeTab === "friends" ? "border-stone-800 text-stone-800 dark:border-stone-200 dark:text-stone-200" : "border-transparent text-stone-400 hover:text-stone-600"}`}
-          >
-            내 친구 ({friends.length})
-          </button>
-          <button 
-            onClick={() => setActiveTab("requests")}
-            className={`flex-1 flex justify-center pb-3 font-semibold border-b-2 transition-colors ${activeTab === "requests" ? "border-stone-800 text-stone-800 dark:border-stone-200 dark:text-stone-200" : "border-transparent text-stone-400 hover:text-stone-600"}`}
-          >
-            <span className="relative">
-              받은 요청
-              {requests.length > 0 && (
-                <span className="absolute -top-1 -right-3 w-2 h-2 rounded-full bg-red-500 ring-2 ring-stone-50 dark:ring-stone-950"></span>
-              )}
-            </span>
-          </button>
-          <button 
-            onClick={() => setActiveTab("search")}
-            className={`flex-1 pb-3 font-semibold border-b-2 transition-colors ${activeTab === "search" ? "border-stone-800 text-stone-800 dark:border-stone-200 dark:text-stone-200" : "border-transparent text-stone-400 hover:text-stone-600"}`}
-          >
-            친구 찾기
-          </button>
-        </div>
+            <button 
+              onClick={() => friendsState.setActiveTab("friends")}
+              className={`flex-1 pb-3 font-semibold border-b-2 transition-colors ${friendsState.activeTab === "friends" ? "border-stone-800 text-stone-800 dark:border-stone-200 dark:text-stone-200" : "border-transparent text-stone-400 hover:text-stone-600"}`}
+            >
+              내 친구 ({friendsState.friends.length})
+            </button>
+            <button 
+              onClick={() => friendsState.setActiveTab("requests")}
+              className={`flex-1 flex justify-center pb-3 font-semibold border-b-2 transition-colors ${friendsState.activeTab === "requests" ? "border-stone-800 text-stone-800 dark:border-stone-200 dark:text-stone-200" : "border-transparent text-stone-400 hover:text-stone-600"}`}
+            >
+              <span className="relative">
+                받은 요청
+                {friendsState.requests.length > 0 && (
+                  <span className="absolute -top-1 -right-3 w-2 h-2 rounded-full bg-red-500 ring-2 ring-stone-50 dark:ring-stone-950"></span>
+                )}
+              </span>
+            </button>
+            <button 
+              onClick={() => friendsState.setActiveTab("search")}
+              className={`flex-1 pb-3 font-semibold border-b-2 transition-colors ${friendsState.activeTab === "search" ? "border-stone-800 text-stone-800 dark:border-stone-200 dark:text-stone-200" : "border-transparent text-stone-400 hover:text-stone-600"}`}
+            >
+              친구 찾기
+            </button>
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-stone-50 dark:bg-stone-950">
-          {isLoading ? (
+          {friendsState.isLoading ? (
             <div className="flex items-center justify-center h-full text-stone-400">로딩 중...</div>
           ) : (
             <>
-              {/* 내 친구 탭 */}
-              {activeTab === "friends" && (
-                <div className="flex flex-col gap-4">
-                  {friends.length === 0 ? (
-                    <div className="text-center text-stone-500 py-10">
-                      아직 등록된 친구가 없습니다. <br/>[친구 찾기]에서 닉네임으로 검색해보세요!
-                    </div>
-                  ) : (
-                    friends.map(friend => (
-                      <div 
-                        key={friend.id} 
-                        className="bg-white dark:bg-stone-900 p-4 rounded-2xl shadow-sm border border-stone-100 dark:border-stone-800 flex flex-col gap-3 group"
-                        onTouchStart={() => handleTouchStart(friend.id)}
-                        onTouchEnd={handleTouchEnd}
-                        onTouchCancel={handleTouchEnd}
-                      >
-                        <Link href={`/friend/${friend.id}`} className="flex flex-col gap-3 cursor-pointer group/link">
-                          <div className="flex justify-between items-center w-full">
-                            <div className="flex items-center gap-3">
-                              <div className="w-12 h-12 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden flex-shrink-0 group-hover/link:ring-2 ring-sky-500 transition-all">
-                                {friend.avatar_url ? (
-                                  <img src={friend.avatar_url} alt={friend.name} className="w-full h-full object-cover" />
-                                ) : (
-                                  <div className="w-full h-full flex items-center justify-center text-stone-400">
-                                    <UserCheck size={24} />
-                                  </div>
-                                )}
-                              </div>
-                              <div className="flex items-center gap-1.5">
-                                <span className="font-bold text-lg text-stone-800 dark:text-stone-100 group-hover/link:text-sky-600 dark:group-hover/link:text-sky-400 transition-colors break-words">
-                                  {(friend.nickname || friend.name).split('#')[0]}
-                                </span>
-                                {friend.nickname?.includes('#') && (
-                                  <span className="text-sm font-medium text-stone-500 mt-0.5">
-                                    #{friend.nickname.split('#')[1]}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            <div className="text-xs font-medium text-stone-400 shrink-0 ml-2">
-                              Kakao: {friend.name}
-                            </div>
-                          </div>
-                        </Link>
-                        
-                        {/* 최신 One Verse 노출 */}
-                        {friendsFeed[friend.id] && friendsFeed[friend.id].length > 0 ? (
-                          <div className="mt-2 p-3 bg-stone-50 dark:bg-stone-950 rounded-xl text-sm text-stone-600 dark:text-stone-300 border border-stone-100 dark:border-stone-800 flex flex-col gap-2">
-                            <div className="flex justify-between items-center">
-                              <span className="font-bold text-sky-600 dark:text-sky-400 text-xs">{friendsFeed[friend.id][0].one_verse.reference}</span>
-                              <span className="text-xs text-stone-400">Day {friendsFeed[friend.id][0].day_index}</span>
-                            </div>
-                            <p className="font-semibold text-stone-700 dark:text-stone-200">
-                              &quot;{friendsFeed[friend.id][0].one_verse.displayText || friendsFeed[friend.id][0].one_verse.text}&quot;
-                            </p>
-                            
-                            {/* 좋아요 버튼 연동 */}
-                            <div className="flex justify-end pt-1 mt-1 border-t border-stone-200 dark:border-stone-800/50">
-                              <button 
-                                onClick={() => handleLike(friend.id, friendsFeed[friend.id][0])}
-                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-colors ${
-                                  friendsFeed[friend.id][0].is_liked_by_me 
-                                    ? "bg-red-50 dark:bg-red-950/30 text-red-500" 
-                                    : "bg-stone-100 dark:bg-stone-800 text-stone-500 hover:bg-stone-200 dark:hover:bg-stone-700"
-                                }`}
-                              >
-                                <Heart size={16} fill={friendsFeed[friend.id][0].is_liked_by_me ? "currentColor" : "none"} />
-                                <span className="text-xs font-bold">{friendsFeed[friend.id][0].like_count > 0 ? friendsFeed[friend.id][0].like_count : '좋아요'}</span>
-                              </button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="mt-2 text-xs text-stone-400">아직 기록이 없습니다.</div>
-                        )}
-                      </div>
-                    ))
-                  )}
-                </div>
+              {friendsState.activeTab === "friends" && (
+                <FriendListWidget
+                  friends={friendsState.friends}
+                  friendsFeed={friendsState.friendsFeed}
+                  handleLike={friendsState.handleLike}
+                  handleTouchStart={friendsState.handleTouchStart}
+                  handleTouchEnd={friendsState.handleTouchEnd}
+                />
               )}
 
-              {/* 받은 요청 탭 */}
-              {activeTab === "requests" && (
-                <div className="flex flex-col gap-3">
-                  {requests.length === 0 ? (
-                    <div className="text-center text-stone-500 py-10">받은 친구 요청이 없습니다.</div>
-                  ) : (
-                    requests.map(req => (
-                      <div 
-                        key={req.id} 
-                        className="bg-white dark:bg-stone-900 p-5 rounded-2xl shadow-sm border border-stone-100 dark:border-stone-800 flex flex-col gap-3 group"
-                        onTouchStart={() => handleTouchStart(req.id)}
-                        onTouchEnd={handleTouchEnd}
-                        onTouchCancel={handleTouchEnd}
-                      >
-                        <div className="flex justify-between items-center w-full">
-                          <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden flex-shrink-0">
-                              {req.profile.avatar_url && <img src={req.profile.avatar_url} alt={req.profile.name} className="w-full h-full object-cover" />}
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <span className="font-bold text-lg text-stone-800 dark:text-stone-100 break-words">
-                                {(req.profile.nickname || req.profile.name).split('#')[0]}
-                              </span>
-                              {req.profile.nickname?.includes('#') && (
-                                <span className="text-sm font-medium text-stone-500 mt-0.5">
-                                  #{req.profile.nickname.split('#')[1]}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                          <div className="text-xs font-medium text-stone-400 shrink-0 ml-2">
-                            Kakao: {req.profile.name}
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-end gap-2 mt-2">
-                          <button onClick={() => handleRespondRequest(req.id, false)} className="flex-1 sm:flex-none justify-center flex items-center gap-1.5 px-4 py-2.5 font-bold text-sm bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700 rounded-xl transition-colors">
-                            <RejectIcon size={18} /> 거절
-                          </button>
-                          <button onClick={() => handleRespondRequest(req.id, true)} className="relative flex-1 sm:flex-none justify-center flex items-center gap-1.5 px-4 py-2.5 font-bold text-sm bg-emerald-100 text-emerald-700 hover:bg-emerald-200 rounded-xl transition-colors">
-                            <Check size={18} /> 수락
-                            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-red-500 ring-2 ring-stone-50 dark:ring-stone-900 animate-pulse"></span>
-                          </button>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
+              {friendsState.activeTab === "requests" && (
+                <FriendRequestList
+                  requests={friendsState.requests}
+                  handleRespondRequest={friendsState.handleRespondRequest}
+                  handleTouchStart={friendsState.handleTouchStart}
+                  handleTouchEnd={friendsState.handleTouchEnd}
+                />
               )}
 
-              {/* 친구 찾기 탭 */}
-              {activeTab === "search" && (
-                <div className="flex flex-col gap-4">
-                  <div className="flex gap-2">
-                    <input 
-                      type="text" 
-                      placeholder="친구의 닉네임을 입력하세요" 
-                      className="flex-1 px-4 py-3 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500"
-                      value={searchQuery}
-                      onChange={e => setSearchQuery(e.target.value)}
-                      onKeyDown={e => e.key === 'Enter' && handleSearch()}
-                    />
-                    <button 
-                      onClick={handleSearch}
-                      disabled={isSearching}
-                      className="px-4 bg-stone-800 text-white rounded-xl hover:bg-stone-900 transition-colors"
-                    >
-                      <Search size={20} />
-                    </button>
-                  </div>
-                  
-                  <div className="flex flex-col gap-3 mt-4">
-                    {searchResults.length === 0 && searchQuery !== "" && !isSearching && (
-                      <div className="text-center text-stone-500">검색 결과가 없습니다.</div>
-                    )}
-                    {searchResults.map(user => {
-                      const isAlreadyFriend = friends.some(f => f.id === user.id);
-                      const isPendingRequest = sentRequests.includes(user.id);
-                      
-                      return (
-                        <div 
-                          key={user.id} 
-                          className="bg-white dark:bg-stone-900 p-5 rounded-2xl shadow-sm border border-stone-100 dark:border-stone-800 flex flex-col gap-3 group"
-                          onTouchStart={() => handleTouchStart(user.id)}
-                          onTouchEnd={handleTouchEnd}
-                          onTouchCancel={handleTouchEnd}
-                        >
-                          <div className="flex justify-between items-center w-full">
-                            <div className="flex items-center gap-3">
-                              <div className="w-12 h-12 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden flex-shrink-0">
-                                {user.avatar_url && <img src={user.avatar_url} alt={user.name} className="w-full h-full object-cover" />}
-                              </div>
-                              <div className="flex items-center gap-1.5">
-                                <span className="font-bold text-lg text-stone-800 dark:text-stone-100 break-words">
-                                  {(user.nickname || user.name).split('#')[0]}
-                                </span>
-                                {user.nickname?.includes('#') && (
-                                  <span className="text-sm font-medium text-stone-500 mt-0.5">
-                                    #{user.nickname.split('#')[1]}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            <div className="text-xs font-medium text-stone-400 shrink-0 ml-2">
-                              Kakao: {user.name}
-                            </div>
-                          </div>
-                          
-                          <div className="flex justify-end mt-2">
-                            {isAlreadyFriend ? (
-                              <span className="w-full sm:w-auto flex justify-center items-center gap-1.5 px-4 py-2.5 text-sm font-bold text-emerald-700 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl">
-                                <Check size={18} /> 친구 완료
-                              </span>
-                            ) : isPendingRequest ? (
-                              <button disabled className="w-full sm:w-auto flex justify-center items-center gap-1.5 px-4 py-2.5 bg-stone-100 dark:bg-stone-800 text-stone-400 font-bold text-sm rounded-xl cursor-not-allowed">
-                                요청 대기중
-                              </button>
-                            ) : (
-                              <button onClick={() => handleSendRequest(user.id)} className="w-full sm:w-auto flex justify-center items-center gap-1.5 px-4 py-2.5 bg-sky-100 text-sky-700 hover:bg-sky-200 font-bold text-sm rounded-xl transition-colors">
-                                <UserPlus size={18} /> 친구 추가
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
+              {friendsState.activeTab === "search" && (
+                <FriendSearchBox
+                  searchQuery={friendsState.searchQuery}
+                  setSearchQuery={friendsState.setSearchQuery}
+                  searchResults={friendsState.searchResults}
+                  isSearching={friendsState.isSearching}
+                  friends={friendsState.friends}
+                  sentRequests={friendsState.sentRequests}
+                  handleSearch={friendsState.handleSearch}
+                  handleSendRequest={friendsState.handleSendRequest}
+                  handleTouchStart={friendsState.handleTouchStart}
+                  handleTouchEnd={friendsState.handleTouchEnd}
+                />
               )}
             </>
           )}

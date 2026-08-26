@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { X, GripVertical } from 'lucide-react';
 import { DayRecord, MemoData } from '@/lib/storage';
@@ -36,7 +38,7 @@ export default function ShareModal({ isOpen, onClose, record, onShare }: ShareMo
     e.dataTransfer.setData("text/plain", index.toString());
   };
 
-  const handleDragOver = (e: React.DragEvent, index: number) => {
+  const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
   };
@@ -83,7 +85,7 @@ export default function ShareModal({ isOpen, onClose, record, onShare }: ShareMo
               key={item.id}
               draggable
               onDragStart={(e) => handleDragStart(e, index)}
-              onDragOver={(e) => handleDragOver(e, index)}
+              onDragOver={(e) => handleDragOver(e)}
               onDrop={(e) => handleDrop(e, index)}
               className="flex items-center justify-between p-4 bg-stone-800 rounded-xl border border-stone-700/50 cursor-grab active:cursor-grabbing hover:bg-stone-750 transition-colors"
             >

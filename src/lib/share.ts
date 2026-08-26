@@ -45,8 +45,8 @@ export const shareOneVerse = async (
   };
 
   // Prioritize Kakao Share
-  if ((window as any).Kakao && (window as any).Kakao.isInitialized()) {
-    (window as any).Kakao.Share.sendDefault({
+  if (window.Kakao && window.Kakao.isInitialized()) {
+    window.Kakao.Share.sendDefault({
       objectType: 'text',
       text: textToShare,
       link: {
@@ -71,7 +71,7 @@ export const shareOneVerse = async (
   try {
     await navigator.clipboard.writeText(`${textToShare}\n\n${window.location.origin}`);
     alert("공유 링크가 클립보드에 복사되었습니다!");
-  } catch (e) {
+  } catch {
     alert("공유 기능을 지원하지 않는 브라우저입니다.");
   }
 };

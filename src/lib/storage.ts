@@ -92,8 +92,15 @@ export async function fetchReadRecords(): Promise<ReadRecordsMap> {
   if (error) console.error("fetchReadRecords error:", error);
   if (error || !data) return {};
   
+  interface ReadingRecordRow {
+    day_index: number;
+    read_date: string;
+    completed_at: string;
+    one_verse?: OneVerse;
+  }
+  
   const result: ReadRecordsMap = {};
-  data.forEach((row: any) => {
+  data.forEach((row: ReadingRecordRow) => {
     result[row.day_index] = {
       dayIndex: row.day_index,
       readDate: row.read_date,

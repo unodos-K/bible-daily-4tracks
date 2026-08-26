@@ -10,9 +10,10 @@ import NicknameOnboardingModal from "./NicknameOnboardingModal";
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onLogout?: () => void | Promise<void>;
 }
 
-export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
+export default function SettingsModal({ isOpen, onClose, onLogout }: SettingsModalProps) {
   const { theme, setTheme, fontSize, setFontSize } = useSettings();
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
@@ -142,6 +143,14 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 {authUser.nickname ? `닉네임: ${authUser.nickname}` : "닉네임 설정하기"}
               </div>
             </button>
+            {onLogout && (
+              <button
+                onClick={onLogout}
+                className="flex items-center justify-center w-full px-4 py-3.5 bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 font-bold rounded-xl transition-colors hover:bg-stone-200 dark:hover:bg-stone-700 border border-stone-200 dark:border-stone-700"
+              >
+                로그아웃
+              </button>
+            )}
           </div>
         )}
 

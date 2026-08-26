@@ -23,7 +23,7 @@ export async function getAuthUser(): Promise<AuthUser | null> {
 }
 
 export async function updateUserNickname(nickname: string): Promise<boolean> {
-  const { data, error } = await supabase.auth.updateUser({
+  const { error } = await supabase.auth.updateUser({
     data: { nickname }
   });
   

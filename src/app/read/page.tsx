@@ -1,397 +1,81 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ChevronDown, CheckCircle2, Bookmark, BrainCircuit, AlertCircle, Leaf, Crown, X, Share2, PencilLine, FileText } from "lucide-react";
-import { getDailyReadingByIndex, getAllSchedules, TRACK_INFO } from "@/lib/bible";
+import React, { useRef } from "react";
+import { AlertCircle } from "lucide-react";
+import { getDailyReadingByIndex, getAllSchedules } from "@/lib/bible";
 import MemoryTrainerModal from "@/components/MemoryTrainerModal";
-import { 
-  ReadingSettings,
-  ReadRecordsMap,
-  DayRecord,
-  OneVerse,
-  fetchReadingSettings, 
-  fetchReadRecords,
-  startNewReading,
-  getNextUnreadDay,
-  saveDayRecord,
-  updateReadRecordOneVerse,
-  updateMemorizeRecord,
-  getTodayReadCount,
-  saveViewerDay,
-  getSavedViewerDay
-} from "@/lib/storage";
-import { getAuthUser, AuthUser } from "@/lib/auth";
-import { shareOneVerse } from "@/lib/share";
 import ShareModal from "@/components/ShareModal";
 import { signInWithKakao } from "@/lib/supabase";
+import { useBibleReader } from "@/hooks/useBibleReader";
+import ReadHeader from "@/components/read/ReadHeader";
+import BibleContent from "@/components/read/BibleContent";
+import DaySelectorSheet from "@/components/read/DaySelectorSheet";
+import VerseInteractionModals from "@/components/read/VerseInteractionModals";
+import { shareOneVerse } from "@/lib/share";
+import { getNextUnreadDay } from "@/lib/storage";
 import { useSettings } from "@/contexts/SettingsContext";
 
-const TRACK_ICONS: Record<string, string> = {
-  "구약": "📖",
-  "신약": "✝️",
-  "시편": "🕊️",
-  "잠언": "💡",
-};
-
-const TRACK_ID_MAP: Record<string, string> = {
-  "구약": "track-old-testament",
-  "신약": "track-new-testament",
-  "시편": "track-psalms",
-  "잠언": "track-proverbs",
-};
-
-const formatReference = (book: string, chapter: number, verse: number) => {
-  return book === "시편" ? `${book} ${chapter}편 ${verse}절` : `${book} ${chapter}장 ${verse}절`;
-};
-
-function calculateDaysSince(startDateStr: string): number {
-  if (!startDateStr) return 1;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const [y, m, d] = startDateStr.split("-").map(Number);
-  const start = new Date(y, m - 1, d);
-  start.setHours(0, 0, 0, 0);
-
-  const diffTime = today.getTime() - start.getTime();
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-  return Math.max(1, diffDays + 1);
-}
-
-export default function BibleViewerPage() {
-  const router = useRouter();
-  
-  const [isClient, setIsClient] = useState(false);
-  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
-  const [settings, setSettings] = useState<ReadingSettings | null>(null);
-  const [records, setRecords] = useState<ReadRecordsMap>({});
-  
-
-  const [dayIndex, setDayIndex] = useState<number>(1);
-  const { fontSize } = useSettings();
-  const [isDaySelectorOpen, setIsDaySelectorOpen] = useState(false);
-  
-  const [isCompletedDay, setIsCompletedDay] = useState(false);
-  
-  const [selectedVerse, setSelectedVerse] = useState<OneVerse | null>(null);
-  const [confirmedVerse, setConfirmedVerse] = useState<OneVerse | null>(null);
-  const [isMemoryModalOpen, setIsMemoryModalOpen] = useState(false);
-  const [showWarningModal, setShowWarningModal] = useState(false);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [verseToReplace, setVerseToReplace] = useState<OneVerse | null>(null);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [showAccessDeniedModal, setShowAccessDeniedModal] = useState(false);
-  const [showDailyLimitModal, setShowDailyLimitModal] = useState(false);
-  
-  const [selectedRecordToShare, setSelectedRecordToShare] = useState<DayRecord | null>(null);
-  
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const headerRef = useRef<HTMLElement>(null);
-  const [headerHeight, setHeaderHeight] = useState<number>(64);
-
-  useEffect(() => {
-    if (!headerRef.current) return;
-    const updateHeight = () => {
-      if (headerRef.current) {
-        setHeaderHeight(headerRef.current.offsetHeight);
-      }
-    };
-    updateHeight();
-    const observer = new ResizeObserver(updateHeight);
-    observer.observe(headerRef.current);
-    window.addEventListener("resize", updateHeight);
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", updateHeight);
-    };
-  }, [isClient]);
-
-  const allSchedules = getAllSchedules();
-
-  const handleSetDay = (newDay: number, currentRecords: ReadRecordsMap = records) => {
-    const validDay = Math.max(1, Math.min(365, newDay));
-    const maxAllowedDay = settings ? calculateDaysSince(settings.startDate) : getNextUnreadDay(currentRecords);
-    const isAlreadyRead = !!currentRecords[validDay];
-    
-    // 권한 체크: 열리지 않은 미래의 Day
-    if (validDay > maxAllowedDay) {
-      showToast("이 진도는 내일 열려요! 내일 만나요 👋");
-      setIsDaySelectorOpen(false);
-      return;
-    }
-
-    // 일일 3개 제한 체크: 열리지 않은 '오늘의 새로운 Day'를 열려고 할 때만 발동
-    const dateObj = new Date();
-    const todayStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
-    if (!isAlreadyRead && getTodayReadCount(todayStr, currentRecords) >= 3) {
-      setShowDailyLimitModal(true);
-      setIsDaySelectorOpen(false);
-      return;
-    }
-
-    setDayIndex(validDay);
-    saveViewerDay(validDay);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    setIsDaySelectorOpen(false);
-    setSelectedVerse(null);
-  };
-
-  useEffect(() => {
-    setIsClient(true);
-    
-    getAuthUser().then(async (user) => {
-      setAuthUser(user);
-      
-      let currentRecords: ReadRecordsMap = {};
-      let currentSettings: ReadingSettings | null = null;
-      
-      if (user) {
-        // Handle invite code
-        const searchParams = new URLSearchParams(window.location.search);
-        const inviteCode = searchParams.get('inviteCode');
-        if (inviteCode) {
-          import('@/lib/social').then(m => m.sendFriendRequest(inviteCode).catch((e: Error) => console.error(e)));
-          window.history.replaceState({}, '', window.location.pathname);
-        }
-        currentSettings = await fetchReadingSettings();
-        currentRecords = await fetchReadRecords();
-      }
-      
-      if (!currentSettings || !currentSettings.hasStarted) {
-        const dateObj = new Date();
-        const todayStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
-        await startNewReading(todayStr);
-        currentSettings = {
-          startDate: todayStr,
-          currentDay: 1,
-          hasStarted: true
-        };
-        currentRecords = {};
-      }
-      
-      setSettings(currentSettings);
-      setRecords(currentRecords);
-
-      try {
-        const dateObj = new Date();
-        const todayStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
-        const maxAllowed = currentSettings ? calculateDaysSince(currentSettings.startDate) : getNextUnreadDay(currentRecords);
-        const isLimitReached = getTodayReadCount(todayStr, currentRecords) >= 3;
-
-        let initialDay = maxAllowed;
-        const savedDay = getSavedViewerDay();
-        
-        if (savedDay) {
-          if (savedDay >= 1 && savedDay <= 365) {
-            initialDay = Math.min(savedDay, maxAllowed);
-          }
-        }
-
-        // 초기 진입 시 제한에 걸려있는데 새로운 Day를 열려고 하는 경우
-        if (initialDay === maxAllowed && isLimitReached) {
-          initialDay = Math.max(1, maxAllowed - 1);
-          setShowDailyLimitModal(true);
-        }
-
-        setDayIndex(initialDay);
-      } catch {
-        // ignore
-      }
+const scrollToSection = (id: string) => {
+  const el = document.getElementById(id);
+  if (el) {
+    const headerOffset = 60;
+    const elementPosition = el.getBoundingClientRect().top;
+    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+    window.scrollTo({
+      top: offsetPosition,
+      behavior: "smooth"
     });
-
-    const handleRecordsUpdated = async () => {
-      getAuthUser().then(async (user) => {
-        if (user) {
-          const r = await fetchReadRecords();
-          setRecords(r);
-        }
-      });
-    };
-    window.addEventListener('records_updated', handleRecordsUpdated);
-    return () => window.removeEventListener('records_updated', handleRecordsUpdated);
-  }, []);
-
-  // Load record for the current dayIndex
-  useEffect(() => {
-    if (isClient && settings?.hasStarted) {
-      const record = records[dayIndex];
-      if (record) {
-        setIsCompletedDay(true);
-        setConfirmedVerse(record.oneVerse || null);
-        setSelectedVerse(null);
-      } else {
-        setIsCompletedDay(false);
-        setConfirmedVerse(null);
-      }
-    }
-  }, [isClient, dayIndex, settings, records]);
-
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3000);
-  };
-
-  const scrollToSection = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  };
-
-  // 마지막으로 읽은(완료된) Day로 이동하는 핸들러
-  const handleGoToLastRead = () => {
-    const completedDays = Object.keys(records)
-      .map((k) => Number(k))
-      .filter((day) => !!records[day]?.oneVerse);
-    const lastDay = completedDays.length > 0 ? Math.max(...completedDays) : 1;
-    handleSetDay(lastDay);
-    setIsDaySelectorOpen(false); // 드롭다운 닫기
-  };
-
-
-
-
-  const handleVerseClick = async (trackType: string, book: string, chapter: number, verse: number, rawText: string, displayText: string, chunks: string[]) => {
-    const verseObj = {
-      trackType,
-      book,
-      chapter,
-      verse,
-      rawText,
-      displayText,
-      chunks,
-      reference: `${book} ${chapter}:${verse}`
-    };
-
-    const isConfirmed = confirmedVerse?.book === book && confirmedVerse?.chapter === chapter && confirmedVerse?.verse === verse;
-    if (isConfirmed) {
-      // 1. 단순 터치로 인한 One Verse 지정 취소 방지
-      // 이미 지정된 상태라면 해제되지 않도록 리턴
-      return;
-    }
-
-    const isSelected = selectedVerse?.book === book && selectedVerse?.chapter === chapter && selectedVerse?.verse === verse;
-    if (isSelected) {
-      setSelectedVerse(null);
-    } else {
-      setSelectedVerse(verseObj);
-    }
-  };
-
-
-
-  const handleShareOneVerseClick = async (record: DayRecord) => {
-    setSelectedRecordToShare(record);
-  };
-
-  const handleConfirmVerse = async (verse: OneVerse, e: React.MouseEvent) => {
-    e.stopPropagation();
-    
-    if (!confirmedVerse) {
-      await executeReplaceVerse(verse);
-      return;
-    }
-
-    // 이미 One Verse가 있고 다른 구절을 선택한 경우 교체 모달 표시
-    if (confirmedVerse.book !== verse.book || confirmedVerse.chapter !== verse.chapter || confirmedVerse.verse !== verse.verse) {
-      setVerseToReplace(verse);
-    }
-  };
-
-  const executeReplaceVerse = async (verse: OneVerse) => {
-    let success = false;
-    
-    if (isCompletedDay) {
-      success = await updateReadRecordOneVerse(dayIndex, verse);
-    } else {
-      const dateObj = new Date();
-      const todayStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
-      
-      success = await saveDayRecord({
-        dayIndex: dayIndex,
-        readDate: todayStr,
-        completedAt: new Date().toISOString(),
-        oneVerse: verse,
-      });
-      if (success) {
-        setIsCompletedDay(true);
-      }
-    }
-
-    if (success) {
-      setConfirmedVerse(verse);
-      setSelectedVerse(null);
-      setVerseToReplace(null);
-      const r = await fetchReadRecords();
-      setRecords(r);
-      showToast("One Verse가 새로 지정되었습니다.");
-    } else {
-      alert("저장에 실패했습니다.");
-    }
-  };
-
-  const handleBottomButtonClick = () => {
-    if (!confirmedVerse && !selectedVerse) {
-      setShowWarningModal(true);
-      return;
-    }
-    if (!confirmedVerse && selectedVerse) {
-      setShowConfirmModal(true);
-      return;
-    }
-    if (confirmedVerse) {
-      completeReadingAndShowSuccess(confirmedVerse);
-    }
-  };
-
-  const completeReadingAndShowSuccess = async (verse: OneVerse) => {
-    const dateObj = new Date();
-    const todayStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
-    
-    if (!isCompletedDay) {
-      const success = await saveDayRecord({
-        dayIndex: dayIndex,
-        readDate: todayStr,
-        completedAt: new Date().toISOString(),
-        oneVerse: verse,
-      });
-      if (success) {
-        setIsCompletedDay(true);
-        const r = await fetchReadRecords();
-        setRecords(r);
-        setShowSuccessModal(true);
-      } else {
-        alert("저장에 실패했습니다.");
-      }
-    } else {
-      setShowSuccessModal(true);
-    }
-  };
-
-  const handleMemoryComplete = async () => {
-    if (confirmedVerse) {
-      await updateMemorizeRecord(dayIndex, true, confirmedVerse);
-      setConfirmedVerse({ ...confirmedVerse, isMemorized: true, memorizedAt: new Date().toISOString() });
-      const r = await fetchReadRecords();
-      setRecords(r);
-      setIsMemoryModalOpen(false);
-    }
-  };
-
-  useEffect(() => {
-    const isAnyModalOpen = showConfirmModal || showSuccessModal || showWarningModal || isMemoryModalOpen || showDailyLimitModal || showAccessDeniedModal;
-    if (isAnyModalOpen) {
-      document.body.classList.add('modal-open');
-    } else {
-      document.body.classList.remove('modal-open');
-    }
-    return () => {
-      document.body.classList.remove('modal-open');
-    };
-  }, [showConfirmModal, showSuccessModal, showWarningModal, isMemoryModalOpen, showDailyLimitModal, showAccessDeniedModal]);
+  }
+};
+export default function BibleViewerPage() {
+  const { fontSize } = useSettings();
+  
+  const {
+    isClient,
+    authUser,
+    settings,
+    records,
+    dayIndex,
+    setDayIndex,
+    isDaySelectorOpen,
+    setIsDaySelectorOpen,
+    isCompletedDay,
+    selectedVerse,
+    setSelectedVerse,
+    confirmedVerse,
+    setConfirmedVerse,
+    isMemoryModalOpen,
+    setIsMemoryModalOpen,
+    showWarningModal,
+    setShowWarningModal,
+    showConfirmModal,
+    setShowConfirmModal,
+    verseToReplace,
+    setVerseToReplace,
+    showSuccessModal,
+    setShowSuccessModal,
+    showAccessDeniedModal,
+    setShowAccessDeniedModal,
+    showDailyLimitModal,
+    setShowDailyLimitModal,
+    selectedRecordToShare,
+    setSelectedRecordToShare,
+    toastMessage,
+    headerRef,
+    headerHeight,
+    handleSetDay,
+    handleGoToLastRead,
+    handleVerseClick,
+    handleConfirmVerse,
+    executeReplaceVerse,
+    handleBottomButtonClick,
+    completeReadingAndShowSuccess,
+    handleMemoryComplete,
+    calculateDaysSince
+  } = useBibleReader();
+  
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const allSchedules = getAllSchedules();
 
 
 
@@ -466,204 +150,28 @@ export default function BibleViewerPage() {
         </div>
       )}
 
-      {/* Daily Limit Modal (최대 3개 제한) */}
-      {showDailyLimitModal && (
-        <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white dark:bg-stone-900 rounded-2xl p-6 shadow-xl w-full max-w-md flex flex-col items-center gap-4 animate-in zoom-in-95">
-            <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-2">
-              <Leaf size={32} />
-            </div>
-            <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100 text-center">
-              <span className="block">오늘의 권장 통독 분량을</span>
-              <span className="block">달성했습니다! 🌿</span>
-            </h3>
-            <p className="text-stone-500 dark:text-stone-400 text-center text-sm mb-4 leading-relaxed">
-              <span className="block">말씀의 깊은 묵상을 위해 하루에 최대 3개 Day까지만 읽을 수 있습니다.</span>
-              <span className="block">내일 새로운 마음으로 다음 말씀을 이어가보세요! ✨</span>
-            </p>
-            <div className="flex flex-col gap-2 w-full">
-              <button
-                onClick={() => {
-                  setShowDailyLimitModal(false);
-                  router.push("/mypage");
-                }}
-                className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-colors shadow-sm"
-              >
-                마이페이지로 이동
-              </button>
-              <button
-                onClick={() => {
-                  setShowDailyLimitModal(false);
-                  setDayIndex(Math.max(1, getNextUnreadDay(records) - 1));
-                  window.scrollTo(0, 0);
-                }}
-                className="w-full py-3.5 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-bold rounded-xl transition-colors"
-              >
-                오늘 읽은 말씀 복습하기
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Warning Modal (경우 1) */}
-      {verseToReplace && confirmedVerse && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="w-full max-w-sm bg-stone-900 border border-stone-800 rounded-2xl overflow-hidden shadow-2xl flex flex-col p-6 items-center text-center">
-            <h2 className="text-xl font-bold text-stone-100 mb-4">One Verse를 교체하시겠습니까?</h2>
-            
-            <div className="bg-stone-800/50 p-4 rounded-xl mb-4 w-full text-left">
-              <div className="text-xs text-stone-400 mb-1 font-bold">기존 One Verse</div>
-              <p className="text-stone-300 text-sm leading-relaxed mb-2 line-clamp-3">
-                &quot;{confirmedVerse.displayText}&quot;
-              </p>
-              <div className="text-xs text-stone-500 font-bold">
-                {confirmedVerse.book} {confirmedVerse.chapter}:{confirmedVerse.verse}
-              </div>
-            </div>
-
-            <p className="text-red-400 text-sm mb-6 font-bold flex items-center justify-center gap-1.5 leading-relaxed bg-red-950/30 p-3 rounded-lg w-full">
-              <AlertCircle size={16} className="shrink-0" />
-              One Verse를 교체할 경우 남겨둔 발자국과 암송 데이터는 복구할 수 없습니다.
-            </p>
-            
-            <div className="flex gap-3 w-full">
-              <button 
-                onClick={() => setVerseToReplace(null)}
-                className="flex-1 py-3.5 bg-stone-800 hover:bg-stone-700 text-stone-200 font-bold rounded-xl transition-colors"
-              >
-                취소
-              </button>
-              <button 
-                onClick={() => executeReplaceVerse(verseToReplace)}
-                className="flex-1 py-3.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl transition-colors"
-              >
-                교체
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showWarningModal && (
-        <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white dark:bg-stone-900 rounded-2xl p-6 shadow-xl w-full max-w-sm flex flex-col items-center gap-4 animate-in zoom-in-95">
-            <div className="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:bg-amber-400 flex items-center justify-center mb-2">
-              <Bookmark size={24} />
-            </div>
-            <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 text-center">One Verse를 선택해주세요 ✨</h3>
-            <p className="text-stone-500 dark:text-stone-400 text-center text-sm mb-2">
-              오늘 마음에 깊이 닿은 구절을 1개 선택해야 통독이 완료됩니다. 본문에서 구절을 클릭해 보세요.
-            </p>
-            <button
-              onClick={() => setShowWarningModal(false)}
-              className="w-full py-3 bg-stone-800 hover:bg-stone-900 dark:bg-stone-200 dark:hover:bg-stone-300 dark:text-stone-900 text-white font-bold rounded-xl transition-colors"
-            >
-              확인
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Confirm Modal (경우 2) */}
-      {showConfirmModal && selectedVerse && (
-        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in md:p-4">
-          <div className="bg-white dark:bg-stone-900 rounded-none md:rounded-2xl px-6 shadow-xl w-full h-full md:h-auto md:max-h-[85vh] max-w-sm flex flex-col items-center justify-center gap-4 animate-in zoom-in-95 pt-[calc(2rem+env(safe-area-inset-top))] pb-[calc(2rem+env(safe-area-inset-bottom))] md:py-6 overflow-y-auto">
-            <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 text-center mb-2 leading-relaxed">
-              <span className="block">&apos;{formatReference(selectedVerse.book, selectedVerse.chapter, selectedVerse.verse)}&apos;을(를)</span>
-              <span className="block">오늘의 One Verse로 선택하시겠습니까?</span>
-            </h3>
-            <div className="flex gap-3 w-full mt-2">
-              <button
-                onClick={() => setShowConfirmModal(false)}
-                className="flex-1 py-3 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-bold rounded-xl transition-colors"
-              >
-                다시 선택하기
-              </button>
-              <button
-                onClick={() => {
-                  setConfirmedVerse(selectedVerse);
-                  setSelectedVerse(null);
-                  setShowConfirmModal(false);
-                  completeReadingAndShowSuccess(selectedVerse);
-                }}
-                className="flex-1 py-3 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-xl shadow-md transition-colors"
-              >
-                확인
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Success Modal (경우 3) */}
-      {showSuccessModal && confirmedVerse && (
-        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in md:p-4">
-          <div className="bg-white dark:bg-stone-900 rounded-none md:rounded-3xl p-6 md:p-8 shadow-2xl w-full h-full md:h-auto md:max-h-[85vh] max-w-lg flex flex-col justify-between relative animate-in zoom-in-95 border border-stone-200 dark:border-stone-800 text-center overflow-hidden pt-[calc(2rem+env(safe-area-inset-top))] pb-[calc(2rem+env(safe-area-inset-bottom))] md:py-8">
-            
-            {/* Top Area: Header with Close Button */}
-            <div className="flex-shrink-0 relative">
-              <button 
-                onClick={() => setShowSuccessModal(false)}
-                className="absolute right-0 top-0 p-2 bg-stone-100 dark:bg-stone-800 rounded-full text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 transition-colors"
-              >
-                <X size={20} />
-              </button>
-              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-emerald-100 dark:bg-emerald-900/50 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle2 className="text-emerald-500 w-8 h-8 sm:w-10 sm:h-10" />
-              </div>
-              <h3 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100 mb-2 mt-4 md:mt-0">
-                오늘 말씀 통독 완료! 🎉
-              </h3>
-              <p className="text-stone-500 dark:text-stone-400 text-sm sm:text-base mb-4 sm:mb-6">
-                오늘의 4개 트랙 말씀을 모두 읽으셨습니다! 👏
-              </p>
-            </div>
-            
-            {/* Middle Area: Flexible Card with dynamic text */}
-            <div className="flex-1 min-h-0 bg-stone-50 dark:bg-stone-800/50 rounded-2xl p-4 sm:p-6 mb-6 border border-stone-100 dark:border-stone-700 flex flex-col items-center justify-center overflow-y-auto">
-              <div className="w-full flex flex-col items-center justify-center my-auto">
-                <p className={`text-stone-800 dark:text-stone-200 leading-relaxed mb-4 text-center break-keep w-full ${
-                  confirmedVerse.displayText.length <= 50 
-                    ? "text-2xl sm:text-3xl font-bold" 
-                    : confirmedVerse.displayText.length <= 100 
-                      ? "text-xl sm:text-2xl font-semibold" 
-                      : "text-base sm:text-lg font-medium"
-                }`}>
-                  {confirmedVerse.displayText}
-                </p>
-                <p className="text-sm font-bold text-stone-400 dark:text-stone-500 w-full text-center mt-2">
-                  {formatReference(confirmedVerse.book, confirmedVerse.chapter, confirmedVerse.verse)}
-                </p>
-              </div>
-            </div>
-
-            {/* Bottom Area: Action Buttons */}
-            <div className="flex-shrink-0 flex flex-col gap-3 w-full">
-              <button
-                onClick={() => {
-                  setShowSuccessModal(false);
-                  setIsMemoryModalOpen(true);
-                }}
-                className="w-full py-4 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl shadow-lg transition-transform hover:scale-[1.02] flex items-center justify-center gap-2"
-              >
-                <BrainCircuit size={20} />
-                🧠 지금 암송 도전하기
-              </button>
-              
-              <div className="flex gap-3">
-                <button
-                  onClick={() => router.push("/mypage")}
-                  className="w-full py-3.5 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-bold rounded-xl transition-colors"
-                >
-                  마이페이지로 이동
-                </button>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      )}
+      <VerseInteractionModals
+        showDailyLimitModal={showDailyLimitModal}
+        setShowDailyLimitModal={setShowDailyLimitModal}
+        showWarningModal={showWarningModal}
+        setShowWarningModal={setShowWarningModal}
+        showConfirmModal={showConfirmModal}
+        setShowConfirmModal={setShowConfirmModal}
+        showSuccessModal={showSuccessModal}
+        setShowSuccessModal={setShowSuccessModal}
+        verseToReplace={verseToReplace}
+        setVerseToReplace={setVerseToReplace}
+        confirmedVerse={confirmedVerse}
+        setConfirmedVerse={setConfirmedVerse}
+        selectedVerse={selectedVerse}
+        setSelectedVerse={setSelectedVerse}
+        executeReplaceVerse={executeReplaceVerse}
+        completeReadingAndShowSuccess={completeReadingAndShowSuccess}
+        setIsMemoryModalOpen={setIsMemoryModalOpen}
+        setDayIndex={setDayIndex}
+        getNextUnreadDay={getNextUnreadDay}
+        records={records}
+      />
 
       {/* 플로팅 퀵 네비게이터 */}
       <div className="fixed right-0 top-1/2 -translate-y-1/2 z-40 ios-pwa-bottom-safe mr-1 md:mr-2">
@@ -718,7 +226,7 @@ export default function BibleViewerPage() {
               if (el) {
                 el.scrollIntoView({ behavior: 'smooth', block: 'center' });
               } else {
-                showToast("오늘의 One Verse를 먼저 지정해주세요.");
+                alert("오늘의 One Verse를 먼저 지정해주세요.");
               }
             }} 
             className="flex flex-col items-center justify-center w-[38px] h-[38px] md:w-16 md:h-16 aspect-square rounded-full bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700/50 shadow-md transition-all hover:scale-105 gap-0 md:gap-1" 
@@ -743,353 +251,47 @@ export default function BibleViewerPage() {
       <div className="w-full max-w-2xl bg-transparent shadow-2xl flex flex-col relative min-h-full">
         
         {/* 상단 네비게이터 */}
-        <header 
-          ref={headerRef}
-          className="sticky top-0 z-30 bg-stone-50/95 dark:bg-stone-950/95 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 shadow-sm flex flex-col px-3 py-2 gap-2"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1 sm:gap-2">
-              <button
-                onClick={() => handleSetDay(dayIndex - 10)}
-                disabled={dayIndex <= 1}
-                className="p-1.5 sm:p-2 rounded-full hover:bg-stone-200 dark:hover:bg-stone-800 disabled:opacity-30 transition-colors"
-                title="10일 이전"
-              >
-                <ChevronsLeft size={22} className="text-stone-700 dark:text-stone-300" />
-              </button>
-              <button
-                onClick={() => handleSetDay(dayIndex - 1)}
-                disabled={dayIndex <= 1}
-                className="p-1.5 sm:p-2 rounded-full hover:bg-stone-200 dark:hover:bg-stone-800 disabled:opacity-30 transition-colors"
-                title="1일 이전"
-              >
-                <ChevronLeft size={22} className="text-stone-700 dark:text-stone-300" />
-              </button>
-            </div>
-            
-            <div 
-              className="flex flex-col items-center flex-1 cursor-pointer select-none py-1 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg transition-colors mx-2" 
-              onClick={() => setIsDaySelectorOpen(!isDaySelectorOpen)}
-            >
-              <h1 className="font-bold text-lg sm:text-xl text-stone-800 dark:text-stone-100 flex items-center gap-1.5">
-                Day {readingData.dayIndex} 
-                <ChevronDown size={18} className={`text-stone-400 transition-transform ${isDaySelectorOpen ? 'rotate-180' : ''}`} />
-              </h1>
-              <span className="text-[10px] sm:text-xs text-stone-500 font-medium mt-0.5">
-                {isCompletedDay && records[dayIndex]?.readDate ? (
-                  `${parseInt(records[dayIndex].readDate.split('-')[1])}월 ${parseInt(records[dayIndex].readDate.split('-')[2])}일 완료 / 목표 Day ${settings ? calculateDaysSince(settings.startDate) : 1}`
-                ) : (
-                  `${new Date().getMonth() + 1}월 ${new Date().getDate()}일 (오늘) / 목표 Day ${settings ? calculateDaysSince(settings.startDate) : 1}`
-                )}
-              </span>
-            </div>
+        <ReadHeader
+          dayIndex={dayIndex}
+          handleSetDay={handleSetDay}
+          isDaySelectorOpen={isDaySelectorOpen}
+          setIsDaySelectorOpen={setIsDaySelectorOpen}
+          readingData={readingData}
+          isCompletedDay={isCompletedDay}
+          records={records}
+          settings={settings}
+          headerRef={headerRef}
+          calculateDaysSince={calculateDaysSince}
+        />
 
-            <div className="flex items-center gap-1 sm:gap-2">
-              <button
-                onClick={() => handleSetDay(dayIndex + 1)}
-                disabled={dayIndex >= 365}
-                className="p-1.5 sm:p-2 rounded-full hover:bg-stone-200 dark:hover:bg-stone-800 disabled:opacity-30 transition-colors"
-                title="1일 다음"
-              >
-                <ChevronRight size={22} className="text-stone-700 dark:text-stone-300" />
-              </button>
-              <button
-                onClick={() => handleSetDay(dayIndex + 10)}
-                disabled={dayIndex >= 365}
-                className="p-1.5 sm:p-2 rounded-full hover:bg-stone-200 dark:hover:bg-stone-800 disabled:opacity-30 transition-colors"
-                title="10일 다음"
-              >
-                <ChevronsRight size={22} className="text-stone-700 dark:text-stone-300" />
-              </button>
-            </div>
-          </div>
-        </header>
+        <DaySelectorSheet
+          isDaySelectorOpen={isDaySelectorOpen}
+          setIsDaySelectorOpen={setIsDaySelectorOpen}
+          headerHeight={headerHeight}
+          scrollContainerRef={scrollContainerRef}
+          handleGoToLastRead={handleGoToLastRead}
+          allSchedules={allSchedules}
+          records={records}
+          dayIndex={dayIndex}
+          handleSetDay={handleSetDay}
+          getNextUnreadDay={getNextUnreadDay}
+        />
 
-        {/* Day 빠른 이동 드롭다운 / 모달 */}
-        {isDaySelectorOpen && (
-          <div 
-            style={{ top: `${headerHeight}px` }}
-            className="absolute left-0 right-0 z-40 bg-white dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800 shadow-2xl flex flex-col animate-in slide-in-from-top-2 h-[75vh] max-h-[600px]"
-          >
-            {/* Day 리스트 */}
-            <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-2 flex flex-col gap-1">
-              <button
-                onClick={handleGoToLastRead}
-                className="w-full py-2.5 px-4 mb-3 rounded-xl bg-cyan-950/40 border border-cyan-500/40 hover:bg-cyan-900/50 text-cyan-300 font-medium text-sm flex items-center justify-center gap-2 transition-all shadow-sm shrink-0"
-              >
-                📌 마지막으로 읽은 본문으로 이동하기
-              </button>
-              {(() => {
-                return allSchedules.map((s) => {
-                  const maxAllowed = getNextUnreadDay(records);
-                  const isLocked = s.dayIndex > maxAllowed;
-                  const dayRecord = records[s.dayIndex];
-                  const hasOneVerse = !!dayRecord?.oneVerse;
-                  const isMemorized = !!dayRecord?.oneVerse?.isMemorized;
-
-                return (
-                  <React.Fragment key={s.dayIndex}>
-                    <button
-                      onClick={() => handleSetDay(s.dayIndex)}
-                      className={`text-left rounded-xl transition-colors flex items-center justify-between gap-3 p-4 ${
-                        s.dayIndex === dayIndex
-                          ? "bg-sky-50 dark:bg-sky-900/30 border border-sky-200 dark:border-sky-800"
-                          : isLocked
-                          ? "opacity-40 hover:opacity-60 border border-transparent"
-                          : "hover:bg-stone-50 dark:hover:bg-stone-800 border border-transparent"
-                      }`}
-                    >
-                      {/* 좌측 텍스트 영역 */}
-                      <div className="flex-1 min-w-0 pr-2">
-                        <span className="font-semibold text-stone-800 dark:text-stone-200 flex items-center gap-2">
-                          Day {s.dayIndex}
-                          {isLocked && <AlertCircle size={14} className="text-stone-400" />}
-                        </span>
-                        
-                        <div className="text-xs text-stone-500 dark:text-stone-400 truncate mt-1 leading-relaxed flex flex-wrap gap-x-2">
-                          <span>📖 {s.tracks.find(t => t.type === '구약')?.range}</span>
-                          <span>✝️ {s.tracks.find(t => t.type === '신약')?.range}</span>
-                          <span>🕊️ {s.tracks.find(t => t.type === '시편')?.range}</span>
-                          <span>💡 {s.tracks.find(t => t.type === '잠언')?.range}</span>
-                        </div>
-                      </div>
-
-                      {/* 뱃지 영역 */}
-                      {hasOneVerse && (
-                        <div className="flex flex-col items-end justify-center gap-1.5 shrink-0 self-center">
-                          <span className="text-[11px] px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-medium">
-                            📌 One Verse
-                          </span>
-                          {isMemorized ? (
-                            <span className="text-[11px] px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-300 border border-amber-500/30 font-medium">
-                              👑 암송 완료
-                            </span>
-                          ) : (
-                            <span className="text-[11px] px-2 py-0.5 rounded-md bg-stone-700/60 text-stone-400 border border-stone-600/40">
-                              🧠 암송 도전
-                            </span>
-                          )}
-                        </div>
-                      )}
-                    </button>
-                  </React.Fragment>
-                );
-              })})()}
-            </div>
-            
-            {/* 닫기 영역 */}
-            <div className="p-3 border-t border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-950 flex justify-center">
-              <button
-                onClick={() => setIsDaySelectorOpen(false)}
-                className="text-sm font-medium text-stone-500 hover:text-stone-800 dark:hover:text-stone-300 py-1 px-4"
-              >
-                닫기
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* 본문 연속 렌더링 컨테이너 */}
-        <div className="flex flex-col flex-1">
-          {readingData.tracks.map((trackReading) => {
-            const trackInfo = TRACK_INFO[trackReading.track.type];
-            const icon = TRACK_ICONS[trackReading.track.type as keyof typeof TRACK_ICONS] || "📖";
-            
-            return (
-              <div 
-                key={trackReading.track.type} 
-                id={TRACK_ID_MAP[trackReading.track.type as keyof typeof TRACK_ID_MAP]} 
-                className="flex flex-col border-b border-stone-200 dark:border-stone-800/60 pb-10"
-                style={{ scrollMarginTop: `${headerHeight}px` }}
-              >
-                {/* 섹션 헤더 */}
-                <div 
-                  className="sticky z-20 py-2 px-4 text-sm font-semibold bg-stone-50/95 dark:bg-stone-900/90 backdrop-blur border-b border-stone-200 dark:border-stone-800 shadow-sm transition-colors"
-                  style={{ top: `${headerHeight}px` }}
-                >
-                  <h2 className="flex items-center gap-2" style={{ color: trackInfo.accentColor }}>
-                    <span>{icon}</span> {trackInfo.title.split(" ")[0]} <span className="text-stone-500 font-normal mx-0.5">·</span> <span className="text-stone-700 dark:text-stone-300">{trackReading.track.range}</span>
-                  </h2>
-                </div>
-
-                {/* 성경 본문 */}
-                <div className="pl-3 pr-14 sm:pl-6 sm:pr-8 py-6 sm:py-8 flex flex-col gap-6" style={{ fontSize: `${fontSize}px`, lineHeight: 1.8 }}>
-                  {trackReading.chapters.map((chapterData) => (
-                    <div key={`${chapterData.name}-${chapterData.chapter}`} className="flex flex-col">
-                      {/* 장 제목 */}
-                      <h3 className="font-bold mb-4 px-2 text-stone-800 dark:text-stone-200 border-b border-stone-200 dark:border-stone-800 pb-2">
-                        {chapterData.name} {chapterData.chapter}{chapterData.chapterUnit || (chapterData.name === "시편" ? "편" : "장")}
-                      </h3>
-                      
-                      {chapterData.verses.length === 0 ? (
-                        <p className="text-stone-400 italic px-2">본문 데이터가 없습니다.</p>
-                      ) : (
-                        <div className="flex flex-col gap-1">
-                          {chapterData.verses.map((v) => {
-                            const isSelected = selectedVerse?.book === chapterData.name 
-                                            && selectedVerse?.chapter === chapterData.chapter 
-                                            && selectedVerse?.verse === v.verse;
-                            
-                            const isConfirmed = confirmedVerse?.book === chapterData.name 
-                                             && confirmedVerse?.chapter === chapterData.chapter 
-                                             && confirmedVerse?.verse === v.verse;
-
-                            // 스타일 분기
-                            let wrapperClass = "text-left px-2 sm:px-3 py-2 rounded-xl transition-all duration-200 relative flex flex-col group ";
-                            let markerClass = "";
-                            let verseNumberClass = "";
-                            let textClass = "flex-1";
-                            let actionArea = null;
-
-                            if (isConfirmed) {
-                              wrapperClass += "bg-amber-50 dark:bg-amber-900/20 text-stone-900 dark:text-stone-100 border border-amber-200 dark:border-amber-800/50 shadow-sm mt-1 mb-2";
-                              markerClass = "absolute left-0 top-3 bottom-3 w-1.5 bg-amber-400 dark:bg-amber-500 rounded-r-md";
-                              verseNumberClass = "text-amber-600 dark:text-amber-500 font-bold";
-                              textClass += " font-medium";
-                              
-                              const isMem = confirmedVerse?.isMemorized;
-                              actionArea = (
-                                <div className="mt-3 flex flex-wrap items-center gap-2 pl-[2.5ch] sm:pl-[3ch]">
-                                  <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ${
-                                    isMem 
-                                      ? "bg-gradient-to-r from-amber-400 to-amber-500 text-white shadow-md"
-                                      : "bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400"
-                                  }`}>
-                                    <Crown size={14} className={isMem ? "text-white" : ""} />
-                                    {isMem ? "암송 완료" : "오늘의 One Verse"}
-                                  </div>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setIsMemoryModalOpen(true);
-                                    }}
-                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-colors border ${
-                                      isMem
-                                        ? "bg-white dark:bg-stone-800 border-amber-200 dark:border-amber-800 text-amber-600 dark:text-amber-500 hover:bg-amber-50 dark:hover:bg-stone-700"
-                                        : "bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-700"
-                                    }`}
-                                  >
-                                    <BrainCircuit size={14} />
-                                    {isMem ? "✅ 암송 복습하기" : "🧠 암송 도전"}
-                                  </button>
-                                </div>
-                              );
-                              actionArea = (
-                                <>
-                                  {actionArea}
-                                  <div className="pl-[2ch] sm:pl-[2.5ch] mt-4 flex items-center gap-2 border-t border-stone-200 dark:border-stone-800/50 pt-3">
-                                    <button
-                                      onClick={(e) => { e.stopPropagation(); router.push(`/memo?day=${dayIndex}&mode=edit`); }}
-                                      className="flex-1 py-2 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors border border-stone-200 dark:border-stone-700 shadow-sm"
-                                    >
-                                      <PencilLine size={16} />
-                                      {confirmedVerse.memo ? "발자국 수정" : "발자국 남기기"}
-                                    </button>
-                                    {confirmedVerse.memo && (
-                                      <button
-                                        onClick={(e) => { e.stopPropagation(); router.push(`/memo?day=${dayIndex}&mode=view`); }}
-                                        className="flex-1 py-2 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors border border-stone-200 dark:border-stone-700 shadow-sm"
-                                      >
-                                        <FileText size={16} />
-                                        발자국 보기
-                                      </button>
-                                    )}
-                                    <button
-                                      onClick={(e) => { e.stopPropagation(); if (records[dayIndex]) handleShareOneVerseClick(records[dayIndex]); }}
-                                      className="flex-1 py-2 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors border border-stone-200 dark:border-stone-700 shadow-sm"
-                                    >
-                                      <Share2 size={16} />
-                                      공유하기
-                                    </button>
-                                  </div>
-                                </>
-                              );
-                            } else if (isSelected) {
-                              wrapperClass += "bg-sky-50 dark:bg-sky-900/20 text-stone-900 dark:text-stone-100 border border-sky-200 border-dashed dark:border-sky-800/50 mt-1 mb-2";
-                              markerClass = "absolute left-0 top-3 bottom-3 w-1 bg-sky-400 dark:bg-sky-500 rounded-r-md";
-                              verseNumberClass = "text-sky-600 dark:text-sky-400 font-bold";
-                              actionArea = (
-                                <div className="mt-3 pl-[2.5ch] sm:pl-[3ch]">
-                                  <button
-                                    onClick={(e) => handleConfirmVerse({
-                                      trackType: trackReading.track.type,
-                                      book: chapterData.name,
-                                      chapter: chapterData.chapter,
-                                      verse: v.verse,
-                                      rawText: v.rawText,
-                                      displayText: v.displayText,
-                                      chunks: v.chunks,
-                                      reference: formatReference(chapterData.name, chapterData.chapter, v.verse)
-                                    }, e)}
-                                    className="flex items-center gap-1.5 bg-sky-600 hover:bg-sky-700 text-white px-3 py-2 rounded-lg text-sm font-bold shadow-sm transition-transform hover:-translate-y-0.5"
-                                  >
-                                    📌 오늘의 One Verse로 지정
-                                  </button>
-                                </div>
-                              );
-                            } else {
-                              wrapperClass += "text-stone-800 dark:text-stone-200 border border-transparent";
-                              verseNumberClass = "text-stone-400 dark:text-stone-500 font-semibold";
-                            }
-                            
-                            return (
-                              <button
-                                key={v.verse}
-                                id={(isConfirmed || isSelected) ? "one-verse-target" : undefined}
-                                onClick={() => handleVerseClick(trackReading.track.type, chapterData.name, chapterData.chapter, v.verse, v.rawText, v.displayText, v.chunks)}
-                                className={wrapperClass}
-                              >
-                                {(isConfirmed || isSelected) && <div className={markerClass}></div>}
-                                
-                                <div className="flex items-start flex-1 w-full">
-                                  <span 
-                                    className={`inline-block min-w-[2.5ch] mr-2 sm:mr-3 select-none mt-[0.1em] text-right ${verseNumberClass}`}
-                                    style={{ fontSize: `${Math.max(fontSize * 0.7, 10)}px` }}
-                                  >
-                                    {v.verse}
-                                  </span>
-                                  <span className={textClass}>
-                                    {v.displayText}
-                                  </span>
-                                </div>
-
-                                {actionArea}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* 하단 완독 체크 액션 */}
-        <div id="viewer-bottom" className="px-5 sm:px-8 py-12 flex justify-center bg-stone-50 dark:bg-stone-900 border-t border-stone-200 dark:border-stone-800 relative z-10">
-          <button
-            onClick={handleBottomButtonClick}
-            className={`flex items-center gap-2 px-6 py-4 rounded-2xl shadow-sm transition-all duration-300 font-bold text-lg w-full max-w-sm justify-center ${
-              isCompletedDay 
-                ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800 scale-[0.98]" 
-                : "bg-sky-600 hover:bg-sky-700 text-white shadow-md hover:-translate-y-1"
-            }`}
-          >
-            {isCompletedDay ? (
-              <React.Fragment>
-                <CheckCircle2 size={24} />
-                Day {readingData.dayIndex} 말씀 통독 완료 🎉
-              </React.Fragment>
-            ) : (
-              <React.Fragment>
-                Day {readingData.dayIndex} 말씀 통독 완료하기
-              </React.Fragment>
-            )}
-          </button>
-        </div>
-
+        <BibleContent
+          readingData={readingData}
+          headerHeight={headerHeight}
+          fontSize={fontSize}
+          selectedVerse={selectedVerse}
+          confirmedVerse={confirmedVerse}
+          records={records}
+          dayIndex={dayIndex}
+          isCompletedDay={isCompletedDay}
+          setIsMemoryModalOpen={setIsMemoryModalOpen}
+          handleShareOneVerseClick={(record) => setSelectedRecordToShare(record)}
+          handleConfirmVerse={handleConfirmVerse}
+          handleVerseClick={handleVerseClick}
+          handleBottomButtonClick={handleBottomButtonClick}
+        />
       </div>
 
       {/* 암송 트레이너 모달 */}

@@ -78,7 +78,7 @@ export default function VerseDetailPage() {
           </div>
         ) : (
           <div className="flex flex-col gap-6 w-full max-w-2xl mx-auto mt-6 md:mt-10">
-            {dayRecords.map((record, index) => {
+            {dayRecords.map((record) => {
               const verse = record.oneVerse;
               if (!verse) return null;
               

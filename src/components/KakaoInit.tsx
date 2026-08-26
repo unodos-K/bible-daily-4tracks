@@ -4,7 +4,14 @@ import { useEffect } from "react";
 
 declare global {
   interface Window {
-    Kakao: any;
+    Kakao: {
+      isInitialized: () => boolean;
+      init: (key: string) => void;
+      Share: {
+        sendDefault: (options: unknown) => void;
+        sendCustom: (options: unknown) => void;
+      };
+    };
   }
 }
 

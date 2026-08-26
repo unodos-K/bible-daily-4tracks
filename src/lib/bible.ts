@@ -10,8 +10,19 @@ import {
   Verse,
 } from "@/types/bible";
 
+interface RawScheduleItem {
+  day: number;
+  tracks: Record<string, {
+    Book: string;
+    startChapter: number;
+    startVerse: number | null;
+    endChapter: number;
+    endVerse: number | null;
+  }>;
+}
+
 // 새로운 365 스케줄 데이터 파싱
-const rawSchedules = rawScheduleData as any[];
+const rawSchedules = rawScheduleData as RawScheduleItem[];
 export const mccheyneSchedules: DaySchedule[] = rawSchedules.map((item) => {
   const dayIndex = item.day;
   

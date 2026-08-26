@@ -1,5 +1,5 @@
 import { supabase } from "./supabase";
-import { getUserId } from "./storage";
+import { getUserId, OneVerse } from "./storage";
 
 export interface FriendProfile {
   id: string;
@@ -17,7 +17,7 @@ export interface FriendFeedItem {
   day_index: number;
   read_date: string;
   completed_at: string;
-  one_verse: any; // from OneVerse type
+  one_verse: OneVerse; // from OneVerse type
   like_count: number;
   is_liked_by_me: boolean;
 }
@@ -101,7 +101,7 @@ export async function getPendingRequests(): Promise<{ id: string; profile: Frien
     return [];
   }
 
-  return data.map((row: any) => ({
+  return data.map((row: { user_id: string; profiles: FriendProfile | FriendProfile[] }) => ({
     id: row.user_id,
     profile: Array.isArray(row.profiles) ? row.profiles[0] : row.profiles
   }));
@@ -224,7 +224,7 @@ export async function getFriendRecords(friendId: string): Promise<FriendFeedItem
   if (records.length === 0) return [];
 
   // 좋아요 데이터 가져오기
-  const { data: likes, error: likeError } = await supabase
+  const { data: likes } = await supabase
     .from('one_verse_likes')
     .select('liker_id, author_id, day_index')
     .eq('author_id', friendId);

@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import { BottomNavigation } from "@/components/BottomNavigation";
 import { SettingsProvider } from "@/contexts/SettingsContext";
 import KakaoInit from "@/components/KakaoInit";
 import NicknameGuard from "@/components/NicknameGuard";
