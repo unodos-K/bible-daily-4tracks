@@ -13,6 +13,7 @@ interface MemoryTrainerProgressProps {
   currentSegmentIndex: number;
   currentSegmentFraction: number;
   handleRestart: () => void;
+  handleDirectChallenge: () => void;
 }
 
 export default function MemoryTrainerProgress({
@@ -25,7 +26,8 @@ export default function MemoryTrainerProgress({
   currentPhaseStepsCount,
   currentSegmentIndex,
   currentSegmentFraction,
-  handleRestart
+  handleRestart,
+  handleDirectChallenge
 }: MemoryTrainerProgressProps) {
   return (
     <div className="flex flex-col gap-4 mb-6 bg-stone-50 dark:bg-stone-800/50 p-4 rounded-xl border border-stone-100 dark:border-stone-800">
@@ -44,7 +46,7 @@ export default function MemoryTrainerProgress({
           </button>
         ))}
         <button
-          onClick={() => jumpToPhase(5)}
+          onClick={handleDirectChallenge}
           className="flex-1 min-w-[3rem] px-2 py-1.5 md:px-3 md:py-2 rounded-lg text-xs md:text-sm font-bold whitespace-nowrap transition-colors bg-orange-500 hover:bg-orange-600 text-white shadow-sm"
         >
           도전

@@ -115,7 +115,7 @@ export default function MemoryTrainerIntro({
         </button>
         <button
           onClick={handleDirectChallenge}
-          className="w-full py-3 bg-stone-200 hover:bg-stone-300 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-bold rounded-2xl transition-colors"
+          className="w-full py-3 bg-orange-50 hover:bg-orange-100 dark:bg-orange-950/30 dark:hover:bg-orange-900/40 text-orange-600 dark:text-orange-400 font-bold rounded-2xl transition-colors border border-orange-200 dark:border-orange-800/50"
         >
           바로 도전하기
         </button>

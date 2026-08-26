@@ -223,12 +223,9 @@ export function useMemoryTrainer({ oneVerse, onComplete }: { oneVerse: OneVerse,
     window.speechSynthesis.cancel();
     setIsPlayingTTS(false);
     setStepState('training');
-    const index = steps.findIndex(s => s.phase === 5);
-    if (index !== -1) {
-      setStepIndex(index);
-      setElapsed(0);
-      setIsPlaying(true);
-    }
+    setStepIndex(steps.length - 1);
+    setElapsed(intervalSeconds * 1000);
+    setIsPlaying(false);
   };
 
   const handleRestart = () => {

@@ -79,6 +79,7 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
               currentSegmentIndex={trainerState.currentSegmentIndex}
               currentSegmentFraction={trainerState.currentSegmentFraction}
               handleRestart={trainerState.handleRestart}
+              handleDirectChallenge={trainerState.handleDirectChallenge}
             />
 
             <MemoryTrainerContent
