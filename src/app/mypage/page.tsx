@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Settings } from "lucide-react";
+import { Settings, Footprints } from "lucide-react";
 import {
   DayRecord,
   OneVerse,
@@ -64,7 +64,8 @@ export default function MyPage() {
 
           {/* 좌측 묶음: 타이틀과 유저 정보 (반응형 래퍼) */}
           <div className="flex flex-col items-start gap-2 min-w-0 flex-1 sm:flex-row sm:items-center sm:justify-between">
-            <h1 className="text-lg sm:text-2xl font-black text-stone-800 dark:text-stone-100 shrink-0">
+            <h1 className="text-lg sm:text-2xl font-black text-stone-800 dark:text-stone-100 shrink-0 flex items-center gap-2">
+              <Footprints size={24} className="text-emerald-500" />
               나의 발자국 보관소
             </h1>
 

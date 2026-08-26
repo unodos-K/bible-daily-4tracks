@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Moon, Sun, Monitor, Minus, Plus, X, RotateCcw, AlertCircle, UserCircle2 } from "lucide-react";
+import { Moon, Sun, Monitor, Minus, Plus, X, Footprints, AlertCircle, UserCircle2 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { startNewReading } from "@/lib/storage";
 import { getAuthUser, AuthUser } from "@/lib/auth";
@@ -163,7 +163,7 @@ export default function SettingsModal({ isOpen, onClose, onLogout }: SettingsMod
             onClick={() => setIsResetModalOpen(true)}
             className="flex items-center justify-center gap-2 w-full py-4 bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/40 text-red-600 dark:text-red-400 font-bold rounded-xl transition-colors border border-red-100 dark:border-red-900/30"
           >
-            <RotateCcw size={18} />
+            <Footprints size={18} />
             통독 발자국 초기화 및 재설정
           </button>
         </div>

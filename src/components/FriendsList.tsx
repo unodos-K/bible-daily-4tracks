@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Loader2 } from "lucide-react";
+import { Loader2, Footprints } from "lucide-react";
 import { getFriendsList, FriendProfile } from "@/lib/social";
 import { getAuthUser, AuthUser } from "@/lib/auth";
 
@@ -76,7 +76,7 @@ export default function FriendsList() {
             </div>
             <div>
               <p className="font-bold text-stone-800 dark:text-stone-100">{friend.nickname || friend.name || '이름 없는 순례자'}</p>
-              <p className="text-xs text-stone-400">발자국 보기</p>
+              <p className="text-xs text-stone-400 flex items-center gap-1"><Footprints size={12} /> 발자국 보기</p>
             </div>
           </div>
           <div className="text-stone-400">

@@ -1,5 +1,5 @@
 import React from "react";
-import { FileText, Share2, Heart, BookOpen } from "lucide-react";
+import { Share2, Heart, BookOpen, Footprints } from "lucide-react";
 import { DayRecord, saveViewerDay } from "@/lib/storage";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
@@ -104,7 +104,7 @@ export default function MyPageStatsBoard({
                       onClick={() => router.push(`/memo?day=${record.dayIndex}&mode=${verse.memo ? 'view' : 'edit'}`)}
                       className="flex flex-col items-center justify-center gap-1.5 py-3 bg-stone-100 dark:bg-white/5 hover:bg-stone-200 dark:hover:bg-white/10 text-stone-600 dark:text-stone-300 rounded-xl transition-all active:scale-95"
                     >
-                      <FileText size={20} strokeWidth={2.5} className="text-emerald-500 dark:text-emerald-400" />
+                      <Footprints size={20} strokeWidth={2.5} className="text-emerald-500 dark:text-emerald-400" />
                       <span className="text-[10px] sm:text-xs font-bold tracking-tight">{verse.memo ? "발자국 보기" : "발자국 남기기"}</span>
                     </button>
                     <button

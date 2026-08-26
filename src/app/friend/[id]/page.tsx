@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Heart, Loader2, ChevronLeft } from "lucide-react";
+import { ChevronLeft, Heart, Footprints, Loader2 } from "lucide-react";
 import { getFriendRecords, getFriendProfile, toggleLike, getFriendStats, FriendFeedItem, FriendProfile } from "@/lib/social";
 import { getAuthUser, AuthUser } from "@/lib/auth";
 
@@ -106,7 +106,8 @@ export default function FriendProfilePage() {
           >
             <ChevronLeft size={24} />
           </button>
-          <h1 className="text-lg font-bold text-stone-800 dark:text-stone-100 ml-2">
+          <h1 className="text-lg font-bold text-stone-800 dark:text-stone-100 ml-2 flex items-center gap-2">
+            <Footprints size={20} className="text-emerald-500" />
             친구 발자국
           </h1>
         </div>

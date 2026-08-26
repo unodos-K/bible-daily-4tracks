@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CheckSquare, ChevronLeft } from "lucide-react";
+import { CheckSquare, ChevronLeft, Footprints } from "lucide-react";
 import { MemoData, fetchReadRecords, updateReadRecordOneVerse, DayRecord } from "@/lib/storage";
 
 const parseInitialMemo = (m: string | MemoData | undefined): MemoData => {
@@ -201,7 +201,8 @@ function MemoEditorContent() {
           <ChevronLeft size={24} />
           <span className="text-sm font-medium">취소</span>
         </button>
-        <h2 className="text-lg font-bold text-stone-100 absolute left-1/2 -translate-x-1/2">
+        <h2 className="text-lg font-bold text-stone-100 absolute left-1/2 -translate-x-1/2 flex items-center gap-1.5">
+          <Footprints size={18} className="text-emerald-500" />
           {mode === 'view' ? '발자국 보기' : '발자국 남기기'}
         </h2>
         <div>
