@@ -6,6 +6,7 @@ import { useHomeDashboard, calculateDaysSince } from "@/hooks/useHomeDashboard";
 import MiniScheduleWidget from "@/components/home/MiniScheduleWidget";
 import ReadingProgressWidget from "@/components/home/ReadingProgressWidget";
 import ScheduleBottomSheet from "@/components/home/ScheduleBottomSheet";
+import SplashScreen from "@/components/home/SplashScreen";
 
 function DashboardSkeleton() {
   return (
@@ -71,14 +72,39 @@ export default function HomePage() {
     settings,
     records,
     authUser,
-    isClient,
+    
     nextUnreadDay,
     isScheduleSheetOpen,
     setIsScheduleSheetOpen,
     isLoading,
     targetDayRef
   } = useHomeDashboard();
-  if (!isClient) return null;
+
+  const [showSplash, setShowSplash] = React.useState(false);
+  const [isMounted, setIsMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsMounted(true);
+    const hasSeenSplash = sessionStorage.getItem('hasSeenSplash');
+    if (!hasSeenSplash) {
+      setShowSplash(true);
+      sessionStorage.setItem('hasSeenSplash', 'true');
+    }
+  }, []);
+
+  if (!isMounted) {
+    return (
+      <div className="w-full min-h-full flex flex-col items-center bg-stone-50 dark:bg-stone-950 pb-10 px-6 pt-24">
+        <div className="w-full max-w-xl">
+          <DashboardSkeleton />
+        </div>
+      </div>
+    );
+  }
+
+  if (showSplash) {
+    return <SplashScreen onFinish={() => setShowSplash(false)} />;
+  }
 
   const recordsArray = Object.values(records);
   const totalReadDays = recordsArray.filter(r => r.completedAt || r.readDate).length;
