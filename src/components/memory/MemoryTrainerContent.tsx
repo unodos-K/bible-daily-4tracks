@@ -1,5 +1,5 @@
 import React from "react";
-import { Mic, EyeOff, Eye, RotateCcw, Sparkles } from "lucide-react";
+import { Mic, EyeOff, Eye, RotateCcw, Sparkles, Heart } from "lucide-react";
 import { TrainerStep } from "@/hooks/useMemoryTrainer";
 import { OneVerse } from "@/lib/storage";
 
@@ -35,10 +35,28 @@ export default function MemoryTrainerContent({
   return (
     <>
       {isTrainingFinished && testResult === 'none' && !isListening && (
-        <div className="mb-6 p-4 bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40 rounded-2xl border border-amber-200 dark:border-amber-800 text-center animate-in slide-in-from-top-2 shadow-sm">
-          <span className="font-bold text-amber-700 dark:text-amber-400 text-lg flex items-center justify-center gap-2">
-            🎤 오늘의 OneVerse를 암송해보세요
-          </span>
+        <div className="mb-6 flex flex-col gap-3 animate-in slide-in-from-top-2">
+          <div className="p-4 bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40 rounded-2xl border border-amber-200 dark:border-amber-800 text-center shadow-sm">
+            <span className="font-bold text-amber-700 dark:text-amber-400 text-lg flex items-center justify-center gap-2">
+              <Heart size={20} className="fill-current text-amber-500" /> 오늘의 OneVerse를 마음에 새겨보세요
+            </span>
+          </div>
+          
+          <button 
+            onClick={handleStartListening}
+            className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-2xl shadow-lg flex items-center justify-center gap-2 text-lg transition-transform hover:scale-[1.02]"
+          >
+            <Mic size={24} />
+            마음 새김 도전하기
+          </button>
+          
+          <button 
+            onClick={handleComplete}
+            className="w-full py-3 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-bold rounded-2xl border border-stone-200 dark:border-stone-700 transition-colors flex items-center justify-center gap-2"
+          >
+            <Sparkles size={20} />
+            마이크 없이 채점하기(즉시 완료)
+          </button>
         </div>
       )}
 
@@ -96,31 +114,14 @@ export default function MemoryTrainerContent({
               {showAnswer ? <EyeOff size={20} /> : <Eye size={20} />}
               <span className="text-sm sm:text-base">{showAnswer ? '정답 가리기' : '정답 확인하기'}</span>
             </button>
-          </div>
-          <div className="flex flex-row gap-3">
             <button 
               onClick={handleRestart}
-              className="flex-1 py-4 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-bold rounded-xl border border-stone-200 dark:border-stone-700 transition-colors flex items-center justify-center gap-2"
+              className="flex-1 py-3 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-bold rounded-xl border border-stone-200 dark:border-stone-700 transition-colors flex items-center justify-center gap-2"
             >
               <RotateCcw size={20} />
               <span className="text-sm sm:text-base">처음부터</span>
             </button>
-            <button 
-              onClick={handleStartListening}
-              className="flex-[2] py-4 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl shadow-lg flex items-center justify-center gap-2 transition-transform hover:scale-[1.02]"
-            >
-              <Mic size={20} />
-              <span className="text-sm sm:text-base">음성으로 암송하기</span>
-            </button>
           </div>
-          
-          <button 
-            onClick={handleComplete}
-            className="text-sm font-medium text-stone-400 hover:text-sky-600 dark:hover:text-sky-400 transition-colors mx-auto mt-2 flex items-center gap-1"
-          >
-            <Sparkles size={14} />
-            마이크 없이 직접 완료하기
-          </button>
         </div>
       )}
     </>

@@ -53,13 +53,16 @@ export default function MemoryTrainerProgress({
         </button>
       </div>
 
-      <div className="flex justify-center items-center mb-4 mt-2">
-        <span className="text-2xl md:text-3xl font-bold text-stone-800 dark:text-stone-200 animate-pulse text-center">
-          {currentStep.phaseLabel}
-        </span>
-      </div>
+      {!isTrainingFinished && (
+        <div className="flex justify-center items-center mb-4 mt-2">
+          <span className="text-2xl md:text-3xl font-bold text-stone-800 dark:text-stone-200 animate-pulse text-center">
+            {currentStep.phaseLabel}
+          </span>
+        </div>
+      )}
 
-      <div className="flex items-center gap-3 w-full">
+      {!isTrainingFinished && (
+        <div className="flex items-center gap-3 w-full">
         <div className="flex-shrink-0 min-w-[70px]">
           {isTrainingFinished ? (
             <div className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 font-bold text-sm shadow-sm animate-in zoom-in">
@@ -111,6 +114,7 @@ export default function MemoryTrainerProgress({
           })}
         </div>
       </div>
+      )}
 
       {!isTrainingFinished && (
         <div className="flex items-center justify-end gap-2 w-full mt-1 border-t border-stone-200/50 dark:border-stone-700/50 pt-3">
