@@ -60,11 +60,11 @@ export default function MyPage() {
       <div className="w-full max-w-2xl flex flex-col">
         
         {/* 헤더 및 프로필 (고정 헤더) */}
-        <header className="sticky top-0 z-40 bg-stone-50/95 dark:bg-stone-950/95 backdrop-blur-md pt-6 pb-4 px-6 border-b border-stone-200/50 dark:border-stone-800/50 flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between w-full mb-6">
-          <h1 className="text-2xl font-black text-stone-800 dark:text-stone-100 flex items-center gap-2">
+        <header className="sticky top-0 z-40 bg-stone-50/95 dark:bg-stone-950/95 backdrop-blur-md pt-6 pb-4 px-6 border-b border-stone-200/50 dark:border-stone-800/50 flex flex-row items-center justify-between w-full mb-6">
+          <h1 className="text-xl sm:text-2xl font-black text-stone-800 dark:text-stone-100 flex items-center gap-2 truncate">
             나의 발자국 보관소
           </h1>
-          <div className="flex items-center justify-between w-full md:w-auto md:justify-end gap-3">
+          <div className="flex items-center gap-3 shrink-0">
             {stats.authUser ? (
               <div className="flex items-center gap-2 px-3 py-1.5 bg-stone-100 dark:bg-stone-800 rounded-full border border-stone-200 dark:border-stone-700 shadow-inner">
                 <div className="w-5 h-5 rounded-full bg-stone-300 dark:bg-stone-700 flex items-center justify-center text-[10px] font-bold text-stone-600 dark:text-stone-300 overflow-hidden">
