@@ -85,40 +85,40 @@ export function useMemoryTrainer({ oneVerse, onComplete }: { oneVerse: OneVerse,
     if (K === 0) return [{ phase: 5, phaseLabel: "빈 구절입니다", hiddenIndices: [] }];
     
     for (let i = 0; i < K; i++) {
-      seq.push({ phase: 1, phaseLabel: "한 마디씩 마음에 새기기", hiddenIndices: [i] });
+      seq.push({ phase: 1, phaseLabel: "한 마디씩 새기기", hiddenIndices: [i] });
     }
     
     if (K >= 2) {
       for (let i = 0; i < K - 1; i++) {
-        seq.push({ phase: 2, phaseLabel: "두 마디 묶어 이어가기", hiddenIndices: [i, i + 1] });
+        seq.push({ phase: 2, phaseLabel: "두 마디씩 새기기", hiddenIndices: [i, i + 1] });
       }
     } else {
-      seq.push({ phase: 2, phaseLabel: "두 마디 묶어 이어가기", hiddenIndices: [0] });
+      seq.push({ phase: 2, phaseLabel: "두 마디씩 새기기", hiddenIndices: [0] });
     }
     
     const oddIndices = Array.from({ length: K }, (_, k) => k).filter(k => k % 2 === 1);
     const evenIndices = Array.from({ length: K }, (_, k) => k).filter(k => k % 2 === 0);
     
-    seq.push({ phase: 3, phaseLabel: "징검다리로 흐름 기억하기", hiddenIndices: oddIndices });
-    seq.push({ phase: 3, phaseLabel: "징검다리로 흐름 기억하기", hiddenIndices: evenIndices });
-    seq.push({ phase: 3, phaseLabel: "징검다리로 흐름 기억하기", hiddenIndices: oddIndices });
-    seq.push({ phase: 3, phaseLabel: "징검다리로 흐름 기억하기", hiddenIndices: evenIndices });
+    seq.push({ phase: 3, phaseLabel: "번갈아가며 새기기", hiddenIndices: oddIndices });
+    seq.push({ phase: 3, phaseLabel: "번갈아가며 새기기", hiddenIndices: evenIndices });
+    seq.push({ phase: 3, phaseLabel: "번갈아가며 새기기", hiddenIndices: oddIndices });
+    seq.push({ phase: 3, phaseLabel: "번갈아가며 새기기", hiddenIndices: evenIndices });
     
     const mid = Math.floor(K / 2);
     const firstHalf = Array.from({ length: mid }, (_, k) => k);
     const secondHalf = Array.from({ length: K - mid }, (_, k) => mid + k);
     
-    seq.push({ phase: 4, phaseLabel: "절반 가리기 패턴 훈련", hiddenIndices: secondHalf }); 
-    seq.push({ phase: 4, phaseLabel: "절반 가리기 패턴 훈련", hiddenIndices: firstHalf });  
-    seq.push({ phase: 4, phaseLabel: "절반 가리기 패턴 훈련", hiddenIndices: secondHalf }); 
-    seq.push({ phase: 4, phaseLabel: "절반 가리기 패턴 훈련", hiddenIndices: firstHalf });  
+    seq.push({ phase: 4, phaseLabel: "절반씩 새기기", hiddenIndices: secondHalf }); 
+    seq.push({ phase: 4, phaseLabel: "절반씩 새기기", hiddenIndices: firstHalf });  
+    seq.push({ phase: 4, phaseLabel: "절반씩 새기기", hiddenIndices: secondHalf }); 
+    seq.push({ phase: 4, phaseLabel: "절반씩 새기기", hiddenIndices: firstHalf });  
     
     const all = Array.from({ length: K }, (_, k) => k);
-    seq.push({ phase: 5, phaseLabel: "전체 말씀 온전히 고백하기", hiddenIndices: [] }); 
-    seq.push({ phase: 5, phaseLabel: "전체 말씀 온전히 고백하기", hiddenIndices: all }); 
-    seq.push({ phase: 5, phaseLabel: "전체 말씀 온전히 고백하기", hiddenIndices: [] }); 
-    seq.push({ phase: 5, phaseLabel: "전체 말씀 온전히 고백하기", hiddenIndices: all }); 
-    seq.push({ phase: 5, phaseLabel: "전체 말씀 온전히 고백하기", hiddenIndices: [] }); 
+    seq.push({ phase: 5, phaseLabel: "온전히 새기기", hiddenIndices: [] }); 
+    seq.push({ phase: 5, phaseLabel: "온전히 새기기", hiddenIndices: all }); 
+    seq.push({ phase: 5, phaseLabel: "온전히 새기기", hiddenIndices: [] }); 
+    seq.push({ phase: 5, phaseLabel: "온전히 새기기", hiddenIndices: all }); 
+    seq.push({ phase: 5, phaseLabel: "온전히 새기기", hiddenIndices: [] }); 
 
     return seq;
   }, [K]);

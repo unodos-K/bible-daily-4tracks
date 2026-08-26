@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { ChevronLeft, BrainCircuit, Share2, PencilLine, FileText, BookOpen, Quote } from "lucide-react";
+import { ChevronLeft, Heart, Share2, PencilLine, FileText, BookOpen, Quote } from "lucide-react";
 import { 
   ReadRecordsMap, 
   DayRecord,
@@ -144,8 +144,8 @@ export default function VerseDetailPage() {
                       }}
                       className="flex flex-col items-center justify-center gap-1.5 py-4 bg-stone-50 dark:bg-white/5 hover:bg-stone-100 dark:hover:bg-white/10 text-stone-600 dark:text-stone-300 rounded-xl transition-all active:scale-95"
                     >
-                      <BrainCircuit size={22} strokeWidth={2.5} className="text-amber-500 dark:text-amber-400" />
-                      <span className="text-xs font-bold tracking-tight">{isMem ? '암송 복습' : '암송 훈련'}</span>
+                      <Heart size={22} strokeWidth={2.5} className="text-amber-500 dark:text-amber-400" />
+                      <span className="text-xs font-bold tracking-tight">{isMem ? '다시 새김' : '마음 새김'}</span>
                     </button>
                     <button
                       onClick={() => {

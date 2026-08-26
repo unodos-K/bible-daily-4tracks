@@ -91,7 +91,7 @@ export default function BibleViewerPage() {
           <div className="w-16 h-16 bg-sky-100 dark:bg-sky-900/50 rounded-full flex items-center justify-center text-3xl mb-1">
             🕊️
           </div>
-          <h1 className="text-2xl font-black text-stone-800 dark:text-stone-100">말씀 통독 & 뇌새김 암송</h1>
+          <h1 className="text-2xl font-black text-stone-800 dark:text-stone-100">말씀 통독 & 마음새김</h1>
           <p className="text-stone-500 dark:text-stone-400 text-sm">매일 말씀과 동행하는 삶을 시작해보세요.</p>
           
           <button

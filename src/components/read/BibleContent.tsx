@@ -1,6 +1,6 @@
 import React from "react";
 import { useRouter } from "next/navigation";
-import { Crown, BrainCircuit, PencilLine, FileText, Share2, CheckCircle2 } from "lucide-react";
+import { Crown, Heart, PencilLine, FileText, Share2, CheckCircle2 } from "lucide-react";
 import { TRACK_INFO } from "@/lib/bible";
 import { OneVerse, ReadRecordsMap, DayRecord } from "@/lib/storage";
 
@@ -159,8 +159,8 @@ export default function BibleContent({
                                       : "bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-700"
                                   }`}
                                 >
-                                  <BrainCircuit size={14} />
-                                  {isMem ? "✅ 암송 복습하기" : "🧠 암송 도전"}
+                                  <Heart size={14} />
+                                  {isMem ? "다시 새김하기" : "마음 새김"}
                                 </button>
                               </div>
                             );

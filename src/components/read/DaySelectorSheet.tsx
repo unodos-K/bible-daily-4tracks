@@ -92,11 +92,11 @@ export default function DaySelectorSheet({
                     </span>
                     {isMemorized ? (
                       <span className="text-[11px] px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-300 border border-amber-500/30 font-medium">
-                        👑 암송 완료
+                        👑 마음새김 완료
                       </span>
                     ) : (
                       <span className="text-[11px] px-2 py-0.5 rounded-md bg-stone-700/60 text-stone-400 border border-stone-600/40">
-                        🧠 암송 도전
+                        ❤️ 마음 새김
                       </span>
                     )}
                   </div>

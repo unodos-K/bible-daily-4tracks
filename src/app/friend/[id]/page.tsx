@@ -148,7 +148,7 @@ export default function FriendProfilePage() {
             
             {/* 뇌새김(암송) 통계 */}
             <div className="mt-4 pt-4 border-t border-stone-100 dark:border-stone-800 flex justify-between items-center">
-              <span className="text-sm font-bold text-stone-600 dark:text-stone-300">뇌새김 암송 완료</span>
+              <span className="text-sm font-bold text-stone-600 dark:text-stone-300">마음새김 완료</span>
               <span className="px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs font-bold rounded-full">
                 👑 {stats.memorizedCount}구절
               </span>

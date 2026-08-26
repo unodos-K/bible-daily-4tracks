@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from 'react';
-import { X, BrainCircuit } from 'lucide-react';
+import { X, Heart } from 'lucide-react';
 import { OneVerse } from '@/lib/storage';
 import { useMemoryTrainer } from '@/hooks/useMemoryTrainer';
 import MemoryTrainerIntro from '@/components/memory/MemoryTrainerIntro';
@@ -41,8 +41,8 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
         
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-2 text-sky-600 dark:text-sky-400 font-bold">
-            <BrainCircuit size={24} />
-            <h2>뇌새김 암송 트레이너</h2>
+            <Heart size={24} />
+            <h2>마음새김 트레이너</h2>
           </div>
           <button 
             onClick={onClose}

@@ -80,9 +80,9 @@ export default function MemoryTrainerIntro({
       )}
 
       <div className="flex flex-col gap-3">
-        <p className="text-sm font-bold text-stone-600 dark:text-stone-400 text-center">
-          암송 훈련 속도를 선택하세요
-        </p>
+        <h3 className="text-sm font-bold text-stone-700 dark:text-stone-300 mb-3 text-center">
+          마음 새김 속도를 선택하세요
+        </h3>
         <div className="grid grid-cols-3 gap-2 bg-stone-100 dark:bg-stone-800 p-1 rounded-xl">
           {[
             { label: "⚡ 빠르게", value: 3 },
@@ -111,7 +111,7 @@ export default function MemoryTrainerIntro({
           className="w-full py-4 bg-sky-600 hover:bg-sky-700 text-white font-bold text-lg rounded-2xl shadow-lg transition-transform hover:-translate-y-1 flex items-center justify-center gap-2"
         >
           <Rocket size={24} />
-          암송 훈련 시작하기
+          마음 새김 시작하기
         </button>
         <button
           onClick={handleDirectChallenge}

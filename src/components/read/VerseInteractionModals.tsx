@@ -1,6 +1,6 @@
 import React from "react";
 import { useRouter } from "next/navigation";
-import { AlertCircle, Leaf, Bookmark, X, CheckCircle2, BrainCircuit } from "lucide-react";
+import { AlertCircle, Leaf, Bookmark, X, CheckCircle2, Heart } from "lucide-react";
 import { OneVerse, ReadRecordsMap } from "@/lib/storage";
 
 interface VerseInteractionModalsProps {
@@ -230,8 +230,8 @@ export default function VerseInteractionModals({
                 }}
                 className="w-full py-4 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl shadow-lg transition-transform hover:scale-[1.02] flex items-center justify-center gap-2"
               >
-                <BrainCircuit size={20} />
-                🧠 지금 암송 도전하기
+                <Heart size={20} />
+                ❤️ 지금 마음 새김하기
               </button>
               
               <div className="flex gap-3">
