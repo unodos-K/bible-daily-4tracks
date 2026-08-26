@@ -4,13 +4,13 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 
 type ThemeMode = "light" | "dark" | "system";
 
-export interface ShareOptions {
-  verse: boolean;
-  meditation: boolean;
-  prayer: boolean;
-  thanksgiving: boolean;
-  application: boolean;
+export interface ShareOptionItem {
+  id: string;
+  label: string;
+  checked: boolean;
 }
+
+export type ShareOptions = ShareOptionItem[];
 
 interface SettingsContextType {
   theme: ThemeMode;
@@ -29,13 +29,13 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<ThemeMode>("system");
   const [fontSize, setFontSize] = useState<number>(18); // 기본값 18px
   const [autoPlayBgm, setAutoPlayBgm] = useState<boolean>(true);
-  const [shareOptions, setShareOptions] = useState<ShareOptions>({
-    verse: true,
-    meditation: true,
-    prayer: true,
-    thanksgiving: true,
-    application: true,
-  });
+  const [shareOptions, setShareOptions] = useState<ShareOptions>([
+    { id: 'verse', label: '말씀', checked: true },
+    { id: 'meditation', label: '묵상', checked: true },
+    { id: 'prayer', label: '기도', checked: true },
+    { id: 'thanksgiving', label: '감사', checked: true },
+    { id: 'application', label: '적용', checked: true },
+  ]);
   const [isMounted, setIsMounted] = useState(false);
 
   // 초기 렌더링 시 로컬 스토리지에서 값 불러오기
@@ -60,7 +60,18 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     const savedShareOptions = localStorage.getItem("bible_app_share_options");
     if (savedShareOptions) {
       try {
-        setShareOptions(JSON.parse(savedShareOptions));
+        const parsed = JSON.parse(savedShareOptions);
+        if (Array.isArray(parsed)) {
+          setShareOptions(parsed);
+        } else {
+          setShareOptions([
+            { id: 'verse', label: '말씀', checked: parsed.verse ?? true },
+            { id: 'meditation', label: '묵상', checked: parsed.meditation ?? true },
+            { id: 'prayer', label: '기도', checked: parsed.prayer ?? true },
+            { id: 'thanksgiving', label: '감사', checked: parsed.thanksgiving ?? true },
+            { id: 'application', label: '적용', checked: parsed.application ?? true },
+          ]);
+        }
       } catch (e) {
         console.error("Failed to parse share options", e);
       }

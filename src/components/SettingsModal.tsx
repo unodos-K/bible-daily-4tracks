@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Moon, Sun, Monitor, Minus, Plus, X, Footprints, AlertCircle, UserCircle2 } from "lucide-react";
+import { Moon, Sun, Monitor, Minus, Plus, X, Footprints, AlertCircle, UserCircle2, GripVertical } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { startNewReading } from "@/lib/storage";
 import { getAuthUser, AuthUser } from "@/lib/auth";
@@ -41,6 +41,27 @@ export default function SettingsModal({ isOpen, onClose, onLogout }: SettingsMod
 
   const handleDecreaseFontSize = () => setFontSize(Math.max(fontSize - 2, 14));
   const handleIncreaseFontSize = () => setFontSize(Math.min(fontSize + 2, 28));
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", index.toString());
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    const dragIndex = parseInt(e.dataTransfer.getData("text/plain"), 10);
+    if (dragIndex === dropIndex) return;
+    
+    const newItems = [...shareOptions];
+    const [draggedItem] = newItems.splice(dragIndex, 1);
+    newItems.splice(dropIndex, 0, draggedItem);
+    setShareOptions(newItems);
+  };
 
   return (
     <>
@@ -147,24 +168,34 @@ export default function SettingsModal({ isOpen, onClose, onLogout }: SettingsMod
 
         {/* 발자국 공유 기본 설정 */}
         <div className="flex flex-col gap-3">
-          <label className="text-sm font-semibold text-stone-500 dark:text-stone-400">발자국 공유 기본 설정</label>
-          <div className="grid grid-cols-2 gap-2">
-            {[
-              { id: 'verse', label: '말씀' },
-              { id: 'meditation', label: '묵상' },
-              { id: 'prayer', label: '기도' },
-              { id: 'thanksgiving', label: '감사' },
-              { id: 'application', label: '적용' },
-            ].map(item => (
-              <label key={item.id} className="flex items-center gap-2 cursor-pointer">
-                <input 
-                  type="checkbox" 
-                  checked={shareOptions[item.id as keyof typeof shareOptions]} 
-                  onChange={() => setShareOptions({ ...shareOptions, [item.id]: !shareOptions[item.id as keyof typeof shareOptions] })} 
-                  className="w-4 h-4 accent-sky-500 bg-stone-100 dark:bg-stone-800 border-stone-300 dark:border-stone-600 rounded" 
-                />
-                <span className="text-sm text-stone-700 dark:text-stone-300">{item.label}</span>
-              </label>
+          <label className="text-sm font-semibold text-stone-500 dark:text-stone-400">발자국 공유 기본 설정 (순서 변경 가능)</label>
+          <div className="flex flex-col gap-2">
+            {shareOptions.map((item, index) => (
+              <div 
+                key={item.id}
+                draggable
+                onDragStart={(e) => handleDragStart(e, index)}
+                onDragOver={(e) => handleDragOver(e)}
+                onDrop={(e) => handleDrop(e, index)}
+                className="flex items-center justify-between p-3 bg-stone-50 dark:bg-stone-800 rounded-xl border border-stone-200 dark:border-stone-700 cursor-grab active:cursor-grabbing hover:bg-stone-100 dark:hover:bg-stone-750 transition-colors"
+              >
+                <label className="flex items-center gap-3 cursor-pointer flex-1">
+                  <input 
+                    type="checkbox" 
+                    checked={item.checked} 
+                    onChange={() => {
+                      const newOptions = [...shareOptions];
+                      newOptions[index].checked = !newOptions[index].checked;
+                      setShareOptions(newOptions);
+                    }} 
+                    className="w-5 h-5 accent-sky-500 bg-white dark:bg-stone-900 border-stone-300 dark:border-stone-600 rounded" 
+                  />
+                  <span className="text-sm font-medium text-stone-700 dark:text-stone-300">{item.label}</span>
+                </label>
+                <div className="text-stone-400 cursor-grab active:cursor-grabbing px-2">
+                  <GripVertical size={16} />
+                </div>
+              </div>
             ))}
           </div>
         </div>

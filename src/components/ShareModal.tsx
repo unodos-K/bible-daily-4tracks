@@ -22,13 +22,19 @@ export default function ShareModal({ isOpen, onClose, record, onShare }: ShareMo
       const newItems = [];
       const memo = record.oneVerse?.memo as MemoData | undefined;
       
-      // 말씀 (Always available since it's the verse)
-      newItems.push({ id: 'verse', label: '말씀', checked: shareOptions.verse });
-      
-      if (memo?.meditation) newItems.push({ id: 'meditation', label: '묵상', checked: shareOptions.meditation });
-      if (memo?.prayer) newItems.push({ id: 'prayer', label: '기도', checked: shareOptions.prayer });
-      if (memo?.thanks) newItems.push({ id: 'thanksgiving', label: '감사', checked: shareOptions.thanksgiving });
-      if (memo?.application && memo.application.length > 0) newItems.push({ id: 'application', label: '적용', checked: shareOptions.application });
+      for (const option of shareOptions) {
+        if (option.id === 'verse') {
+          newItems.push({ ...option });
+        } else if (option.id === 'meditation' && memo?.meditation) {
+          newItems.push({ ...option });
+        } else if (option.id === 'prayer' && memo?.prayer) {
+          newItems.push({ ...option });
+        } else if (option.id === 'thanksgiving' && memo?.thanks) {
+          newItems.push({ ...option });
+        } else if (option.id === 'application' && memo?.application && memo.application.length > 0) {
+          newItems.push({ ...option });
+        }
+      }
       
       setItems(newItems);
     }
