@@ -61,7 +61,7 @@ export default function FriendListWidget({
                 </div>
               </div>
               <div className="text-xs font-medium text-stone-400 shrink-0 ml-2">
-                Kakao: {friend.name}
+                {friend.name}
               </div>
             </div>
           </Link>
@@ -74,7 +74,7 @@ export default function FriendListWidget({
                 <span className="text-xs text-stone-400">Day {friendsFeed[friend.id][0].day_index}</span>
               </div>
               <p className="font-semibold text-stone-700 dark:text-stone-200">
-                &quot;{friendsFeed[friend.id][0].one_verse.displayText || friendsFeed[friend.id][0].one_verse.rawText}&quot;
+                {friendsFeed[friend.id][0].one_verse.displayText || friendsFeed[friend.id][0].one_verse.rawText}
               </p>
               
               {/* 좋아요 버튼 연동 */}

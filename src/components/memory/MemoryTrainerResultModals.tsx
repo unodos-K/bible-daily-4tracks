@@ -53,7 +53,7 @@ export default function MemoryTrainerResultModals({
             </h3>
             <p className="text-stone-500 dark:text-stone-400 mb-8 text-sm">
               <span className="block">인식된 음성: </span>
-              <span className="block text-stone-700 dark:text-stone-300 italic font-semibold">&quot;{speechResult}&quot;</span>
+              <span className="block text-stone-700 dark:text-stone-300 italic font-semibold">{speechResult}</span>
             </p>
             <div className="flex flex-col gap-3">
               <button 

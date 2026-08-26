@@ -80,7 +80,7 @@ export default function FriendSearchBox({
                   </div>
                 </div>
                 <div className="text-xs font-medium text-stone-400 shrink-0 ml-2">
-                  Kakao: {user.name}
+                  {user.name}
                 </div>
               </div>
               

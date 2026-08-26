@@ -141,7 +141,7 @@ export default function FriendProfilePage() {
             )}
           </h2>
           {profile.nickname && (
-            <p className="text-stone-400 dark:text-stone-500 text-xs mt-1">카카오 연동 이름: {profile.name}</p>
+            <p className="text-stone-400 dark:text-stone-500 text-xs mt-1">{profile.name}</p>
           )}
 
           {/* 통독 현황 위젯 */}

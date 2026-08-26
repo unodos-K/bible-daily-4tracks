@@ -103,7 +103,7 @@ export default function VerseInteractionModals({
             <div className="bg-stone-800/50 p-4 rounded-xl mb-4 w-full text-left">
               <div className="text-xs text-stone-400 mb-1 font-bold">기존 One Verse</div>
               <p className="text-stone-300 text-sm leading-relaxed mb-2 line-clamp-3">
-                &quot;{confirmedVerse.displayText}&quot;
+                {confirmedVerse.displayText}
               </p>
               <div className="text-xs text-stone-500 font-bold">
                 {confirmedVerse.book} {confirmedVerse.chapter}:{confirmedVerse.verse}

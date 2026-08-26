@@ -52,7 +52,7 @@ export default function FriendRequestList({
               </div>
             </div>
             <div className="text-xs font-medium text-stone-400 shrink-0 ml-2">
-              Kakao: {req.profile.name}
+              {req.profile.name}
             </div>
           </div>
           <div className="flex items-center justify-end gap-2 mt-2">

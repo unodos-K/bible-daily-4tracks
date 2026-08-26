@@ -235,7 +235,7 @@ function MemoEditorContent() {
         {verseText && verseRef && (
           <div className="mb-6 bg-stone-100 dark:bg-white/5 p-4 rounded-xl border border-stone-200 dark:border-stone-800">
             <blockquote className="text-[15px] sm:text-base text-stone-800 dark:text-stone-200 leading-relaxed italic break-keep mb-3">
-              &quot;{verseText}&quot;
+              {verseText}
             </blockquote>
             <div className="text-right text-stone-500 dark:text-stone-400 font-bold text-xs">
               - {verseRef} -
