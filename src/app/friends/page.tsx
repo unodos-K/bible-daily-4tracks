@@ -18,7 +18,7 @@ export default function FriendsPage() {
           {/* 헤더 */}
           <header className="pt-6 pb-2 px-6 flex items-center justify-between w-full">
             <h1 className="text-2xl font-black text-stone-800 dark:text-stone-100 flex items-center gap-2">
-              친구 탭
+              친구
             </h1>
           </header>
 
@@ -69,7 +69,20 @@ export default function FriendsPage() {
 
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-stone-50 dark:bg-stone-950">
           {friendsState.isLoading ? (
-            <div className="flex items-center justify-center h-full text-stone-400">로딩 중...</div>
+            <div className="flex flex-col gap-3 mt-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex items-center justify-between p-4 bg-white dark:bg-stone-900 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 animate-pulse">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-stone-200 dark:bg-stone-800 shrink-0"></div>
+                    <div className="flex flex-col gap-2">
+                      <div className="w-24 h-4 bg-stone-200 dark:bg-stone-800 rounded"></div>
+                      <div className="w-16 h-3 bg-stone-200 dark:bg-stone-800 rounded"></div>
+                    </div>
+                  </div>
+                  <div className="w-6 h-6 bg-stone-200 dark:bg-stone-800 rounded"></div>
+                </div>
+              ))}
+            </div>
           ) : (
             <>
               {friendsState.activeTab === "friends" && (
