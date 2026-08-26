@@ -73,7 +73,7 @@ export default function FriendListWidget({
                 <span className="text-xs text-stone-400">Day {friendsFeed[friend.id][0].day_index}</span>
               </div>
               <p className="font-semibold text-stone-700 dark:text-stone-200">
-                &quot;{friendsFeed[friend.id][0].one_verse.displayText || friendsFeed[friend.id][0].one_verse.text}&quot;
+                &quot;{friendsFeed[friend.id][0].one_verse.displayText || friendsFeed[friend.id][0].one_verse.rawText}&quot;
               </p>
               
               {/* 좋아요 버튼 연동 */}

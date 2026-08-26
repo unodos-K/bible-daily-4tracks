@@ -2,10 +2,10 @@
 
 import React from "react";
 import { Settings } from "lucide-react";
-import { 
+import {
   DayRecord,
   OneVerse,
-  fetchReadRecords, 
+  fetchReadRecords,
   updateMemorizeRecord,
 } from "@/lib/storage";
 import { signInWithKakao } from "@/lib/supabase";
@@ -36,7 +36,7 @@ export default function MyPage() {
     if (!recordsByDate[r.readDate]) recordsByDate[r.readDate] = [];
     recordsByDate[r.readDate].push(r);
   }
-  
+
   // 그룹 내에서 Day 순으로 정렬
   for (const date in recordsByDate) {
     recordsByDate[date].sort((a, b) => a.dayIndex - b.dayIndex);
@@ -58,47 +58,55 @@ export default function MyPage() {
   return (
     <div className="w-full min-h-full flex flex-col items-center bg-transparent pb-10">
       <div className="w-full max-w-2xl flex flex-col">
-        
+
         {/* 헤더 및 프로필 (고정 헤더) */}
-        <header className="sticky top-0 z-40 bg-stone-50/95 dark:bg-stone-950/95 backdrop-blur-md pt-6 pb-4 px-4 sm:px-6 border-b border-stone-200/50 dark:border-stone-800/50 flex flex-row items-center justify-between w-full mb-6 gap-2">
-          <h1 className="text-lg sm:text-2xl font-black text-stone-800 dark:text-stone-100 shrink-0">
-            나의 발자국 보관소
-          </h1>
-          <div className="flex items-center gap-2 min-w-0 justify-end">
-            {stats.authUser ? (
-              <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 bg-stone-100 dark:bg-stone-800 rounded-full border border-stone-200 dark:border-stone-700 shadow-inner min-w-0">
-                <div className="w-5 h-5 rounded-full bg-stone-300 dark:bg-stone-700 flex items-center justify-center text-[10px] font-bold text-stone-600 dark:text-stone-300 overflow-hidden shrink-0">
-                  {stats.authUser.avatar_url ? (
-                    <img src={stats.authUser.avatar_url} alt={stats.authUser.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <span>{stats.authUser.name.substring(0, 1)}</span>
-                  )}
+        <header className="sticky top-0 z-40 bg-stone-50/95 dark:bg-stone-950/95 backdrop-blur-md pt-6 pb-4 px-4 sm:px-6 border-b border-stone-200/50 dark:border-stone-800/50 flex flex-row items-center justify-between w-full mb-6 gap-4">
+
+          {/* 좌측 묶음: 타이틀과 유저 정보 (반응형 래퍼) */}
+          <div className="flex flex-col items-start gap-2 min-w-0 flex-1 sm:flex-row sm:items-center sm:justify-between">
+            <h1 className="text-lg sm:text-2xl font-black text-stone-800 dark:text-stone-100 shrink-0">
+              나의 발자국 보관소
+            </h1>
+
+            <div className="flex items-center min-w-0">
+              {stats.authUser ? (
+                <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 bg-stone-100 dark:bg-stone-800 rounded-full border border-stone-200 dark:border-stone-700 shadow-inner min-w-0">
+                  <div className="w-5 h-5 rounded-full bg-stone-300 dark:bg-stone-700 flex items-center justify-center text-[10px] font-bold text-stone-600 dark:text-stone-300 overflow-hidden shrink-0">
+                    {stats.authUser.avatar_url ? (
+                      <img src={stats.authUser.avatar_url} alt={stats.authUser.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <span>{stats.authUser.name.substring(0, 1)}</span>
+                    )}
+                  </div>
+                  <span className="font-bold text-xs sm:text-sm text-stone-700 dark:text-stone-200 truncate">
+                    {stats.authUser.nickname ? stats.authUser.nickname.split('#')[0] : stats.authUser.name.split('#')[0]}
+                  </span>
                 </div>
-                <span className="font-bold text-xs sm:text-sm text-stone-700 dark:text-stone-200 truncate">
-                  {stats.authUser.nickname ? stats.authUser.nickname.split('#')[0] : stats.authUser.name.split('#')[0]}
-                </span>
-              </div>
-            ) : (
-              <button
-                onClick={signInWithKakao}
-                className="text-xs sm:text-sm font-bold bg-[#FEE500] text-black hover:bg-[#FDD800] px-3 py-1.5 rounded-lg transition-colors shadow-sm whitespace-nowrap"
-              >
-                💬 카카오 로그인
-              </button>
-            )}
-            <button
-              onClick={() => stats.setIsSettingsModalOpen(true)}
-              className="p-2 text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 transition-colors bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-full shadow-sm"
-              aria-label="환경 설정"
-            >
-              <Settings size={20} />
-            </button>
+              ) : (
+                <button
+                  onClick={signInWithKakao}
+                  className="text-xs sm:text-sm font-bold bg-[#FEE500] text-black hover:bg-[#FDD800] px-3 py-1.5 rounded-lg transition-colors shadow-sm whitespace-nowrap"
+                >
+                  💬 카카오 로그인
+                </button>
+              )}
+            </div>
           </div>
+
+          {/* 우측 설정 버튼 */}
+          <button
+            onClick={() => stats.setIsSettingsModalOpen(true)}
+            className="p-2 text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 transition-colors bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-full shadow-sm shrink-0"
+            aria-label="환경 설정"
+          >
+            <Settings size={20} />
+          </button>
+
         </header>
 
         {/* 메인 컨텐츠 영역 */}
         <div className="flex flex-col gap-8 px-6 w-full">
-          <MyPageCalendar 
+          <MyPageCalendar
             currentDate={stats.currentDate}
             setCurrentDate={stats.setCurrentDate}
             year={year}
@@ -109,7 +117,7 @@ export default function MyPage() {
             handleDayClick={handleDayClick}
           />
 
-          <MyPageStatsBoard 
+          <MyPageStatsBoard
             year={year}
             month={month}
             thisMonthTotal={thisMonthTotal}
@@ -123,7 +131,7 @@ export default function MyPage() {
           />
         </div>
       </div>
-      
+
       {/* 암송 트레이너 모달 연동 */}
       {stats.isMemoryModalOpen && stats.selectedDayIndexForMemory && stats.records[stats.selectedDayIndexForMemory]?.oneVerse && (
         <MemoryTrainerModal
@@ -159,7 +167,7 @@ export default function MyPage() {
         </div>
       )}
 
-      <SettingsModal 
+      <SettingsModal
         isOpen={stats.isSettingsModalOpen}
         onClose={() => stats.setIsSettingsModalOpen(false)}
         onLogout={stats.handleLogout}

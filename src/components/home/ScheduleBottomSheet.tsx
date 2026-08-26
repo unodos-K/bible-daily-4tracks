@@ -8,7 +8,7 @@ interface ScheduleBottomSheetProps {
   daysSince: number;
   records: ReadRecordsMap;
   setIsScheduleSheetOpen: (isOpen: boolean) => void;
-  targetDayRef: React.RefObject<HTMLDivElement | null>;
+  targetDayRef: React.RefObject<HTMLDivElement>;
 }
 
 export default function ScheduleBottomSheet({
@@ -37,8 +37,7 @@ export default function ScheduleBottomSheet({
         </div>
         <div className="flex-1 overflow-y-auto p-4 pb-20 flex flex-col gap-2 overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }}>
           {scheduleData.map((dayData) => {
-            const dayStr = String(dayData.day);
-            const isCompleted = records[dayStr]?.completedAt || records[dayStr]?.readDate;
+            const isCompleted = records[dayData.day]?.completedAt || records[dayData.day]?.readDate;
             const isTargetDay = dayData.day === daysSince;
 
             return (
