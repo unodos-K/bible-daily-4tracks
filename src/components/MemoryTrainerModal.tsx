@@ -8,6 +8,7 @@ import MemoryTrainerIntro from '@/components/memory/MemoryTrainerIntro';
 import MemoryTrainerProgress from '@/components/memory/MemoryTrainerProgress';
 import MemoryTrainerContent from '@/components/memory/MemoryTrainerContent';
 import MemoryTrainerResultModals from '@/components/memory/MemoryTrainerResultModals';
+import { useSettings } from '@/contexts/SettingsContext';
 
 // Web Speech API 타입 정의
 declare global {
@@ -35,7 +36,8 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
     };
   }, []);
 
-  const [isBgmEnabled, setIsBgmEnabled] = useState(true);
+  const { autoPlayBgm } = useSettings();
+  const [isBgmEnabled, setIsBgmEnabled] = useState(autoPlayBgm);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {

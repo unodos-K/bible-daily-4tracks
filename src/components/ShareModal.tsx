@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { X, GripVertical } from 'lucide-react';
 import { DayRecord, MemoData } from '@/lib/storage';
 
+import { useSettings } from '@/contexts/SettingsContext';
+
 interface ShareModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -13,6 +15,7 @@ interface ShareModalProps {
 
 export default function ShareModal({ isOpen, onClose, record, onShare }: ShareModalProps) {
   const [items, setItems] = useState<{ id: string; label: string; checked: boolean }[]>([]);
+  const { shareOptions } = useSettings();
 
   useEffect(() => {
     if (isOpen && record) {
@@ -20,16 +23,16 @@ export default function ShareModal({ isOpen, onClose, record, onShare }: ShareMo
       const memo = record.oneVerse?.memo as MemoData | undefined;
       
       // 말씀 (Always available since it's the verse)
-      newItems.push({ id: 'word', label: '말씀', checked: true });
+      newItems.push({ id: 'verse', label: '말씀', checked: shareOptions.verse });
       
-      if (memo?.meditation) newItems.push({ id: 'meditation', label: '묵상', checked: true });
-      if (memo?.prayer) newItems.push({ id: 'prayer', label: '기도', checked: true });
-      if (memo?.thanks) newItems.push({ id: 'thanks', label: '감사', checked: true });
-      if (memo?.application && memo.application.length > 0) newItems.push({ id: 'application', label: '적용', checked: true });
+      if (memo?.meditation) newItems.push({ id: 'meditation', label: '묵상', checked: shareOptions.meditation });
+      if (memo?.prayer) newItems.push({ id: 'prayer', label: '기도', checked: shareOptions.prayer });
+      if (memo?.thanks) newItems.push({ id: 'thanksgiving', label: '감사', checked: shareOptions.thanksgiving });
+      if (memo?.application && memo.application.length > 0) newItems.push({ id: 'application', label: '적용', checked: shareOptions.application });
       
       setItems(newItems);
     }
-  }, [isOpen, record]);
+  }, [isOpen, record, shareOptions]);
 
   if (!isOpen || !record) return null;
 

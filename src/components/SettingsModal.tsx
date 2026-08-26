@@ -14,7 +14,7 @@ interface SettingsModalProps {
 }
 
 export default function SettingsModal({ isOpen, onClose, onLogout }: SettingsModalProps) {
-  const { theme, setTheme, fontSize, setFontSize } = useSettings();
+  const { theme, setTheme, fontSize, setFontSize, autoPlayBgm, setAutoPlayBgm, shareOptions, setShareOptions } = useSettings();
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [showNicknameModal, setShowNicknameModal] = useState(false);
@@ -125,6 +125,47 @@ export default function SettingsModal({ isOpen, onClose, onLogout }: SettingsMod
             <p className="text-stone-800 dark:text-stone-200 text-center" style={{ fontSize: `${fontSize}px`, lineHeight: 1.8 }}>
               태초에 하나님이 천지를 창조하시니라
             </p>
+          </div>
+        </div>
+
+        <div className="w-full h-px bg-stone-100 dark:bg-stone-800"></div>
+
+        {/* 마음 새김 음악 자동 재생 설정 */}
+        <div className="flex items-center justify-between">
+          <label className="text-sm font-semibold text-stone-500 dark:text-stone-400">마음 새김 시 음악 자동 재생</label>
+          <button
+            onClick={() => setAutoPlayBgm(!autoPlayBgm)}
+            className={`w-12 h-6 rounded-full flex items-center transition-colors p-1 ${
+              autoPlayBgm ? "bg-sky-500" : "bg-stone-300 dark:bg-stone-700"
+            }`}
+          >
+            <div className={`w-4 h-4 rounded-full bg-white transition-transform ${autoPlayBgm ? "translate-x-6" : "translate-x-0"}`} />
+          </button>
+        </div>
+
+        <div className="w-full h-px bg-stone-100 dark:bg-stone-800"></div>
+
+        {/* 발자국 공유 기본 설정 */}
+        <div className="flex flex-col gap-3">
+          <label className="text-sm font-semibold text-stone-500 dark:text-stone-400">발자국 공유 기본 설정</label>
+          <div className="grid grid-cols-2 gap-2">
+            {[
+              { id: 'verse', label: '말씀' },
+              { id: 'meditation', label: '묵상' },
+              { id: 'prayer', label: '기도' },
+              { id: 'thanksgiving', label: '감사' },
+              { id: 'application', label: '적용' },
+            ].map(item => (
+              <label key={item.id} className="flex items-center gap-2 cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  checked={shareOptions[item.id as keyof typeof shareOptions]} 
+                  onChange={() => setShareOptions({ ...shareOptions, [item.id]: !shareOptions[item.id as keyof typeof shareOptions] })} 
+                  className="w-4 h-4 accent-sky-500 bg-stone-100 dark:bg-stone-800 border-stone-300 dark:border-stone-600 rounded" 
+                />
+                <span className="text-sm text-stone-700 dark:text-stone-300">{item.label}</span>
+              </label>
+            ))}
           </div>
         </div>
 
