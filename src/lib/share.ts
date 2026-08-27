@@ -3,22 +3,26 @@ import { DayRecord, MemoData } from "./storage";
 export const shareOneVerse = async (
   record: DayRecord, 
   nickname: string, 
-  orderedItems: string[] = ['word', 'meditation', 'prayer', 'thanks', 'application']
+  orderedItems: string[] = ['verse', 'meditation', 'prayer', 'thanksgiving', 'application']
 ) => {
   if (typeof window === "undefined") return;
 
-  const displayTxt = record.oneVerse?.displayText || record.oneVerse?.rawText || '';
-  const formattedRef = `${record.oneVerse?.book} ${record.oneVerse?.chapter}장 ${record.oneVerse?.verse}절`;
+  const verseObj = record.oneVerse;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const displayTxt = verseObj?.displayText || verseObj?.rawText || (verseObj as any)?.text || '';
+  const formattedRef = verseObj?.reference || (verseObj?.book ? (verseObj.book === "시편" ? `${verseObj.book} ${verseObj.chapter}편 ${verseObj.verse}절` : `${verseObj.book} ${verseObj.chapter}장 ${verseObj.verse}절`) : '');
   
-  const memo = record.oneVerse?.memo as MemoData | undefined;
+  const memo = typeof verseObj?.memo === 'object' ? (verseObj.memo as MemoData) : undefined;
   
   let textToShare = `[One Verse]\n${nickname}님이 오늘의 One Verse를 보냈어요!\n\n`;
 
   for (let i = 0; i < orderedItems.length; i++) {
     const item = orderedItems[i];
     
-    if (item === 'word') {
-      textToShare += `📖 말씀\n"${displayTxt}"\n- ${formattedRef}\n\n`;
+    if (item === 'verse' || item === 'word') {
+      if (displayTxt) {
+        textToShare += `📖 말씀\n"${displayTxt}"\n- ${formattedRef}\n\n`;
+      }
     } 
     else if (item === 'meditation' && memo?.meditation) {
       textToShare += `💭 묵상\n${memo.meditation}\n\n`;
@@ -26,8 +30,7 @@ export const shareOneVerse = async (
     else if (item === 'prayer' && memo?.prayer) {
       textToShare += `🙏 기도\n${memo.prayer}\n\n`;
     }
-    else if (item === 'thanks' && memo?.thanks) {
-      // It might already be formatted with bullets, but just in case we print it
+    else if ((item === 'thanksgiving' || item === 'thanks') && memo?.thanks) {
       textToShare += `💛 감사\n${memo.thanks}\n\n`;
     }
     else if (item === 'application' && memo?.application && memo.application.length > 0) {
