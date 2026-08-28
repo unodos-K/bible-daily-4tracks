@@ -51,8 +51,8 @@ export default function MyPageStatsBoard({
           </span>
         </h3>
         <div className="flex gap-2">
-          <span className="text-xs font-bold bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800 px-2 py-1 rounded-md">
-            👑 암송 완료: {thisMonthMemorized}개
+          <span className="text-xs font-bold bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800 px-2 py-1 rounded-md flex items-center gap-1">
+            <Heart size={12} fill="currentColor" /> 마음 새김: {thisMonthMemorized}개
           </span>
           <span className="text-xs font-bold bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 px-2 py-1 rounded-md">
             📖 통독: {thisMonthTotal}개
@@ -80,17 +80,17 @@ export default function MyPageStatsBoard({
             return (
               <div key={`${record.readDate}-${record.dayIndex}`} className="flex flex-col bg-stone-50 dark:bg-stone-950 border border-stone-100 dark:border-stone-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                 
-                <div className="flex justify-between items-center px-4 py-3 bg-white dark:bg-stone-900 border-b border-stone-100 dark:border-stone-800">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-stone-800 dark:text-stone-200">
-                      {parseInt(mStr)}월 {dayNum}일 ({weekDay})
-                    </span>
-                    <span className="text-xs font-semibold bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 px-2.5 py-0.5 rounded-full">
-                      Day {record.dayIndex}
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
+                <div className="flex flex-col px-4 py-3 bg-white dark:bg-stone-900 border-b border-stone-100 dark:border-stone-800 gap-2">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-stone-800 dark:text-stone-200">
+                        {parseInt(mStr)}월 {dayNum}일 ({weekDay})
+                      </span>
+                      <span className="text-xs font-semibold bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 px-2.5 py-0.5 rounded-full">
+                        Day {record.dayIndex}
+                      </span>
+                    </div>
+                    
                     {likesMap && handleToggleLike && (
                       <LikeButton 
                         item={{
@@ -101,12 +101,15 @@ export default function MyPageStatsBoard({
                         onLike={() => handleToggleLike(record.dayIndex)} 
                       />
                     )}
-                    <div className={`text-xs font-bold px-2 py-1 rounded-md border ${
+                  </div>
+                  
+                  <div className="flex justify-start">
+                    <div className={`text-xs font-bold px-2 py-1 rounded-md border inline-flex items-center gap-1 ${
                       isMem
                         ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400 border-amber-300 dark:border-amber-800'
                         : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800'
                     }`}>
-                      {isMem ? '👑 암송 완료' : '📖 통독 완료'}
+                      {isMem ? <><Heart size={12} fill="currentColor" /> 마음 새김</> : '📖 통독 완료'}
                     </div>
                   </div>
                 </div>

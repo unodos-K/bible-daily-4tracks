@@ -109,7 +109,7 @@ export default function LikeButton({ item, onLike }: LikeButtonProps) {
         }`}
       >
         <Heart size={16} fill={item.is_liked_by_me ? "currentColor" : "none"} />
-        <span className="text-xs font-bold">{item.like_count > 0 ? item.like_count : '좋아요'}</span>
+        <span className="text-xs font-bold">{item.like_count}</span>
       </button>
 
       {showTooltip && (
