@@ -66,15 +66,15 @@ export const shareOneVerse = async (
       await navigator.share(shareData);
       return;
     } catch (err) {
-      console.error("공유 실패:", err);
+      console.error("나눔 실패:", err);
     }
   }
 
   // Clipboard copy fallback
   try {
     await navigator.clipboard.writeText(`${textToShare}\n\n${window.location.origin}`);
-    alert("공유 링크가 클립보드에 복사되었습니다!");
+    alert("나눔 링크가 클립보드에 복사되었습니다!");
   } catch {
-    alert("공유 기능을 지원하지 않는 브라우저입니다.");
+    alert("나눔 기능을 지원하지 않는 브라우저입니다.");
   }
 };

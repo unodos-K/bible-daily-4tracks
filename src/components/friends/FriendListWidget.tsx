@@ -77,7 +77,7 @@ export default function FriendListWidget({
                 {friendsFeed[friend.id][0].one_verse.displayText || friendsFeed[friend.id][0].one_verse.rawText}
               </p>
               
-              {/* 좋아요 버튼 연동 */}
+              {/* 아멘 버튼 연동 */}
               <div className="flex justify-end pt-1 mt-1 border-t border-stone-200 dark:border-stone-800/50">
                 <LikeButton item={friendsFeed[friend.id][0]} onLike={() => handleLike(friend.id, friendsFeed[friend.id][0])} />
               </div>

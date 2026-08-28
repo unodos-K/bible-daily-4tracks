@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Share2, Copy } from "lucide-react";
+import { HeartHandshake, Copy } from "lucide-react";
 import { useFriends } from "@/hooks/useFriends";
 import FriendListWidget from "@/components/friends/FriendListWidget";
 import FriendRequestList from "@/components/friends/FriendRequestList";
@@ -28,7 +28,7 @@ export default function FriendsPage() {
               onClick={friendsState.handleInvite}
               className="flex-1 flex items-center justify-center gap-2 bg-[#FEE500] hover:bg-[#FDD800] text-black text-sm font-bold py-2.5 rounded-xl transition-colors shadow-sm"
             >
-              <Share2 size={16} />
+              <HeartHandshake size={16} />
               친구에게 One Verse 추천하기
             </button>
             <button

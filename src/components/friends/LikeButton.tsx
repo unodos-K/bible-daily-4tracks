@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Heart } from 'lucide-react';
+import { HandHeart } from 'lucide-react';
 import { FriendFeedItem } from '@/lib/social';
 
 interface LikeButtonProps {
@@ -129,7 +129,7 @@ export default function LikeButton({ item, onLike }: LikeButtonProps) {
         }`}
         style={{ WebkitTouchCallout: 'none', WebkitUserSelect: 'none', userSelect: 'none' }}
       >
-        <Heart size={16} fill={item.is_liked_by_me ? "currentColor" : "none"} />
+        <HandHeart size={16} fill={item.is_liked_by_me ? "currentColor" : "none"} />
         <span className="text-xs font-bold">{item.like_count}</span>
       </button>
 
@@ -144,7 +144,7 @@ export default function LikeButton({ item, onLike }: LikeButtonProps) {
           }}
         >
           <div className="font-bold mb-2 opacity-90 border-b border-stone-600 dark:border-stone-300 pb-1.5 flex justify-between items-center">
-            <span>좋아요 누른 사람</span>
+            <span>아멘 한 사람</span>
             <span className="bg-stone-700 dark:bg-stone-200 px-1.5 py-0.5 rounded text-[10px]">{likers.length}</span>
           </div>
           <div className="max-h-32 overflow-y-auto flex flex-wrap gap-1.5 font-medium pr-1">
@@ -155,7 +155,7 @@ export default function LikeButton({ item, onLike }: LikeButtonProps) {
                 </span>
               ))
             ) : (
-              <span className="opacity-70 py-1 text-center w-full block">아직 없어요. 첫 좋아요를 눌러주세요!</span>
+              <span className="opacity-70 py-1 text-center w-full block">아직 없어요. 첫 아멘을 보내주세요!</span>
             )}
           </div>
           {/* Arrow */}

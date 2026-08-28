@@ -88,7 +88,7 @@ export function useFriends() {
       try {
         await navigator.share(shareData);
       } catch (err) {
-        console.error("공유 실패:", err);
+        console.error("나눔 실패:", err);
       }
     } else if (typeof window !== "undefined" && window.Kakao) {
       window.Kakao.Share.sendDefault({
@@ -117,7 +117,7 @@ export function useFriends() {
         await navigator.clipboard.writeText(`${shareData.text}\\n${shareData.url}`);
         alert("초대 링크가 클립보드에 복사되었습니다!");
       } catch {
-        alert("공유 기능을 지원하지 않는 브라우저입니다.");
+        alert("나눔 기능을 지원하지 않는 브라우저입니다.");
       }
     }
   };
@@ -195,7 +195,7 @@ export function useFriends() {
 
     const success = await toggleLike(friendId, item.day_index);
     if (!success) {
-      console.error("좋아요 처리 실패, 롤백합니다.");
+      console.error("아멘 처리 실패, 롤백합니다.");
       // 롤백
       setFriendsFeed(prev => {
         const friendFeed = prev[friendId];

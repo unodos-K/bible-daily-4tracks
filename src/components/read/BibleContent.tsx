@@ -1,6 +1,6 @@
 import React from "react";
 import { useRouter } from "next/navigation";
-import { Crown, Heart, Share2, CheckCircle2, Footprints } from "lucide-react";
+import { Crown, Heart, HeartHandshake, CheckCircle2, Footprints } from "lucide-react";
 import { TRACK_INFO } from "@/lib/bible";
 import { OneVerse, ReadRecordsMap, DayRecord } from "@/lib/storage";
 
@@ -188,8 +188,8 @@ export default function BibleContent({
                                     onClick={(e) => { e.stopPropagation(); if (records[dayIndex]) handleShareOneVerseClick(records[dayIndex]); }}
                                     className="flex-1 py-2 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors border border-stone-200 dark:border-stone-700 shadow-sm"
                                   >
-                                    <Share2 size={16} />
-                                    공유하기
+                                    <HeartHandshake size={16} />
+                                    나눔
                                   </button>
                                 </div>
                               </>

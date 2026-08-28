@@ -1,5 +1,5 @@
 import React from "react";
-import { Share2, Heart, BookOpen, Footprints } from "lucide-react";
+import { HeartHandshake, Heart, BookOpen, Footprints } from "lucide-react";
 import { DayRecord, saveViewerDay } from "@/lib/storage";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import LikeButton from "@/components/friends/LikeButton";
@@ -148,8 +148,8 @@ export default function MyPageStatsBoard({
                       onClick={() => handleShareOneVerse(record)}
                       className="flex flex-col items-center justify-center gap-1.5 py-3 bg-stone-100 dark:bg-white/5 hover:bg-stone-200 dark:hover:bg-white/10 text-stone-600 dark:text-stone-300 rounded-xl transition-all active:scale-95"
                     >
-                      <Share2 size={20} strokeWidth={2.5} className="text-sky-500 dark:text-sky-400" />
-                      <span className="text-[10px] sm:text-xs font-bold tracking-tight">공유하기</span>
+                      <HeartHandshake size={20} strokeWidth={2.5} className="text-sky-500 dark:text-sky-400" />
+                      <span className="text-[10px] sm:text-xs font-bold tracking-tight">나눔</span>
                     </button>
                     <button
                       onClick={() => {

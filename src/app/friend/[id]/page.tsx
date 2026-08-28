@@ -78,7 +78,7 @@ export default function FriendProfilePage() {
 
     const success = await toggleLike(friendId, item.day_index);
     if (!success) {
-      console.error("좋아요 처리 실패");
+      console.error("아멘 처리 실패");
     }
   };
 
