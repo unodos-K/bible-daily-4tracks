@@ -98,14 +98,25 @@ export default function MyPageStatsBoard({
                     )}
                   </div>
                   
-                  <div className="flex justify-start">
-                    <div className={`text-xs font-bold px-2 py-1 rounded-md border inline-flex items-center gap-1.5 ${
-                      isMem
-                        ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400 border-amber-300 dark:border-amber-800'
-                        : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800'
-                    }`}>
-                      {isMem ? <><Heart size={12} fill="currentColor" /> 마음 새김</> : '📖 통독 완료'}
+                  <div className="flex justify-start items-center gap-2 flex-wrap mt-1">
+                    {/* 1. 통독 완료 (항상 활성화) */}
+                    <div className="text-xs font-bold px-2 py-1 rounded-md border inline-flex items-center gap-1.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800">
+                      <BookOpen size={12} /> 통독 완료
                     </div>
+                    
+                    {/* 2. 마음 새김 */}
+                    {isMem && (
+                      <div className="text-xs font-bold px-2 py-1 rounded-md border inline-flex items-center gap-1.5 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400 border-amber-300 dark:border-amber-800">
+                        <Heart size={12} fill="currentColor" /> 마음 새김
+                      </div>
+                    )}
+                    
+                    {/* 3. 발자국 */}
+                    {verse.memo && verse.memo.trim().length > 0 && (
+                      <div className="text-xs font-bold px-2 py-1 rounded-md border inline-flex items-center gap-1.5 bg-sky-100 dark:bg-sky-900/30 text-sky-800 dark:text-sky-400 border-sky-300 dark:border-sky-800">
+                        <Footprints size={12} /> 발자국
+                      </div>
+                    )}
                   </div>
                 </div>
 
