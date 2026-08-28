@@ -78,18 +78,13 @@ export default function MyPageStatsBoard({
             const formattedRef = verse.book === "시편" ? `${verse.book} ${verse.chapter}편 ${verse.verse}절` : `${verse.book} ${verse.chapter}장 ${verse.verse}절`;
 
             return (
-              <div key={`${record.readDate}-${record.dayIndex}`} className="flex flex-col bg-stone-50 dark:bg-stone-950 border border-stone-100 dark:border-stone-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+              <div key={`${record.readDate}-${record.dayIndex}`} className="flex flex-col bg-stone-50 dark:bg-stone-950 border border-stone-100 dark:border-stone-800 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
                 
-                <div className="flex flex-col px-4 py-3 bg-white dark:bg-stone-900 border-b border-stone-100 dark:border-stone-800 gap-2">
+                <div className="flex flex-col px-4 py-3 bg-white dark:bg-stone-900 border-b border-stone-100 dark:border-stone-800 gap-2 rounded-t-2xl">
                   <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-stone-800 dark:text-stone-200">
-                        {parseInt(mStr)}월 {dayNum}일 ({weekDay})
-                      </span>
-                      <span className="text-xs font-semibold bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 px-2.5 py-0.5 rounded-full">
-                        Day {record.dayIndex}
-                      </span>
-                    </div>
+                    <span className="font-bold text-stone-800 dark:text-stone-200">
+                      {parseInt(mStr)}월 {dayNum}일 ({weekDay})
+                    </span>
                     
                     {likesMap && handleToggleLike && (
                       <LikeButton 
@@ -104,7 +99,7 @@ export default function MyPageStatsBoard({
                   </div>
                   
                   <div className="flex justify-start">
-                    <div className={`text-xs font-bold px-2 py-1 rounded-md border inline-flex items-center gap-1 ${
+                    <div className={`text-xs font-bold px-2 py-1 rounded-md border inline-flex items-center gap-1.5 ${
                       isMem
                         ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400 border-amber-300 dark:border-amber-800'
                         : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800'
@@ -115,6 +110,11 @@ export default function MyPageStatsBoard({
                 </div>
 
                 <div className="p-5 flex flex-col gap-3">
+                  <div className="flex justify-start mb-1">
+                    <span className="text-xs font-bold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-900/30 px-2 py-1 rounded-md">
+                      Day {record.dayIndex}
+                    </span>
+                  </div>
                   <blockquote className="text-base sm:text-lg text-stone-800 dark:text-stone-200 font-medium leading-relaxed italic break-keep">
                     {displayTxt}
                   </blockquote>
