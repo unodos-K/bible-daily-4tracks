@@ -22,6 +22,7 @@ interface VerseInteractionModalsProps {
   completeReadingAndShowSuccess: (verse: OneVerse) => void;
   setIsMemoryModalOpen: (open: boolean) => void;
   setDayIndex: (day: number) => void;
+  dayIndex: number;
   getNextUnreadDay: (records: ReadRecordsMap) => number;
   records: ReadRecordsMap;
 }
@@ -45,6 +46,7 @@ export default function VerseInteractionModals({
   completeReadingAndShowSuccess,
   setIsMemoryModalOpen,
   setDayIndex,
+  dayIndex,
   getNextUnreadDay,
   records
 }: VerseInteractionModalsProps) {
@@ -237,7 +239,7 @@ export default function VerseInteractionModals({
               <button
                 onClick={() => {
                   setShowSuccessModal(false);
-                  router.push("/mypage?action=add-footprint");
+                  router.push(`/mypage?action=add-footprint&day=${dayIndex}`);
                 }}
                 className="w-full py-3.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:hover:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 font-bold rounded-xl transition-colors flex items-center justify-center gap-2"
               >

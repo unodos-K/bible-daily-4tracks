@@ -258,6 +258,7 @@ export default function BibleViewerPage() {
         completeReadingAndShowSuccess={completeReadingAndShowSuccess}
         setIsMemoryModalOpen={setIsMemoryModalOpen}
         setDayIndex={setDayIndex}
+        dayIndex={dayIndex}
         getNextUnreadDay={getNextUnreadDay}
         records={records}
       />

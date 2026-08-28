@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Settings, Footprints } from "lucide-react";
 import {
   DayRecord,
@@ -19,6 +19,25 @@ import MyPageStatsBoard from "@/components/mypage/MyPageStatsBoard";
 
 export default function MyPage() {
   const stats = useMyPageStats();
+
+  useEffect(() => {
+    if (stats.isClient && Object.keys(stats.records).length > 0) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const action = urlParams.get('action');
+      const dayStr = urlParams.get('day');
+      
+      if (action === 'add-footprint') {
+        if (dayStr) {
+          stats.router.replace(`/memo?day=${dayStr}&mode=edit`);
+        } else {
+          const sortedRecords = Object.values(stats.records).sort((a, b) => b.dayIndex - a.dayIndex);
+          if (sortedRecords.length > 0) {
+            stats.router.replace(`/memo?day=${sortedRecords[0].dayIndex}&mode=edit`);
+          }
+        }
+      }
+    }
+  }, [stats.isClient, stats.records, stats.router]);
 
   if (!stats.isClient || !stats.settings || !stats.settings.hasStarted) {
     return (
