@@ -98,25 +98,29 @@ export default function MyPageStatsBoard({
                     )}
                   </div>
                   
-                  <div className="flex justify-start items-center gap-2 flex-wrap mt-1">
+                  <div className="grid grid-cols-3 gap-2 w-full mt-2">
                     {/* 1. 통독 완료 (항상 활성화) */}
-                    <div className="text-xs font-bold px-2 py-1 rounded-md border inline-flex items-center gap-1.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800">
-                      <BookOpen size={12} /> 통독 완료
+                    <div className="flex items-center justify-center gap-1 text-[11px] sm:text-xs font-bold py-1.5 rounded-md border bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800 text-center">
+                      <BookOpen size={12} /> <span className="hidden sm:inline">통독 완료</span><span className="sm:hidden">통독</span>
                     </div>
                     
                     {/* 2. 마음 새김 */}
-                    {isMem && (
-                      <div className="text-xs font-bold px-2 py-1 rounded-md border inline-flex items-center gap-1.5 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400 border-amber-300 dark:border-amber-800">
-                        <Heart size={12} fill="currentColor" /> 마음 새김
-                      </div>
-                    )}
+                    <div className={`flex items-center justify-center gap-1 text-[11px] sm:text-xs font-bold py-1.5 rounded-md border text-center transition-colors ${
+                      isMem
+                        ? "bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400 border-amber-300 dark:border-amber-800"
+                        : "bg-stone-100 dark:bg-stone-800/50 text-stone-400 dark:text-stone-500 border-stone-200 dark:border-stone-700"
+                    }`}>
+                      <Heart size={12} fill={isMem ? "currentColor" : "none"} /> <span className="hidden sm:inline">마음 새김</span><span className="sm:hidden">새김</span>
+                    </div>
                     
                     {/* 3. 발자국 */}
-                    {verse.memo && (typeof verse.memo === 'string' ? verse.memo.trim().length > 0 : true) && (
-                      <div className="text-xs font-bold px-2 py-1 rounded-md border inline-flex items-center gap-1.5 bg-sky-100 dark:bg-sky-900/30 text-sky-800 dark:text-sky-400 border-sky-300 dark:border-sky-800">
-                        <Footprints size={12} /> 발자국
-                      </div>
-                    )}
+                    <div className={`flex items-center justify-center gap-1 text-[11px] sm:text-xs font-bold py-1.5 rounded-md border text-center transition-colors ${
+                      verse.memo && (typeof verse.memo === 'string' ? verse.memo.trim().length > 0 : true)
+                        ? "bg-sky-100 dark:bg-sky-900/30 text-sky-800 dark:text-sky-400 border-sky-300 dark:border-sky-800"
+                        : "bg-stone-100 dark:bg-stone-800/50 text-stone-400 dark:text-stone-500 border-stone-200 dark:border-stone-700"
+                    }`}>
+                      <Footprints size={12} /> 발자국
+                    </div>
                   </div>
                 </div>
 
