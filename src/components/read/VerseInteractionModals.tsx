@@ -1,6 +1,6 @@
 import React from "react";
 import { useRouter } from "next/navigation";
-import { AlertCircle, Leaf, Bookmark, X, CheckCircle2, Heart } from "lucide-react";
+import { AlertCircle, Leaf, Bookmark, X, CheckCircle2, Heart, Footprints } from "lucide-react";
 import { OneVerse, ReadRecordsMap } from "@/lib/storage";
 
 interface VerseInteractionModalsProps {
@@ -231,17 +231,29 @@ export default function VerseInteractionModals({
                 className="w-full py-4 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl shadow-lg transition-transform hover:scale-[1.02] flex items-center justify-center gap-2"
               >
                 <Heart size={20} />
-                ❤️ 지금 마음 새김하기
+                지금 마음 새기기
+              </button>
+
+              <button
+                onClick={() => {
+                  setShowSuccessModal(false);
+                  router.push("/mypage?action=add-footprint");
+                }}
+                className="w-full py-3.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:hover:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 font-bold rounded-xl transition-colors flex items-center justify-center gap-2"
+              >
+                <Footprints size={18} />
+                발자국 찍기
               </button>
               
-              <div className="flex gap-3">
-                <button
-                  onClick={() => router.push("/mypage")}
-                  className="w-full py-3.5 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-bold rounded-xl transition-colors"
-                >
-                  마이페이지로 이동
-                </button>
-              </div>
+              <button
+                onClick={() => {
+                  setShowSuccessModal(false);
+                  router.push("/mypage");
+                }}
+                className="w-full py-3.5 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-bold rounded-xl transition-colors"
+              >
+                마이페이지로 이동
+              </button>
             </div>
           </div>
         </div>
