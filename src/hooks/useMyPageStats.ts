@@ -8,7 +8,14 @@ import {
   fetchReadRecords 
 } from "@/lib/storage";
 import { getAuthUser, AuthUser } from "@/lib/auth";
-import { signOut } from "@/lib/supabase";
+import { signOut, supabase } from "@/lib/supabase";
+import { toggleLike } from "@/lib/social";
+
+export interface VerseLikeData {
+  count: number;
+  isLikedByMe: boolean;
+  likers: { id: string; name: string }[];
+}
 
 export function useMyPageStats() {
   const router = useRouter();
@@ -27,6 +34,8 @@ export function useMyPageStats() {
   const [selectedRecordToShare, setSelectedRecordToShare] = useState<DayRecord | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  const [likesMap, setLikesMap] = useState<Record<number, VerseLikeData>>({});
+
   useEffect(() => {
     setIsClient(true);
     getAuthUser().then(async (user) => {
@@ -40,6 +49,30 @@ export function useMyPageStats() {
         setSettings(s);
         const r = await fetchReadRecords();
         setRecords(r);
+
+        const { data: likes } = await supabase
+          .from('one_verse_likes')
+          .select('liker_id, day_index, profiles!liker_id(name, nickname)')
+          .eq('author_id', user.id);
+          
+        if (likes) {
+          const map: Record<number, VerseLikeData> = {};
+          likes.forEach(l => {
+            if (!map[l.day_index]) {
+              map[l.day_index] = { count: 0, isLikedByMe: false, likers: [] };
+            }
+            map[l.day_index].count++;
+            if (l.liker_id === user.id) map[l.day_index].isLikedByMe = true;
+            
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const p = Array.isArray(l.profiles) ? l.profiles[0] : (l.profiles as any);
+            map[l.day_index].likers.push({
+              id: l.liker_id,
+              name: p?.nickname || p?.name || '알 수 없음'
+            });
+          });
+          setLikesMap(map);
+        }
       } else {
         router.push("/");
       }
@@ -78,6 +111,31 @@ export function useMyPageStats() {
     setSelectedRecordToShare(record);
   };
 
+  const handleToggleLike = async (dayIndex: number) => {
+    if (!authUser) return;
+    const success = await toggleLike(authUser.id, dayIndex);
+    if (success) {
+      setLikesMap(prev => {
+        const current = prev[dayIndex] || { count: 0, isLikedByMe: false, likers: [] };
+        const newIsLiked = !current.isLikedByMe;
+        let newLikers = [...current.likers];
+        if (newIsLiked) {
+          newLikers.push({ id: authUser.id, name: authUser.nickname || authUser.name || '나' });
+        } else {
+          newLikers = newLikers.filter(u => u.id !== authUser.id);
+        }
+        return {
+          ...prev,
+          [dayIndex]: {
+            count: newIsLiked ? current.count + 1 : current.count - 1,
+            isLikedByMe: newIsLiked,
+            likers: newLikers
+          }
+        };
+      });
+    }
+  };
+
   return {
     router,
     settings,
@@ -98,6 +156,9 @@ export function useMyPageStats() {
     toastMessage,
     setToastMessage,
     handleLogout,
-    handleShareOneVerse
+    handleShareOneVerse,
+    likesMap,
+    handleToggleLike
   };
 }
+

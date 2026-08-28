@@ -2,6 +2,9 @@ import React from "react";
 import { Share2, Heart, BookOpen, Footprints } from "lucide-react";
 import { DayRecord, saveViewerDay } from "@/lib/storage";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import LikeButton from "@/components/friends/LikeButton";
+import { FriendFeedItem } from "@/lib/social";
+import { VerseLikeData } from "@/hooks/useMyPageStats";
 
 interface MyPageStatsBoardProps {
   year: number;
@@ -14,6 +17,8 @@ interface MyPageStatsBoardProps {
   setSelectedRecordStr: (date: string) => void;
   setSelectedDayIndexForMemory: (index: number) => void;
   setIsMemoryModalOpen: (isOpen: boolean) => void;
+  likesMap?: Record<number, VerseLikeData>;
+  handleToggleLike?: (dayIndex: number) => void;
 }
 
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
@@ -32,7 +37,9 @@ export default function MyPageStatsBoard({
   handleShareOneVerse,
   setSelectedRecordStr,
   setSelectedDayIndexForMemory,
-  setIsMemoryModalOpen
+  setIsMemoryModalOpen,
+  likesMap,
+  handleToggleLike
 }: MyPageStatsBoardProps) {
   return (
     <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 p-4 sm:p-6 flex flex-col">
@@ -83,12 +90,24 @@ export default function MyPageStatsBoard({
                     </span>
                   </div>
                   
-                  <div className={`text-xs font-bold px-2 py-1 rounded-md border ${
-                    isMem
-                      ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400 border-amber-300 dark:border-amber-800'
-                      : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800'
-                  }`}>
-                    {isMem ? '👑 암송 완료' : '📖 통독 완료'}
+                  <div className="flex items-center gap-2">
+                    {likesMap && handleToggleLike && (
+                      <LikeButton 
+                        item={{
+                          is_liked_by_me: likesMap[record.dayIndex]?.isLikedByMe || false,
+                          like_count: likesMap[record.dayIndex]?.count || 0,
+                          liked_by_users: likesMap[record.dayIndex]?.likers || [],
+                        } as FriendFeedItem} 
+                        onLike={() => handleToggleLike(record.dayIndex)} 
+                      />
+                    )}
+                    <div className={`text-xs font-bold px-2 py-1 rounded-md border ${
+                      isMem
+                        ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400 border-amber-300 dark:border-amber-800'
+                        : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800'
+                    }`}>
+                      {isMem ? '👑 암송 완료' : '📖 통독 완료'}
+                    </div>
                   </div>
                 </div>
 

@@ -133,6 +133,8 @@ export default function MyPage() {
             setSelectedRecordStr={stats.setSelectedRecordStr}
             setSelectedDayIndexForMemory={stats.setSelectedDayIndexForMemory}
             setIsMemoryModalOpen={stats.setIsMemoryModalOpen}
+            likesMap={stats.likesMap}
+            handleToggleLike={stats.handleToggleLike}
           />
         </div>
       </div>
