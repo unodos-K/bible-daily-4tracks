@@ -112,7 +112,7 @@ export default function MyPageStatsBoard({
                     )}
                     
                     {/* 3. 발자국 */}
-                    {verse.memo && verse.memo.trim().length > 0 && (
+                    {verse.memo && (typeof verse.memo === 'string' ? verse.memo.trim().length > 0 : true) && (
                       <div className="text-xs font-bold px-2 py-1 rounded-md border inline-flex items-center gap-1.5 bg-sky-100 dark:bg-sky-900/30 text-sky-800 dark:text-sky-400 border-sky-300 dark:border-sky-800">
                         <Footprints size={12} /> 발자국
                       </div>
