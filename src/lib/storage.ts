@@ -49,8 +49,11 @@ export async function fetchReadingSettings(): Promise<ReadingSettings | null> {
   const userId = await getUserId();
   if (!userId) return null;
   const { data, error } = await supabase.from('reading_settings').select('*').eq('user_id', userId).maybeSingle();
-  if (error) console.error("fetchReadingSettings error:", error);
-  if (error || !data) return null;
+  if (error) {
+    console.error("fetchReadingSettings error:", error);
+    throw error;
+  }
+  if (!data) return null;
   return {
     startDate: data.start_date,
     currentDay: 1,
@@ -89,8 +92,11 @@ export async function fetchReadRecords(): Promise<ReadRecordsMap> {
   const userId = await getUserId();
   if (!userId) return {};
   const { data, error } = await supabase.from('reading_records').select('*').eq('user_id', userId);
-  if (error) console.error("fetchReadRecords error:", error);
-  if (error || !data) return {};
+  if (error) {
+    console.error("fetchReadRecords error:", error);
+    throw error;
+  }
+  if (!data) return {};
   
   interface ReadingRecordRow {
     day_index: number;

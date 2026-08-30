@@ -3,7 +3,7 @@ import {
   ReadingSettings, ReadRecordsMap, DayRecord, OneVerse,
   fetchReadingSettings, fetchReadRecords, startNewReading, getNextUnreadDay,
   saveDayRecord, updateReadRecordOneVerse, updateMemorizeRecord, getTodayReadCount,
-  saveViewerDay, getSavedViewerDay 
+  saveViewerDay, getSavedViewerDay, saveReadingSettings
 } from "@/lib/storage";
 import { getAuthUser, AuthUser } from "@/lib/auth";
 export function useBibleReader() {
@@ -108,14 +108,20 @@ export function useBibleReader() {
           import('@/lib/social').then(m => m.sendFriendRequest(inviteCode).catch(e => console.error(e)));
           window.history.replaceState({}, '', window.location.pathname);
         }
-        currentSettings = await fetchReadingSettings();
-        currentRecords = await fetchReadRecords();
+        try {
+          currentSettings = await fetchReadingSettings();
+          currentRecords = await fetchReadRecords();
+        } catch (error) {
+          console.error("Failed to load user data due to network error", error);
+          showToast("데이터를 불러오는데 실패했습니다. 네트워크 상태를 확인해주세요.");
+          return;
+        }
       }
       
       if (!currentSettings || !currentSettings.hasStarted) {
         const dateObj = new Date();
         const todayStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
-        await startNewReading(todayStr);
+        await saveReadingSettings(todayStr);
         currentSettings = {
           startDate: todayStr,
           currentDay: 1,
