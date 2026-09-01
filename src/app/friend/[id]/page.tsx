@@ -16,6 +16,7 @@ export default function FriendProfilePage() {
   const [profile, setProfile] = useState<FriendProfile | null>(null);
   const [stats, setStats] = useState<{ totalReadDays: number, memorizedCount: number }>({ totalReadDays: 0, memorizedCount: 0 });
   const [thisMonthRecords, setThisMonthRecords] = useState<FriendFeedItem[]>([]);
+  const [showAllRecords, setShowAllRecords] = useState(false);
   const [loading, setLoading] = useState(true);
   const { authUser, isAuthLoading } = useAuth();
 
@@ -98,14 +99,18 @@ export default function FriendProfilePage() {
     );
   }
 
+  const displayedRecords = showAllRecords ? records : thisMonthRecords;
+  const pastRecordsCount = records.length - thisMonthRecords.length;
+
   return (
     <div className="w-full min-h-screen flex flex-col bg-stone-100/50 dark:bg-stone-950 pb-32">
       {/* 헤더 */}
-      <header className="sticky top-0 z-40 bg-white/80 dark:bg-stone-900/80 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 pt-[env(safe-area-inset-top)]">
+      <header className="sticky top-0 z-40 bg-white/90 dark:bg-stone-900/90 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 shrink-0">
         <div className="flex items-center px-4 h-14 max-w-2xl mx-auto w-full">
           <button 
             onClick={() => router.back()}
             className="p-2 -ml-2 text-stone-500 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full transition-colors"
+            title="뒤로가기"
           >
             <ChevronLeft size={24} />
           </button>
@@ -116,7 +121,7 @@ export default function FriendProfilePage() {
         </div>
       </header>
 
-      <main className="w-full max-w-2xl mx-auto flex flex-col gap-6 p-4 sm:p-8 mt-4">
+      <main className="w-full max-w-2xl mx-auto flex flex-col gap-6 p-4 sm:p-8 mt-2">
         {/* 프로필 정보 섹션 */}
         <div className="flex flex-col items-center py-6 px-4">
           <div className="w-24 h-24 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden shadow-sm mb-4 flex items-center justify-center text-4xl">
@@ -160,17 +165,18 @@ export default function FriendProfilePage() {
           </div>
         </div>
 
-        {/* 이번 달 One Verse 아카이브 */}
+        {/* One Verse 아카이브 */}
         <div className="flex flex-col gap-4 mt-2">
-          <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 px-1">
-            📅 이번 달 One Verse 모음
+          <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 px-1 flex items-center justify-between">
+            <span>📅 {showAllRecords ? "전체 One Verse 모음" : "이번 달 One Verse 모음"}</span>
+            <span className="text-xs font-normal text-stone-400">총 {records.length}개 중 {displayedRecords.length}개</span>
           </h3>
-          {thisMonthRecords.length === 0 ? (
+          {displayedRecords.length === 0 ? (
             <div className="text-center py-12 text-stone-500 bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-sm">
-              <p>이번 달에 남긴 발자국이 없어요.</p>
+              <p>남긴 발자국이 없어요.</p>
             </div>
           ) : (
-            thisMonthRecords.map((record) => (
+            displayedRecords.map((record) => (
               <div key={record.day_index} className="bg-white dark:bg-stone-900 p-5 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 flex flex-col gap-3">
                 <div className="flex justify-between items-center mb-1">
                   <div className="flex items-center gap-2">
@@ -199,11 +205,18 @@ export default function FriendProfilePage() {
           )}
         </div>
         
-        {/* 이전 발자국 보기 (추후 구현 가능) */}
-        {records.length > thisMonthRecords.length && (
-          <div className="mt-4 px-4 sm:px-6 mb-8">
-            <button className="w-full py-3 bg-stone-100 dark:bg-stone-900 text-stone-600 dark:text-stone-300 font-bold rounded-xl text-sm hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors">
-              이전 발자국 모두 보기 ({records.length - thisMonthRecords.length}개)
+        {/* 이전 발자국 보기 */}
+        {pastRecordsCount > 0 && (
+          <div className="mt-2 px-1 mb-8">
+            <button 
+              onClick={() => setShowAllRecords(prev => !prev)}
+              className="w-full py-3.5 bg-stone-200/70 hover:bg-stone-200 dark:bg-stone-800/80 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-200 font-bold rounded-xl text-sm transition-colors shadow-xs flex items-center justify-center gap-2 cursor-pointer"
+            >
+              {showAllRecords ? (
+                <>이전 발자국 접기 🔼</>
+              ) : (
+                <>이전 발자국 모두 보기 ({pastRecordsCount}개 더보기) 🔽</>
+              )}
             </button>
           </div>
         )}
