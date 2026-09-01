@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import confetti from 'canvas-confetti';
 import { calculateSimilarity } from '@/lib/utils';
 import { OneVerse } from '@/lib/storage';
-import rawBibleData from "@/data/chunked_text.json";
+import { loadChunkedBibleText } from '@/lib/chunkedBibleText';
 
 export interface TrainerStep {
   phase: 1 | 2 | 3 | 4 | 5;
@@ -11,8 +11,35 @@ export interface TrainerStep {
 }
 
 export function useMemoryTrainer({ oneVerse, onComplete }: { oneVerse: OneVerse, onComplete: () => void }) {
-  const bibleTexts = rawBibleData as Record<string, Record<string, Record<string, string>>>;
-  const freshRawText = bibleTexts[oneVerse.book]?.[oneVerse.chapter.toString()]?.[oneVerse.verse.toString()];
+  const [freshRawText, setFreshRawText] = useState<string | null>(null);
+  const [isBibleTextLoading, setIsBibleTextLoading] = useState(true);
+  const [bibleTextLoadError, setBibleTextLoadError] = useState(false);
+
+  useEffect(() => {
+    let isActive = true;
+    setFreshRawText(null);
+    setIsBibleTextLoading(true);
+    setBibleTextLoadError(false);
+
+    loadChunkedBibleText()
+      .then((bibleTexts) => {
+        if (!isActive) return;
+        setFreshRawText(
+          bibleTexts[oneVerse.book]?.[oneVerse.chapter.toString()]?.[oneVerse.verse.toString()] ?? null,
+        );
+      })
+      .catch((error: unknown) => {
+        console.error('Failed to load chunked Bible text:', error);
+        if (isActive) setBibleTextLoadError(true);
+      })
+      .finally(() => {
+        if (isActive) setIsBibleTextLoading(false);
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, [oneVerse.book, oneVerse.chapter, oneVerse.verse]);
   
   const textToUse = freshRawText || oneVerse.rawText || oneVerse.displayText || "";
   const displayString = textToUse.replace(/\s*\/\s*/g, ' ').trim();
@@ -289,6 +316,8 @@ export function useMemoryTrainer({ oneVerse, onComplete }: { oneVerse: OneVerse,
   return {
     displayString,
     chunks,
+    isBibleTextLoading,
+    bibleTextLoadError,
     stepState,
     isPlaying,
     setIsPlaying,

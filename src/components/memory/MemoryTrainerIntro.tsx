@@ -14,6 +14,7 @@ interface MemoryTrainerIntroProps {
   setIntervalSeconds: (sec: number) => void;
   handleStartTraining: () => void;
   handleDirectChallenge: () => void;
+  isBibleTextLoading: boolean;
 }
 
 export default function MemoryTrainerIntro({
@@ -27,7 +28,8 @@ export default function MemoryTrainerIntro({
   intervalSeconds,
   setIntervalSeconds,
   handleStartTraining,
-  handleDirectChallenge
+  handleDirectChallenge,
+  isBibleTextLoading
 }: MemoryTrainerIntroProps) {
   return (
     <div className="flex flex-col gap-6 animate-in slide-in-from-bottom-4">
@@ -106,14 +108,16 @@ export default function MemoryTrainerIntro({
       <div className="mt-2 flex flex-col gap-2 w-full">
         <button
           onClick={handleStartTraining}
-          className="w-full py-4 bg-sky-600 hover:bg-sky-700 text-white font-bold text-lg rounded-2xl shadow-lg transition-transform hover:-translate-y-1 flex items-center justify-center gap-2"
+          disabled={isBibleTextLoading}
+          className="w-full py-4 bg-sky-600 hover:bg-sky-700 disabled:bg-sky-400 disabled:cursor-wait text-white font-bold text-lg rounded-2xl shadow-lg transition-transform hover:-translate-y-1 flex items-center justify-center gap-2"
         >
           <Rocket size={24} />
-          마음 새김 시작하기
+          {isBibleTextLoading ? '본문 준비 중...' : '마음 새김 시작하기'}
         </button>
         <button
           onClick={handleDirectChallenge}
-          className="w-full py-3 bg-orange-50 hover:bg-orange-100 dark:bg-orange-950/30 dark:hover:bg-orange-900/40 text-orange-600 dark:text-orange-400 font-bold rounded-2xl transition-colors border border-orange-200 dark:border-orange-800/50"
+          disabled={isBibleTextLoading}
+          className="w-full py-3 bg-orange-50 hover:bg-orange-100 disabled:opacity-60 disabled:cursor-wait dark:bg-orange-950/30 dark:hover:bg-orange-900/40 text-orange-600 dark:text-orange-400 font-bold rounded-2xl transition-colors border border-orange-200 dark:border-orange-800/50"
         >
           바로 도전하기
         </button>

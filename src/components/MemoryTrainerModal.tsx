@@ -104,6 +104,7 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
             setIntervalSeconds={trainerState.setIntervalSeconds}
             handleStartTraining={trainerState.handleStartTraining}
             handleDirectChallenge={trainerState.handleDirectChallenge}
+            isBibleTextLoading={trainerState.isBibleTextLoading}
           />
         ) : (
           <div className="flex flex-col gap-0 animate-in fade-in zoom-in-95">
@@ -136,6 +137,17 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
               handleComplete={trainerState.handleComplete}
             />
           </div>
+        )}
+
+        {trainerState.isBibleTextLoading && (
+          <p className="mt-3 text-center text-xs font-medium text-stone-400" aria-live="polite">
+            성경 본문을 불러오는 중입니다...
+          </p>
+        )}
+        {trainerState.bibleTextLoadError && (
+          <p className="mt-3 text-center text-xs font-medium text-amber-600 dark:text-amber-400" role="status">
+            저장된 One Verse 본문으로 훈련을 계속합니다.
+          </p>
         )}
       </div>
 

@@ -1,5 +1,5 @@
 import rawScheduleData from "@/data/Bible_Reading_Schedule_365.json";
-import rawBibleData from "@/data/chunked_text.json";
+import { ChunkedBibleText, loadChunkedBibleText } from "@/lib/chunkedBibleText";
 import {
   ChapterData,
   DailyReading,
@@ -77,9 +77,6 @@ export const mccheyneSchedules: DaySchedule[] = rawSchedules.map((item) => {
     tracks: parsedTracks
   };
 });
-
-// 성경 텍스트 데이터 딕셔너리
-const bibleTexts = rawBibleData as Record<string, Record<string, Record<string, string>>>;
 
 // 트랙별 메타데이터 (표시명, 대표 색상 등)
 export const TRACK_INFO: Record<
@@ -239,8 +236,9 @@ export function filterVersesForTrack(
 /**
  * 트랙 정보를 기반으로 성경 데이터에서 해당하는 장/절 본문들을 추출합니다.
  */
-export function getBibleChaptersForTrack(
-  track: ReadingTrack
+function getBibleChaptersForTrack(
+  track: ReadingTrack,
+  bibleTexts: ChunkedBibleText,
 ): ChapterData[] {
   const { book, startChapter, endChapter } = track;
   const result: ChapterData[] = [];
@@ -294,15 +292,16 @@ export function getScheduleByDayIndex(dayIndex: number): DaySchedule | null {
  * 날짜를 입력받아 오늘의 4개 트랙(구약, 신약, 시편, 잠언) 범위와 실제 본문 구절들을 매핑해 반환합니다.
  * @param dateInput "2026-01-01", "1/1", { month: 1, day: 1 }, 또는 new Date()
  */
-export function getDailyReading(
+export async function getDailyReading(
   dateInput: string | { month: number; day: number } | Date
-): DailyReading | null {
+): Promise<DailyReading | null> {
   const schedule = getScheduleByDate(dateInput);
   if (!schedule) return null;
+  const bibleTexts = await loadChunkedBibleText();
 
   const tracksWithContent: TrackReading[] = schedule.tracks.map((track) => ({
     track,
-    chapters: getBibleChaptersForTrack(track),
+    chapters: getBibleChaptersForTrack(track, bibleTexts),
   }));
 
   return {
@@ -318,15 +317,16 @@ export function getDailyReading(
 /**
  * dayIndex(1~365)를 입력받아 4개 트랙(구약, 신약, 시편, 잠언) 범위와 실제 본문 구절들을 매핑해 반환합니다.
  */
-export function getDailyReadingByIndex(
+export async function getDailyReadingByIndex(
   dayIndex: number
-): DailyReading | null {
+): Promise<DailyReading | null> {
   const schedule = getScheduleByDayIndex(dayIndex);
   if (!schedule) return null;
+  const bibleTexts = await loadChunkedBibleText();
 
   const tracksWithContent: TrackReading[] = schedule.tracks.map((track) => ({
     track,
-    chapters: getBibleChaptersForTrack(track),
+    chapters: getBibleChaptersForTrack(track, bibleTexts),
   }));
 
   return {

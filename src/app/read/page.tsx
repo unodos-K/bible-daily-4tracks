@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { AlertCircle, BookOpen } from "lucide-react";
 import { getDailyReadingByIndex, getAllSchedules } from "@/lib/bible";
+import type { DailyReading } from "@/types/bible";
 import MemoryTrainerModal from "@/components/MemoryTrainerModal";
 import ShareModal from "@/components/ShareModal";
 import { signInWithKakao } from "@/lib/supabase";
@@ -35,6 +36,9 @@ const scrollToSection = (id: string) => {
 };
 export default function BibleViewerPage() {
   const { fontSize } = useSettings();
+  const [readingData, setReadingData] = useState<DailyReading | null>(null);
+  const [isReadingTextLoading, setIsReadingTextLoading] = useState(true);
+  const [readingTextError, setReadingTextError] = useState(false);
   
   const {
     isClient,
@@ -80,6 +84,31 @@ export default function BibleViewerPage() {
   
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const allSchedules = getAllSchedules();
+
+  useEffect(() => {
+    if (!isClient || !isDataLoaded || !authUser) return;
+
+    let isActive = true;
+    setIsReadingTextLoading(true);
+    setReadingTextError(false);
+    setReadingData(null);
+
+    getDailyReadingByIndex(dayIndex)
+      .then((data) => {
+        if (isActive) setReadingData(data);
+      })
+      .catch((error: unknown) => {
+        console.error('Failed to load Bible text:', error);
+        if (isActive) setReadingTextError(true);
+      })
+      .finally(() => {
+        if (isActive) setIsReadingTextLoading(false);
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, [authUser, dayIndex, isClient, isDataLoaded]);
 
 
 
@@ -193,7 +222,19 @@ export default function BibleViewerPage() {
     );
   }
 
-  const readingData = getDailyReadingByIndex(dayIndex);
+  if (isReadingTextLoading) {
+    return (
+      <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex flex-col items-center justify-center gap-3 text-stone-500">
+        <BookOpen className="animate-pulse w-8 h-8" />
+        <span className="text-sm font-medium">오늘의 본문을 불러오는 중...</span>
+      </div>
+    );
+  }
+
+  if (readingTextError) {
+    return <div className="p-8 text-center text-stone-500">본문을 불러오지 못했습니다. 네트워크를 확인한 뒤 다시 시도해주세요.</div>;
+  }
+
   if (!readingData) {
     return <div className="p-8 text-center text-stone-500">데이터를 불러올 수 없습니다.</div>;
   }
