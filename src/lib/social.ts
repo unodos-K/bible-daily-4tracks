@@ -34,8 +34,8 @@ export async function createInviteLink(origin: string): Promise<string | null> {
 }
 
 // 1. 친구 검색 (닉네임 기준) 또는 전체 디렉토리 조회
-export async function searchUsersByNickname(nickname: string): Promise<FriendProfile[]> {
-  const userId = await getUserId();
+export async function searchUsersByNickname(nickname: string, currentUserId?: string): Promise<FriendProfile[]> {
+  const userId = currentUserId ?? await getUserId();
   if (!userId) return [];
 
   let query = supabase
@@ -59,8 +59,8 @@ export async function searchUsersByNickname(nickname: string): Promise<FriendPro
 }
 
 // 1-1. 내가 보낸 친구 요청 목록 (friend_id 리스트 반환)
-export async function getSentRequests(): Promise<string[]> {
-  const userId = await getUserId();
+export async function getSentRequests(currentUserId?: string): Promise<string[]> {
+  const userId = currentUserId ?? await getUserId();
   if (!userId) return [];
 
   const { data, error } = await supabase
@@ -92,8 +92,8 @@ export async function sendFriendRequest(friendId: string): Promise<boolean> {
 }
 
 // 3. 나에게 온 친구 요청 목록 가져오기
-export async function getPendingRequests(): Promise<{ id: string; profile: FriendProfile }[]> {
-  const userId = await getUserId();
+export async function getPendingRequests(currentUserId?: string): Promise<{ id: string; profile: FriendProfile }[]> {
+  const userId = currentUserId ?? await getUserId();
   if (!userId) return [];
 
   const { data, error } = await supabase
@@ -162,8 +162,8 @@ export async function respondToFriendRequest(requesterId: string, accept: boolea
 
 
 // 2. 내 친구 목록 가져오기 (profiles 테이블과 조인)
-export async function getFriendsList(): Promise<FriendProfile[]> {
-  const userId = await getUserId();
+export async function getFriendsList(currentUserId?: string): Promise<FriendProfile[]> {
+  const userId = currentUserId ?? await getUserId();
   if (!userId) return [];
 
   // FK 제약 조건이 설정되었으므로 profiles 테이블과 바로 조인 가능
@@ -201,6 +201,110 @@ export async function getFriendsList(): Promise<FriendProfile[]> {
   }
 
   return Array.from(friendsMap.values());
+}
+
+/**
+ * Builds the list-card feed with two batch queries, regardless of friend count.
+ * The list UI only renders each friend's latest One Verse, so older records are
+ * discarded after the ordered batch response is mapped by author.
+ */
+export async function getFriendsFeed(
+  friends: FriendProfile[],
+  currentUserId: string,
+): Promise<Record<string, FriendFeedItem[]>> {
+  const friendIds = Array.from(new Set(friends.map((friend) => friend.id)));
+  const feedByFriend: Record<string, FriendFeedItem[]> = Object.fromEntries(
+    friendIds.map((friendId) => [friendId, []]),
+  );
+  if (friendIds.length === 0) return feedByFriend;
+
+  const profileById = new Map(friends.map((friend) => [friend.id, friend]));
+  const { data: records, error: recordError } = await supabase
+    .from('reading_records')
+    .select('user_id, day_index, read_date, completed_at, one_verse')
+    .in('user_id', friendIds)
+    .not('one_verse', 'is', null)
+    .not('completed_at', 'is', null)
+    .order('completed_at', { ascending: false });
+
+  if (recordError || !records) {
+    console.error('getFriendsFeed records error:', recordError);
+    return feedByFriend;
+  }
+
+  const latestRecordByFriend = new Map<string, {
+    dayIndex: number;
+    readDate: string;
+    completedAt: string;
+    oneVerse: OneVerse;
+  }>();
+
+  for (const record of records) {
+    if (latestRecordByFriend.has(record.user_id) || !record.completed_at) continue;
+    const oneVerse = parseOneVerse(record.one_verse);
+    if (!oneVerse) continue;
+
+    latestRecordByFriend.set(record.user_id, {
+      dayIndex: record.day_index,
+      readDate: record.read_date,
+      completedAt: record.completed_at,
+      oneVerse,
+    });
+  }
+
+  if (latestRecordByFriend.size === 0) return feedByFriend;
+
+  const latestAuthorIds = Array.from(latestRecordByFriend.keys());
+  const latestDayIndices = Array.from(new Set(
+    Array.from(latestRecordByFriend.values(), (record) => record.dayIndex),
+  ));
+  const { data: likes, error: likeError } = await supabase
+    .from('one_verse_likes')
+    .select('liker_id, author_id, day_index, profiles!liker_id(name, nickname)')
+    .in('author_id', latestAuthorIds)
+    .in('day_index', latestDayIndices);
+
+  if (likeError) {
+    console.error('getFriendsFeed likes error:', likeError);
+  }
+
+  const likesByVerse = new Map<string, NonNullable<typeof likes>>();
+  for (const like of likes ?? []) {
+    if (!like.author_id) continue;
+    const key = `${like.author_id}:${like.day_index}`;
+    const recordLikes = likesByVerse.get(key) ?? [];
+    recordLikes.push(like);
+    likesByVerse.set(key, recordLikes);
+  }
+
+  for (const [friendId, record] of Array.from(latestRecordByFriend.entries())) {
+    const friend = profileById.get(friendId);
+    if (!friend) continue;
+
+    const recordLikes = likesByVerse.get(`${friendId}:${record.dayIndex}`) ?? [];
+    feedByFriend[friendId] = [{
+      user_id: friendId,
+      name: friend.name,
+      avatar_url: friend.avatar_url,
+      nickname: friend.nickname,
+      day_index: record.dayIndex,
+      read_date: record.readDate,
+      completed_at: record.completedAt,
+      one_verse: record.oneVerse,
+      like_count: recordLikes.length,
+      is_liked_by_me: recordLikes.some((like) => like.liker_id === currentUserId),
+      liked_by_users: recordLikes.flatMap((like) => {
+        if (!like.liker_id) return [];
+        const profile = Array.isArray(like.profiles) ? like.profiles[0] : like.profiles;
+        return [{
+          id: like.liker_id,
+          name: profile?.nickname || profile?.name || '알 수 없음',
+        }];
+      }),
+    }];
+  }
+
+  return feedByFriend;
 }
 
 // 3. 친구 정보 단건 조회

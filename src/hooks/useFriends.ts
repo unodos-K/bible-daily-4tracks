@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { 
   FriendProfile, 
   searchUsersByNickname, 
@@ -7,7 +7,7 @@ import {
   respondToFriendRequest, 
   getFriendsList,
   FriendFeedItem,
-  getFriendRecords,
+  getFriendsFeed,
   toggleLike,
   getSentRequests,
   createInviteLink
@@ -34,41 +34,50 @@ export function useFriends() {
   const [pressedId, setPressedId] = useState<string | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  useEffect(() => {
-    loadData();
-    getAuthUser().then(user => setAuthUser(user));
-  }, []);
-
-  const loadData = async () => {
+  const loadData = useCallback(async (currentUser: AuthUser | null) => {
     setIsLoading(true);
     try {
-      const fList = await getFriendsList();
-      setFriends(fList);
-      
-      const rList = await getPendingRequests();
-      setRequests(rList);
-      
-      // Fetch sent requests
-      const sentList = await getSentRequests();
-      setSentRequests(sentList);
+      if (!currentUser) {
+        setFriends([]);
+        setRequests([]);
+        setSentRequests([]);
+        setSearchResults([]);
+        setFriendsFeed({});
+        return;
+      }
 
-      // Fetch initial directory
-      const directory = await searchUsersByNickname("");
+      const [fList, rList, sentList, directory] = await Promise.all([
+        getFriendsList(currentUser.id),
+        getPendingRequests(currentUser.id),
+        getSentRequests(currentUser.id),
+        searchUsersByNickname('', currentUser.id),
+      ]);
+      setFriends(fList);
+      setRequests(rList);
+      setSentRequests(sentList);
       setSearchResults(directory);
 
-      // Fetch feed for friends
-      const feeds: Record<string, FriendFeedItem[]> = {};
-      for (const friend of fList) {
-        const records = await getFriendRecords(friend.id);
-        feeds[friend.id] = records;
-      }
+      const feeds = await getFriendsFeed(fList, currentUser.id);
       setFriendsFeed(feeds);
     } catch (e) {
       console.error(e);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    let isActive = true;
+    getAuthUser().then((user) => {
+      if (!isActive) return;
+      setAuthUser(user);
+      void loadData(user);
+    });
+
+    return () => {
+      isActive = false;
+    };
+  }, [loadData]);
 
 
 
@@ -164,7 +173,7 @@ export function useFriends() {
     const success = await respondToFriendRequest(requesterId, accept);
     if (success) {
       alert(accept ? "친구 요청을 수락했습니다." : "친구 요청을 거절했습니다.");
-      loadData(); // 리로드
+      void loadData(authUser); // 리로드
       window.dispatchEvent(new CustomEvent('friend_requests_updated'));
     } else {
       alert("처리에 실패했습니다.");

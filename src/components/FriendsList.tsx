@@ -18,7 +18,7 @@ export default function FriendsList() {
       if (!mounted) return;
       setAuthUser(user);
       if (user) {
-        getFriendsList().then(list => {
+        getFriendsList(user.id).then(list => {
           if (mounted) {
             setFriends(list);
             setLoading(false);
