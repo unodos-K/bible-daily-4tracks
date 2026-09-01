@@ -162,8 +162,8 @@ ALTER TABLE "public"."invites" OWNER TO "postgres";
 
 CREATE TABLE IF NOT EXISTS "public"."one_verse_likes" (
     "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
-    "liker_id" "uuid",
-    "author_id" "uuid",
+    "liker_id" "uuid" NOT NULL,
+    "author_id" "uuid" NOT NULL,
     "day_index" integer NOT NULL,
     "created_at" timestamp with time zone DEFAULT "timezone"('utc'::"text", "now"()) NOT NULL
 );
@@ -210,6 +210,10 @@ ALTER TABLE ONLY "public"."friendships"
     ADD CONSTRAINT "friendships_pkey" PRIMARY KEY ("user_id", "friend_id");
 
 
+ALTER TABLE ONLY "public"."friendships"
+    ADD CONSTRAINT "friendships_no_self_reference" CHECK (("user_id" <> "friend_id"));
+
+
 
 ALTER TABLE ONLY "public"."invites"
     ADD CONSTRAINT "invites_pkey" PRIMARY KEY ("id");
@@ -246,6 +250,18 @@ CREATE INDEX "idx_invites_invite_code" ON "public"."invites" USING "btree" ("inv
 
 
 CREATE INDEX "idx_invites_invitee_id" ON "public"."invites" USING "btree" ("invitee_id");
+
+
+CREATE INDEX "idx_friendships_friend_status" ON "public"."friendships" USING "btree" ("friend_id", "status");
+
+
+CREATE INDEX "idx_friendships_user_status" ON "public"."friendships" USING "btree" ("user_id", "status");
+
+
+CREATE INDEX "idx_one_verse_likes_author_day" ON "public"."one_verse_likes" USING "btree" ("author_id", "day_index");
+
+
+CREATE INDEX "idx_reading_records_user_completed_one_verse" ON "public"."reading_records" USING "btree" ("user_id", "completed_at" DESC) WHERE (("one_verse" IS NOT NULL) AND ("completed_at" IS NOT NULL));
 
 
 
@@ -515,7 +531,6 @@ ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TAB
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "anon";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "authenticated";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "service_role";
-
 
 
 

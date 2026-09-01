@@ -97,25 +97,25 @@ export type Database = {
       }
       one_verse_likes: {
         Row: {
-          author_id: string | null
+          author_id: string
           created_at: string
           day_index: number
           id: string
-          liker_id: string | null
+          liker_id: string
         }
         Insert: {
-          author_id?: string | null
+          author_id: string
           created_at?: string
           day_index: number
           id?: string
-          liker_id?: string | null
+          liker_id: string
         }
         Update: {
-          author_id?: string | null
+          author_id?: string
           created_at?: string
           day_index?: number
           id?: string
-          liker_id?: string | null
+          liker_id?: string
         }
         Relationships: [
           {

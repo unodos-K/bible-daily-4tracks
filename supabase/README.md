@@ -23,9 +23,19 @@ On 2026-09-01, a read-only comparison found the following remote migration histo
 | `20260823033422` | `fix_schema_structure.sql` | present | Recorded remote migration. |
 | `20260823205000` | `split_invites_and_friends.sql` | absent | SQL Editor/manual application is possible; verify objects, not history alone. |
 | `20260901090000` | `secure_invite_acceptance.sql` | absent | Confirmed through remote generated types: `expires_at`, `accepted_at`, `create_invite`, and `accept_invite` exist. It was applied manually in SQL Editor. |
+| `20260902090000` | `friendship_like_integrity.sql` | may be absent | User applied it manually in Supabase SQL Editor after a clean preflight; postflight confirmed its CHECK, NOT NULL changes, and four indexes. |
 
 The absent history entries must **not** be repaired automatically. `supabase migration repair`
 changes remote history without changing objects; use it only after an approved object-level audit.
+
+The manual application of `20260902090000_friendship_like_integrity.sql` was
+recorded in this repository on 2026-09-02. The preflight returned zero rows for
+self-friendships and nullable `one_verse_likes` IDs. The operator's postflight
+then confirmed `friendships_no_self_reference`, `NOT NULL` for both like IDs,
+and all four candidate indexes. SQL Editor application does not automatically
+update Supabase migration history, so the linked history may still omit this
+version. Do not run `db push`, `migration repair`, or re-run this migration to
+resolve that discrepancy without a separately approved object-level plan.
 
 `src/types/supabase.ts` was regenerated from the linked remote `public` schema on
 2026-09-02. It is a type representation, not a schema dump: it does not preserve
@@ -202,7 +212,26 @@ flow uses the primary-key UUID (`invites.id`) as its opaque token; any legacy
 code uniqueness decision must first use `invite_friendship_preflight.sql` and a
 separate migration.
 
-### Candidate migration rollout: 20260902090000
+### Applied manual rollout record: 20260902090000
+
+`20260902090000_friendship_like_integrity.sql` is no longer a pending production
+candidate. It was manually applied through Supabase SQL Editor after the
+required preflight passed. Its result is reflected in `schema/public.sql`:
+
+- `friendships_no_self_reference` prevents self-relations.
+- `one_verse_likes.liker_id` and `.author_id` are `NOT NULL`.
+- `idx_friendships_friend_status`, `idx_friendships_user_status`,
+  `idx_reading_records_user_completed_one_verse`, and
+  `idx_one_verse_likes_author_day` exist.
+
+The snapshot update is a careful DDL reconciliation from the operator-provided
+postflight and the reviewed migration, rather than a fresh CLI dump: Docker was
+not available and the local Supabase CLI could not write its telemetry file.
+Run a future read-only `supabase db dump --linked --schema public` only in a
+working Docker/CLI environment, then compare it before committing. Never use a
+dump command as a reason to apply or repair migrations on production.
+
+### Manual rollout record and future verification: 20260902090000
 
 The following is the reported production index inventory from the SQL Editor as
 of the review: only the primary/unique indexes on `friendships`,
@@ -211,9 +240,9 @@ indexes created by `20260902090000_friendship_like_integrity.sql` were absent.
 This observation is not a substitute for a fresh preflight immediately before
 the change.
 
-The migration is intentionally an **all-or-nothing reviewed rollout**. Do not
-copy only its `CREATE INDEX` statements into production: that would create an
-untracked partial state and make the forward-only migration fail later.
+The migration was applied as an **all-or-nothing reviewed rollout**. Do not
+copy only its `CREATE INDEX` statements into production or re-run the migration:
+that would create an untracked partial state or fail against existing objects.
 
 The index choices match the current client queries in `src/lib/social.ts`:
 
@@ -233,7 +262,8 @@ two friendship lookup directions, feed-eligible reading records, and the
 author/day like lookup used by the current feed. Do not add an `invite_code`
 unique constraint in this rollout; it is a legacy-data/product decision.
 
-User-run production sequence (Codex must not run these SQL statements):
+The completed operator sequence was (and is the required template for any
+future, separately approved constraint migration):
 
 1. In Supabase SQL Editor, run
    `supabase/diagnostics/friendship_like_preflight.sql` in its entirety.
@@ -244,10 +274,10 @@ User-run production sequence (Codex must not run these SQL statements):
 3. Review the informational reverse friendship, status, orphan, duplicate,
    self-like, day-range, RLS, and index results. Do not delete or repair data
    automatically.
-4. Only when the prerequisite and name-conflict result sets are empty, have an
-   approved operator run the complete contents of
-   `supabase/migrations/20260902090000_friendship_like_integrity.sql` once in
-   SQL Editor. Do not use `db push`, `migration repair`, or `db reset`.
+4. When the prerequisite and name-conflict result sets were empty, the approved
+   operator ran the complete migration once in SQL Editor. This step is already
+   complete; do not repeat it. Do not use `db push`, `migration repair`, or
+   `db reset`.
 5. Run `supabase/diagnostics/friendship_like_postflight.sql`. It must show the
    self-reference check, `NO` nullable flags for both like IDs, and all four
    candidate indexes.
