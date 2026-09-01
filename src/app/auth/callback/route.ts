@@ -13,28 +13,18 @@ export async function GET(request: Request) {
     const { error, data } = await supabase.auth.exchangeCodeForSession(code)
     
     if (!error && data?.session?.user) {
-      // Check for pending invite code
+      // Invite acceptance is an authenticated, server-only RPC. The opaque invite
+      // UUID never requires a client-side SELECT of the invites table.
       const { cookies } = await import('next/headers')
       const cookieStore = cookies()
-      const inviteCode = cookieStore.get('pending_invite_code')?.value
+      const inviteId = cookieStore.get('pending_invite_code')?.value
 
-      if (inviteCode) {
-        // 초대 기록 확인 (이미 등록되었는지 방어 코드)
-        const { data: existing } = await supabase
-          .from('invites')
-          .select('id')
-          .eq('invitee_id', data.session.user.id)
-          .single();
-          
-        if (!existing) {
-          await supabase.from('invites').insert({
-            inviter_id: inviteCode,
-            invite_code: inviteCode,
-            invitee_id: data.session.user.id
-          });
+      if (inviteId) {
+        if (/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(inviteId)) {
+          const { error: inviteError } = await supabase.rpc('accept_invite', { p_invite_id: inviteId })
+          if (inviteError) console.warn('Invite acceptance was rejected')
         }
-        
-        // 쿠키 삭제를 위해 응답 객체 생성
+
         const response = NextResponse.redirect(`${origin}${next}`)
         response.cookies.delete('pending_invite_code')
         return response

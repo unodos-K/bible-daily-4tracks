@@ -95,12 +95,6 @@ export function useBibleReader() {
       let currentSettings: ReadingSettings | null = null;
       
       if (user) {
-        const searchParams = new URLSearchParams(window.location.search);
-        const inviteCode = searchParams.get('inviteCode');
-        if (inviteCode) {
-          import('@/lib/social').then(m => m.sendFriendRequest(inviteCode).catch(e => console.error(e)));
-          window.history.replaceState({}, '', window.location.pathname);
-        }
         try {
           currentSettings = await fetchReadingSettings();
           currentRecords = await fetchReadRecords();

@@ -9,7 +9,8 @@ import {
   FriendFeedItem,
   getFriendRecords,
   toggleLike,
-  getSentRequests
+  getSentRequests,
+  createInviteLink
 } from "@/lib/social";
 import { getAuthUser, AuthUser } from "@/lib/auth";
 
@@ -77,7 +78,12 @@ export function useFriends() {
       return;
     }
     
-    const inviteUrl = window.location.origin || process.env.NEXT_PUBLIC_BASE_URL || "";
+    const origin = window.location.origin || process.env.NEXT_PUBLIC_BASE_URL || "";
+    const inviteUrl = await createInviteLink(origin);
+    if (!inviteUrl) {
+      alert("초대 링크를 만들지 못했습니다. 잠시 후 다시 시도해주세요.");
+      return;
+    }
     const shareData = {
       title: 'One Verse',
       text: '매일 말씀을 읽고 내게 주신 한 구절을 암송하세요\\n말씀읽기 & 뇌새김 말씀 암송',

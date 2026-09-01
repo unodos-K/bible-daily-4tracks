@@ -23,6 +23,16 @@ export interface FriendFeedItem {
   liked_by_users?: { id: string; name: string }[];
 }
 
+export async function createInviteLink(origin: string): Promise<string | null> {
+  const { data: inviteId, error } = await supabase.rpc('create_invite');
+  if (error || !inviteId) {
+    console.error("createInviteLink error:", error);
+    return null;
+  }
+
+  return `${origin}/?inviteCode=${encodeURIComponent(inviteId)}`;
+}
+
 // 1. 친구 검색 (닉네임 기준) 또는 전체 디렉토리 조회
 export async function searchUsersByNickname(nickname: string): Promise<FriendProfile[]> {
   const userId = await getUserId();
