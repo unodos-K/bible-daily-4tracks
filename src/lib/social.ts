@@ -1,5 +1,5 @@
 import { supabase } from "./supabase";
-import { getUserId, OneVerse } from "./storage";
+import { getUserId, OneVerse, parseOneVerse } from "./storage";
 
 export interface FriendProfile {
   id: string;
@@ -112,10 +112,20 @@ export async function getPendingRequests(): Promise<{ id: string; profile: Frien
     return [];
   }
 
-  return data.map((row: { user_id: string; profiles: FriendProfile | FriendProfile[] }) => ({
-    id: row.user_id,
-    profile: Array.isArray(row.profiles) ? row.profiles[0] : row.profiles
-  }));
+  return data.flatMap(row => {
+    const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
+    if (!profile) return [];
+
+    return [{
+      id: row.user_id,
+      profile: {
+        id: profile.id,
+        name: profile.name || '친구',
+        avatar_url: profile.avatar_url || '',
+        nickname: profile.nickname || undefined,
+      },
+    }];
+  });
 }
 
 // 4. 친구 요청 수락/거절
@@ -246,12 +256,15 @@ export async function getFriendRecords(friendId: string): Promise<FriendFeedItem
   const friendAvatar = profile?.avatar_url || '';
   const friendNickname = profile?.nickname;
 
-  const feedItems: FriendFeedItem[] = records.map(record => {
+  const feedItems: FriendFeedItem[] = records.flatMap(record => {
+    const oneVerse = parseOneVerse(record.one_verse);
+    if (!oneVerse || !record.completed_at) return [];
+
     const recordLikes = likes ? likes.filter(l => l.day_index === record.day_index) : [];
     const isLikedByMe = myUserId ? recordLikes.some(l => l.liker_id === myUserId) : false;
-    const likedByUsers = recordLikes.map(l => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const p = Array.isArray(l.profiles) ? l.profiles[0] : (l.profiles as any);
+    const likedByUsers = recordLikes.flatMap(l => {
+      if (!l.liker_id) return [];
+      const p = Array.isArray(l.profiles) ? l.profiles[0] : l.profiles;
       return {
         id: l.liker_id,
         name: p?.nickname || p?.name || '알 수 없음'
@@ -266,7 +279,7 @@ export async function getFriendRecords(friendId: string): Promise<FriendFeedItem
       day_index: record.day_index,
       read_date: record.read_date,
       completed_at: record.completed_at,
-      one_verse: record.one_verse,
+      one_verse: oneVerse,
       like_count: recordLikes.length,
       is_liked_by_me: isLikedByMe,
       liked_by_users: likedByUsers
@@ -289,7 +302,7 @@ export async function getFriendStats(friendId: string): Promise<{ totalReadDays:
   }
 
   const totalReadDays = records.length;
-  const memorizedCount = records.filter(r => r.one_verse?.isMemorized).length;
+  const memorizedCount = records.filter(r => parseOneVerse(r.one_verse)?.isMemorized).length;
 
   return { totalReadDays, memorizedCount };
 }

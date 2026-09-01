@@ -17,6 +17,7 @@ export interface VerseLikeData {
   likers: { id: string; name: string }[];
 }
 
+
 export function useMyPageStats() {
   const router = useRouter();
   
@@ -58,14 +59,14 @@ export function useMyPageStats() {
         if (likes) {
           const map: Record<number, VerseLikeData> = {};
           likes.forEach(l => {
+            if (!l.liker_id) return;
             if (!map[l.day_index]) {
               map[l.day_index] = { count: 0, isLikedByMe: false, likers: [] };
             }
             map[l.day_index].count++;
             if (l.liker_id === user.id) map[l.day_index].isLikedByMe = true;
             
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = Array.isArray(l.profiles) ? l.profiles[0] : (l.profiles as any);
+            const p = Array.isArray(l.profiles) ? l.profiles[0] : l.profiles;
             map[l.day_index].likers.push({
               id: l.liker_id,
               name: p?.nickname || p?.name || '알 수 없음'
@@ -161,4 +162,3 @@ export function useMyPageStats() {
     handleToggleLike
   };
 }
-

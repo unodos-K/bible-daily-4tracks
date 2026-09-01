@@ -10,28 +10,28 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.15"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
       friendships: {
         Row: {
-          created_at: string
+          created_at: string | null
           friend_id: string
           user_id: string
-          status: string
+          status: string | null
         }
         Insert: {
-          created_at?: string
+          created_at?: string | null
           friend_id: string
           user_id: string
-          status?: string
+          status?: string | null
         }
         Update: {
-          created_at?: string
+          created_at?: string | null
           friend_id?: string
           user_id?: string
-          status?: string
+          status?: string | null
         }
         Relationships: [
           {
@@ -52,21 +52,27 @@ export type Database = {
       }
       invites: {
         Row: {
-          created_at: string
+          accepted_at: string | null
+          created_at: string | null
+          expires_at: string | null
           id: string
           invite_code: string
           invitee_id: string | null
           inviter_id: string
         }
         Insert: {
-          created_at?: string
+          accepted_at?: string | null
+          created_at?: string | null
+          expires_at?: string | null
           id?: string
           invite_code: string
           invitee_id?: string | null
           inviter_id: string
         }
         Update: {
-          created_at?: string
+          accepted_at?: string | null
+          created_at?: string | null
+          expires_at?: string | null
           id?: string
           invite_code?: string
           invitee_id?: string | null
@@ -215,7 +221,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      accept_invite: { Args: { p_invite_id: string }; Returns: boolean }
+      create_invite: { Args: never; Returns: string }
     }
     Enums: {
       [_ in never]: never
