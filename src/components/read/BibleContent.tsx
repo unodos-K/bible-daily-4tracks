@@ -28,7 +28,7 @@ const formatReference = (book: string, chapter: number, verse: number) => {
 
 interface BibleContentProps {
   readingData: ReadingData;
-  headerHeight: number;
+  headerHeight?: number;
   fontSize: number;
   selectedVerse: OneVerse | null;
   confirmedVerse: OneVerse | null;
@@ -44,7 +44,6 @@ interface BibleContentProps {
 
 export default function BibleContent({
   readingData,
-  headerHeight,
   fontSize,
   selectedVerse,
   confirmedVerse,
@@ -59,32 +58,31 @@ export default function BibleContent({
 }: BibleContentProps) {
   const router = useRouter();
   const tracks = readingData.tracks;
-  const { activeTrackType, stickyHeaderHeight, stickyHeaderRef, trackRefs } = useActiveReaderTrack(tracks, headerHeight);
+  const { activeTrackType, stickyHeaderRef, trackRefs } = useActiveReaderTrack(tracks);
 
   const activeTrack = readingData.tracks.find(
     (trackReading) => trackReading.track.type === activeTrackType
   ) ?? readingData.tracks[0];
   const activeTrackInfo = activeTrack && TRACK_INFO[activeTrack.track.type as keyof typeof TRACK_INFO];
   const activeTrackIcon = activeTrack && (TRACK_ICONS[activeTrack.track.type] || "📖");
-  const stickyOffsetStyle = {
-    "--reader-main-header-height": `${headerHeight}px`,
-    "--reader-track-header-height": `${stickyHeaderHeight}px`,
-  } as React.CSSProperties;
 
   return (
-    <>
-      <div className="flex flex-col flex-1" style={stickyOffsetStyle}>
-        {activeTrack && activeTrackInfo && (
-          <div
-            ref={stickyHeaderRef}
-            className="sticky z-20 py-2 px-4 text-sm font-semibold bg-stone-50/95 dark:bg-stone-900/90 backdrop-blur border-b border-stone-200 dark:border-stone-800 shadow-sm transition-colors"
-            style={{ top: "var(--reader-main-header-height)" }}
-          >
-            <h2 className="flex items-center gap-2" style={{ color: activeTrackInfo.accentColor }}>
-              <span>{activeTrackIcon}</span> {activeTrackInfo.title.split(" ")[0]} <span className="text-stone-500 font-normal mx-0.5">·</span> <span className="text-stone-700 dark:text-stone-300">{activeTrack.track.range}</span>
-            </h2>
-          </div>
-        )}
+    <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
+      {activeTrack && activeTrackInfo && (
+        <div
+          ref={stickyHeaderRef}
+          className="shrink-0 relative z-20 py-2 px-4 text-sm font-semibold bg-stone-100/90 dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800 transition-colors"
+        >
+          <h2 className="flex items-center gap-2" style={{ color: activeTrackInfo.accentColor }}>
+            <span>{activeTrackIcon}</span> {activeTrackInfo.title.split(" ")[0]} <span className="text-stone-500 font-normal mx-0.5">·</span> <span className="text-stone-700 dark:text-stone-300">{activeTrack.track.range}</span>
+          </h2>
+        </div>
+      )}
+
+      <div 
+        id="bible-content-scroll"
+        className="flex-1 overflow-y-auto overscroll-y-contain flex flex-col"
+      >
         {readingData.tracks.map((trackReading: TrackData) => {
           return (
             <div 
@@ -95,7 +93,6 @@ export default function BibleContent({
                 if (element) trackRefs.current.set(trackReading.track.type, element);
                 else trackRefs.current.delete(trackReading.track.type);
               }}
-              style={{ scrollMarginTop: "calc(var(--reader-main-header-height) + var(--reader-track-header-height))" }}
             >
               <div className="pl-3 pr-14 sm:pl-6 sm:pr-8 py-6 sm:py-8 flex flex-col gap-6" style={{ fontSize: `${fontSize}px`, lineHeight: 1.8 }}>
                 {trackReading.chapters.map((chapterData: ChapterData) => (
@@ -247,29 +244,29 @@ export default function BibleContent({
             </div>
           );
         })}
-      </div>
 
-      <div id="viewer-bottom" className="px-5 sm:px-8 py-12 flex justify-center bg-stone-50 dark:bg-stone-900 border-t border-stone-200 dark:border-stone-800 relative z-10">
-        <button
-          onClick={handleBottomButtonClick}
-          className={`flex items-center gap-2 px-6 py-4 rounded-2xl shadow-sm transition-all duration-300 font-bold text-lg w-full max-w-sm justify-center ${
-            isCompletedDay 
-              ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800 scale-[0.98]" 
-              : "bg-sky-600 hover:bg-sky-700 text-white shadow-md hover:-translate-y-1"
-          }`}
-        >
-          {isCompletedDay ? (
-            <React.Fragment>
-              <CheckCircle2 size={24} />
-              Day {readingData.dayIndex} 말씀 통독 완료 🎉
-            </React.Fragment>
-          ) : (
-            <React.Fragment>
-              Day {readingData.dayIndex} 말씀 통독 완료하기
-            </React.Fragment>
-          )}
-        </button>
+        <div id="viewer-bottom" className="px-5 sm:px-8 py-12 flex justify-center bg-stone-50 dark:bg-stone-900 border-t border-stone-200 dark:border-stone-800 relative z-10">
+          <button
+            onClick={handleBottomButtonClick}
+            className={`flex items-center gap-2 px-6 py-4 rounded-2xl shadow-sm transition-all duration-300 font-bold text-lg w-full max-w-sm justify-center ${
+              isCompletedDay 
+                ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800 scale-[0.98]" 
+                : "bg-sky-600 hover:bg-sky-700 text-white shadow-md hover:-translate-y-1"
+            }`}
+          >
+            {isCompletedDay ? (
+              <React.Fragment>
+                <CheckCircle2 size={24} />
+                Day {readingData.dayIndex} 말씀 통독 완료 🎉
+              </React.Fragment>
+            ) : (
+              <React.Fragment>
+                Day {readingData.dayIndex} 말씀 통독 완료하기
+              </React.Fragment>
+            )}
+          </button>
+        </div>
       </div>
-    </>
+    </div>
   );
 }

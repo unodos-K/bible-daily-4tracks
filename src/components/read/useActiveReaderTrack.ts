@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { TrackData } from "./types";
 
-export function useActiveReaderTrack(tracks: TrackData[], headerHeight: number) {
+export function useActiveReaderTrack(tracks: TrackData[]) {
   const trackRefs = useRef(new Map<string, HTMLDivElement>());
   const stickyHeaderRef = useRef<HTMLDivElement>(null);
   const [stickyHeaderHeight, setStickyHeaderHeight] = useState(0);
@@ -22,17 +22,23 @@ export function useActiveReaderTrack(tracks: TrackData[], headerHeight: number) 
   }, [activeTrackType]);
 
   useEffect(() => {
-    const scrollContainer = document.querySelector("main");
+    const scrollContainer = document.getElementById("bible-content-scroll");
     if (!scrollContainer) return;
     let frameId: number | null = null;
     const updateActiveTrack = () => {
       frameId = null;
-      const stickyBottom = scrollContainer.getBoundingClientRect().top + headerHeight + stickyHeaderHeight;
+      const containerTop = scrollContainer.getBoundingClientRect().top;
       let nextTrackType = initialTrackType;
       for (const track of tracks) {
-        const top = trackRefs.current.get(track.track.type)?.getBoundingClientRect().top;
-        if (top !== undefined && top <= stickyBottom) nextTrackType = track.track.type;
-        else break;
+        const trackEl = trackRefs.current.get(track.track.type);
+        if (trackEl) {
+          const top = trackEl.getBoundingClientRect().top - containerTop;
+          if (top <= 40) {
+            nextTrackType = track.track.type;
+          } else {
+            break;
+          }
+        }
       }
       setActiveTrackType((current) => current === nextTrackType ? current : nextTrackType);
     };
@@ -45,7 +51,7 @@ export function useActiveReaderTrack(tracks: TrackData[], headerHeight: number) 
       window.removeEventListener("resize", onScroll);
       if (frameId !== null) window.cancelAnimationFrame(frameId);
     };
-  }, [headerHeight, initialTrackType, stickyHeaderHeight, trackSignature, tracks]);
+  }, [initialTrackType, trackSignature, tracks]);
 
   return { activeTrackType, stickyHeaderHeight, stickyHeaderRef, trackRefs };
 }

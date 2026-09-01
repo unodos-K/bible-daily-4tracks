@@ -20,13 +20,12 @@ import { useSettings } from "@/contexts/SettingsContext";
 const scrollToSection = (id: string) => {
   const el = document.getElementById(id);
   if (el) {
-    const main = document.querySelector('main');
-    if (main) {
-      const headerOffset = 60;
-      const mainRect = main.getBoundingClientRect();
+    const scrollContainer = document.getElementById('bible-content-scroll');
+    if (scrollContainer) {
+      const containerRect = scrollContainer.getBoundingClientRect();
       const elRect = el.getBoundingClientRect();
-      const targetTop = main.scrollTop + (elRect.top - mainRect.top) - headerOffset;
-      main.scrollTo({
+      const targetTop = scrollContainer.scrollTop + (elRect.top - containerRect.top);
+      scrollContainer.scrollTo({
         top: Math.max(0, targetTop),
         behavior: "smooth"
       });
@@ -241,7 +240,7 @@ export default function BibleViewerPage() {
   }
 
   return (
-    <div className="w-full min-h-[calc(100vh-52px)] flex justify-center bg-stone-200/50 dark:bg-stone-950 pb-20 relative">
+    <div className="w-full h-full flex flex-col overflow-hidden bg-stone-200/50 dark:bg-stone-950 relative">
       
       {/* Toast */}
       {toastMessage && (
@@ -302,15 +301,15 @@ export default function BibleViewerPage() {
         onOneVerse={() => {
               const el = document.getElementById('one-verse-target');
               if (el) {
-                const main = document.querySelector('main');
-                if (main) {
-                  const mainRect = main.getBoundingClientRect();
+                const scrollContainer = document.getElementById('bible-content-scroll');
+                if (scrollContainer) {
+                  const mainRect = scrollContainer.getBoundingClientRect();
                   const elRect = el.getBoundingClientRect();
                   const elementCenter = elRect.top + elRect.height / 2;
                   const viewportCenter = mainRect.top + mainRect.height / 2;
-                  const targetTop = main.scrollTop + (elementCenter - viewportCenter);
-                  const maxScrollTop = main.scrollHeight - main.clientHeight;
-                  main.scrollTo({
+                  const targetTop = scrollContainer.scrollTop + (elementCenter - viewportCenter);
+                  const maxScrollTop = scrollContainer.scrollHeight - scrollContainer.clientHeight;
+                  scrollContainer.scrollTo({
                     top: Math.min(Math.max(0, targetTop), maxScrollTop),
                     behavior: 'smooth'
                   });
@@ -323,9 +322,7 @@ export default function BibleViewerPage() {
             }}
       />
 
-
-
-      <div className="w-full max-w-2xl bg-transparent shadow-2xl flex flex-col relative min-h-full">
+      <div className="w-full max-w-2xl bg-white dark:bg-stone-900 shadow-2xl flex flex-col h-full overflow-hidden mx-auto relative">
         
         {/* 상단 네비게이터 */}
         <ReadHeader
