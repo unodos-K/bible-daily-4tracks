@@ -156,3 +156,48 @@ Before any production change, separately review and diagnose:
   `NOT NULL`; the existing composite unique constraint allows multiple NULLs.
 - Whether `invites.invite_code` needs a unique constraint for legacy data; the
   new opaque ID flow relies on the already-unique `invites.id` instead.
+
+## Friendship and One Verse integrity follow-up
+
+`diagnostics/friendship_like_preflight.sql` is the required read-only preflight
+for `20260902090000_friendship_like_integrity.sql`. Run it in the Supabase SQL
+Editor immediately before requesting approval to apply that migration.
+
+The candidate migration is safe only when its self-friendship and nullable-like
+ID prerequisite queries return no rows. It then adds:
+
+- `friendships_no_self_reference`, preventing `user_id = friend_id`.
+- `NOT NULL` on `one_verse_likes.liker_id` and `author_id`, so the existing
+  `(liker_id, author_id, day_index)` unique key cannot be bypassed with NULLs.
+- Query indexes for incoming/outgoing friendship status, friend-feed One Verse
+  ordering, and likes by verse author/day.
+
+An accepted friendship intentionally has two directed rows: `(A, B)` and
+`(B, A)`. The preflight reports a missing reverse accepted row as inconsistent
+data; it must not be deduplicated automatically. A pending request may have no
+reverse row.
+
+For a production rollout, first run the preflight in SQL Editor and retain its
+results with the change request. If the prerequisite queries are empty, review
+the informational status/reverse/self-like/day-range results, then obtain
+approval for the migration. Do not use `db push` to apply this candidate while
+the linked project's manual migration-history gap remains unresolved.
+
+The candidate SQL was statically reviewed, but an isolated Docker syntax run
+could not complete because the local Supabase PostgreSQL image exited during
+startup. It has not been run against any remote database. Re-run it in a stable
+disposable Supabase stack before requesting production application.
+
+No RLS policy change is included. The snapshot shows that `friendships`,
+`one_verse_likes`, `profiles`, and `reading_records` have unrestricted SELECT
+policies; `friendships` also has duplicate INSERT and DELETE policies. The
+current friend search, arbitrary friend profile route, friend feed, and like
+display rely on cross-user reads, while `reading_records.one_verse` can contain
+user-authored memo data. Narrowing these policies needs an explicit product
+decision about public profiles, public One Verse, and private memo visibility,
+followed by role-level integration tests.
+
+`invite_code` remains non-unique by design in this candidate. The active invite
+flow uses the primary-key UUID (`invites.id`) as its opaque token; any legacy
+code uniqueness decision must first use `invite_friendship_preflight.sql` and a
+separate migration.
