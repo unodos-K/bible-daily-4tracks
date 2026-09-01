@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { 
   ReadingSettings, ReadRecordsMap, DayRecord, OneVerse,
-  fetchReadingSettings, fetchReadRecords, startNewReading, getNextUnreadDay,
+  fetchReadingSettings, fetchReadRecords, getNextUnreadDay,
   saveDayRecord, updateReadRecordOneVerse, updateMemorizeRecord,
   saveViewerDay, getSavedViewerDay, saveReadingSettings
 } from "@/lib/storage";
