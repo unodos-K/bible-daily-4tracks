@@ -201,3 +201,56 @@ followed by role-level integration tests.
 flow uses the primary-key UUID (`invites.id`) as its opaque token; any legacy
 code uniqueness decision must first use `invite_friendship_preflight.sql` and a
 separate migration.
+
+### Candidate migration rollout: 20260902090000
+
+The following is the reported production index inventory from the SQL Editor as
+of the review: only the primary/unique indexes on `friendships`,
+`one_verse_likes`, and `reading_records` were present. In particular, the four
+indexes created by `20260902090000_friendship_like_integrity.sql` were absent.
+This observation is not a substitute for a fresh preflight immediately before
+the change.
+
+The migration is intentionally an **all-or-nothing reviewed rollout**. Do not
+copy only its `CREATE INDEX` statements into production: that would create an
+untracked partial state and make the forward-only migration fail later.
+
+The index choices match the current client queries in `src/lib/social.ts`:
+
+- `idx_friendships_friend_status` serves incoming pending requests by
+  `(friend_id, status)`.
+- `idx_friendships_user_status` serves sent requests and accepted friend lists
+  by `(user_id, status)`.
+- `idx_reading_records_user_completed_one_verse` serves the batch friend feed:
+  `user_id IN (...)`, non-null One Verse/completion filtering, then newest
+  `completed_at` first. It excludes rows that cannot appear in that feed.
+- `idx_one_verse_likes_author_day` serves the batch likes lookup by verse
+  author and day. The existing unique index starts with `liker_id`, so it does
+  not cover this access pattern.
+
+Each index adds write cost to its table. They are deliberately limited to the
+two friendship lookup directions, feed-eligible reading records, and the
+author/day like lookup used by the current feed. Do not add an `invite_code`
+unique constraint in this rollout; it is a legacy-data/product decision.
+
+User-run production sequence (Codex must not run these SQL statements):
+
+1. In Supabase SQL Editor, run
+   `supabase/diagnostics/friendship_like_preflight.sql` in its entirety.
+2. Stop if either prerequisite data query returns rows: self-friendships, or
+   likes with nullable `liker_id` / `author_id`. Also stop if the final
+   constraint/index name checks return rows: that indicates a prior partial or
+   manual application that requires an object-level review.
+3. Review the informational reverse friendship, status, orphan, duplicate,
+   self-like, day-range, RLS, and index results. Do not delete or repair data
+   automatically.
+4. Only when the prerequisite and name-conflict result sets are empty, have an
+   approved operator run the complete contents of
+   `supabase/migrations/20260902090000_friendship_like_integrity.sql` once in
+   SQL Editor. Do not use `db push`, `migration repair`, or `db reset`.
+5. Run `supabase/diagnostics/friendship_like_postflight.sql`. It must show the
+   self-reference check, `NO` nullable flags for both like IDs, and all four
+   candidate indexes.
+6. Verify friend list/request views, the batched friend One Verse feed, and
+   like add/remove in the application. Keep the SQL Editor results with the
+   production change record.

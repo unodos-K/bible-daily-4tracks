@@ -83,4 +83,22 @@ WHERE schemaname = 'public'
   AND tablename IN ('friendships', 'one_verse_likes', 'reading_records')
 ORDER BY tablename, indexname;
 
+-- Stop before applying the forward-only migration if it was partially or fully
+-- applied manually. The migration has no safe re-run guard for ALTER TABLE.
+SELECT conrelid::regclass AS table_name, conname AS constraint_name
+FROM pg_catalog.pg_constraint
+WHERE connamespace = 'public'::regnamespace
+  AND conname = 'friendships_no_self_reference';
+
+SELECT indexname
+FROM pg_catalog.pg_indexes
+WHERE schemaname = 'public'
+  AND indexname IN (
+    'idx_friendships_friend_status',
+    'idx_friendships_user_status',
+    'idx_reading_records_user_completed_one_verse',
+    'idx_one_verse_likes_author_day'
+  )
+ORDER BY indexname;
+
 COMMIT;
