@@ -298,8 +298,14 @@ export default function BibleViewerPage() {
                 if (main) {
                   const mainRect = main.getBoundingClientRect();
                   const elRect = el.getBoundingClientRect();
-                  const targetTop = main.scrollTop + (elRect.top - mainRect.top) - 100;
-                  main.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
+                  const elementCenter = elRect.top + elRect.height / 2;
+                  const viewportCenter = mainRect.top + mainRect.height / 2;
+                  const targetTop = main.scrollTop + (elementCenter - viewportCenter);
+                  const maxScrollTop = main.scrollHeight - main.clientHeight;
+                  main.scrollTo({
+                    top: Math.min(Math.max(0, targetTop), maxScrollTop),
+                    behavior: 'smooth'
+                  });
                 } else {
                   el.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
