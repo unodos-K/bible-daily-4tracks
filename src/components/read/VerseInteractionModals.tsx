@@ -1,11 +1,9 @@
 import React from "react";
 import { useRouter } from "next/navigation";
-import { AlertCircle, Leaf, Bookmark, X, CheckCircle2, Heart } from "lucide-react";
-import { OneVerse, ReadRecordsMap } from "@/lib/storage";
+import { AlertCircle, Bookmark, X, CheckCircle2, Heart } from "lucide-react";
+import { OneVerse } from "@/lib/storage";
 
 interface VerseInteractionModalsProps {
-  showDailyLimitModal: boolean;
-  setShowDailyLimitModal: (open: boolean) => void;
   showWarningModal: boolean;
   setShowWarningModal: (open: boolean) => void;
   showConfirmModal: boolean;
@@ -21,14 +19,9 @@ interface VerseInteractionModalsProps {
   executeReplaceVerse: (verse: OneVerse) => void;
   completeReadingAndShowSuccess: (verse: OneVerse) => void;
   setIsMemoryModalOpen: (open: boolean) => void;
-  setDayIndex: (day: number) => void;
-  getNextUnreadDay: (records: ReadRecordsMap) => number;
-  records: ReadRecordsMap;
 }
 
 export default function VerseInteractionModals({
-  showDailyLimitModal,
-  setShowDailyLimitModal,
   showWarningModal,
   setShowWarningModal,
   showConfirmModal,
@@ -43,10 +36,7 @@ export default function VerseInteractionModals({
   setSelectedVerse,
   executeReplaceVerse,
   completeReadingAndShowSuccess,
-  setIsMemoryModalOpen,
-  setDayIndex,
-  getNextUnreadDay,
-  records
+  setIsMemoryModalOpen
 }: VerseInteractionModalsProps) {
   const router = useRouter();
 
@@ -56,44 +46,6 @@ export default function VerseInteractionModals({
 
   return (
     <>
-      {showDailyLimitModal && (
-        <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white dark:bg-stone-900 rounded-2xl p-6 shadow-xl w-full max-w-md flex flex-col items-center gap-4 animate-in zoom-in-95">
-            <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-2">
-              <Leaf size={32} />
-            </div>
-            <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100 text-center">
-              <span className="block">오늘의 권장 통독 분량을</span>
-              <span className="block">달성했습니다! 🌿</span>
-            </h3>
-            <p className="text-stone-500 dark:text-stone-400 text-center text-sm mb-4 leading-relaxed">
-              <span className="block">말씀의 깊은 묵상을 위해 하루에 최대 3개 Day까지만 읽을 수 있습니다.</span>
-              <span className="block">내일 새로운 마음으로 다음 말씀을 이어가보세요! ✨</span>
-            </p>
-            <div className="flex flex-col gap-2 w-full">
-              <button
-                onClick={() => {
-                  setShowDailyLimitModal(false);
-                  router.push("/mypage");
-                }}
-                className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-colors shadow-sm"
-              >
-                마이페이지로 이동
-              </button>
-              <button
-                onClick={() => {
-                  setShowDailyLimitModal(false);
-                  setDayIndex(Math.max(1, getNextUnreadDay(records) - 1));
-                  window.scrollTo(0, 0);
-                }}
-                className="w-full py-3.5 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-bold rounded-xl transition-colors"
-              >
-                오늘 읽은 말씀 복습하기
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {verseToReplace && confirmedVerse && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">

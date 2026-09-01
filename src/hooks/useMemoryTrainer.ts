@@ -167,6 +167,7 @@ export function useMemoryTrainer({ oneVerse, onComplete }: { oneVerse: OneVerse,
       recognitionRef.current = recognition;
 
       const rec = recognitionRef.current;
+      if (!rec) return;
       rec.onresult = (event: { results: { transcript: string }[][] }) => {
         const transcript = event.results[0][0].transcript;
         setSpeechResult(transcript);

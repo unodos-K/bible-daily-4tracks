@@ -171,9 +171,7 @@ export function getNextUnreadDay(records: ReadRecordsMap): number {
   return Math.min(maxDay + 1, 365);
 }
 
-export function getTodayReadCount(dateStr: string, records: ReadRecordsMap): number {
-  return Object.values(records).filter(r => r.readDate === dateStr).length;
-}
+
 
 // 뷰어 위치는 기기/브라우저 종속적인 상태이므로 그대로 localStorage 사용
 export function saveViewerDay(day: number): void {

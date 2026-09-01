@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { 
   ReadingSettings, ReadRecordsMap, DayRecord, OneVerse,
   fetchReadingSettings, fetchReadRecords, startNewReading, getNextUnreadDay,
-  saveDayRecord, updateReadRecordOneVerse, updateMemorizeRecord, getTodayReadCount,
+  saveDayRecord, updateReadRecordOneVerse, updateMemorizeRecord,
   saveViewerDay, getSavedViewerDay 
 } from "@/lib/storage";
 import { getAuthUser, AuthUser } from "@/lib/auth";
@@ -26,7 +26,6 @@ export function useBibleReader() {
   const [verseToReplace, setVerseToReplace] = useState<OneVerse | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showAccessDeniedModal, setShowAccessDeniedModal] = useState(false);
-  const [showDailyLimitModal, setShowDailyLimitModal] = useState(false);
   
   const [selectedRecordToShare, setSelectedRecordToShare] = useState<DayRecord | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -70,18 +69,10 @@ export function useBibleReader() {
   const handleSetDay = (newDay: number, currentRecords: ReadRecordsMap = records) => {
     const validDay = Math.max(1, Math.min(365, newDay));
     const maxAllowedDay = settings ? calculateDaysSince(settings.startDate) : getNextUnreadDay(currentRecords);
-    const isAlreadyRead = !!currentRecords[validDay];
+
     
     if (validDay > maxAllowedDay) {
       showToast("이 진도는 내일 열려요! 내일 만나요 👋");
-      setIsDaySelectorOpen(false);
-      return;
-    }
-
-    const dateObj = new Date();
-    const todayStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
-    if (!isAlreadyRead && getTodayReadCount(todayStr, currentRecords) >= 3) {
-      setShowDailyLimitModal(true);
       setIsDaySelectorOpen(false);
       return;
     }
@@ -128,10 +119,7 @@ export function useBibleReader() {
       setRecords(currentRecords);
 
       try {
-        const dateObj = new Date();
-        const todayStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
         const maxAllowed = currentSettings ? calculateDaysSince(currentSettings.startDate) : getNextUnreadDay(currentRecords);
-        const isLimitReached = getTodayReadCount(todayStr, currentRecords) >= 3;
 
         let initialDay = maxAllowed;
         const savedDay = getSavedViewerDay();
@@ -140,11 +128,6 @@ export function useBibleReader() {
           if (savedDay >= 1 && savedDay <= 365) {
             initialDay = Math.min(savedDay, maxAllowed);
           }
-        }
-
-        if (initialDay === maxAllowed && isLimitReached) {
-          initialDay = Math.max(1, maxAllowed - 1);
-          setShowDailyLimitModal(true);
         }
 
         setDayIndex(initialDay);
@@ -299,11 +282,11 @@ export function useBibleReader() {
   };
 
   useEffect(() => {
-    const isAnyModalOpen = showConfirmModal || showSuccessModal || showWarningModal || isMemoryModalOpen || showDailyLimitModal || showAccessDeniedModal;
+    const isAnyModalOpen = showConfirmModal || showSuccessModal || showWarningModal || isMemoryModalOpen || showAccessDeniedModal;
     if (isAnyModalOpen) document.body.classList.add('modal-open');
     else document.body.classList.remove('modal-open');
     return () => document.body.classList.remove('modal-open');
-  }, [showConfirmModal, showSuccessModal, showWarningModal, isMemoryModalOpen, showDailyLimitModal, showAccessDeniedModal]);
+  }, [showConfirmModal, showSuccessModal, showWarningModal, isMemoryModalOpen, showAccessDeniedModal]);
 
   return {
     isClient,
@@ -331,8 +314,6 @@ export function useBibleReader() {
     setShowSuccessModal,
     showAccessDeniedModal,
     setShowAccessDeniedModal,
-    showDailyLimitModal,
-    setShowDailyLimitModal,
     selectedRecordToShare,
     setSelectedRecordToShare,
     toastMessage,

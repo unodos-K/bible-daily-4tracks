@@ -42,7 +42,6 @@ export default function BibleViewerPage() {
     settings,
     records,
     dayIndex,
-    setDayIndex,
     isDaySelectorOpen,
     setIsDaySelectorOpen,
     isCompletedDay,
@@ -62,8 +61,6 @@ export default function BibleViewerPage() {
     setShowSuccessModal,
     showAccessDeniedModal,
     setShowAccessDeniedModal,
-    showDailyLimitModal,
-    setShowDailyLimitModal,
     selectedRecordToShare,
     setSelectedRecordToShare,
     toastMessage,
@@ -240,8 +237,6 @@ export default function BibleViewerPage() {
       )}
 
       <VerseInteractionModals
-        showDailyLimitModal={showDailyLimitModal}
-        setShowDailyLimitModal={setShowDailyLimitModal}
         showWarningModal={showWarningModal}
         setShowWarningModal={setShowWarningModal}
         showConfirmModal={showConfirmModal}
@@ -257,9 +252,6 @@ export default function BibleViewerPage() {
         executeReplaceVerse={executeReplaceVerse}
         completeReadingAndShowSuccess={completeReadingAndShowSuccess}
         setIsMemoryModalOpen={setIsMemoryModalOpen}
-        setDayIndex={setDayIndex}
-        getNextUnreadDay={getNextUnreadDay}
-        records={records}
       />
 
       {/* 플로팅 퀵 네비게이터 */}
