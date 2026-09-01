@@ -53,7 +53,10 @@ export function useBibleReader() {
     if (!headerRef.current) return;
     const updateHeight = () => {
       if (headerRef.current) {
-        setHeaderHeight(headerRef.current.offsetHeight);
+        const height = headerRef.current.getBoundingClientRect().height;
+        setHeaderHeight((currentHeight) => (
+          Math.abs(currentHeight - height) < 0.01 ? currentHeight : height
+        ));
       }
     };
     updateHeight();
@@ -64,7 +67,7 @@ export function useBibleReader() {
       observer.disconnect();
       window.removeEventListener("resize", updateHeight);
     };
-  }, [isClient]);
+  }, [isClient, isDataLoaded]);
 
   const handleSetDay = (newDay: number, currentRecords: ReadRecordsMap = records) => {
     const validDay = Math.max(1, Math.min(365, newDay));

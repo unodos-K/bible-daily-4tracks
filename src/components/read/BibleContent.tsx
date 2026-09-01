@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Crown, Heart, HeartHandshake, CheckCircle2, Footprints } from "lucide-react";
 import { TRACK_INFO } from "@/lib/bible";
@@ -81,30 +81,107 @@ export default function BibleContent({
   handleBottomButtonClick
 }: BibleContentProps) {
   const router = useRouter();
+  const trackRefs = useRef(new Map<string, HTMLDivElement>());
+  const stickyHeaderRef = useRef<HTMLDivElement>(null);
+  const [stickyHeaderHeight, setStickyHeaderHeight] = useState(0);
+  const tracks = readingData.tracks;
+  const initialTrackType = tracks[0]?.track.type;
+  const [activeTrackType, setActiveTrackType] = useState(initialTrackType);
+  const trackSignature = tracks
+    .map((trackReading) => `${trackReading.track.type}:${trackReading.track.range}`)
+    .join("|");
+
+  useEffect(() => {
+    setActiveTrackType(initialTrackType);
+  }, [initialTrackType, trackSignature]);
+
+  useEffect(() => {
+    const stickyHeader = stickyHeaderRef.current;
+    if (!stickyHeader) return;
+
+    const updateHeight = () => {
+      setStickyHeaderHeight(stickyHeader.getBoundingClientRect().height);
+    };
+
+    updateHeight();
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(stickyHeader);
+    return () => observer.disconnect();
+  }, [activeTrackType]);
+
+  useEffect(() => {
+    const scrollContainer = document.querySelector("main");
+    if (!scrollContainer) return;
+
+    let frameId: number | null = null;
+    const updateActiveTrack = () => {
+      frameId = null;
+      const stickyBottom = scrollContainer.getBoundingClientRect().top + headerHeight + stickyHeaderHeight;
+      let nextTrackType = initialTrackType;
+
+      for (const trackReading of tracks) {
+        const trackTop = trackRefs.current.get(trackReading.track.type)?.getBoundingClientRect().top;
+        if (trackTop !== undefined && trackTop <= stickyBottom) {
+          nextTrackType = trackReading.track.type;
+        } else {
+          break;
+        }
+      }
+
+      setActiveTrackType((currentTrackType) => (
+        currentTrackType === nextTrackType ? currentTrackType : nextTrackType
+      ));
+    };
+    const handleScroll = () => {
+      if (frameId === null) frameId = window.requestAnimationFrame(updateActiveTrack);
+    };
+
+    updateActiveTrack();
+    scrollContainer.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll);
+    return () => {
+      scrollContainer.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+      if (frameId !== null) window.cancelAnimationFrame(frameId);
+    };
+  }, [headerHeight, initialTrackType, stickyHeaderHeight, trackSignature, tracks]);
+
+  const activeTrack = readingData.tracks.find(
+    (trackReading) => trackReading.track.type === activeTrackType
+  ) ?? readingData.tracks[0];
+  const activeTrackInfo = activeTrack && TRACK_INFO[activeTrack.track.type as keyof typeof TRACK_INFO];
+  const activeTrackIcon = activeTrack && (TRACK_ICONS[activeTrack.track.type] || "📖");
+  const stickyOffsetStyle = {
+    "--reader-main-header-height": `${headerHeight}px`,
+    "--reader-track-header-height": `${stickyHeaderHeight}px`,
+  } as React.CSSProperties;
 
   return (
     <>
-      <div className="flex flex-col flex-1">
+      <div className="flex flex-col flex-1" style={stickyOffsetStyle}>
+        {activeTrack && activeTrackInfo && (
+          <div
+            ref={stickyHeaderRef}
+            className="sticky z-20 py-2 px-4 text-sm font-semibold bg-stone-50/95 dark:bg-stone-900/90 backdrop-blur border-b border-stone-200 dark:border-stone-800 shadow-sm transition-colors"
+            style={{ top: "var(--reader-main-header-height)" }}
+          >
+            <h2 className="flex items-center gap-2" style={{ color: activeTrackInfo.accentColor }}>
+              <span>{activeTrackIcon}</span> {activeTrackInfo.title.split(" ")[0]} <span className="text-stone-500 font-normal mx-0.5">·</span> <span className="text-stone-700 dark:text-stone-300">{activeTrack.track.range}</span>
+            </h2>
+          </div>
+        )}
         {readingData.tracks.map((trackReading: TrackData) => {
-          const trackInfo = TRACK_INFO[trackReading.track.type as keyof typeof TRACK_INFO];
-          const icon = TRACK_ICONS[trackReading.track.type] || "📖";
-          
           return (
             <div 
               key={trackReading.track.type} 
               id={TRACK_ID_MAP[trackReading.track.type]} 
               className="flex flex-col border-b border-stone-200 dark:border-stone-800/60 pb-10"
-              style={{ scrollMarginTop: `${headerHeight}px` }}
+              ref={(element) => {
+                if (element) trackRefs.current.set(trackReading.track.type, element);
+                else trackRefs.current.delete(trackReading.track.type);
+              }}
+              style={{ scrollMarginTop: "calc(var(--reader-main-header-height) + var(--reader-track-header-height))" }}
             >
-              <div 
-                className="sticky z-20 py-2 px-4 text-sm font-semibold bg-stone-50/95 dark:bg-stone-900/90 backdrop-blur border-b border-stone-200 dark:border-stone-800 shadow-sm transition-colors"
-                style={{ top: `${headerHeight}px` }}
-              >
-                <h2 className="flex items-center gap-2" style={{ color: trackInfo.accentColor }}>
-                  <span>{icon}</span> {trackInfo.title.split(" ")[0]} <span className="text-stone-500 font-normal mx-0.5">·</span> <span className="text-stone-700 dark:text-stone-300">{trackReading.track.range}</span>
-                </h2>
-              </div>
-
               <div className="pl-3 pr-14 sm:pl-6 sm:pr-8 py-6 sm:py-8 flex flex-col gap-6" style={{ fontSize: `${fontSize}px`, lineHeight: 1.8 }}>
                 {trackReading.chapters.map((chapterData: ChapterData) => (
                   <div key={`${chapterData.name}-${chapterData.chapter}`} className="flex flex-col">
