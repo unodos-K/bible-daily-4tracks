@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, Suspense } from "react";
+import React, { useState, useEffect, useLayoutEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CheckSquare, ChevronLeft, Footprints } from "lucide-react";
 import { MemoData, fetchReadRecords, updateReadRecordOneVerse, DayRecord } from "@/lib/storage";
@@ -13,6 +13,12 @@ const parseInitialMemo = (m: string | MemoData | undefined): MemoData => {
 
 const formatReference = (book: string, chapter: number, verse: number) => {
   return book === "시편" ? `${book} ${chapter}편 ${verse}절` : `${book} ${chapter}장 ${verse}절`;
+};
+
+const resizeTextarea = (textarea: HTMLTextAreaElement | null) => {
+  if (!textarea) return;
+  textarea.style.height = "0px";
+  textarea.style.height = `${textarea.scrollHeight}px`;
 };
 
 function MemoEditorContent() {
@@ -36,6 +42,14 @@ function MemoEditorContent() {
   // Refs for focusing inputs
   const thanksRefs = useRef<(HTMLInputElement | null)[]>([]);
   const appRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const meditationTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const prayerTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useLayoutEffect(() => {
+    if (mode !== 'edit') return;
+    resizeTextarea(meditationTextareaRef.current);
+    resizeTextarea(prayerTextareaRef.current);
+  }, [memoData.meditation, memoData.prayer, mode]);
 
   useEffect(() => {
     const loadRecord = async () => {
@@ -292,19 +306,23 @@ function MemoEditorContent() {
             <div className="flex flex-col gap-2">
               <h4 className="text-stone-400 text-xs font-semibold">묵상</h4>
               <textarea
+                ref={meditationTextareaRef}
                 value={memoData.meditation || ""}
                 onChange={e => setMemoData({...memoData, meditation: e.target.value})}
+                onInput={e => resizeTextarea(e.currentTarget)}
                 placeholder="이 말씀이 마음에 와닿은 이유는 무엇인가요?"
-                className="w-full bg-transparent text-[15px] text-stone-200 placeholder-stone-600 focus:outline-none resize-none min-h-[100px] leading-relaxed"
+                className="w-full bg-transparent text-[15px] text-stone-200 placeholder-stone-600 focus:outline-none resize-none overflow-y-hidden min-h-[100px] leading-relaxed"
               />
             </div>
             <div className="flex flex-col gap-2">
               <h4 className="text-stone-400 text-xs font-semibold">기도</h4>
               <textarea
+                ref={prayerTextareaRef}
                 value={memoData.prayer || ""}
                 onChange={e => setMemoData({...memoData, prayer: e.target.value})}
+                onInput={e => resizeTextarea(e.currentTarget)}
                 placeholder="말씀을 통해 깨달은 기도를 적어보세요."
-                className="w-full bg-transparent text-[15px] text-stone-200 placeholder-stone-600 focus:outline-none resize-none min-h-[100px] leading-relaxed"
+                className="w-full bg-transparent text-[15px] text-stone-200 placeholder-stone-600 focus:outline-none resize-none overflow-y-hidden min-h-[100px] leading-relaxed"
               />
             </div>
             
