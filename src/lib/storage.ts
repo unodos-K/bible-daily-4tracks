@@ -37,8 +37,6 @@ export interface DayRecord {
 
 export type ReadRecordsMap = Record<number, DayRecord>; // key: dayIndex (1~365)
 
-const isBrowser = typeof window !== "undefined";
-
 // Fetch user ID securely from session
 export async function getUserId(): Promise<string | null> {
   const { data: { session } } = await supabase.auth.getSession();
@@ -175,23 +173,4 @@ export function getNextUnreadDay(records: ReadRecordsMap): number {
     }
   }
   return Math.min(maxDay + 1, 365);
-}
-
-
-
-// 뷰어 위치는 기기/브라우저 종속적인 상태이므로 그대로 localStorage 사용
-export function saveViewerDay(day: number): void {
-  if (!isBrowser) return;
-  try {
-    localStorage.setItem("bible_viewer_day_index", day.toString());
-  } catch {}
-}
-
-export function getSavedViewerDay(): number | null {
-  if (!isBrowser) return null;
-  try {
-    const val = localStorage.getItem("bible_viewer_day_index");
-    if (val) return parseInt(val, 10);
-  } catch {}
-  return null;
 }

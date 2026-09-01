@@ -3,8 +3,8 @@ const fs = require('fs');
 // Fix useBibleReader.ts
 let useBible = fs.readFileSync('src/hooks/useBibleReader.ts', 'utf8');
 useBible = useBible.replace(
-  /<<<<<<< HEAD\n  saveDayRecord, updateReadRecordOneVerse, updateMemorizeRecord,\n  saveViewerDay, getSavedViewerDay \n=======\n  saveDayRecord, updateReadRecordOneVerse, updateMemorizeRecord, getTodayReadCount,\n  saveViewerDay, getSavedViewerDay, saveReadingSettings\n>>>>>>> [a-f0-9]+\n/g,
-  '  saveDayRecord, updateReadRecordOneVerse, updateMemorizeRecord,\n  saveViewerDay, getSavedViewerDay, saveReadingSettings\n'
+  /<<<<<<< HEAD\n  saveDayRecord, updateReadRecordOneVerse, updateMemorizeRecord,\n=======\n  saveDayRecord, updateReadRecordOneVerse, updateMemorizeRecord, getTodayReadCount,\n  saveReadingSettings\n>>>>>>> [a-f0-9]+\n/g,
+  '  saveDayRecord, updateReadRecordOneVerse, updateMemorizeRecord,\n  saveReadingSettings\n'
 );
 fs.writeFileSync('src/hooks/useBibleReader.ts', useBible);
 

@@ -8,8 +8,7 @@ import {
   DayRecord,
   OneVerse,
   fetchReadRecords, 
-  updateMemorizeRecord,
-  saveViewerDay
+  updateMemorizeRecord
 } from "@/lib/storage";
 import { getAuthUser, AuthUser } from "@/lib/auth";
 import { shareOneVerse } from "@/lib/share";
@@ -154,9 +153,6 @@ export default function VerseDetailPage() {
                     </button>
                     <button
                       onClick={() => {
-                        try {
-                          saveViewerDay(record.dayIndex);
-                        } catch {}
                         router.push("/read?day=" + record.dayIndex);
                       }}
                       className="flex flex-col items-center justify-center gap-1.5 py-4 bg-stone-50 dark:bg-white/5 hover:bg-stone-100 dark:hover:bg-white/10 text-stone-600 dark:text-stone-300 rounded-xl transition-all active:scale-95"

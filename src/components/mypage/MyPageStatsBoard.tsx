@@ -1,6 +1,6 @@
 import React from "react";
 import { HeartHandshake, Heart, BookOpen, Footprints } from "lucide-react";
-import { DayRecord, saveViewerDay } from "@/lib/storage";
+import { DayRecord } from "@/lib/storage";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import LikeButton from "@/components/friends/LikeButton";
 import { FriendFeedItem } from "@/lib/social";
@@ -164,9 +164,6 @@ export default function MyPageStatsBoard({
                     </button>
                     <button
                       onClick={() => {
-                        try {
-                          saveViewerDay(record.dayIndex);
-                        } catch {}
                         router.push("/read?day=" + record.dayIndex);
                       }}
                       className="flex flex-col items-center justify-center gap-1.5 py-3 bg-stone-100 dark:bg-white/5 hover:bg-stone-200 dark:hover:bg-white/10 text-stone-600 dark:text-stone-300 rounded-xl transition-all active:scale-95"

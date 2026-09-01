@@ -3,7 +3,7 @@ import {
   ReadingSettings, ReadRecordsMap, DayRecord, OneVerse,
   fetchReadingSettings, fetchReadRecords, getNextUnreadDay,
   saveDayRecord, updateReadRecordOneVerse, updateMemorizeRecord,
-  saveViewerDay, getSavedViewerDay, saveReadingSettings
+  saveReadingSettings
 } from "@/lib/storage";
 import { getAuthUser, AuthUser } from "@/lib/auth";
 export function useBibleReader() {
@@ -71,7 +71,7 @@ export function useBibleReader() {
 
   const handleSetDay = (newDay: number, currentRecords: ReadRecordsMap = records) => {
     const validDay = Math.max(1, Math.min(365, newDay));
-    const maxAllowedDay = settings ? calculateDaysSince(settings.startDate) : getNextUnreadDay(currentRecords);
+    const maxAllowedDay = Math.min(365, settings ? calculateDaysSince(settings.startDate) : getNextUnreadDay(currentRecords));
 
     
     if (validDay > maxAllowedDay) {
@@ -81,7 +81,6 @@ export function useBibleReader() {
     }
 
     setDayIndex(validDay);
-    saveViewerDay(validDay);
     window.scrollTo({ top: 0, behavior: "smooth" });
     setIsDaySelectorOpen(false);
     setSelectedVerse(null);
@@ -128,16 +127,11 @@ export function useBibleReader() {
       setRecords(currentRecords);
 
       try {
-        const maxAllowed = currentSettings ? calculateDaysSince(currentSettings.startDate) : getNextUnreadDay(currentRecords);
-
-        let initialDay = maxAllowed;
-        const savedDay = getSavedViewerDay();
-        
-        if (savedDay) {
-          if (savedDay >= 1 && savedDay <= 365) {
-            initialDay = Math.min(savedDay, maxAllowed);
-          }
-        }
+        const maxAllowed = Math.min(365, currentSettings ? calculateDaysSince(currentSettings.startDate) : getNextUnreadDay(currentRecords));
+        const requestedDay = Number(new URLSearchParams(window.location.search).get('day'));
+        const initialDay = Number.isInteger(requestedDay) && requestedDay >= 1
+          ? Math.min(requestedDay, maxAllowed)
+          : maxAllowed;
 
         setDayIndex(initialDay);
       } catch {
