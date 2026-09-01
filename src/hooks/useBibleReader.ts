@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { 
   ReadingSettings, ReadRecordsMap, DayRecord, OneVerse,
-  fetchReadingSettings, fetchReadRecords, getNextUnreadDay,
+  fetchReadingSettings, fetchReadRecords,
   saveDayRecord, updateReadRecordOneVerse, updateMemorizeRecord,
   saveReadingSettings
 } from "@/lib/storage";
 import { useAuth } from "@/components/AuthProvider";
+import { calculateDaysSince, clampReadingDay, getMaxAllowedDay } from "@/hooks/bible-reader/dayUtils";
 export function useBibleReader() {
   const [isClient, setIsClient] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
@@ -38,17 +39,6 @@ export function useBibleReader() {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  const calculateDaysSince = (startDateStr: string): number => {
-    if (!startDateStr) return 1;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const [y, m, d] = startDateStr.split("-").map(Number);
-    const start = new Date(y, m - 1, d);
-    start.setHours(0, 0, 0, 0);
-    const diffTime = today.getTime() - start.getTime();
-    return Math.max(1, Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1);
-  };
-
   useEffect(() => {
     if (!headerRef.current) return;
     const updateHeight = () => {
@@ -70,8 +60,8 @@ export function useBibleReader() {
   }, [isClient, isDataLoaded]);
 
   const handleSetDay = (newDay: number, currentRecords: ReadRecordsMap = records) => {
-    const validDay = Math.max(1, Math.min(365, newDay));
-    const maxAllowedDay = Math.min(365, settings ? calculateDaysSince(settings.startDate) : getNextUnreadDay(currentRecords));
+    const validDay = clampReadingDay(newDay);
+    const maxAllowedDay = getMaxAllowedDay(settings, currentRecords);
 
     
     if (validDay > maxAllowedDay) {
@@ -126,7 +116,7 @@ export function useBibleReader() {
       setRecords(currentRecords);
 
       try {
-        const maxAllowed = Math.min(365, currentSettings ? calculateDaysSince(currentSettings.startDate) : getNextUnreadDay(currentRecords));
+        const maxAllowed = getMaxAllowedDay(currentSettings, currentRecords);
         const requestedDay = Number(new URLSearchParams(window.location.search).get('day'));
         const initialDay = Number.isInteger(requestedDay) && requestedDay >= 1
           ? Math.min(requestedDay, maxAllowed)

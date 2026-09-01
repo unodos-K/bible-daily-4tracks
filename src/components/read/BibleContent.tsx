@@ -1,35 +1,12 @@
-import React, { useEffect, useRef, useState } from "react";
+import React from "react";
 import { useRouter } from "next/navigation";
 import { Crown, Heart, HeartHandshake, CheckCircle2, Footprints } from "lucide-react";
 import { TRACK_INFO } from "@/lib/bible";
 import { OneVerse, ReadRecordsMap, DayRecord } from "@/lib/storage";
+import { useActiveReaderTrack } from "./useActiveReaderTrack";
+import type { ChapterData, ReadingData, TrackData, VerseData } from "./types";
 
-export interface VerseData {
-  verse: number;
-  rawText: string;
-  displayText: string;
-  chunks: string[];
-}
-
-export interface ChapterData {
-  name: string;
-  chapter: number;
-  chapterUnit?: string;
-  verses: VerseData[];
-}
-
-export interface TrackData {
-  track: {
-    type: string;
-    range: string;
-  };
-  chapters: ChapterData[];
-}
-
-export interface ReadingData {
-  dayIndex: number;
-  tracks: TrackData[];
-}
+export type { ReadingData } from "./types";
 
 const TRACK_ICONS: Record<string, string> = {
   "구약": "📖",
@@ -81,70 +58,8 @@ export default function BibleContent({
   handleBottomButtonClick
 }: BibleContentProps) {
   const router = useRouter();
-  const trackRefs = useRef(new Map<string, HTMLDivElement>());
-  const stickyHeaderRef = useRef<HTMLDivElement>(null);
-  const [stickyHeaderHeight, setStickyHeaderHeight] = useState(0);
   const tracks = readingData.tracks;
-  const initialTrackType = tracks[0]?.track.type;
-  const [activeTrackType, setActiveTrackType] = useState(initialTrackType);
-  const trackSignature = tracks
-    .map((trackReading) => `${trackReading.track.type}:${trackReading.track.range}`)
-    .join("|");
-
-  useEffect(() => {
-    setActiveTrackType(initialTrackType);
-  }, [initialTrackType, trackSignature]);
-
-  useEffect(() => {
-    const stickyHeader = stickyHeaderRef.current;
-    if (!stickyHeader) return;
-
-    const updateHeight = () => {
-      setStickyHeaderHeight(stickyHeader.getBoundingClientRect().height);
-    };
-
-    updateHeight();
-    const observer = new ResizeObserver(updateHeight);
-    observer.observe(stickyHeader);
-    return () => observer.disconnect();
-  }, [activeTrackType]);
-
-  useEffect(() => {
-    const scrollContainer = document.querySelector("main");
-    if (!scrollContainer) return;
-
-    let frameId: number | null = null;
-    const updateActiveTrack = () => {
-      frameId = null;
-      const stickyBottom = scrollContainer.getBoundingClientRect().top + headerHeight + stickyHeaderHeight;
-      let nextTrackType = initialTrackType;
-
-      for (const trackReading of tracks) {
-        const trackTop = trackRefs.current.get(trackReading.track.type)?.getBoundingClientRect().top;
-        if (trackTop !== undefined && trackTop <= stickyBottom) {
-          nextTrackType = trackReading.track.type;
-        } else {
-          break;
-        }
-      }
-
-      setActiveTrackType((currentTrackType) => (
-        currentTrackType === nextTrackType ? currentTrackType : nextTrackType
-      ));
-    };
-    const handleScroll = () => {
-      if (frameId === null) frameId = window.requestAnimationFrame(updateActiveTrack);
-    };
-
-    updateActiveTrack();
-    scrollContainer.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", handleScroll);
-    return () => {
-      scrollContainer.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleScroll);
-      if (frameId !== null) window.cancelAnimationFrame(frameId);
-    };
-  }, [headerHeight, initialTrackType, stickyHeaderHeight, trackSignature, tracks]);
+  const { activeTrackType, stickyHeaderHeight, stickyHeaderRef, trackRefs } = useActiveReaderTrack(tracks, headerHeight);
 
   const activeTrack = readingData.tracks.find(
     (trackReading) => trackReading.track.type === activeTrackType
