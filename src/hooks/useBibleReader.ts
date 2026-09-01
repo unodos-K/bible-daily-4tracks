@@ -5,11 +5,11 @@ import {
   saveDayRecord, updateReadRecordOneVerse, updateMemorizeRecord,
   saveReadingSettings
 } from "@/lib/storage";
-import { getAuthUser, AuthUser } from "@/lib/auth";
+import { useAuth } from "@/components/AuthProvider";
 export function useBibleReader() {
   const [isClient, setIsClient] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
-  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+  const { authUser, isAuthLoading } = useAuth();
   const [settings, setSettings] = useState<ReadingSettings | null>(null);
   const [records, setRecords] = useState<ReadRecordsMap>({});
   
@@ -88,16 +88,20 @@ export function useBibleReader() {
 
   useEffect(() => {
     setIsClient(true);
-    getAuthUser().then(async (user) => {
-      setAuthUser(user);
-      
+  }, []);
+
+  useEffect(() => {
+    if (isAuthLoading) return;
+    let isActive = true;
+
+    const loadReader = async () => {
       let currentRecords: ReadRecordsMap = {};
       let currentSettings: ReadingSettings | null = null;
       
-      if (user) {
+      if (authUser) {
         try {
-          currentSettings = await fetchReadingSettings();
-          currentRecords = await fetchReadRecords();
+          currentSettings = await fetchReadingSettings(authUser.id);
+          currentRecords = await fetchReadRecords(authUser.id);
         } catch (error) {
           console.error("Failed to load user data due to network error", error);
           showToast("데이터를 불러오는데 실패했습니다. 네트워크 상태를 확인해주세요.");
@@ -108,7 +112,7 @@ export function useBibleReader() {
       if (!currentSettings || !currentSettings.hasStarted) {
         const dateObj = new Date();
         const todayStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
-        await saveReadingSettings(todayStr);
+        if (authUser) await saveReadingSettings(todayStr, authUser.id);
         currentSettings = {
           startDate: todayStr,
           currentDay: 1,
@@ -117,6 +121,7 @@ export function useBibleReader() {
         currentRecords = {};
       }
       
+      if (!isActive) return;
       setSettings(currentSettings);
       setRecords(currentRecords);
 
@@ -127,25 +132,27 @@ export function useBibleReader() {
           ? Math.min(requestedDay, maxAllowed)
           : maxAllowed;
 
-        setDayIndex(initialDay);
+        if (isActive) setDayIndex(initialDay);
       } catch {
         // ignore
       } finally {
-        setIsDataLoaded(true);
+        if (isActive) setIsDataLoaded(true);
       }
-    });
+    };
+
+    void loadReader();
 
     const handleRecordsUpdated = async () => {
-      getAuthUser().then(async (user) => {
-        if (user) {
-          const r = await fetchReadRecords();
-          setRecords(r);
-        }
-      });
+      if (!authUser) return;
+      const r = await fetchReadRecords(authUser.id);
+      if (isActive) setRecords(r);
     };
     window.addEventListener('records_updated', handleRecordsUpdated);
-    return () => window.removeEventListener('records_updated', handleRecordsUpdated);
-  }, []);
+    return () => {
+      isActive = false;
+      window.removeEventListener('records_updated', handleRecordsUpdated);
+    };
+  }, [authUser, isAuthLoading]);
 
   useEffect(() => {
     if (isClient && settings?.hasStarted) {
@@ -191,7 +198,7 @@ export function useBibleReader() {
     let success = false;
     
     if (isCompletedDay) {
-      success = await updateReadRecordOneVerse(dayIndex, verse);
+      success = await updateReadRecordOneVerse(dayIndex, verse, authUser?.id);
     } else {
       const dateObj = new Date();
       const todayStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
@@ -201,7 +208,7 @@ export function useBibleReader() {
         readDate: todayStr,
         completedAt: new Date().toISOString(),
         oneVerse: verse,
-      });
+      }, authUser?.id);
       if (success) {
         setIsCompletedDay(true);
       }
@@ -211,7 +218,7 @@ export function useBibleReader() {
       setConfirmedVerse(verse);
       setSelectedVerse(null);
       setVerseToReplace(null);
-      const r = await fetchReadRecords();
+      const r = await fetchReadRecords(authUser?.id);
       setRecords(r);
       showToast("One Verse가 새로 지정되었습니다.");
     } else {
@@ -240,10 +247,10 @@ export function useBibleReader() {
         readDate: todayStr,
         completedAt: new Date().toISOString(),
         oneVerse: verse,
-      });
+      }, authUser?.id);
       if (success) {
         setIsCompletedDay(true);
-        const r = await fetchReadRecords();
+        const r = await fetchReadRecords(authUser?.id);
         setRecords(r);
         setShowSuccessModal(true);
       } else {
@@ -270,9 +277,9 @@ export function useBibleReader() {
 
   const handleMemoryComplete = async () => {
     if (confirmedVerse) {
-      await updateMemorizeRecord(dayIndex, true, confirmedVerse);
+      await updateMemorizeRecord(dayIndex, true, confirmedVerse, authUser?.id);
       setConfirmedVerse({ ...confirmedVerse, isMemorized: true, memorizedAt: new Date().toISOString() });
-      const r = await fetchReadRecords();
+      const r = await fetchReadRecords(authUser?.id);
       setRecords(r);
       setIsMemoryModalOpen(false);
     }

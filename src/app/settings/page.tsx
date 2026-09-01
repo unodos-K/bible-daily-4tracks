@@ -18,33 +18,31 @@ import {
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { startNewReading } from "@/lib/storage";
-import { getAuthUser, AuthUser } from "@/lib/auth";
 import { signOut } from "@/lib/supabase";
 import NicknameOnboardingModal from "@/components/NicknameOnboardingModal";
+import { useAuth } from "@/components/AuthProvider";
 
 export default function SettingsPage() {
   const router = useRouter();
   const { theme, setTheme, fontSize, setFontSize, autoPlayBgm, setAutoPlayBgm, shareOptions, setShareOptions } = useSettings();
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
-  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+  const { authUser, isAuthLoading } = useAuth();
   const [showNicknameModal, setShowNicknameModal] = useState(false);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
-    getAuthUser().then(setAuthUser);
   }, []);
 
   const handleLogout = async () => {
     await signOut();
-    setAuthUser(null);
     window.location.href = "/";
   };
 
   const executeReset = async () => {
     const dateObj = new Date();
     const todayStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
-    await startNewReading(todayStr);
+    await startNewReading(todayStr, authUser?.id);
     setIsResetModalOpen(false);
     window.location.href = "/";
   };
@@ -73,7 +71,7 @@ export default function SettingsPage() {
     setShareOptions(newItems);
   };
 
-  if (!isClient) return null;
+  if (!isClient || isAuthLoading) return null;
 
   return (
     <div className="w-full min-h-[100dvh] bg-stone-50 dark:bg-stone-950 flex flex-col">
@@ -303,10 +301,7 @@ export default function SettingsPage() {
           isOpen={showNicknameModal} 
           cancellable={true} 
           onCancel={() => setShowNicknameModal(false)}
-          onComplete={(nickname) => {
-            if (authUser) {
-              setAuthUser({ ...authUser, nickname });
-            }
+          onComplete={() => {
             setShowNicknameModal(false);
           }}
         />

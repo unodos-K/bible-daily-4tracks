@@ -7,7 +7,7 @@ import {
   fetchReadRecords,
   getNextUnreadDay
 } from "@/lib/storage";
-import { getAuthUser, AuthUser } from "@/lib/auth";
+import { useAuth } from "@/components/AuthProvider";
 
 export function calculateDaysSince(startDateStr: string): number {
   if (!startDateStr) return 1;
@@ -29,7 +29,7 @@ export function useHomeDashboard() {
   
   const [settings, setSettings] = useState<ReadingSettings | null>(null);
   const [records, setRecords] = useState<ReadRecordsMap>({});
-  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+  const { authUser, isAuthLoading } = useAuth();
   const [isClient, setIsClient] = useState(false);
   const [nextUnreadDay, setNextUnreadDay] = useState(1);
   const [isScheduleSheetOpen, setIsScheduleSheetOpen] = useState(false);
@@ -38,20 +38,25 @@ export function useHomeDashboard() {
 
   useEffect(() => {
     setIsClient(true);
-    getAuthUser().then(async (user) => {
-      setAuthUser(user);
-      if (user) {
-        const s = await fetchReadingSettings();
+    if (isAuthLoading) return;
+    const loadDashboard = async () => {
+      if (authUser) {
+        const s = await fetchReadingSettings(authUser.id);
         if (s && s.hasStarted) {
           setSettings(s);
-          const r = await fetchReadRecords();
+          const r = await fetchReadRecords(authUser.id);
           setRecords(r);
           setNextUnreadDay(await getNextUnreadDay(r));
         }
+      } else {
+        setSettings(null);
+        setRecords({});
+        setNextUnreadDay(1);
       }
       setIsLoading(false);
-    });
-  }, []);
+    };
+    void loadDashboard();
+  }, [authUser, isAuthLoading]);
 
   useEffect(() => {
     if (isScheduleSheetOpen && targetDayRef.current) {

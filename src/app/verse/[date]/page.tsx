@@ -10,7 +10,7 @@ import {
   fetchReadRecords, 
   updateMemorizeRecord
 } from "@/lib/storage";
-import { getAuthUser, AuthUser } from "@/lib/auth";
+import { useAuth } from "@/components/AuthProvider";
 import { shareOneVerse } from "@/lib/share";
 import ShareModal from "@/components/ShareModal";
 import MemoryTrainerModal from "@/components/MemoryTrainerModal";
@@ -21,7 +21,7 @@ export default function VerseDetailPage() {
   const dateParam = params?.date as string;
   
   const [records, setRecords] = useState<ReadRecordsMap>({});
-  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+  const { authUser, isAuthLoading } = useAuth();
   const [isClient, setIsClient] = useState(false);
   
   const [selectedDayIndexForMemory, setSelectedDayIndexForMemory] = useState<number | null>(null);
@@ -30,12 +30,13 @@ export default function VerseDetailPage() {
 
   useEffect(() => {
     setIsClient(true);
-    getAuthUser().then(async (user) => {
-      setAuthUser(user);
-      const r = await fetchReadRecords();
+    if (isAuthLoading) return;
+    const loadRecords = async () => {
+      const r = await fetchReadRecords(authUser?.id);
       setRecords(r);
-    });
-  }, []);
+    };
+    void loadRecords();
+  }, [authUser, isAuthLoading]);
 
   if (!isClient) {
     return (
@@ -177,8 +178,8 @@ export default function VerseDetailPage() {
           onComplete={async () => {
             const verse = records[selectedDayIndexForMemory].oneVerse;
             if (verse) {
-              await updateMemorizeRecord(selectedDayIndexForMemory, true, verse);
-              const r = await fetchReadRecords();
+              await updateMemorizeRecord(selectedDayIndexForMemory, true, verse, authUser?.id);
+              const r = await fetchReadRecords(authUser?.id);
               setRecords(r);
             }
             setIsMemoryModalOpen(false);

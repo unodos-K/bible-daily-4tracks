@@ -122,8 +122,8 @@ export async function getUserId(): Promise<string | null> {
   return session?.user?.id || null;
 }
 
-export async function fetchReadingSettings(): Promise<ReadingSettings | null> {
-  const userId = await getUserId();
+export async function fetchReadingSettings(currentUserId?: string): Promise<ReadingSettings | null> {
+  const userId = currentUserId ?? await getUserId();
   if (!userId) return null;
   const { data, error } = await supabase.from('reading_settings').select('*').eq('user_id', userId).maybeSingle();
   if (error) {
@@ -138,8 +138,8 @@ export async function fetchReadingSettings(): Promise<ReadingSettings | null> {
   };
 }
 
-export async function saveReadingSettings(startDate: string): Promise<void> {
-  const userId = await getUserId();
+export async function saveReadingSettings(startDate: string, currentUserId?: string): Promise<void> {
+  const userId = currentUserId ?? await getUserId();
   if (!userId) return;
   const { error } = await supabase.from('reading_settings').upsert({
     user_id: userId,
@@ -148,16 +148,16 @@ export async function saveReadingSettings(startDate: string): Promise<void> {
   if (error) console.error("saveReadingSettings error:", error);
 }
 
-export async function startNewReading(dateStr: string): Promise<void> {
-  const userId = await getUserId();
+export async function startNewReading(dateStr: string, currentUserId?: string): Promise<void> {
+  const userId = currentUserId ?? await getUserId();
   if (!userId) return;
   const { error } = await supabase.from('reading_records').delete().eq('user_id', userId);
   if (error) console.error("startNewReading delete error:", error);
-  await saveReadingSettings(dateStr);
+  await saveReadingSettings(dateStr, userId);
 }
 
-export async function resetUserData(): Promise<void> {
-  const userId = await getUserId();
+export async function resetUserData(currentUserId?: string): Promise<void> {
+  const userId = currentUserId ?? await getUserId();
   if (!userId) return;
   const { error: err1 } = await supabase.from('reading_records').delete().eq('user_id', userId);
   if (err1) console.error("resetUserData records error:", err1);
@@ -165,8 +165,8 @@ export async function resetUserData(): Promise<void> {
   if (err2) console.error("resetUserData settings error:", err2);
 }
 
-export async function fetchReadRecords(): Promise<ReadRecordsMap> {
-  const userId = await getUserId();
+export async function fetchReadRecords(currentUserId?: string): Promise<ReadRecordsMap> {
+  const userId = currentUserId ?? await getUserId();
   if (!userId) return {};
   const { data, error } = await supabase.from('reading_records').select('*').eq('user_id', userId);
   if (error) {
@@ -188,8 +188,8 @@ export async function fetchReadRecords(): Promise<ReadRecordsMap> {
   return result;
 }
 
-export async function saveDayRecord(record: DayRecord): Promise<boolean> {
-  const userId = await getUserId();
+export async function saveDayRecord(record: DayRecord, currentUserId?: string): Promise<boolean> {
+  const userId = currentUserId ?? await getUserId();
   if (!userId) return false;
   const { error } = await supabase.from('reading_records').upsert({
     user_id: userId,
@@ -205,8 +205,8 @@ export async function saveDayRecord(record: DayRecord): Promise<boolean> {
   return true;
 }
 
-export async function updateReadRecordOneVerse(dayIndex: number, oneVerse: OneVerse | null): Promise<boolean> {
-  const userId = await getUserId();
+export async function updateReadRecordOneVerse(dayIndex: number, oneVerse: OneVerse | null, currentUserId?: string): Promise<boolean> {
+  const userId = currentUserId ?? await getUserId();
   if (!userId) return false;
   
   // 만약 update 시 read_date가 필요하다면 기존 레코드가 있는지부터 확인해야 하지만
@@ -225,8 +225,8 @@ export async function updateReadRecordOneVerse(dayIndex: number, oneVerse: OneVe
   return true;
 }
 
-export async function updateMemorizeRecord(dayIndex: number, isMemorized: boolean, currentOneVerse: OneVerse): Promise<void> {
-  const userId = await getUserId();
+export async function updateMemorizeRecord(dayIndex: number, isMemorized: boolean, currentOneVerse: OneVerse, currentUserId?: string): Promise<void> {
+  const userId = currentUserId ?? await getUserId();
   if (!userId) return;
   const updatedOneVerse = { ...currentOneVerse, isMemorized };
   if (isMemorized) {
@@ -234,7 +234,7 @@ export async function updateMemorizeRecord(dayIndex: number, isMemorized: boolea
   } else {
     delete updatedOneVerse.memorizedAt;
   }
-  await updateReadRecordOneVerse(dayIndex, updatedOneVerse);
+  await updateReadRecordOneVerse(dayIndex, updatedOneVerse, userId);
 }
 
 // 순수 계산 함수들

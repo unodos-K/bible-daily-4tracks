@@ -7,7 +7,7 @@ import {
   fetchReadingSettings, 
   fetchReadRecords 
 } from "@/lib/storage";
-import { getAuthUser, AuthUser } from "@/lib/auth";
+import { useAuth } from "@/components/AuthProvider";
 import { signOut, supabase } from "@/lib/supabase";
 import { toggleLike } from "@/lib/social";
 
@@ -23,7 +23,7 @@ export function useMyPageStats() {
   
   const [settings, setSettings] = useState<ReadingSettings | null>(null);
   const [records, setRecords] = useState<ReadRecordsMap>({});
-  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+  const { authUser, isAuthLoading } = useAuth();
   
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isClient, setIsClient] = useState(false);
@@ -39,22 +39,22 @@ export function useMyPageStats() {
 
   useEffect(() => {
     setIsClient(true);
-    getAuthUser().then(async (user) => {
-      setAuthUser(user);
-      if (user) {
-        const s = await fetchReadingSettings();
+    if (isAuthLoading) return;
+    const loadStats = async () => {
+      if (authUser) {
+        const s = await fetchReadingSettings(authUser.id);
         if (!s || !s.hasStarted) {
           router.push("/");
           return;
         }
         setSettings(s);
-        const r = await fetchReadRecords();
+        const r = await fetchReadRecords(authUser.id);
         setRecords(r);
 
         const { data: likes } = await supabase
           .from('one_verse_likes')
           .select('liker_id, day_index, profiles!liker_id(name, nickname)')
-          .eq('author_id', user.id);
+          .eq('author_id', authUser.id);
           
         if (likes) {
           const map: Record<number, VerseLikeData> = {};
@@ -64,7 +64,7 @@ export function useMyPageStats() {
               map[l.day_index] = { count: 0, isLikedByMe: false, likers: [] };
             }
             map[l.day_index].count++;
-            if (l.liker_id === user.id) map[l.day_index].isLikedByMe = true;
+            if (l.liker_id === authUser.id) map[l.day_index].isLikedByMe = true;
             
             const p = Array.isArray(l.profiles) ? l.profiles[0] : l.profiles;
             map[l.day_index].likers.push({
@@ -75,10 +75,14 @@ export function useMyPageStats() {
           setLikesMap(map);
         }
       } else {
+        setSettings(null);
+        setRecords({});
+        setLikesMap({});
         router.push("/");
       }
-    });
-  }, [router]);
+    };
+    void loadStats();
+  }, [authUser, isAuthLoading, router]);
 
   useEffect(() => {
     if (selectedRecordStr || isMemoryModalOpen) {
@@ -94,7 +98,7 @@ export function useMyPageStats() {
   useEffect(() => {
     const handleRecordsUpdated = async () => {
       if (authUser) {
-        const r = await fetchReadRecords();
+        const r = await fetchReadRecords(authUser.id);
         setRecords(r);
       }
     };
@@ -104,7 +108,6 @@ export function useMyPageStats() {
 
   const handleLogout = async () => {
     await signOut();
-    setAuthUser(null);
     window.location.href = "/";
   };
 
@@ -114,7 +117,7 @@ export function useMyPageStats() {
 
   const handleToggleLike = async (dayIndex: number) => {
     if (!authUser) return;
-    const success = await toggleLike(authUser.id, dayIndex);
+    const success = await toggleLike(authUser.id, dayIndex, authUser.id);
     if (success) {
       setLikesMap(prev => {
         const current = prev[dayIndex] || { count: 0, isLikedByMe: false, likers: [] };

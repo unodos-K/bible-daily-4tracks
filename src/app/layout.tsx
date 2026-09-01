@@ -50,14 +50,14 @@ export default function RootLayout({
       </head>
       <body className="bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 flex flex-col items-center selection:bg-amber-200 dark:selection:bg-amber-900 h-[100dvh] overflow-hidden overscroll-none">
         <KakaoInit />
-        <NicknameGuard />
-        <SettingsProvider>
-          <AuthProvider>
+        <AuthProvider>
+          <NicknameGuard />
+          <SettingsProvider>
             <MainLayout>
               {children}
             </MainLayout>
-          </AuthProvider>
-        </SettingsProvider>
+          </SettingsProvider>
+        </AuthProvider>
       </body>
     </html>
   );

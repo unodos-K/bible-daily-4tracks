@@ -4,6 +4,7 @@ import React, { useState, useEffect, useLayoutEffect, useRef, Suspense } from "r
 import { useRouter, useSearchParams } from "next/navigation";
 import { CheckSquare, ChevronLeft, Footprints } from "lucide-react";
 import { MemoData, fetchReadRecords, updateReadRecordOneVerse, DayRecord } from "@/lib/storage";
+import { useAuth } from "@/components/AuthProvider";
 
 const parseInitialMemo = (m: string | MemoData | undefined): MemoData => {
   if (!m) return {};
@@ -24,6 +25,7 @@ const resizeTextarea = (textarea: HTMLTextAreaElement | null) => {
 function MemoEditorContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { authUser, isAuthLoading } = useAuth();
   const dayIndexParam = searchParams.get("day");
   const modeParam = searchParams.get("mode");
   
@@ -61,7 +63,8 @@ function MemoEditorContent() {
       const day = parseInt(dayIndexParam, 10);
       setDayIndex(day);
       
-      const records = await fetchReadRecords();
+      if (isAuthLoading) return;
+      const records = await fetchReadRecords(authUser?.id);
       const rec = records[day];
       
       if (!rec || !rec.oneVerse) {
@@ -95,7 +98,7 @@ function MemoEditorContent() {
     };
     
     loadRecord();
-  }, [dayIndexParam, modeParam, router]);
+  }, [authUser, dayIndexParam, isAuthLoading, modeParam, router]);
 
   if (isLoading || !record || dayIndex === null) {
     return (
@@ -124,7 +127,7 @@ function MemoEditorContent() {
       };
       
       const updatedVerse = { ...record.oneVerse!, memo: finalMemoData, memoUpdatedAt: new Date().toISOString() };
-      await updateReadRecordOneVerse(dayIndex, updatedVerse);
+      await updateReadRecordOneVerse(dayIndex, updatedVerse, authUser?.id);
       
       // Update global event for records so other pages reflect the change
       window.dispatchEvent(new Event('records_updated'));
@@ -149,7 +152,7 @@ function MemoEditorContent() {
       setAppItems(newApp);
       
       const updatedVerse = { ...record.oneVerse!, memo: newMemoData, memoUpdatedAt: new Date().toISOString() };
-      await updateReadRecordOneVerse(dayIndex, updatedVerse);
+      await updateReadRecordOneVerse(dayIndex, updatedVerse, authUser?.id);
       window.dispatchEvent(new Event('records_updated'));
     }
   };

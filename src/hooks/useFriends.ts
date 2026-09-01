@@ -12,13 +12,14 @@ import {
   getSentRequests,
   createInviteLink
 } from "@/lib/social";
-import { getAuthUser, AuthUser } from "@/lib/auth";
+import { useAuth } from "@/components/AuthProvider";
+import type { AuthUser } from "@/lib/auth";
 
 export type TabType = "friends" | "requests" | "search";
 
 export function useFriends() {
   const [activeTab, setActiveTab] = useState<TabType>("friends");
-  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+  const { authUser, isAuthLoading } = useAuth();
   
   const [friends, setFriends] = useState<FriendProfile[]>([]);
   const [requests, setRequests] = useState<{ id: string; profile: FriendProfile }[]>([]);
@@ -67,17 +68,8 @@ export function useFriends() {
   }, []);
 
   useEffect(() => {
-    let isActive = true;
-    getAuthUser().then((user) => {
-      if (!isActive) return;
-      setAuthUser(user);
-      void loadData(user);
-    });
-
-    return () => {
-      isActive = false;
-    };
-  }, [loadData]);
+    if (!isAuthLoading) void loadData(authUser);
+  }, [authUser, isAuthLoading, loadData]);
 
 
 
@@ -155,13 +147,13 @@ export function useFriends() {
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
     setIsSearching(true);
-    const results = await searchUsersByNickname(searchQuery);
+    const results = await searchUsersByNickname(searchQuery, authUser?.id);
     setSearchResults(results);
     setIsSearching(false);
   };
 
   const handleSendRequest = async (friendId: string) => {
-    const success = await sendFriendRequest(friendId);
+    const success = await sendFriendRequest(friendId, authUser?.id);
     if (success) {
       setSentRequests(prev => [...prev, friendId]);
     } else {
@@ -170,7 +162,7 @@ export function useFriends() {
   };
 
   const handleRespondRequest = async (requesterId: string, accept: boolean) => {
-    const success = await respondToFriendRequest(requesterId, accept);
+    const success = await respondToFriendRequest(requesterId, accept, authUser?.id);
     if (success) {
       alert(accept ? "친구 요청을 수락했습니다." : "친구 요청을 거절했습니다.");
       void loadData(authUser); // 리로드
@@ -208,7 +200,7 @@ export function useFriends() {
       return { ...prev, [friendId]: newFeed };
     });
 
-    const success = await toggleLike(friendId, item.day_index);
+    const success = await toggleLike(friendId, item.day_index, authUser?.id);
     if (!success) {
       console.error("아멘 처리 실패, 롤백합니다.");
       // 롤백

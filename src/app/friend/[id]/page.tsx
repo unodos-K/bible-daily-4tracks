@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { ChevronLeft, Footprints, Loader2, Heart } from "lucide-react";
 import { getFriendRecords, getFriendProfile, toggleLike, getFriendStats, FriendFeedItem, FriendProfile } from "@/lib/social";
 import LikeButton from "@/components/friends/LikeButton";
-import { getAuthUser, AuthUser } from "@/lib/auth";
+import { useAuth } from "@/components/AuthProvider";
 
 export default function FriendProfilePage() {
   const params = useParams();
@@ -17,19 +17,14 @@ export default function FriendProfilePage() {
   const [stats, setStats] = useState<{ totalReadDays: number, memorizedCount: number }>({ totalReadDays: 0, memorizedCount: 0 });
   const [thisMonthRecords, setThisMonthRecords] = useState<FriendFeedItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+  const { authUser, isAuthLoading } = useAuth();
 
   useEffect(() => {
     let mounted = true;
-    if (!friendId) return;
-
-    getAuthUser().then(user => {
-      if (!mounted) return;
-      setAuthUser(user);
-
+    if (!friendId || isAuthLoading) return () => { mounted = false; };
       Promise.all([
         getFriendProfile(friendId),
-        getFriendRecords(friendId),
+        getFriendRecords(friendId, authUser?.id),
         getFriendStats(friendId)
       ]).then(([prof, recs, st]) => {
         if (mounted) {
@@ -45,10 +40,8 @@ export default function FriendProfilePage() {
           setLoading(false);
         }
       });
-    });
-
     return () => { mounted = false; };
-  }, [friendId]);
+  }, [authUser, friendId, isAuthLoading]);
 
   const handleLike = async (item: FriendFeedItem) => {
     if (!authUser) {
@@ -76,7 +69,7 @@ export default function FriendProfilePage() {
       return rec;
     }));
 
-    const success = await toggleLike(friendId, item.day_index);
+    const success = await toggleLike(friendId, item.day_index, authUser?.id);
     if (!success) {
       console.error("아멘 처리 실패");
     }

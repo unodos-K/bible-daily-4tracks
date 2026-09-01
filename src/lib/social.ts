@@ -74,8 +74,8 @@ export async function getSentRequests(currentUserId?: string): Promise<string[]>
 }
 
 // 2. 친구 요청 보내기
-export async function sendFriendRequest(friendId: string): Promise<boolean> {
-  const userId = await getUserId();
+export async function sendFriendRequest(friendId: string, currentUserId?: string): Promise<boolean> {
+  const userId = currentUserId ?? await getUserId();
   if (!userId || userId === friendId) return false;
 
   const { error } = await supabase.from('friendships').insert({
@@ -129,8 +129,8 @@ export async function getPendingRequests(currentUserId?: string): Promise<{ id: 
 }
 
 // 4. 친구 요청 수락/거절
-export async function respondToFriendRequest(requesterId: string, accept: boolean): Promise<boolean> {
-  const userId = await getUserId();
+export async function respondToFriendRequest(requesterId: string, accept: boolean, currentUserId?: string): Promise<boolean> {
+  const userId = currentUserId ?? await getUserId();
   if (!userId) return false;
 
   if (accept) {
@@ -329,8 +329,8 @@ export async function getFriendProfile(friendId: string): Promise<FriendProfile 
 }
 
 // 4. 특정 친구의 One Verse 기록 조회 (아멘 상태 포함)
-export async function getFriendRecords(friendId: string): Promise<FriendFeedItem[]> {
-  const myUserId = await getUserId();
+export async function getFriendRecords(friendId: string, currentUserId?: string): Promise<FriendFeedItem[]> {
+  const myUserId = currentUserId ?? await getUserId();
   
   // 친구의 One Verse 기록 가져오기 (최신순)
   const { data: records, error: recordError } = await supabase
@@ -412,8 +412,8 @@ export async function getFriendStats(friendId: string): Promise<{ totalReadDays:
 }
 
 // 5. 아멘 토글
-export async function toggleLike(authorId: string, dayIndex: number): Promise<boolean> {
-  const userId = await getUserId();
+export async function toggleLike(authorId: string, dayIndex: number, currentUserId?: string): Promise<boolean> {
+  const userId = currentUserId ?? await getUserId();
   if (!userId) return false;
 
   const { data, error: selectError } = await supabase

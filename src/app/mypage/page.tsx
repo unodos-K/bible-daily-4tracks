@@ -166,8 +166,8 @@ export default function MyPage() {
           onComplete={async () => {
             const verse = stats.records[stats.selectedDayIndexForMemory!].oneVerse;
             if (verse) {
-              await updateMemorizeRecord(stats.selectedDayIndexForMemory!, true, verse);
-              const r = await fetchReadRecords();
+              await updateMemorizeRecord(stats.selectedDayIndexForMemory!, true, verse, stats.authUser?.id);
+              const r = await fetchReadRecords(stats.authUser?.id);
               stats.setRecords(r);
             }
             stats.setIsMemoryModalOpen(false);

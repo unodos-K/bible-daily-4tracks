@@ -4,33 +4,30 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Footprints } from "lucide-react";
 import { getFriendsList, FriendProfile } from "@/lib/social";
-import { getAuthUser, AuthUser } from "@/lib/auth";
+import { useAuth } from "@/components/AuthProvider";
 
 export default function FriendsList() {
   const [friends, setFriends] = useState<FriendProfile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+  const { authUser, isAuthLoading } = useAuth();
 
   useEffect(() => {
     let mounted = true;
-    
-    getAuthUser().then(user => {
-      if (!mounted) return;
-      setAuthUser(user);
-      if (user) {
-        getFriendsList(user.id).then(list => {
+    if (isAuthLoading) return () => { mounted = false; };
+    if (authUser) {
+        getFriendsList(authUser.id).then(list => {
           if (mounted) {
             setFriends(list);
             setLoading(false);
           }
         });
-      } else {
-        setLoading(false);
-      }
-    });
+    } else {
+      setFriends([]);
+      setLoading(false);
+    }
 
     return () => { mounted = false; };
-  }, []);
+  }, [authUser, isAuthLoading]);
 
   if (loading) {
     return (
