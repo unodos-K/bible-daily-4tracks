@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ChevronLeft, Footprints, Loader2 } from "lucide-react";
+import { ChevronLeft, Footprints, Loader2, Heart } from "lucide-react";
 import { getFriendRecords, getFriendProfile, toggleLike, getFriendStats, FriendFeedItem, FriendProfile } from "@/lib/social";
 import LikeButton from "@/components/friends/LikeButton";
 import { getAuthUser, AuthUser } from "@/lib/auth";
@@ -78,7 +78,7 @@ export default function FriendProfilePage() {
 
     const success = await toggleLike(friendId, item.day_index);
     if (!success) {
-      console.error("좋아요 처리 실패");
+      console.error("아멘 처리 실패");
     }
   };
 
@@ -160,8 +160,8 @@ export default function FriendProfilePage() {
             {/* 뇌새김(암송) 통계 */}
             <div className="mt-4 pt-4 border-t border-stone-100 dark:border-stone-800 flex justify-between items-center">
               <span className="text-sm font-bold text-stone-600 dark:text-stone-300">마음새김 완료</span>
-              <span className="px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs font-bold rounded-full">
-                👑 {stats.memorizedCount}구절
+              <span className="px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs font-bold rounded-full flex items-center gap-1">
+                <Heart size={12} fill="currentColor" /> {stats.memorizedCount}구절
               </span>
             </div>
           </div>
@@ -185,8 +185,8 @@ export default function FriendProfilePage() {
                     <p className="text-xs text-stone-400">• {new Date(record.completed_at).toLocaleDateString()}</p>
                   </div>
                   {record.one_verse?.isMemorized && (
-                    <span className="bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                      👑 암송
+                    <span className="bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <Heart size={10} fill="currentColor" /> 마음 새김
                     </span>
                   )}
                 </div>

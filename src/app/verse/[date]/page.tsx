@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { ChevronLeft, Heart, Share2, BookOpen, Quote, Footprints } from "lucide-react";
+import { ChevronLeft, Heart, HeartHandshake, BookOpen, Quote, Footprints } from "lucide-react";
 import { 
   ReadRecordsMap, 
   DayRecord,
@@ -139,8 +139,8 @@ export default function VerseDetailPage() {
                       onClick={() => handleShareOneVerse(record)}
                       className="flex flex-col items-center justify-center gap-1.5 py-4 bg-stone-50 dark:bg-white/5 hover:bg-stone-100 dark:hover:bg-white/10 text-stone-600 dark:text-stone-300 rounded-xl transition-all active:scale-95"
                     >
-                      <Share2 size={22} strokeWidth={2.5} className="text-sky-500 dark:text-sky-400" />
-                      <span className="text-xs font-bold tracking-tight">공유하기</span>
+                      <HeartHandshake size={22} strokeWidth={2.5} className="text-sky-500 dark:text-sky-400" />
+                      <span className="text-xs font-bold tracking-tight">나눔</span>
                     </button>
                     <button
                       onClick={() => {
@@ -190,7 +190,7 @@ export default function VerseDetailPage() {
         />
       )}
 
-      {/* 공유 모달 */}
+      {/* 나눔 모달 */}
       <ShareModal
         isOpen={!!selectedRecordToShare}
         onClose={() => setSelectedRecordToShare(null)}

@@ -80,12 +80,12 @@ export default function ShareModal({ isOpen, onClose, record, onShare }: ShareMo
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between p-6 pb-4">
-          <h3 className="text-xl font-bold text-stone-100">공유 항목 선택</h3>
+          <h3 className="text-xl font-bold text-stone-100">나눔 항목 선택</h3>
           <button onClick={onClose} className="text-stone-400 hover:text-stone-200"><X size={24} /></button>
         </div>
         
         <div className="px-6 pb-2 text-sm text-stone-400">
-          공유할 항목을 선택하고, 핸들(⋮⋮)을 드래그하여 순서를 변경해 보세요.
+          나눌 항목을 선택하고, 핸들(⋮⋮)을 드래그하여 순서를 변경해 보세요.
         </div>
 
         <div className="flex flex-col gap-2 p-6 pt-2 overflow-y-auto max-h-[60vh]">
@@ -119,7 +119,7 @@ export default function ShareModal({ isOpen, onClose, record, onShare }: ShareMo
             onClick={handleShareClick}
             className="w-full py-3.5 bg-[#FEE500] hover:bg-[#FDD800] text-black font-bold rounded-xl flex items-center justify-center transition-colors"
           >
-            카카오톡으로 공유하기
+            카카오톡으로 나누기
           </button>
         </div>
       </div>

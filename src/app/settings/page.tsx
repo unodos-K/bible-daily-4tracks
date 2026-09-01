@@ -188,11 +188,11 @@ export default function SettingsPage() {
             </button>
           </div>
 
-          {/* 발자국 공유 기본 설정 카드 */}
+          {/* 발자국 나눔 기본 설정 카드 */}
           <div className="bg-white dark:bg-stone-900 rounded-2xl md:rounded-3xl p-5 md:p-6 shadow-sm border border-stone-200/80 dark:border-stone-800 flex flex-col gap-3">
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-bold text-stone-800 dark:text-stone-100">발자국 공유 기본 설정</label>
-              <p className="text-xs text-stone-400">공유 시 포함할 항목과 표시 순서를 변경할 수 있습니다 (드래그하여 순서 변경)</p>
+              <label className="text-sm font-bold text-stone-800 dark:text-stone-100">발자국 나눔 기본 설정</label>
+              <p className="text-xs text-stone-400">나눔 시 포함할 항목과 표시 순서를 변경할 수 있습니다 (드래그하여 순서 변경)</p>
             </div>
             <div className="flex flex-col gap-2 mt-1">
               {shareOptions.map((item, index) => (

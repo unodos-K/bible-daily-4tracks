@@ -204,7 +204,7 @@ export async function getFriendProfile(friendId: string): Promise<FriendProfile 
   };
 }
 
-// 4. 특정 친구의 One Verse 기록 조회 (좋아요 상태 포함)
+// 4. 특정 친구의 One Verse 기록 조회 (아멘 상태 포함)
 export async function getFriendRecords(friendId: string): Promise<FriendFeedItem[]> {
   const myUserId = await getUserId();
   
@@ -224,7 +224,7 @@ export async function getFriendRecords(friendId: string): Promise<FriendFeedItem
 
   if (records.length === 0) return [];
 
-  // 좋아요 데이터 가져오기
+  // 아멘 데이터 가져오기
   const { data: likes } = await supabase
     .from('one_verse_likes')
     .select('liker_id, author_id, day_index, profiles!liker_id(name, nickname)')
@@ -284,7 +284,7 @@ export async function getFriendStats(friendId: string): Promise<{ totalReadDays:
   return { totalReadDays, memorizedCount };
 }
 
-// 5. 좋아요 토글
+// 5. 아멘 토글
 export async function toggleLike(authorId: string, dayIndex: number): Promise<boolean> {
   const userId = await getUserId();
   if (!userId) return false;
