@@ -1,5 +1,5 @@
 import React from "react";
-import { Search, UserPlus, Check } from "lucide-react";
+import { Search, UserPlus } from "lucide-react";
 import { FriendProfile } from "@/lib/social";
 
 interface FriendSearchBoxProps {
@@ -27,13 +27,17 @@ export default function FriendSearchBox({
   handleTouchStart,
   handleTouchEnd
 }: FriendSearchBoxProps) {
+  // 이미 친구 상태인 유저 제외 필터링
+  const filteredResults = searchResults.filter(user => !friends.some(f => f.id === user.id));
+
   return (
     <div className="flex flex-col gap-4">
+      {/* 검색창 */}
       <div className="flex gap-2">
         <input 
           type="text" 
           placeholder="친구의 닉네임을 입력하세요" 
-          className="flex-1 px-4 py-3 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500"
+          className="flex-1 px-4 py-2.5 text-sm bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500"
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleSearch()}
@@ -41,66 +45,80 @@ export default function FriendSearchBox({
         <button 
           onClick={handleSearch}
           disabled={isSearching}
-          className="px-4 bg-stone-800 text-white rounded-xl hover:bg-stone-900 transition-colors"
+          className="px-4 bg-stone-800 hover:bg-stone-900 dark:bg-stone-100 dark:hover:bg-stone-200 text-white dark:text-stone-900 font-bold rounded-xl transition-colors text-sm flex items-center justify-center cursor-pointer"
         >
-          <Search size={20} />
+          <Search size={18} />
         </button>
       </div>
       
-      <div className="flex flex-col gap-3 mt-4">
-        {searchResults.length === 0 && searchQuery !== "" && !isSearching && (
-          <div className="text-center text-stone-500">검색 결과가 없습니다.</div>
+      {/* 검색 결과 리스트 */}
+      <div className="flex flex-col gap-2.5 mt-2">
+        {filteredResults.length === 0 && searchQuery !== "" && !isSearching && (
+          <div className="text-center text-stone-500 text-sm py-8 bg-white dark:bg-stone-900 rounded-2xl border border-stone-100 dark:border-stone-800">
+            검색 결과가 없거나 이미 친구로 등록되어 있습니다.
+          </div>
         )}
-        {searchResults.map(user => {
-          const isAlreadyFriend = friends.some(f => f.id === user.id);
+
+        {filteredResults.map(user => {
           const isPendingRequest = sentRequests.includes(user.id);
           
           return (
             <div 
               key={user.id} 
-              className="bg-white dark:bg-stone-900 p-5 rounded-2xl shadow-sm border border-stone-100 dark:border-stone-800 flex flex-col gap-3 group"
+              className="bg-white dark:bg-stone-900 p-3.5 sm:p-4 rounded-2xl shadow-xs border border-stone-200/70 dark:border-stone-800 flex items-center justify-between gap-3 group transition-all"
               onTouchStart={() => handleTouchStart(user.id)}
               onTouchEnd={handleTouchEnd}
               onTouchCancel={handleTouchEnd}
             >
-              <div className="flex justify-between items-center w-full">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden flex-shrink-0">
-                    {user.avatar_url && <img src={user.avatar_url} alt={user.name} className="w-full h-full object-cover" />}
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-bold text-lg text-stone-800 dark:text-stone-100 break-words">
+              {/* 유저 프로필 정보 (썸네일 + 닉네임 + 카카오 이름) */}
+              <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden flex-shrink-0">
+                  {user.avatar_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={user.avatar_url} alt={user.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-stone-400 text-sm">
+                      👤
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex flex-col min-w-0">
+                  <div className="flex items-center gap-1 min-w-0">
+                    <span className="font-bold text-sm sm:text-base text-stone-800 dark:text-stone-100 truncate">
                       {(user.nickname || user.name).split('#')[0]}
                     </span>
                     {user.nickname?.includes('#') && (
-                      <span className="text-sm font-medium text-stone-500 mt-0.5">
+                      <span className="text-xs font-normal text-stone-400 shrink-0">
                         #{user.nickname.split('#')[1]}
                       </span>
                     )}
                   </div>
-                </div>
-                <div className="text-xs font-medium text-stone-400 shrink-0 ml-2">
-                  {user.name}
+                  {user.name && user.nickname && (
+                    <span className="text-[11px] font-medium text-stone-400 dark:text-stone-500 truncate">
+                      카카오 이름: {user.name}
+                    </span>
+                  )}
                 </div>
               </div>
               
-              <div className="flex justify-end mt-2">
-                {isAlreadyFriend ? (
-                  <span className="w-full sm:w-auto flex justify-center items-center gap-1.5 px-4 py-2.5 text-sm font-bold text-emerald-700 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl">
-                    <Check size={18} /> 친구 완료
-                  </span>
-                ) : isPendingRequest ? (
-                  <button disabled className="w-full sm:w-auto flex justify-center items-center gap-1.5 px-4 py-2.5 bg-stone-100 dark:bg-stone-800 text-stone-400 font-bold text-sm rounded-xl cursor-not-allowed">
+              {/* 친구 요청 / 상태 버튼 (우측 슬림 배치) */}
+              <div className="shrink-0">
+                {isPendingRequest ? (
+                  <span className="px-3 py-1.5 bg-stone-100 dark:bg-stone-800 text-stone-400 font-semibold text-xs rounded-lg select-none">
                     요청 대기중
-                  </button>
+                  </span>
                 ) : (
-                  <button onClick={() => handleSendRequest(user.id)} className="w-full sm:w-auto flex justify-center items-center gap-1.5 px-4 py-2.5 bg-sky-100 text-sky-700 hover:bg-sky-200 font-bold text-sm rounded-xl transition-colors">
-                    <UserPlus size={18} /> 친구 추가
+                  <button 
+                    onClick={() => handleSendRequest(user.id)} 
+                    className="px-3 py-1.5 bg-sky-100 hover:bg-sky-200 dark:bg-sky-950/60 dark:hover:bg-sky-900/80 text-sky-700 dark:text-sky-300 font-bold text-xs rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+                  >
+                    <UserPlus size={14} /> 친구 추가
                   </button>
                 )}
               </div>
             </div>
-          )
+          );
         })}
       </div>
     </div>
