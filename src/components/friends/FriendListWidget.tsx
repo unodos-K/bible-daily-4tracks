@@ -53,13 +53,20 @@ export default function FriendListWidget({
                     </div>
                   )}
                 </div>
-                <div className="flex items-center gap-1.5 min-w-0 truncate">
-                  <span className="font-bold text-sm sm:text-base text-stone-800 dark:text-stone-100 group-hover/link:text-sky-600 dark:group-hover/link:text-sky-400 transition-colors truncate">
-                    {(friend.nickname || friend.name).split('#')[0]}
-                  </span>
-                  {friend.nickname?.includes('#') && (
-                    <span className="text-xs font-normal text-stone-400 shrink-0">
-                      #{friend.nickname.split('#')[1]}
+                <div className="flex flex-col min-w-0">
+                  <div className="flex items-center gap-1 min-w-0">
+                    <span className="font-bold text-sm sm:text-base text-stone-800 dark:text-stone-100 group-hover/link:text-sky-600 dark:group-hover/link:text-sky-400 transition-colors truncate">
+                      {(friend.nickname || friend.name).split('#')[0]}
+                    </span>
+                    {friend.nickname?.includes('#') && (
+                      <span className="text-xs font-normal text-stone-400 shrink-0">
+                        #{friend.nickname.split('#')[1]}
+                      </span>
+                    )}
+                  </div>
+                  {friend.name && friend.nickname && (
+                    <span className="text-[11px] font-medium text-stone-400 dark:text-stone-500 truncate">
+                      카카오 이름: {friend.name}
                     </span>
                   )}
                 </div>
