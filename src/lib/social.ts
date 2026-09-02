@@ -1,5 +1,6 @@
 import { supabase } from "./supabase";
 import { getUserId, OneVerse, parseOneVerse } from "./storage";
+import type { Json } from "@/types/supabase";
 
 export interface FriendProfile {
   id: string;
@@ -328,43 +329,66 @@ export async function getFriendProfile(friendId: string): Promise<FriendProfile 
   };
 }
 
-// 4. 특정 친구의 One Verse 기록 조회 (아멘 상태 포함)
-export async function getFriendRecords(friendId: string, currentUserId?: string): Promise<FriendFeedItem[]> {
-  const myUserId = currentUserId ?? await getUserId();
-  
-  // 친구의 One Verse 기록 가져오기 (최신순)
-  const { data: records, error: recordError } = await supabase
-    .from('reading_records')
-    .select('*')
-    .eq('user_id', friendId)
-    .not('one_verse', 'is', null)
-    .order('completed_at', { ascending: false })
-    .limit(50);
+export interface FriendStats {
+  totalReadDays: number;
+  memorizedCount: number;
+}
 
-  if (recordError || !records) {
-    console.error("getFriendRecords error:", recordError);
-    return [];
+export interface FriendDetail {
+  profile: FriendProfile | null;
+  records: FriendFeedItem[];
+  stats: FriendStats;
+}
+
+function buildFriendStats(records: { one_verse: Json | null }[]): FriendStats {
+  return {
+    totalReadDays: records.length,
+    memorizedCount: records.filter((record) => parseOneVerse(record.one_verse)?.isMemorized).length,
+  };
+}
+
+// 상세 화면은 읽기 기록을 한 번만 가져와 One Verse 목록과 통계를 함께 구성한다.
+export async function getFriendDetail(friendId: string, currentUserId?: string): Promise<FriendDetail> {
+  const myUserId = currentUserId ?? await getUserId();
+  const [profile, recordsResult, likesResult] = await Promise.all([
+    getFriendProfile(friendId),
+    supabase
+      .from('reading_records')
+      .select('user_id, day_index, read_date, completed_at, one_verse')
+      .eq('user_id', friendId)
+      .order('completed_at', { ascending: false }),
+    supabase
+      .from('one_verse_likes')
+      .select('liker_id, author_id, day_index, profiles!liker_id(name, nickname)')
+      .eq('author_id', friendId),
+  ]);
+
+  if (recordsResult.error || !recordsResult.data) {
+    console.error("getFriendDetail records error:", recordsResult.error);
+    return { profile, records: [], stats: { totalReadDays: 0, memorizedCount: 0 } };
+  }
+  if (likesResult.error) console.error("getFriendDetail likes error:", likesResult.error);
+
+  const allRecords = recordsResult.data;
+  const stats = buildFriendStats(allRecords);
+  const likesByDay = new Map<number, NonNullable<typeof likesResult.data>>();
+  for (const like of likesResult.data ?? []) {
+    const dayLikes = likesByDay.get(like.day_index) ?? [];
+    dayLikes.push(like);
+    likesByDay.set(like.day_index, dayLikes);
   }
 
-  if (records.length === 0) return [];
-
-  // 아멘 데이터 가져오기
-  const { data: likes } = await supabase
-    .from('one_verse_likes')
-    .select('liker_id, author_id, day_index, profiles!liker_id(name, nickname)')
-    .eq('author_id', friendId);
-
-  // 친구 프로필 가져오기
-  const profile = await getFriendProfile(friendId);
   const friendName = profile?.name || '친구';
   const friendAvatar = profile?.avatar_url || '';
   const friendNickname = profile?.nickname;
-
-  const feedItems: FriendFeedItem[] = records.flatMap(record => {
+  const feedItems: FriendFeedItem[] = allRecords
+    .filter((record) => record.one_verse !== null && record.completed_at !== null)
+    .slice(0, 50)
+    .flatMap(record => {
     const oneVerse = parseOneVerse(record.one_verse);
     if (!oneVerse || !record.completed_at) return [];
 
-    const recordLikes = likes ? likes.filter(l => l.day_index === record.day_index) : [];
+    const recordLikes = likesByDay.get(record.day_index) ?? [];
     const isLikedByMe = myUserId ? recordLikes.some(l => l.liker_id === myUserId) : false;
     const likedByUsers = recordLikes.flatMap(l => {
       if (!l.liker_id) return [];
@@ -390,25 +414,7 @@ export async function getFriendRecords(friendId: string, currentUserId?: string)
     };
   });
 
-  return feedItems;
-}
-
-// 4-1. 특정 친구의 통독 및 암송 통계 조회
-export async function getFriendStats(friendId: string): Promise<{ totalReadDays: number, memorizedCount: number }> {
-  const { data: records, error } = await supabase
-    .from('reading_records')
-    .select('one_verse')
-    .eq('user_id', friendId);
-
-  if (error || !records) {
-    console.error("getFriendStats error:", error);
-    return { totalReadDays: 0, memorizedCount: 0 };
-  }
-
-  const totalReadDays = records.length;
-  const memorizedCount = records.filter(r => parseOneVerse(r.one_verse)?.isMemorized).length;
-
-  return { totalReadDays, memorizedCount };
+  return { profile, records: feedItems, stats };
 }
 
 // 5. 아멘 토글

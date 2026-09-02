@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ChevronLeft, Footprints, Loader2, Heart, Sparkles } from "lucide-react";
-import { getFriendRecords, getFriendProfile, toggleLike, getFriendStats, FriendFeedItem, FriendProfile } from "@/lib/social";
+import { getFriendDetail, toggleLike, FriendFeedItem, FriendProfile } from "@/lib/social";
 import LikeButton from "@/components/friends/LikeButton";
 import { useAuth } from "@/components/AuthProvider";
 
@@ -24,11 +24,7 @@ export default function FriendProfilePage() {
   useEffect(() => {
     let mounted = true;
     if (!friendId || isAuthLoading) return () => { mounted = false; };
-      Promise.all([
-        getFriendProfile(friendId),
-        getFriendRecords(friendId, authUser?.id),
-        getFriendStats(friendId)
-      ]).then(([prof, recs, st]) => {
+      getFriendDetail(friendId, authUser?.id).then(({ profile: prof, records: recs, stats: st }) => {
         if (mounted) {
           setProfile(prof);
           // day_index 내림차순 (최신순) 정렬 보장
