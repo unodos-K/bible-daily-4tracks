@@ -1,20 +1,28 @@
 "use client";
 
-import React, { useState, useEffect, useLayoutEffect, useRef, Suspense } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { BookOpen, CheckSquare, ChevronLeft, Copy, Footprints, X } from "lucide-react";
-import { MemoData, fetchOneVerseRecord, updateReadRecordOneVerse, OneVerseRecord } from "@/lib/storage";
+import { ArrowLeft, CheckSquare, ChevronLeft, Copy, Footprints, Plus } from "lucide-react";
+import { MemoData, fetchOneVerseRecord, OneVerseRecord, updateReadRecordOneVerse } from "@/lib/storage";
 import { useAuth } from "@/components/AuthProvider";
 
-const parseInitialMemo = (m: string | MemoData | undefined): MemoData => {
-  if (!m) return {};
-  if (typeof m === 'string') return { meditation: m };
-  return m;
+type MemoSection = "meditation" | "prayer" | "thanks" | "application";
+
+const SECTION_INFO: Record<MemoSection, { title: string; placeholder: string }> = {
+  meditation: { title: "묵상", placeholder: "이 말씀이 마음에 와닿은 이유는 무엇인가요?" },
+  prayer: { title: "기도", placeholder: "말씀을 통해 깨달은 기도를 적어보세요." },
+  thanks: { title: "감사하기", placeholder: "오늘 하루 감사한 일을 적어보세요." },
+  application: { title: "삶에 적용하기", placeholder: "오늘 실천할 내용을 적어보세요." },
 };
 
-const formatReference = (book: string, chapter: number, verse: number) => {
-  return book === "시편" ? `${book} ${chapter}편 ${verse}절` : `${book} ${chapter}장 ${verse}절`;
+const parseInitialMemo = (memo: string | MemoData | undefined): MemoData => {
+  if (!memo) return {};
+  return typeof memo === "string" ? { meditation: memo } : memo;
 };
+
+const formatReference = (book: string, chapter: number, verse: number) => (
+  book === "시편" ? `${book} ${chapter}편 ${verse}절` : `${book} ${chapter}장 ${verse}절`
+);
 
 const resizeTextarea = (textarea: HTMLTextAreaElement | null) => {
   if (!textarea) return;
@@ -22,86 +30,78 @@ const resizeTextarea = (textarea: HTMLTextAreaElement | null) => {
   textarea.style.height = `${textarea.scrollHeight}px`;
 };
 
+const parseThanks = (thanks?: string) => (
+  (thanks || "").split("\n").filter((item) => item.trim() !== "").map((item) => item.replace(/^•\s*/, ""))
+);
+
 function MemoEditorContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { authUser, isAuthLoading } = useAuth();
   const dayIndexParam = searchParams.get("day");
-  const modeParam = searchParams.get("mode");
-  
+
   const [dayIndex, setDayIndex] = useState<number | null>(null);
   const [record, setRecord] = useState<OneVerseRecord | null>(null);
-  
-  const [mode, setMode] = useState<'view' | 'edit'>('edit');
   const [memoData, setMemoData] = useState<MemoData>({});
-  
-  const [thanksItems, setThanksItems] = useState<string[]>([]);
-  const [appItems, setAppItems] = useState<{checked: boolean, text: string}[]>([]);
-  
+  const [thanksItems, setThanksItems] = useState<string[]>([""]);
+  const [appItems, setAppItems] = useState<{ checked: boolean; text: string }[]>([{ checked: false, text: "" }]);
+  const [activeSection, setActiveSection] = useState<MemoSection | null>(null);
+  const [isDirty, setIsDirty] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [copyMessage, setCopyMessage] = useState<string | null>(null);
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
 
-  // Refs for focusing inputs
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const thanksRefs = useRef<(HTMLInputElement | null)[]>([]);
   const appRefs = useRef<(HTMLInputElement | null)[]>([]);
-  const meditationTextareaRef = useRef<HTMLTextAreaElement>(null);
-  const prayerTextareaRef = useRef<HTMLTextAreaElement>(null);
-  const [isVerseDialogOpen, setIsVerseDialogOpen] = useState(false);
-  const [copyMessage, setCopyMessage] = useState<string | null>(null);
-  const lastFocusedElementRef = useRef<HTMLElement | null>(null);
   const copyMessageTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useLayoutEffect(() => {
-    if (mode !== 'edit') return;
-    resizeTextarea(meditationTextareaRef.current);
-    resizeTextarea(prayerTextareaRef.current);
-  }, [memoData.meditation, memoData.prayer, mode]);
-
   useEffect(() => {
+    if (isAuthLoading) return;
     const loadRecord = async () => {
       if (!dayIndexParam) {
         router.back();
         return;
       }
-      
-      const day = parseInt(dayIndexParam, 10);
-      setDayIndex(day);
-      
-      if (isAuthLoading) return;
-      const rec = await fetchOneVerseRecord(day, authUser?.id);
-      
-      if (!rec || !rec.oneVerse) {
-        // If there's no record or one verse, we can't write a memo
+
+      const day = Number(dayIndexParam);
+      if (!Number.isInteger(day) || day < 1) {
         router.back();
         return;
       }
-      
-      setRecord(rec);
-      
-      const initialMemo = rec.oneVerse.memo;
-      const md = parseInitialMemo(initialMemo);
-      setMemoData(md);
-      
-      if (modeParam === 'view') {
-        setMode('view');
-      } else {
-        setMode(Object.keys(md).length > 0 ? 'view' : 'edit');
+
+      try {
+        const nextRecord = await fetchOneVerseRecord(day, authUser?.id);
+        if (!nextRecord) {
+          router.back();
+          return;
+        }
+
+        const initialMemo = parseInitialMemo(nextRecord.oneVerse.memo);
+        const initialThanks = parseThanks(initialMemo.thanks);
+        setDayIndex(day);
+        setRecord(nextRecord);
+        setMemoData(initialMemo);
+        setThanksItems(initialThanks.length > 0 ? initialThanks : [""]);
+        setAppItems(initialMemo.application?.length ? initialMemo.application : [{ checked: false, text: "" }]);
+      } catch (error) {
+        console.error("Failed to load footprint:", error);
+        setErrorMessage("발자국을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.");
+      } finally {
+        setIsLoading(false);
       }
-      
-      const parsedThanks = (md.thanks || "").split('\n').filter(l => l.trim() !== '').map(l => l.replace(/^•\s*/, ''));
-      setThanksItems(parsedThanks.length > 0 ? parsedThanks : [""]);
-      
-      if (md.application && md.application.length > 0) {
-        setAppItems(md.application);
-      } else {
-        setAppItems([{ checked: false, text: "" }]);
-      }
-      
-      setIsLoading(false);
     };
-    
-    loadRecord();
-  }, [authUser, dayIndexParam, isAuthLoading, modeParam, router]);
+
+    void loadRecord();
+  }, [authUser, dayIndexParam, isAuthLoading, router]);
+
+  useLayoutEffect(() => {
+    if (activeSection === "meditation" || activeSection === "prayer") {
+      resizeTextarea(textAreaRef.current);
+    }
+  }, [activeSection, memoData.meditation, memoData.prayer]);
 
   useEffect(() => () => {
     if (copyMessageTimeoutRef.current) clearTimeout(copyMessageTimeoutRef.current);
@@ -109,123 +109,66 @@ function MemoEditorContent() {
 
   if (isLoading || !record || dayIndex === null) {
     return (
-      <div className="min-h-[100dvh] bg-stone-50 dark:bg-stone-950 flex flex-col items-center justify-center gap-3 text-stone-500">
-        <Footprints className="animate-pulse w-8 h-8" />
+      <div className="flex min-h-[100dvh] flex-col items-center justify-center gap-3 bg-stone-950 text-stone-500">
+        <Footprints className="h-8 w-8 animate-pulse" />
         <span className="text-sm font-medium">발자국을 확인하는 중...</span>
       </div>
     );
   }
 
-  const memoUpdatedAt = record.oneVerse?.memoUpdatedAt;
-  const formattedDate = memoUpdatedAt 
-    ? new Date(memoUpdatedAt).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\. /g, '.').replace(/\.$/, '')
-    : new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\. /g, '.').replace(/\.$/, '');
+  const verse = record.oneVerse;
+  const verseText = verse.displayText || verse.rawText;
+  const verseRef = formatReference(verse.book, verse.chapter, verse.verse);
+  const formattedDate = verse.memoUpdatedAt
+    ? new Date(verse.memoUpdatedAt).toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" }).replace(/\. /g, ".").replace(/\.$/, "")
+    : new Date().toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" }).replace(/\. /g, ".").replace(/\.$/, "");
 
-  const handleSave = async () => {
-    setIsSaving(true);
-    try {
-      const finalThanks = thanksItems.filter(t => t.trim() !== '').map(t => `• ${t}`).join('\n');
-      const finalApp = appItems.filter(a => a.text.trim() !== '');
-      
-      const finalMemoData = { 
-        ...memoData, 
-        thanks: finalThanks,
-        application: finalApp 
-      };
-      
-      const updatedVerse = { ...record.oneVerse!, memo: finalMemoData, memoUpdatedAt: new Date().toISOString() };
-      await updateReadRecordOneVerse(dayIndex, updatedVerse, authUser?.id);
-      
-      // Update global event for records so other pages reflect the change
-      window.dispatchEvent(new Event('records_updated'));
-      
-      router.back();
-    } finally {
-      setIsSaving(false);
+  const buildMemoData = (): MemoData => ({
+    ...memoData,
+    thanks: thanksItems.filter((item) => item.trim() !== "").map((item) => `• ${item}`).join("\n"),
+    application: appItems.filter((item) => item.text.trim() !== ""),
+  });
+
+  const isSectionWritten = (section: MemoSection) => {
+    if (section === "meditation" || section === "prayer") return Boolean(memoData[section]?.trim());
+    if (section === "thanks") return thanksItems.some((item) => item.trim());
+    return appItems.some((item) => item.text.trim());
+  };
+
+  const sectionPreview = (section: MemoSection) => {
+    if (section === "meditation" || section === "prayer") return memoData[section]?.trim();
+    if (section === "thanks") return thanksItems.find((item) => item.trim());
+    return appItems.find((item) => item.text.trim())?.text;
+  };
+
+  const restoreSavedMemo = () => {
+    const savedMemo = parseInitialMemo(record.oneVerse.memo);
+    const savedThanks = parseThanks(savedMemo.thanks);
+    setMemoData(savedMemo);
+    setThanksItems(savedThanks.length > 0 ? savedThanks : [""]);
+    setAppItems(savedMemo.application?.length ? savedMemo.application : [{ checked: false, text: "" }]);
+  };
+
+  const openSection = (section: MemoSection) => {
+    setErrorMessage(null);
+    setIsDirty(false);
+    setActiveSection(section);
+  };
+
+  const returnToOverview = () => {
+    if (isDirty) {
+      setShowDiscardConfirm(true);
+      return;
     }
+    setActiveSection(null);
   };
 
-  const toggleAppCheck = async (idx: number) => {
-    if (mode === 'edit') {
-      const newItems = [...appItems];
-      newItems[idx].checked = !newItems[idx].checked;
-      setAppItems(newItems);
-    } else {
-      if (!memoData.application) return;
-      const newApp = [...memoData.application];
-      newApp[idx].checked = !newApp[idx].checked;
-      const newMemoData = { ...memoData, application: newApp };
-      setMemoData(newMemoData);
-      setAppItems(newApp);
-      
-      const updatedVerse = { ...record.oneVerse!, memo: newMemoData, memoUpdatedAt: new Date().toISOString() };
-      await updateReadRecordOneVerse(dayIndex, updatedVerse, authUser?.id);
-      window.dispatchEvent(new Event('records_updated'));
+  const closeEditor = () => {
+    if (activeSection) {
+      returnToOverview();
+      return;
     }
-  };
-
-  // Thanks Handlers
-  const handleThanksKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, idx: number) => {
-    if (e.nativeEvent.isComposing) return;
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      const newItems = [...thanksItems];
-      newItems.splice(idx + 1, 0, "");
-      setThanksItems(newItems);
-      setTimeout(() => thanksRefs.current[idx + 1]?.focus(), 0);
-    } else if (e.key === 'Backspace' && thanksItems[idx] === '') {
-      e.preventDefault();
-      if (thanksItems.length > 1) {
-        const newItems = [...thanksItems];
-        newItems.splice(idx, 1);
-        setThanksItems(newItems);
-        setTimeout(() => thanksRefs.current[idx - 1]?.focus(), 0);
-      }
-    }
-  };
-
-  const updateThanksItem = (idx: number, val: string) => {
-    const newItems = [...thanksItems];
-    newItems[idx] = val;
-    setThanksItems(newItems);
-  };
-
-  // Application Handlers
-  const handleAppKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, idx: number) => {
-    if (e.nativeEvent.isComposing) return;
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      const newItems = [...appItems];
-      newItems.splice(idx + 1, 0, { checked: false, text: "" });
-      setAppItems(newItems);
-      setTimeout(() => appRefs.current[idx + 1]?.focus(), 0);
-    } else if (e.key === 'Backspace' && appItems[idx].text === '') {
-      e.preventDefault();
-      if (appItems.length > 1) {
-        const newItems = [...appItems];
-        newItems.splice(idx, 1);
-        setAppItems(newItems);
-        setTimeout(() => appRefs.current[idx - 1]?.focus(), 0);
-      }
-    }
-  };
-
-  const updateAppItem = (idx: number, val: string) => {
-    const newItems = [...appItems];
-    newItems[idx].text = val;
-    setAppItems(newItems);
-  };
-
-  const verseText = record.oneVerse!.displayText || record.oneVerse!.rawText;
-  const verseRef = formatReference(record.oneVerse!.book, record.oneVerse!.chapter, record.oneVerse!.verse);
-  const closeVerseDialog = () => {
-    setIsVerseDialogOpen(false);
-    requestAnimationFrame(() => lastFocusedElementRef.current?.focus());
-  };
-
-  const openVerseDialog = () => {
-    lastFocusedElementRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    setIsVerseDialogOpen(true);
+    router.back();
   };
 
   const showCopyMessage = (message: string) => {
@@ -240,237 +183,94 @@ function MemoEditorContent() {
       await navigator.clipboard.writeText(text);
       showCopyMessage("복사했어요.");
     } catch {
-      try {
-        const textarea = document.createElement("textarea");
-        textarea.value = text;
-        textarea.style.position = "fixed";
-        textarea.style.opacity = "0";
-        document.body.appendChild(textarea);
-        textarea.select();
-        const copied = document.execCommand("copy");
-        document.body.removeChild(textarea);
-        showCopyMessage(copied ? "복사했어요." : "복사하지 못했어요.");
-      } catch {
-        showCopyMessage("복사하지 못했어요.");
-      }
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      const copied = document.execCommand("copy");
+      document.body.removeChild(textarea);
+      showCopyMessage(copied ? "복사했어요." : "복사하지 못했어요.");
     }
   };
 
-  return (
-    <div className="h-full min-h-0 overflow-hidden bg-stone-900 flex flex-col relative w-full">
-      {/* Sticky Header */}
-      <div className="shrink-0 z-50 flex items-center justify-between p-4 border-b border-stone-800 bg-stone-900/90 backdrop-blur-md">
-        <button 
-          onClick={() => router.back()}
-          className="text-stone-400 hover:text-stone-200 transition-colors flex items-center gap-1"
-        >
-          <ChevronLeft size={24} />
-          <span className="text-sm font-medium">취소</span>
-        </button>
-        <h2 className="text-lg font-bold text-stone-100 absolute left-1/2 -translate-x-1/2 flex items-center gap-1.5">
-          <Footprints size={18} className="text-emerald-500" />
-          {mode === 'view' ? '발자국 보기' : '발자국 남기기'}
-        </h2>
-        <div>
-          {mode === 'view' ? (
-            <button
-              onClick={() => setMode('edit')}
-              className="text-sky-400 hover:text-sky-300 transition-colors font-medium text-sm"
-            >
-              수정
-            </button>
-          ) : (
-            <button
-              onClick={handleSave}
-              disabled={isSaving}
-              className="text-sky-500 hover:text-sky-400 font-bold transition-colors disabled:opacity-50 text-sm"
-            >
-              {isSaving ? "저장 중" : "저장"}
-            </button>
-          )}
-        </div>
-      </div>
+  const saveSection = async () => {
+    const nextMemoData = buildMemoData();
+    setIsSaving(true);
+    setErrorMessage(null);
+    try {
+      const updatedVerse = { ...verse, memo: nextMemoData, memoUpdatedAt: new Date().toISOString() };
+      const success = await updateReadRecordOneVerse(dayIndex, updatedVerse, authUser?.id);
+      if (!success) {
+        setErrorMessage("저장하지 못했습니다. 네트워크 상태를 확인한 뒤 다시 시도해 주세요.");
+        return;
+      }
+      setRecord((current) => current ? { ...current, oneVerse: updatedVerse } : current);
+      setMemoData(nextMemoData);
+      setIsDirty(false);
+      setActiveSection(null);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
-      {/* Content */}
-      <div className="flex-1 min-h-0 overflow-y-auto overscroll-y-contain p-5 pb-[calc(6rem+env(safe-area-inset-bottom))]">
-        {verseText && verseRef && (
-          <div className="mb-6 bg-stone-100 dark:bg-white/5 p-4 rounded-xl border border-stone-200 dark:border-stone-800">
-            <blockquote className="break-words text-[15px] leading-relaxed italic text-stone-800 dark:text-stone-200 sm:text-base mb-3">
-              {verseText}
-            </blockquote>
-            <div className="text-right text-stone-500 dark:text-stone-400 font-bold text-xs">
-              - {verseRef} -
-            </div>
-          </div>
-        )}
-        <div className="text-stone-400 text-xs mb-4 font-medium tracking-wide">
-          작성일: {formattedDate}
-        </div>
+  const updateThanks = (index: number, value: string) => {
+    setThanksItems((current) => current.map((item, itemIndex) => itemIndex === index ? value : item));
+    setIsDirty(true);
+  };
 
-        {mode === 'view' ? (
-          <div className="flex flex-col gap-6">
-            {memoData.meditation && (
-              <div className="flex flex-col gap-2">
-                <h4 className="text-stone-400 text-xs font-semibold">묵상</h4>
-                <p className="text-stone-200 text-[15px] leading-relaxed whitespace-pre-wrap">{memoData.meditation}</p>
-              </div>
-            )}
-            {memoData.prayer && (
-              <div className="flex flex-col gap-2">
-                <h4 className="text-stone-400 text-xs font-semibold">기도</h4>
-                <p className="text-stone-200 text-[15px] leading-relaxed whitespace-pre-wrap">{memoData.prayer}</p>
-              </div>
-            )}
-            {memoData.thanks && (
-              <div className="flex flex-col gap-2">
-                <h4 className="text-stone-400 text-xs font-semibold">감사하기</h4>
-                <p className="text-stone-200 text-[15px] leading-relaxed whitespace-pre-wrap pl-2">{memoData.thanks}</p>
-              </div>
-            )}
-            {memoData.application && memoData.application.length > 0 && (
-              <div className="flex flex-col gap-2">
-                <h4 className="text-stone-400 text-xs font-semibold">삶에 적용하기</h4>
-                <div className="flex flex-col gap-2 mt-1">
-                  {memoData.application.map((item, idx) => (
-                    <label key={idx} className="flex items-start gap-3 cursor-pointer group">
-                      <input 
-                        type="checkbox" 
-                        checked={item.checked}
-                        onChange={() => toggleAppCheck(idx)}
-                        className="mt-1 w-4 h-4 accent-sky-500 bg-stone-800 border-stone-600 rounded cursor-pointer"
-                      />
-                      <span className={`text-[15px] leading-relaxed transition-colors ${item.checked ? 'text-stone-500 line-through' : 'text-stone-200'}`}>
-                        {item.text}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="flex flex-col gap-6 pb-10">
-            <div className="flex flex-col gap-2">
-              <h4 className="text-stone-400 text-xs font-semibold">묵상</h4>
-              <textarea
-                ref={meditationTextareaRef}
-                value={memoData.meditation || ""}
-                onChange={e => setMemoData({...memoData, meditation: e.target.value})}
-                onInput={e => resizeTextarea(e.currentTarget)}
-                placeholder="이 말씀이 마음에 와닿은 이유는 무엇인가요?"
-                className="w-full bg-transparent text-[15px] text-stone-200 placeholder-stone-600 focus:outline-none resize-none overflow-y-hidden min-h-[100px] leading-relaxed"
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <h4 className="text-stone-400 text-xs font-semibold">기도</h4>
-              <textarea
-                ref={prayerTextareaRef}
-                value={memoData.prayer || ""}
-                onChange={e => setMemoData({...memoData, prayer: e.target.value})}
-                onInput={e => resizeTextarea(e.currentTarget)}
-                placeholder="말씀을 통해 깨달은 기도를 적어보세요."
-                className="w-full bg-transparent text-[15px] text-stone-200 placeholder-stone-600 focus:outline-none resize-none overflow-y-hidden min-h-[100px] leading-relaxed"
-              />
-            </div>
-            
-            <div className="flex flex-col gap-2">
-              <h4 className="text-stone-400 text-xs font-semibold">감사하기</h4>
-              <div className="flex flex-col gap-1">
-                {thanksItems.map((val, idx) => (
-                  <div key={idx} className="flex items-start gap-2 group">
-                    <span className="text-stone-500 mt-1 select-none flex-shrink-0 text-[10px] sm:text-xs">●</span>
-                    <input
-                      ref={el => { thanksRefs.current[idx] = el; }}
-                      value={val}
-                      onChange={e => updateThanksItem(idx, e.target.value)}
-                      onKeyDown={e => handleThanksKeyDown(e, idx)}
-                      placeholder="오늘 하루 감사한 일은 무엇인가요?"
-                      className="w-full bg-transparent text-[15px] text-stone-200 placeholder-stone-600 focus:outline-none leading-relaxed py-0.5"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
+  const updateApplication = (index: number, patch: Partial<{ checked: boolean; text: string }>) => {
+    setAppItems((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, ...patch } : item));
+    setIsDirty(true);
+  };
 
-            <div className="flex flex-col gap-2">
-              <h4 className="text-stone-400 text-xs font-semibold">삶에 적용하기</h4>
-              <div className="flex flex-col gap-1">
-                {appItems.map((item, idx) => (
-                  <div key={idx} className="flex items-start gap-2 group">
-                    <div className="mt-1 flex-shrink-0 cursor-pointer" onClick={() => toggleAppCheck(idx)}>
-                      {item.checked ? (
-                        <div className="w-4 h-4 bg-sky-500 rounded border border-sky-500 flex items-center justify-center">
-                          <CheckSquare size={12} className="text-white" />
-                        </div>
-                      ) : (
-                        <div className="w-4 h-4 bg-stone-800 rounded border border-stone-600"></div>
-                      )}
-                    </div>
-                    <input
-                      ref={el => { appRefs.current[idx] = el; }}
-                      value={item.text}
-                      onChange={e => updateAppItem(idx, e.target.value)}
-                      onKeyDown={e => handleAppKeyDown(e, idx)}
-                      placeholder="오늘 실천할 내용을 적어보세요."
-                      className={`w-full bg-transparent text-[15px] placeholder-stone-600 focus:outline-none leading-relaxed py-0.5 transition-colors ${item.checked ? 'text-stone-500 line-through' : 'text-stone-200'}`}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
+  const handleThanksKeyDown = (event: React.KeyboardEvent<HTMLInputElement>, index: number) => {
+    if (event.nativeEvent.isComposing || event.key !== "Enter") return;
+    event.preventDefault();
+    setThanksItems((current) => [...current.slice(0, index + 1), "", ...current.slice(index + 1)]);
+    setIsDirty(true);
+    setTimeout(() => thanksRefs.current[index + 1]?.focus(), 0);
+  };
 
-          </div>
-        )}
-      </div>
+  const handleApplicationKeyDown = (event: React.KeyboardEvent<HTMLInputElement>, index: number) => {
+    if (event.nativeEvent.isComposing || event.key !== "Enter") return;
+    event.preventDefault();
+    setAppItems((current) => [...current.slice(0, index + 1), { checked: false, text: "" }, ...current.slice(index + 1)]);
+    setIsDirty(true);
+    setTimeout(() => appRefs.current[index + 1]?.focus(), 0);
+  };
 
-      <button
-        type="button"
-        onClick={openVerseDialog}
-        aria-label="One Verse 보기"
-        title="One Verse 보기"
-        className="fixed right-1 top-[calc(env(safe-area-inset-top)+4.25rem)] z-40 flex h-11 w-11 items-center justify-center rounded-full p-1.5 transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-stone-950"
-      >
-        <span aria-hidden="true" className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 text-white shadow-lg transition-colors hover:bg-emerald-700">
-          <BookOpen size={16} />
-        </span>
-      </button>
+  const renderSectionInput = () => {
+    if (!activeSection) return null;
+    if (activeSection === "meditation" || activeSection === "prayer") {
+      return <textarea ref={textAreaRef} value={memoData[activeSection] || ""} onChange={(event) => { setMemoData((current) => ({ ...current, [activeSection]: event.target.value })); setIsDirty(true); }} onInput={(event) => resizeTextarea(event.currentTarget)} placeholder={SECTION_INFO[activeSection].placeholder} className="min-h-[11rem] w-full resize-none overflow-y-hidden rounded-xl border border-stone-700 bg-stone-800/60 px-4 py-3 text-[15px] leading-relaxed text-stone-100 placeholder-stone-500 outline-none transition-colors focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20" />;
+    }
+    if (activeSection === "thanks") {
+      return <div className="flex flex-col gap-3">
+        {thanksItems.map((item, index) => <div key={index} className="flex items-start gap-2 rounded-xl border border-stone-700 bg-stone-800/60 px-3 py-2"><span className="mt-1.5 text-xs text-emerald-400">●</span><input ref={(element) => { thanksRefs.current[index] = element; }} value={item} onChange={(event) => updateThanks(index, event.target.value)} onKeyDown={(event) => handleThanksKeyDown(event, index)} placeholder={SECTION_INFO.thanks.placeholder} className="min-w-0 flex-1 bg-transparent py-1 text-[15px] leading-relaxed text-stone-100 placeholder-stone-500 outline-none" /></div>)}
+        <button type="button" onClick={() => { setThanksItems((current) => [...current, ""]); setIsDirty(true); }} className="flex min-h-11 items-center justify-center gap-1 rounded-xl border border-dashed border-stone-600 text-sm font-bold text-stone-300 transition-colors hover:border-sky-500 hover:text-sky-300"><Plus size={16} />감사 항목 추가</button>
+      </div>;
+    }
+    return <div className="flex flex-col gap-3">
+      {appItems.map((item, index) => <div key={index} className="flex items-start gap-2 rounded-xl border border-stone-700 bg-stone-800/60 px-3 py-2"><button type="button" aria-label="적용 완료 표시" onClick={() => updateApplication(index, { checked: !item.checked })} className="mt-1 rounded p-0.5 text-sky-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400">{item.checked ? <CheckSquare size={18} /> : <span className="block h-[18px] w-[18px] rounded border border-stone-500" />}</button><input ref={(element) => { appRefs.current[index] = element; }} value={item.text} onChange={(event) => updateApplication(index, { text: event.target.value })} onKeyDown={(event) => handleApplicationKeyDown(event, index)} placeholder={SECTION_INFO.application.placeholder} className={`min-w-0 flex-1 bg-transparent py-1 text-[15px] leading-relaxed placeholder-stone-500 outline-none ${item.checked ? "text-stone-500 line-through" : "text-stone-100"}`} /></div>)}
+      <button type="button" onClick={() => { setAppItems((current) => [...current, { checked: false, text: "" }]); setIsDirty(true); }} className="flex min-h-11 items-center justify-center gap-1 rounded-xl border border-dashed border-stone-600 text-sm font-bold text-stone-300 transition-colors hover:border-sky-500 hover:text-sky-300"><Plus size={16} />적용 항목 추가</button>
+    </div>;
+  };
 
-      {isVerseDialogOpen && (
-        <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 p-4 backdrop-blur-sm sm:items-center" role="dialog" aria-modal="true" aria-label="One Verse 보기">
-          <div className="flex w-full max-w-lg flex-col rounded-2xl bg-stone-900 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-stone-800 px-5 py-4">
-              <div>
-                <p className="text-xs font-bold text-emerald-400">오늘의 One Verse</p>
-                <h3 className="mt-0.5 text-base font-bold text-stone-100">{verseRef}</h3>
-              </div>
-              <button type="button" onClick={closeVerseDialog} aria-label="말씀 팝업 닫기" className="rounded-full p-2 text-stone-400 transition-colors hover:bg-stone-800 hover:text-stone-100"><X size={20} /></button>
-            </div>
-            <div className="max-h-[60dvh] overflow-y-auto px-5 py-5">
-              <blockquote className="break-words text-base leading-relaxed text-stone-100 sm:text-lg">{verseText}</blockquote>
-            </div>
-            <div className="border-t border-stone-800 p-4">
-              <button type="button" onClick={copyVerse} className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-stone-800 py-3 text-sm font-bold text-stone-100 transition-colors hover:bg-stone-700"><Copy size={16} />말씀 복사하기</button>
-            </div>
-          </div>
-        </div>
-      )}
+  return <div className="flex h-[100dvh] min-h-0 w-full flex-col overflow-hidden bg-stone-950 text-stone-100">
+    <header className="relative z-20 flex shrink-0 items-center justify-between border-b border-stone-800 bg-stone-900/95 px-4 py-4 backdrop-blur-md"><button type="button" onClick={closeEditor} className="flex min-h-11 items-center gap-1 rounded-lg px-1 text-stone-400 transition-colors hover:text-stone-100">{activeSection ? <ArrowLeft size={21} /> : <ChevronLeft size={24} />}<span className="text-sm font-medium">{activeSection ? "목록" : "닫기"}</span></button><h1 className="absolute left-1/2 -translate-x-1/2 text-base font-bold"><Footprints className="mr-1 inline h-4 w-4 text-emerald-500" />발자국 남기기</h1><span className="w-16 text-right text-xs font-medium text-stone-500">{activeSection ? SECTION_INFO[activeSection].title : ""}</span></header>
 
-      {copyMessage && (
-        <div role="status" className="fixed bottom-6 left-1/2 z-[110] -translate-x-1/2 rounded-full bg-stone-100 px-4 py-2 text-sm font-bold text-stone-900 shadow-lg dark:bg-stone-800 dark:text-stone-100">{copyMessage}</div>
-      )}
-    </div>
-  );
+    {activeSection ? <>
+      <section className="shrink-0 border-b border-stone-800 bg-stone-900 px-4 py-3"><div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="text-xs font-bold text-emerald-400">오늘의 One Verse</p><p className="mt-0.5 text-sm font-bold text-stone-200">{verseRef}</p></div><button type="button" onClick={copyVerse} className="flex min-h-11 shrink-0 items-center gap-1 rounded-lg px-2 text-xs font-bold text-stone-300 transition-colors hover:bg-stone-800 hover:text-stone-100"><Copy size={15} />복사</button></div><blockquote className="mt-2 max-h-[30dvh] overflow-y-auto break-words pr-1 text-sm leading-relaxed text-stone-200">{verseText}</blockquote></section>
+      <main className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-5 py-5 pb-[calc(6rem+env(safe-area-inset-bottom))]"><h2 className="mb-4 text-lg font-bold text-stone-100">{SECTION_INFO[activeSection].title}</h2>{renderSectionInput()}{errorMessage && <p role="alert" className="mt-4 rounded-lg bg-red-950/50 px-3 py-2 text-sm text-red-300">{errorMessage}</p>}<button type="button" onClick={saveSection} disabled={isSaving} className="mt-6 flex min-h-12 w-full items-center justify-center rounded-xl bg-sky-600 px-4 py-3 font-bold text-white transition-colors hover:bg-sky-700 disabled:opacity-50">{isSaving ? "저장 중..." : `${SECTION_INFO[activeSection].title} 저장`}</button></main>
+    </> : <main className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-5 py-5 pb-[calc(2rem+env(safe-area-inset-bottom))]"><section className="rounded-2xl border border-stone-800 bg-stone-900 p-4"><p className="text-xs font-bold text-emerald-400">오늘의 One Verse</p><h2 className="mt-1 text-base font-bold text-stone-100">{verseRef}</h2><p className="mt-2 line-clamp-3 break-words text-sm leading-relaxed text-stone-300">{verseText}</p></section><p className="mb-3 mt-5 text-sm text-stone-400">작성할 항목을 선택해 주세요. 각 항목은 따로 저장됩니다.</p><div className="flex flex-col gap-3">{(Object.keys(SECTION_INFO) as MemoSection[]).map((section) => { const written = isSectionWritten(section); const preview = sectionPreview(section); return <button type="button" key={section} onClick={() => openSection(section)} className="flex min-h-20 items-center justify-between gap-4 rounded-2xl border border-stone-800 bg-stone-900 px-4 py-3 text-left transition-colors hover:border-sky-700 hover:bg-stone-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"><span className="min-w-0"><span className="block font-bold text-stone-100">{SECTION_INFO[section].title}</span><span className="mt-1 block truncate text-sm text-stone-400">{written ? preview : SECTION_INFO[section].placeholder}</span></span><span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ${written ? "bg-emerald-900/50 text-emerald-300" : "bg-stone-800 text-stone-400"}`}>{written ? "작성됨" : "작성하기"}</span></button>; })}</div><p className="mt-5 text-center text-xs text-stone-500">마지막 수정: {formattedDate}</p></main>}
+
+    {showDiscardConfirm && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="작성 내용 취소 확인"><div className="w-full max-w-sm rounded-2xl bg-stone-900 p-6 shadow-2xl"><h2 className="text-lg font-bold text-stone-100">작성 중인 내용을 버릴까요?</h2><p className="mt-3 text-sm leading-relaxed text-stone-400">저장하지 않은 변경사항은 사라집니다.</p><div className="mt-6 flex gap-3"><button type="button" onClick={() => setShowDiscardConfirm(false)} className="min-h-11 flex-1 rounded-xl bg-stone-800 font-bold text-stone-200">계속 작성</button><button type="button" onClick={() => { restoreSavedMemo(); setShowDiscardConfirm(false); setIsDirty(false); setActiveSection(null); }} className="min-h-11 flex-1 rounded-xl bg-amber-600 font-bold text-white">버리기</button></div></div></div>}
+    {copyMessage && <div role="status" className="fixed bottom-6 left-1/2 z-[60] -translate-x-1/2 rounded-full bg-stone-100 px-4 py-2 text-sm font-bold text-stone-900 shadow-lg">{copyMessage}</div>}
+  </div>;
 }
 
 export default function MemoPage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-[100dvh] bg-stone-50 dark:bg-stone-950 flex flex-col items-center justify-center gap-3 text-stone-500">
-        <Footprints className="animate-pulse w-8 h-8" />
-        <span className="text-sm font-medium">발자국을 확인하는 중...</span>
-      </div>
-    }>
-      <MemoEditorContent />
-    </Suspense>
-  );
+  return <Suspense fallback={<div className="flex min-h-[100dvh] items-center justify-center bg-stone-950 text-stone-500">발자국을 확인하는 중...</div>}><MemoEditorContent /></Suspense>;
 }
