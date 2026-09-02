@@ -54,7 +54,7 @@ export default function LandingPage() {
             onClick={signInWithKakao}
             className="w-full bg-[#FEE500] hover:bg-[#FDD800] text-black font-bold py-4 rounded-2xl flex items-center justify-center gap-3 transition-transform hover:-translate-y-1 active:translate-y-0 shadow-lg shadow-[#FEE500]/30"
           >
-            <svg viewBox="0 0 32 32" className="w-6 h-6" fill="currentColor">
+            <svg viewBox="0 0 32 32" width={24} height={24} className="w-6 h-6 shrink-0" fill="currentColor">
               <path d="M16 4.64c-6.96 0-12.64 4.48-12.64 10.08 0 3.52 2.32 6.64 5.76 8.48l-1.44 5.44c-0.08 0.4 0.32 0.72 0.72 0.48l6.4-4.4c0.4 0 0.72 0.08 1.2 0.08 6.96 0 12.64-4.48 12.64-10.08S22.96 4.64 16 4.64z" />
             </svg>
             <span className="text-[17px]">카카오 로그인하고 시작하기</span>
