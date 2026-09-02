@@ -67,8 +67,8 @@ export function BottomNavigation() {
   ];
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 box-border bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border-t border-stone-200 dark:border-stone-800 pb-[env(safe-area-inset-bottom)]">
-      <div className="mx-auto grid h-16 max-w-2xl grid-cols-4">
+    <nav className="shrink-0 w-full z-40 box-border bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border-t border-stone-200 dark:border-stone-800 pb-[env(safe-area-inset-bottom)]">
+      <div className="mx-auto grid h-14 max-w-2xl grid-cols-4">
         {tabItems.map((item) => {
           const Icon = item.icon;
           return (
