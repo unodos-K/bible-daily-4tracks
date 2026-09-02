@@ -1,5 +1,5 @@
 import React from "react";
-import { Mic, EyeOff, Eye, RotateCcw, Sparkles, Heart } from "lucide-react";
+import { Mic, Sparkles, Heart } from "lucide-react";
 import { TrainerStep } from "@/hooks/useMemoryTrainer";
 import { OneVerse } from "@/lib/storage";
 
@@ -12,8 +12,6 @@ interface MemoryTrainerContentProps {
   isTrainingFinished: boolean;
   currentStep: TrainerStep;
   testResult: 'none' | 'success' | 'fail';
-  setShowAnswer: (show: boolean) => void;
-  handleRestart: () => void;
   handleStartListening: () => void;
   handleComplete: () => void;
 }
@@ -27,36 +25,34 @@ export default function MemoryTrainerContent({
   isTrainingFinished,
   currentStep,
   testResult,
-  setShowAnswer,
-  handleRestart,
   handleStartListening,
   handleComplete
 }: MemoryTrainerContentProps) {
   return (
     <>
       {isTrainingFinished && testResult === 'none' && !isListening && (
-        <div className="mb-6 flex flex-col gap-3 animate-in slide-in-from-top-2">
-          <div className="p-4 bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40 rounded-2xl border border-amber-200 dark:border-amber-800 text-center shadow-sm">
-            <span className="font-bold text-amber-700 dark:text-amber-400 text-lg flex items-center justify-center gap-2">
-              <Heart size={20} className="fill-current text-amber-500" /> 오늘의 OneVerse를 마음에 새겨보세요
+        <div className="mb-5 flex flex-col gap-3 animate-in slide-in-from-top-2">
+          <div className="rounded-xl border border-amber-200 bg-amber-50/70 px-3 py-2.5 text-center dark:border-amber-900/60 dark:bg-amber-950/20">
+            <span className="flex items-center justify-center gap-1.5 text-sm font-semibold text-amber-700 dark:text-amber-400">
+              <Heart size={16} className="fill-current text-amber-500" /> 오늘의 One Verse를 마음에 새겨보세요
             </span>
           </div>
-          
-          <button 
-            onClick={handleStartListening}
-            className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-2xl shadow-lg flex items-center justify-center gap-2 text-lg transition-transform hover:scale-[1.02]"
-          >
-            <Mic size={24} />
-            마음 새김 도전하기
-          </button>
-          
-          <button 
-            onClick={handleComplete}
-            className="w-full py-3 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-bold rounded-2xl border border-stone-200 dark:border-stone-700 transition-colors flex items-center justify-center gap-2"
-          >
-            <Sparkles size={20} />
-            마이크 없이 채점하기(즉시 완료)
-          </button>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={handleStartListening}
+              className="flex min-h-12 items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-2 py-3 text-xs font-bold text-white shadow-sm transition-colors hover:bg-orange-600 sm:text-sm"
+            >
+              <Mic size={18} /> 도전하기
+            </button>
+            <button
+              type="button"
+              onClick={handleComplete}
+              className="flex min-h-12 items-center justify-center gap-1.5 rounded-xl border border-stone-200 bg-stone-100 px-2 py-3 text-xs font-bold text-stone-700 transition-colors hover:bg-stone-200 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700 sm:text-sm"
+            >
+              <Sparkles size={18} /> 마이크 없이 채점
+            </button>
+          </div>
         </div>
       )}
 
@@ -104,26 +100,6 @@ export default function MemoryTrainerContent({
         </div>
       </div>
 
-      {isTrainingFinished && (
-        <div className="flex flex-col gap-3 w-full justify-center mt-2 animate-in slide-in-from-bottom-4">
-          <div className="flex flex-row gap-3">
-            <button 
-              onClick={() => setShowAnswer(!showAnswer)}
-              className="flex-1 py-3 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-bold rounded-xl border border-stone-200 dark:border-stone-700 transition-colors flex items-center justify-center gap-2"
-            >
-              {showAnswer ? <EyeOff size={20} /> : <Eye size={20} />}
-              <span className="text-sm sm:text-base">{showAnswer ? '정답 가리기' : '정답 확인하기'}</span>
-            </button>
-            <button 
-              onClick={handleRestart}
-              className="flex-1 py-3 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-bold rounded-xl border border-stone-200 dark:border-stone-700 transition-colors flex items-center justify-center gap-2"
-            >
-              <RotateCcw size={20} />
-              <span className="text-sm sm:text-base">처음부터</span>
-            </button>
-          </div>
-        </div>
-      )}
     </>
   );
 }
