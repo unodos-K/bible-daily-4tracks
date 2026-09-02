@@ -17,7 +17,7 @@ import { useMyPageStats } from "@/hooks/useMyPageStats";
 import MyPageCalendar from "@/components/mypage/MyPageCalendar";
 import MyPageStatsBoard from "@/components/mypage/MyPageStatsBoard";
 import AvatarImage from "@/components/AvatarImage";
-import { getLastRecordDay, getRecordsWithOneVerse, sortRecordsByDay } from "@/lib/readingRecords";
+import { getLastRecordDay } from "@/lib/readingRecords";
 
 export default function MyPage() {
   const stats = useMyPageStats();
@@ -71,12 +71,12 @@ export default function MyPage() {
 
   // 이번 달 One Verse 필터링 로직
   const currentMonthPrefix = `${year}-${String(month).padStart(2, "0")}-`;
-  const thisMonthRecords = sortRecordsByDay(
-    getRecordsWithOneVerse(stats.records).filter((record) => record.readDate.startsWith(currentMonthPrefix)),
-    "desc",
-  ).sort((a, b) => b.readDate.localeCompare(a.readDate) || b.dayIndex - a.dayIndex);
+  const thisMonthRecords = Object.values(stats.oneVerseRecords)
+    .filter((record) => record.readDate.startsWith(currentMonthPrefix))
+    .sort((a, b) => b.readDate.localeCompare(a.readDate) || b.dayIndex - a.dayIndex);
 
   const thisMonthTotal = thisMonthRecords.length;
+  const thisMonthCompletedTotal = thisMonthRecords.filter((record) => record.completedAt !== null).length;
   const thisMonthMemorized = thisMonthRecords.filter(r => r.oneVerse?.isMemorized).length;
 
   return (
@@ -146,6 +146,7 @@ export default function MyPage() {
             year={year}
             month={month}
             thisMonthTotal={thisMonthTotal}
+            thisMonthCompletedTotal={thisMonthCompletedTotal}
             thisMonthMemorized={thisMonthMemorized}
             thisMonthRecords={thisMonthRecords}
             router={stats.router}

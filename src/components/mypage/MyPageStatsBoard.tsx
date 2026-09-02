@@ -1,6 +1,6 @@
 import React from "react";
 import { HeartHandshake, Heart, BookOpen, Footprints } from "lucide-react";
-import { DayRecord } from "@/lib/storage";
+import { OneVerseRecord } from "@/lib/storage";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import LikeButton from "@/components/friends/LikeButton";
 import { FriendFeedItem } from "@/lib/social";
@@ -10,10 +10,11 @@ interface MyPageStatsBoardProps {
   year: number;
   month: number;
   thisMonthTotal: number;
+  thisMonthCompletedTotal: number;
   thisMonthMemorized: number;
-  thisMonthRecords: DayRecord[];
+  thisMonthRecords: OneVerseRecord[];
   router: AppRouterInstance;
-  handleShareOneVerse: (record: DayRecord) => void;
+  handleShareOneVerse: (record: OneVerseRecord) => void;
   setSelectedRecordStr: (date: string) => void;
   setSelectedDayIndexForMemory: (index: number) => void;
   setIsMemoryModalOpen: (isOpen: boolean) => void;
@@ -31,6 +32,7 @@ export default function MyPageStatsBoard({
   year,
   month,
   thisMonthTotal,
+  thisMonthCompletedTotal,
   thisMonthMemorized,
   thisMonthRecords,
   router,
@@ -55,7 +57,7 @@ export default function MyPageStatsBoard({
             <Heart size={12} fill="currentColor" /> 마음 새김: {thisMonthMemorized}개
           </span>
           <span className="text-xs font-bold bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 px-2 py-1 rounded-md">
-            📖 통독: {thisMonthTotal}개
+            📖 통독: {thisMonthCompletedTotal}개
           </span>
         </div>
       </div>
@@ -73,6 +75,7 @@ export default function MyPageStatsBoard({
             const weekDay = getDayOfWeek(parseInt(yStr), parseInt(mStr), dayNum);
             const verse = record.oneVerse!;
             const isMem = verse.isMemorized;
+            const isCompleted = record.completedAt !== null;
             // @ts-expect-error: compatibility with older data structure
             const displayTxt = verse.displayText || verse.text || "";
             const formattedRef = verse.book === "시편" ? `${verse.book} ${verse.chapter}편 ${verse.verse}절` : `${verse.book} ${verse.chapter}장 ${verse.verse}절`;
@@ -99,9 +102,8 @@ export default function MyPageStatsBoard({
                   </div>
                   
                   <div className="grid grid-cols-3 gap-2 w-full mt-2">
-                    {/* 1. 통독 완료 (항상 활성화) */}
-                    <div className="flex items-center justify-center gap-1 text-[11px] sm:text-xs font-bold py-1.5 rounded-md border bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800 text-center">
-                      <BookOpen size={12} /> <span className="hidden sm:inline">통독 완료</span><span className="sm:hidden">통독</span>
+                    <div className={`flex items-center justify-center gap-1 text-[11px] sm:text-xs font-bold py-1.5 rounded-md border text-center ${isCompleted ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800" : "bg-sky-100 dark:bg-sky-900/30 text-sky-800 dark:text-sky-400 border-sky-300 dark:border-sky-800"}`}>
+                      <BookOpen size={12} /> <span className="hidden sm:inline">{isCompleted ? "통독 완료" : "One Verse 선택"}</span><span className="sm:hidden">{isCompleted ? "통독" : "선택"}</span>
                     </div>
                     
                     {/* 2. 마음 새김 */}

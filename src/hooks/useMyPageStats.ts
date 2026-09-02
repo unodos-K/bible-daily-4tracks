@@ -3,9 +3,11 @@ import { useRouter } from "next/navigation";
 import { 
   ReadingSettings, 
   ReadRecordsMap, 
-  DayRecord,
   fetchReadingSettings, 
-  fetchReadRecords 
+  fetchReadRecords,
+  fetchOneVerseRecords,
+  OneVerseRecordsMap,
+  OneVerseRecord,
 } from "@/lib/storage";
 import { useAuth } from "@/components/AuthProvider";
 import { signOut, supabase } from "@/lib/supabase";
@@ -23,6 +25,7 @@ export function useMyPageStats() {
   
   const [settings, setSettings] = useState<ReadingSettings | null>(null);
   const [records, setRecords] = useState<ReadRecordsMap>({});
+  const [oneVerseRecords, setOneVerseRecords] = useState<OneVerseRecordsMap>({});
   const { authUser, isAuthLoading } = useAuth();
   
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -32,7 +35,7 @@ export function useMyPageStats() {
   const [selectedDayIndexForMemory, setSelectedDayIndexForMemory] = useState<number | null>(null);
   const [isMemoryModalOpen, setIsMemoryModalOpen] = useState(false);
   
-  const [selectedRecordToShare, setSelectedRecordToShare] = useState<DayRecord | null>(null);
+  const [selectedRecordToShare, setSelectedRecordToShare] = useState<OneVerseRecord | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const [likesMap, setLikesMap] = useState<Record<number, VerseLikeData>>({});
@@ -48,8 +51,12 @@ export function useMyPageStats() {
           return;
         }
         setSettings(s);
-        const r = await fetchReadRecords(authUser.id);
+        const [r, oneVerseR] = await Promise.all([
+          fetchReadRecords(authUser.id),
+          fetchOneVerseRecords(authUser.id),
+        ]);
         setRecords(r);
+        setOneVerseRecords(oneVerseR);
 
         const { data: likes } = await supabase
           .from('one_verse_likes')
@@ -77,6 +84,7 @@ export function useMyPageStats() {
       } else {
         setSettings(null);
         setRecords({});
+        setOneVerseRecords({});
         setLikesMap({});
         router.push("/");
       }
@@ -98,8 +106,12 @@ export function useMyPageStats() {
   useEffect(() => {
     const handleRecordsUpdated = async () => {
       if (authUser) {
-        const r = await fetchReadRecords(authUser.id);
+        const [r, oneVerseR] = await Promise.all([
+          fetchReadRecords(authUser.id),
+          fetchOneVerseRecords(authUser.id),
+        ]);
         setRecords(r);
+        setOneVerseRecords(oneVerseR);
       }
     };
     window.addEventListener('records_updated', handleRecordsUpdated);
@@ -111,7 +123,7 @@ export function useMyPageStats() {
     window.location.href = "/";
   };
 
-  const handleShareOneVerse = (record: DayRecord) => {
+  const handleShareOneVerse = (record: OneVerseRecord) => {
     setSelectedRecordToShare(record);
   };
 
@@ -145,6 +157,7 @@ export function useMyPageStats() {
     settings,
     records,
     setRecords,
+    oneVerseRecords,
     authUser,
     currentDate,
     setCurrentDate,

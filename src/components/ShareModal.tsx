@@ -2,14 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { X, GripVertical } from 'lucide-react';
-import { DayRecord, MemoData } from '@/lib/storage';
+import { MemoData, ShareableOneVerseRecord } from '@/lib/storage';
 
 import { useSettings } from '@/contexts/SettingsContext';
 
 interface ShareModalProps {
   isOpen: boolean;
   onClose: () => void;
-  record: DayRecord | null;
+  record: ShareableOneVerseRecord | null;
   onShare: (orderedItems: string[]) => void;
 }
 

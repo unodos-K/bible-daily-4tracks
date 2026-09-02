@@ -44,6 +44,9 @@ export interface OneVerseRecord {
   oneVerse: OneVerse;
 }
 
+export type ShareableOneVerseRecord = DayRecord | OneVerseRecord;
+export type OneVerseRecordsMap = Record<number, OneVerseRecord>;
+
 export type OneVerseCandidate = OneVerse;
 
 export type ReadRecordsMap = Record<number, DayRecord>; // key: dayIndex (1~365)
@@ -345,6 +348,39 @@ export async function fetchOneVerseRecord(dayIndex: number, currentUserId?: stri
     completedAt: data.completed_at,
     oneVerse,
   };
+}
+
+/**
+ * Returns every persisted final One Verse, including incomplete drafts.
+ * Completion-only consumers should continue using fetchReadRecords.
+ */
+export async function fetchOneVerseRecords(currentUserId?: string): Promise<OneVerseRecordsMap> {
+  const userId = currentUserId ?? await getUserId();
+  if (!userId) return {};
+
+  const { data, error } = await supabase
+    .from('reading_records')
+    .select('day_index, read_date, completed_at, one_verse')
+    .eq('user_id', userId)
+    .not('one_verse', 'is', null);
+
+  if (error) {
+    console.error("fetchOneVerseRecords error:", error);
+    throw error;
+  }
+
+  return (data ?? []).reduce<OneVerseRecordsMap>((result, row) => {
+    const oneVerse = parseOneVerse(row.one_verse);
+    if (oneVerse) {
+      result[row.day_index] = {
+        dayIndex: row.day_index,
+        readDate: row.read_date,
+        completedAt: row.completed_at,
+        oneVerse,
+      };
+    }
+    return result;
+  }, {});
 }
 
 export async function saveDayRecord(record: DayRecord, currentUserId?: string): Promise<boolean> {

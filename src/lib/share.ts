@@ -1,7 +1,7 @@
-import { DayRecord, MemoData } from "./storage";
+import { MemoData, ShareableOneVerseRecord } from "./storage";
 
 export const shareOneVerse = async (
-  record: DayRecord, 
+  record: ShareableOneVerseRecord,
   nickname: string, 
   orderedItems: string[] = ['verse', 'meditation', 'prayer', 'thanksgiving', 'application']
 ) => {
