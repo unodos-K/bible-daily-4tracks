@@ -1,13 +1,13 @@
 import React from "react";
-import { CheckCircle2, AlertCircle } from "lucide-react";
+import { CheckCircle2, AlertCircle, Sparkles } from "lucide-react";
 
 interface ReadingProgressWidgetProps {
   totalReadDays: number;
   achievementRate: number;
   daysSince: number;
   memorizedCount: number;
-  isOnTrack: boolean;
-  missedDays: number;
+  isTodayRead: boolean;
+  pastMissedDays: number;
 }
 
 export default function ReadingProgressWidget({
@@ -15,8 +15,8 @@ export default function ReadingProgressWidget({
   achievementRate,
   daysSince,
   memorizedCount,
-  isOnTrack,
-  missedDays
+  isTodayRead,
+  pastMissedDays
 }: ReadingProgressWidgetProps) {
   return (
     <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 p-5 flex flex-col gap-4">
@@ -53,13 +53,17 @@ export default function ReadingProgressWidget({
         
         <div className="bg-stone-50 dark:bg-stone-950 rounded-xl p-3 flex flex-col items-center justify-center border border-stone-100 dark:border-stone-800 col-span-2">
           <span className="text-xs font-semibold text-stone-500 mb-1">오늘의 통독 상태</span>
-          {isOnTrack ? (
+          {isTodayRead ? (
             <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
-              <CheckCircle2 size={16} /> 목표 진도 달성 완료! 멋져요 🎉
+              <CheckCircle2 size={16} /> 오늘 통독 완료 🎉
+            </span>
+          ) : pastMissedDays > 0 ? (
+            <span className="text-sm font-bold text-rose-500 dark:text-rose-400 flex items-center gap-1.5">
+              <AlertCircle size={16} /> 밀린 진도가 {pastMissedDays}일 있어요! 몰아보기 추천 🔥
             </span>
           ) : (
-            <span className="text-sm font-bold text-rose-500 dark:text-rose-400 flex items-center gap-1.5">
-              <AlertCircle size={16} /> 밀린 진도가 {missedDays}일 있어요! 몰아보기 추천 🔥
+            <span className="text-sm font-bold text-sky-600 dark:text-sky-400 flex items-center gap-1.5">
+              <Sparkles size={16} className="text-amber-500" /> 오늘도 말씀을 읽어볼까요? ✨
             </span>
           )}
         </div>

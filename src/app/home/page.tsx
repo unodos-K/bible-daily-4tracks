@@ -112,8 +112,13 @@ export default function HomePage() {
   const daysSince = settings ? calculateDaysSince(settings.startDate) : 1;
   const memorizedCount = recordsArray.filter(r => r.oneVerse?.isMemorized).length;
   
-  const missedDays = Math.max(0, daysSince - totalReadDays);
-  const isOnTrack = missedDays === 0;
+  const isTodayRead = !!(records[daysSince]?.completedAt || records[daysSince]?.readDate);
+  let pastMissedDays = 0;
+  for (let d = 1; d < daysSince; d++) {
+    if (!records[d]?.completedAt && !records[d]?.readDate) {
+      pastMissedDays++;
+    }
+  }
 
   return (
     <div className="w-full min-h-full flex flex-col items-center bg-transparent pb-10">
@@ -155,8 +160,8 @@ export default function HomePage() {
                 achievementRate={achievementRate}
                 daysSince={daysSince}
                 memorizedCount={memorizedCount}
-                isOnTrack={isOnTrack}
-                missedDays={missedDays}
+                isTodayRead={isTodayRead}
+                pastMissedDays={pastMissedDays}
               />
 
         {/* CTA 버튼 */}
