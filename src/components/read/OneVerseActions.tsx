@@ -45,12 +45,11 @@ interface SelectedOneVerseActionsProps {
 
 export function SelectedOneVerseActions({ verse, isMarked, onToggleMark, onConfirm }: SelectedOneVerseActionsProps) {
   return (
-    <div className="mt-3 flex flex-wrap items-center gap-2 pl-[2.5ch] sm:pl-[3ch]">
-      <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${isMarked ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400" : "bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-400"}`}>{isMarked ? "마킹됨" : "선택한 구절"}</span>
-      <button type="button" onClick={(event) => onToggleMark(verse, event)} className="min-h-11 flex items-center gap-1.5 rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm font-bold text-stone-700 shadow-sm transition-colors hover:bg-stone-50 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700">
+    <div className="mt-3 grid grid-cols-2 gap-2 pl-[2.5ch] sm:pl-[3ch]">
+      <button type="button" onClick={(event) => onConfirm(verse, event)} className="min-h-11 rounded-lg bg-sky-600 px-3 py-2 text-sm font-bold text-white shadow-sm transition-transform hover:-translate-y-0.5 hover:bg-sky-700">One Verse로 지정</button>
+      <button type="button" onClick={(event) => onToggleMark(verse, event)} className="min-h-11 rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm font-bold text-stone-700 shadow-sm transition-colors hover:bg-stone-50 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700">
         {isMarked ? "마킹 해제" : "마킹"}
       </button>
-      <button type="button" onClick={(event) => onConfirm(verse, event)} className="min-h-11 flex items-center gap-1.5 bg-sky-600 hover:bg-sky-700 text-white px-3 py-2 rounded-lg text-sm font-bold shadow-sm transition-transform hover:-translate-y-0.5">📌 오늘의 One Verse로 지정</button>
     </div>
   );
 }

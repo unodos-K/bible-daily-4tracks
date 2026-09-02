@@ -56,11 +56,11 @@ export default function BibleContent({ readingData, fontSize, selectedVerse, con
             </div>
           </div>
         ))}
-        <div id="viewer-bottom" className="px-5 sm:px-8 py-12 flex justify-center bg-stone-50 dark:bg-stone-900 border-t border-stone-200 dark:border-stone-800 relative z-10">
-          <button onClick={handleBottomButtonClick} className={`flex items-center gap-2 px-6 py-4 rounded-2xl shadow-sm transition-all duration-300 font-bold text-lg w-full max-w-sm justify-center ${isCompletedDay ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800 scale-[0.98]" : "bg-sky-600 hover:bg-sky-700 text-white shadow-md hover:-translate-y-1"}`}>
+        <div id="viewer-bottom" className="relative z-10 flex flex-col items-center gap-3 border-t border-stone-200 bg-stone-50 px-5 py-12 dark:border-stone-800 dark:bg-stone-900 sm:px-8">
+          {!isCompletedDay && <p className="max-w-sm text-center text-xs font-medium leading-relaxed text-stone-500 dark:text-stone-400">{confirmedVerse ? "오늘의 One Verse가 선택되었습니다." : "오늘의 One Verse를 선택해 주세요."}</p>}
+          <button onClick={handleBottomButtonClick} className={`flex w-full max-w-sm items-center justify-center gap-2 rounded-2xl px-6 py-4 text-lg font-bold shadow-sm transition-all duration-300 ${isCompletedDay ? "scale-[0.98] border border-emerald-300 bg-emerald-100 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-400" : "bg-sky-600 text-white shadow-md hover:-translate-y-1 hover:bg-sky-700"}`}>
             {isCompletedDay ? <><CheckCircle2 size={24} />Day {readingData.dayIndex} 말씀 통독 완료 🎉</> : <>Day {readingData.dayIndex} 말씀 통독 완료하기</>}
           </button>
-          {!isCompletedDay && <p className="mt-3 text-center text-xs font-medium text-stone-500 dark:text-stone-400">{confirmedVerse ? "오늘의 One Verse가 선택되었습니다." : "오늘의 One Verse를 선택해 주세요."}</p>}
         </div>
       </div>
     </div>
