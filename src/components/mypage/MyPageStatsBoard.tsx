@@ -15,9 +15,7 @@ interface MyPageStatsBoardProps {
   thisMonthRecords: OneVerseRecord[];
   router: AppRouterInstance;
   handleShareOneVerse: (record: OneVerseRecord) => void;
-  setSelectedRecordStr: (date: string) => void;
-  setSelectedDayIndexForMemory: (index: number) => void;
-  setIsMemoryModalOpen: (isOpen: boolean) => void;
+  onOpenMemory: (dayIndex: number, readDate: string) => void;
   likesMap?: Record<number, VerseLikeData>;
   handleToggleLike?: (dayIndex: number) => void;
 }
@@ -37,9 +35,7 @@ export default function MyPageStatsBoard({
   thisMonthRecords,
   router,
   handleShareOneVerse,
-  setSelectedRecordStr,
-  setSelectedDayIndexForMemory,
-  setIsMemoryModalOpen,
+  onOpenMemory,
   likesMap,
   handleToggleLike
 }: MyPageStatsBoardProps) {
@@ -154,11 +150,8 @@ export default function MyPageStatsBoard({
                       <span className="text-[10px] sm:text-xs font-bold tracking-tight">나눔</span>
                     </button>
                     <button
-                      onClick={() => {
-                        setSelectedRecordStr(record.readDate);
-                        setSelectedDayIndexForMemory(record.dayIndex);
-                        setIsMemoryModalOpen(true);
-                      }}
+                      type="button"
+                      onClick={() => onOpenMemory(record.dayIndex, record.readDate)}
                       className="flex flex-col items-center justify-center gap-1.5 py-3 bg-stone-100 dark:bg-white/5 hover:bg-stone-200 dark:hover:bg-white/10 text-stone-600 dark:text-stone-300 rounded-xl transition-all active:scale-95"
                     >
                       <Heart size={20} strokeWidth={2.5} className="text-amber-500 dark:text-amber-400" />

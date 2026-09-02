@@ -6,6 +6,7 @@ import {
   fetchReadingSettings, 
   fetchReadRecords,
   fetchOneVerseRecords,
+  updateMemorizeRecord,
   OneVerseRecordsMap,
   OneVerseRecord,
 } from "@/lib/storage";
@@ -127,6 +128,52 @@ export function useMyPageStats() {
     setSelectedRecordToShare(record);
   };
 
+  const closeMemoryModal = () => {
+    setIsMemoryModalOpen(false);
+    setSelectedDayIndexForMemory(null);
+  };
+
+  const handleOpenMemory = (dayIndex: number, readDate: string) => {
+    if (!oneVerseRecords[dayIndex]?.oneVerse) {
+      setToastMessage("One Verse를 찾지 못했어요. 새로고침 후 다시 시도해 주세요.");
+      return;
+    }
+
+    setSelectedRecordStr(readDate);
+    setSelectedDayIndexForMemory(dayIndex);
+    setIsMemoryModalOpen(true);
+  };
+
+  const selectedOneVerseForMemory = selectedDayIndexForMemory
+    ? oneVerseRecords[selectedDayIndexForMemory] ?? null
+    : null;
+
+  const handleMemoryComplete = async () => {
+    if (!selectedOneVerseForMemory?.oneVerse) {
+      setToastMessage("One Verse를 찾지 못했어요. 새로고침 후 다시 시도해 주세요.");
+      closeMemoryModal();
+      return;
+    }
+
+    await updateMemorizeRecord(
+      selectedOneVerseForMemory.dayIndex,
+      true,
+      selectedOneVerseForMemory.oneVerse,
+      authUser?.id,
+    );
+
+    if (authUser) {
+      const [updatedRecords, updatedOneVerseRecords] = await Promise.all([
+        fetchReadRecords(authUser.id),
+        fetchOneVerseRecords(authUser.id),
+      ]);
+      setRecords(updatedRecords);
+      setOneVerseRecords(updatedOneVerseRecords);
+    }
+
+    closeMemoryModal();
+  };
+
   const handleToggleLike = async (dayIndex: number) => {
     if (!authUser) return;
     const success = await toggleLike(authUser.id, dayIndex, authUser.id);
@@ -165,15 +212,17 @@ export function useMyPageStats() {
     selectedRecordStr,
     setSelectedRecordStr,
     selectedDayIndexForMemory,
-    setSelectedDayIndexForMemory,
     isMemoryModalOpen,
-    setIsMemoryModalOpen,
+    selectedOneVerseForMemory,
     selectedRecordToShare,
     setSelectedRecordToShare,
     toastMessage,
     setToastMessage,
     handleLogout,
     handleShareOneVerse,
+    handleOpenMemory,
+    closeMemoryModal,
+    handleMemoryComplete,
     likesMap,
     handleToggleLike
   };

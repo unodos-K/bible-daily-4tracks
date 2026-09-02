@@ -4,9 +4,6 @@ import React, { useEffect } from "react";
 import { Settings, Footprints } from "lucide-react";
 import {
   DayRecord,
-  OneVerse,
-  fetchReadRecords,
-  updateMemorizeRecord,
 } from "@/lib/storage";
 import { signInWithKakao } from "@/lib/supabase";
 import { shareOneVerse } from "@/lib/share";
@@ -151,9 +148,7 @@ export default function MyPage() {
             thisMonthRecords={thisMonthRecords}
             router={stats.router}
             handleShareOneVerse={stats.handleShareOneVerse}
-            setSelectedRecordStr={stats.setSelectedRecordStr}
-            setSelectedDayIndexForMemory={stats.setSelectedDayIndexForMemory}
-            setIsMemoryModalOpen={stats.setIsMemoryModalOpen}
+            onOpenMemory={stats.handleOpenMemory}
             likesMap={stats.likesMap}
             handleToggleLike={stats.handleToggleLike}
           />
@@ -161,19 +156,11 @@ export default function MyPage() {
       </div>
 
       {/* 암송 트레이너 모달 연동 */}
-      {stats.isMemoryModalOpen && stats.selectedDayIndexForMemory && stats.records[stats.selectedDayIndexForMemory]?.oneVerse && (
+      {stats.isMemoryModalOpen && stats.selectedOneVerseForMemory && (
         <MemoryTrainerModal
-          oneVerse={stats.records[stats.selectedDayIndexForMemory].oneVerse as OneVerse}
-          onClose={() => stats.setIsMemoryModalOpen(false)}
-          onComplete={async () => {
-            const verse = stats.records[stats.selectedDayIndexForMemory!].oneVerse;
-            if (verse) {
-              await updateMemorizeRecord(stats.selectedDayIndexForMemory!, true, verse, stats.authUser?.id);
-              const r = await fetchReadRecords(stats.authUser?.id);
-              stats.setRecords(r);
-            }
-            stats.setIsMemoryModalOpen(false);
-          }}
+          oneVerse={stats.selectedOneVerseForMemory.oneVerse}
+          onClose={stats.closeMemoryModal}
+          onComplete={stats.handleMemoryComplete}
         />
       )}
 
