@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { 
   ReadingSettings, ReadRecordsMap, DayRecord, OneVerse, OneVerseCandidate,
   fetchReadingSettings, fetchReadRecords,
-  saveDayRecord, updateReadRecordOneVerse, updateReadRecordCompletion, updateMemorizeRecord,
+  saveDayRecord, saveOneVerseDraft, updateReadRecordOneVerse, updateReadRecordCompletion, updateMemorizeRecord,
   saveReadingSettings, fetchOneVerseCandidates, saveOneVerseCandidate, removeOneVerseCandidate
 } from "@/lib/storage";
 import { useAuth } from "@/components/AuthProvider";
@@ -261,6 +261,11 @@ export function useBibleReader() {
     if (isCompletedDay) {
       success = await updateReadRecordOneVerse(dayIndex, verse, authUser?.id);
     } else {
+      success = await saveOneVerseDraft(dayIndex, verse, authUser?.id);
+      if (!success) {
+        showToast("오늘의 One Verse 저장에 실패했습니다.");
+        return;
+      }
       setConfirmedVerse(verse);
       setSelectedVerse(null);
       setVerseToReplace(null);
@@ -288,6 +293,10 @@ export function useBibleReader() {
     }
     if (!await ensureCandidate(verse)) return;
     if (!confirmedVerse) {
+      if (!await saveOneVerseDraft(dayIndex, verse, authUser?.id)) {
+        showToast("오늘의 One Verse 저장에 실패했습니다.");
+        return;
+      }
       setConfirmedVerse(verse);
       setSelectedVerse(null);
       showToast("오늘의 One Verse가 지정되었습니다. 통독을 완료해 주세요.");
@@ -296,6 +305,10 @@ export function useBibleReader() {
     if (!isSameVerse(confirmedVerse, verse)) {
       if (isCompletedDay) setVerseToReplace(verse);
       else {
+        if (!await saveOneVerseDraft(dayIndex, verse, authUser?.id)) {
+          showToast("오늘의 One Verse 저장에 실패했습니다.");
+          return;
+        }
         setConfirmedVerse(verse);
         setSelectedVerse(null);
         showToast("오늘의 One Verse를 변경했습니다.");
@@ -307,10 +320,15 @@ export function useBibleReader() {
     setShowReselectModal(true);
   };
 
-  const handleConfirmReselect = () => {
+  const handleConfirmReselect = async () => {
     setShowReselectModal(false);
     if (isCompletedDay) {
       showToast("새 구절을 선택하면 기존 One Verse가 교체됩니다.");
+      return;
+    }
+    const success = await updateReadRecordOneVerse(dayIndex, null, authUser?.id);
+    if (!success) {
+      showToast("One Verse 선택 취소에 실패했습니다.");
       return;
     }
     setConfirmedVerse(null);

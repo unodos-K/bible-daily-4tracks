@@ -37,6 +37,13 @@ export interface DayRecord {
   oneVerse?: OneVerse;
 }
 
+export interface OneVerseRecord {
+  dayIndex: number;
+  readDate: string;
+  completedAt: string | null;
+  oneVerse: OneVerse;
+}
+
 export type OneVerseCandidate = OneVerse;
 
 export type ReadRecordsMap = Record<number, DayRecord>; // key: dayIndex (1~365)
@@ -311,6 +318,35 @@ export async function fetchReadRecords(currentUserId?: string): Promise<ReadReco
   return result;
 }
 
+/** Retrieves a One Verse for follow-up actions, including an incomplete draft. */
+export async function fetchOneVerseRecord(dayIndex: number, currentUserId?: string): Promise<OneVerseRecord | null> {
+  const userId = currentUserId ?? await getUserId();
+  if (!userId) return null;
+
+  const { data, error } = await supabase
+    .from('reading_records')
+    .select('day_index, read_date, completed_at, one_verse')
+    .eq('user_id', userId)
+    .eq('day_index', dayIndex)
+    .maybeSingle();
+
+  if (error) {
+    console.error("fetchOneVerseRecord error:", error);
+    throw error;
+  }
+  if (!data) return null;
+
+  const oneVerse = parseOneVerse(data.one_verse);
+  if (!oneVerse) return null;
+
+  return {
+    dayIndex: data.day_index,
+    readDate: data.read_date,
+    completedAt: data.completed_at,
+    oneVerse,
+  };
+}
+
 export async function saveDayRecord(record: DayRecord, currentUserId?: string): Promise<boolean> {
   const userId = currentUserId ?? await getUserId();
   if (!userId) return false;
@@ -323,6 +359,30 @@ export async function saveDayRecord(record: DayRecord, currentUserId?: string): 
   }, { onConflict: 'user_id, day_index' });
   if (error) {
     console.error("One Verse Save Error:", error);
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Persists the selected One Verse before completion so follow-up actions such
+ * as a footprint can be opened without marking the Day as completed.
+ */
+export async function saveOneVerseDraft(dayIndex: number, oneVerse: OneVerse, currentUserId?: string): Promise<boolean> {
+  const userId = currentUserId ?? await getUserId();
+  if (!userId) return false;
+  const date = new Date();
+  const readDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  const { error } = await supabase.from('reading_records').upsert({
+    user_id: userId,
+    day_index: dayIndex,
+    read_date: readDate,
+    completed_at: null,
+    one_verse: serializeOneVerse(oneVerse),
+  }, { onConflict: 'user_id, day_index' });
+
+  if (error) {
+    console.error("One Verse draft save error:", error);
     return false;
   }
   return true;

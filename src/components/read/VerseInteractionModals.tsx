@@ -25,7 +25,7 @@ interface VerseInteractionModalsProps {
   executeReplaceVerse: (verse: OneVerse) => void;
   completeReadingAndShowSuccess: (verse: OneVerse) => void;
   handleCancelCompletion: () => void;
-  handleConfirmReselect: () => void;
+  handleConfirmReselect: () => Promise<void>;
   isCompletedDay: boolean;
   setIsMemoryModalOpen: (open: boolean) => void;
   dayIndex: number;
@@ -136,7 +136,7 @@ export default function VerseInteractionModals({
             </p>
             <div className="mt-6 flex gap-3">
               <button onClick={() => setShowReselectModal(false)} className="flex-1 rounded-xl bg-stone-100 py-3 font-bold text-stone-700 transition-colors hover:bg-stone-200 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700">아니요</button>
-              <button onClick={handleConfirmReselect} className="flex-1 rounded-xl bg-amber-500 py-3 font-bold text-white transition-colors hover:bg-amber-600">{isCompletedDay ? "새 구절 고르기" : "다시 선택하기"}</button>
+              <button type="button" onClick={() => void handleConfirmReselect()} className="flex-1 rounded-xl bg-amber-500 py-3 font-bold text-white transition-colors hover:bg-amber-600">{isCompletedDay ? "새 구절 고르기" : "다시 선택하기"}</button>
             </div>
           </div>
         </div>

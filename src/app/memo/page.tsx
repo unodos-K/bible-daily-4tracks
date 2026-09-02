@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useLayoutEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { BookOpen, CheckSquare, ChevronLeft, Copy, Footprints, X } from "lucide-react";
-import { MemoData, fetchReadRecords, updateReadRecordOneVerse, DayRecord } from "@/lib/storage";
+import { MemoData, fetchOneVerseRecord, updateReadRecordOneVerse, OneVerseRecord } from "@/lib/storage";
 import { useAuth } from "@/components/AuthProvider";
 
 const parseInitialMemo = (m: string | MemoData | undefined): MemoData => {
@@ -30,7 +30,7 @@ function MemoEditorContent() {
   const modeParam = searchParams.get("mode");
   
   const [dayIndex, setDayIndex] = useState<number | null>(null);
-  const [record, setRecord] = useState<DayRecord | null>(null);
+  const [record, setRecord] = useState<OneVerseRecord | null>(null);
   
   const [mode, setMode] = useState<'view' | 'edit'>('edit');
   const [memoData, setMemoData] = useState<MemoData>({});
@@ -68,8 +68,7 @@ function MemoEditorContent() {
       setDayIndex(day);
       
       if (isAuthLoading) return;
-      const records = await fetchReadRecords(authUser?.id);
-      const rec = records[day];
+      const rec = await fetchOneVerseRecord(day, authUser?.id);
       
       if (!rec || !rec.oneVerse) {
         // If there's no record or one verse, we can't write a memo
