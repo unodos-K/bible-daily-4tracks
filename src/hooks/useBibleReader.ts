@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { 
-  ReadingSettings, ReadRecordsMap, DayRecord, OneVerse,
+  ReadingSettings, ReadRecordsMap, DayRecord, OneVerse, OneVerseCandidate,
   fetchReadingSettings, fetchReadRecords,
   saveDayRecord, updateReadRecordOneVerse, updateMemorizeRecord,
-  saveReadingSettings
+  saveReadingSettings, fetchOneVerseCandidates, saveOneVerseCandidate, removeOneVerseCandidate
 } from "@/lib/storage";
 import { useAuth } from "@/components/AuthProvider";
 import { calculateDaysSince, clampReadingDay, getMaxAllowedDay } from "@/hooks/bible-reader/dayUtils";
@@ -21,6 +21,7 @@ export function useBibleReader() {
   
   const [selectedVerse, setSelectedVerse] = useState<OneVerse | null>(null);
   const [confirmedVerse, setConfirmedVerse] = useState<OneVerse | null>(null);
+  const [oneVerseCandidates, setOneVerseCandidates] = useState<OneVerseCandidate[]>([]);
   const [isMemoryModalOpen, setIsMemoryModalOpen] = useState(false);
   
   const [showWarningModal, setShowWarningModal] = useState(false);
@@ -146,6 +147,28 @@ export function useBibleReader() {
   }, [authUser, isAuthLoading]);
 
   useEffect(() => {
+    let isActive = true;
+    if (!authUser || !isDataLoaded) {
+      setOneVerseCandidates([]);
+      return () => { isActive = false; };
+    }
+
+    void fetchOneVerseCandidates(dayIndex, authUser.id)
+      .then((candidates) => {
+        if (isActive) setOneVerseCandidates(candidates);
+      })
+      .catch((error: unknown) => {
+        console.error("Failed to load One Verse candidates:", error);
+        if (isActive) {
+          setOneVerseCandidates([]);
+          showToast("One Verse 후보를 불러오지 못했습니다.");
+        }
+      });
+
+    return () => { isActive = false; };
+  }, [authUser, dayIndex, isDataLoaded]);
+
+  useEffect(() => {
     if (isClient && settings?.hasStarted) {
       const record = records[dayIndex];
       if (record) {
@@ -182,24 +205,59 @@ export function useBibleReader() {
     }
   };
 
+  const isSameVerse = (left: OneVerse, right: OneVerse) =>
+    left.book === right.book && left.chapter === right.chapter && left.verse === right.verse;
+
+  const ensureCandidate = async (verse: OneVerse): Promise<boolean> => {
+    if (oneVerseCandidates.some((candidate) => isSameVerse(candidate, verse))) return true;
+    const success = await saveOneVerseCandidate(dayIndex, verse, authUser?.id);
+    if (!success) {
+      showToast("One Verse 후보 저장에 실패했습니다.");
+      return false;
+    }
+    setOneVerseCandidates((current) => (
+      current.some((candidate) => isSameVerse(candidate, verse)) ? current : [...current, verse]
+    ));
+    return true;
+  };
+
+  const handleToggleCandidate = async (verse: OneVerse, event: React.MouseEvent) => {
+    event.stopPropagation();
+    if (confirmedVerse && isSameVerse(confirmedVerse, verse)) {
+      showToast("오늘의 One Verse는 후보에서 해제할 수 없습니다.");
+      return;
+    }
+
+    const isCandidate = oneVerseCandidates.some((candidate) => isSameVerse(candidate, verse));
+    const success = isCandidate
+      ? await removeOneVerseCandidate(dayIndex, verse, authUser?.id)
+      : await saveOneVerseCandidate(dayIndex, verse, authUser?.id);
+
+    if (!success) {
+      showToast(isCandidate ? "후보 해제에 실패했습니다." : "후보 저장에 실패했습니다.");
+      return;
+    }
+
+    setOneVerseCandidates((current) => (
+      isCandidate
+        ? current.filter((candidate) => !isSameVerse(candidate, verse))
+        : [...current, verse]
+    ));
+    showToast(isCandidate ? "One Verse 후보를 해제했습니다." : "One Verse 후보에 담았습니다.");
+  };
+
   const executeReplaceVerse = async (verse: OneVerse) => {
+    if (!await ensureCandidate(verse)) return;
     let success = false;
     
     if (isCompletedDay) {
       success = await updateReadRecordOneVerse(dayIndex, verse, authUser?.id);
     } else {
-      const dateObj = new Date();
-      const todayStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
-      
-      success = await saveDayRecord({
-        dayIndex: dayIndex,
-        readDate: todayStr,
-        completedAt: new Date().toISOString(),
-        oneVerse: verse,
-      }, authUser?.id);
-      if (success) {
-        setIsCompletedDay(true);
-      }
+      setConfirmedVerse(verse);
+      setSelectedVerse(null);
+      setVerseToReplace(null);
+      showToast("오늘의 One Verse가 지정되었습니다. 통독을 완료해 주세요.");
+      return;
     }
 
     if (success) {
@@ -216,12 +274,20 @@ export function useBibleReader() {
 
   const handleConfirmVerse = async (verse: OneVerse, e: React.MouseEvent) => {
     e.stopPropagation();
+    if (!await ensureCandidate(verse)) return;
     if (!confirmedVerse) {
-      await executeReplaceVerse(verse);
+      setConfirmedVerse(verse);
+      setSelectedVerse(null);
+      showToast("오늘의 One Verse가 지정되었습니다. 통독을 완료해 주세요.");
       return;
     }
-    if (confirmedVerse.book !== verse.book || confirmedVerse.chapter !== verse.chapter || confirmedVerse.verse !== verse.verse) {
-      setVerseToReplace(verse);
+    if (!isSameVerse(confirmedVerse, verse)) {
+      if (isCompletedDay) setVerseToReplace(verse);
+      else {
+        setConfirmedVerse(verse);
+        setSelectedVerse(null);
+        showToast("오늘의 One Verse를 변경했습니다.");
+      }
     }
   };
 
@@ -250,12 +316,8 @@ export function useBibleReader() {
   };
 
   const handleBottomButtonClick = () => {
-    if (!confirmedVerse && !selectedVerse) {
+    if (!confirmedVerse) {
       setShowWarningModal(true);
-      return;
-    }
-    if (!confirmedVerse && selectedVerse) {
-      setShowConfirmModal(true);
       return;
     }
     if (confirmedVerse) {
@@ -294,6 +356,7 @@ export function useBibleReader() {
     setSelectedVerse,
     confirmedVerse,
     setConfirmedVerse,
+    oneVerseCandidates,
     isMemoryModalOpen,
     setIsMemoryModalOpen,
     showWarningModal,
@@ -309,12 +372,14 @@ export function useBibleReader() {
     selectedRecordToShare,
     setSelectedRecordToShare,
     toastMessage,
+    showToast,
     headerRef,
     headerHeight,
     isDataLoaded,
     handleSetDay,
     handleGoToLastRead,
     handleVerseClick,
+    handleToggleCandidate,
     handleConfirmVerse,
     executeReplaceVerse,
     handleBottomButtonClick,

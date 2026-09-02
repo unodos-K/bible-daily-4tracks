@@ -34,12 +34,33 @@ const scrollToSection = (id: string) => {
     }
   }
 };
+
+const scrollElementToCenter = (element: HTMLElement) => {
+  const scrollContainer = document.getElementById('bible-content-scroll');
+  if (!scrollContainer) {
+    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  const containerRect = scrollContainer.getBoundingClientRect();
+  const elementRect = element.getBoundingClientRect();
+  const targetTop = scrollContainer.scrollTop
+    + (elementRect.top + elementRect.height / 2)
+    - (containerRect.top + containerRect.height / 2);
+  const maxScrollTop = scrollContainer.scrollHeight - scrollContainer.clientHeight;
+  scrollContainer.scrollTo({
+    top: Math.min(Math.max(0, targetTop), maxScrollTop),
+    behavior: 'smooth',
+  });
+};
+
 export default function BibleViewerPage() {
   const { fontSize } = useSettings();
   const [readingData, setReadingData] = useState<DailyReading | null>(null);
   const [isReadingTextLoading, setIsReadingTextLoading] = useState(true);
   const [readingTextError, setReadingTextError] = useState(false);
   const [readingTextRetryKey, setReadingTextRetryKey] = useState(0);
+  const [candidateNavigationIndex, setCandidateNavigationIndex] = useState(0);
   
   const {
     isClient,
@@ -54,6 +75,7 @@ export default function BibleViewerPage() {
     setSelectedVerse,
     confirmedVerse,
     setConfirmedVerse,
+    oneVerseCandidates,
     isMemoryModalOpen,
     setIsMemoryModalOpen,
     showWarningModal,
@@ -69,6 +91,7 @@ export default function BibleViewerPage() {
     selectedRecordToShare,
     setSelectedRecordToShare,
     toastMessage,
+    showToast,
     headerRef,
     headerHeight,
     isDataLoaded,
@@ -76,6 +99,7 @@ export default function BibleViewerPage() {
     handleGoToLastRead,
     handleVerseClick,
     handleConfirmVerse,
+    handleToggleCandidate,
     executeReplaceVerse,
     handleBottomButtonClick,
     completeReadingAndShowSuccess,
@@ -85,6 +109,10 @@ export default function BibleViewerPage() {
   
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const allSchedules = getAllSchedules();
+
+  useEffect(() => {
+    setCandidateNavigationIndex(0);
+  }, [dayIndex, oneVerseCandidates]);
 
   useEffect(() => {
     if (!isClient || !isDataLoaded || !authUser) return;
@@ -311,27 +339,24 @@ export default function BibleViewerPage() {
       <ReaderQuickNavigation
         onNavigate={scrollToSection}
         onOneVerse={() => {
-              const el = document.getElementById('one-verse-target');
-              if (el) {
-                const scrollContainer = document.getElementById('bible-content-scroll');
-                if (scrollContainer) {
-                  const mainRect = scrollContainer.getBoundingClientRect();
-                  const elRect = el.getBoundingClientRect();
-                  const elementCenter = elRect.top + elRect.height / 2;
-                  const viewportCenter = mainRect.top + mainRect.height / 2;
-                  const targetTop = scrollContainer.scrollTop + (elementCenter - viewportCenter);
-                  const maxScrollTop = scrollContainer.scrollHeight - scrollContainer.clientHeight;
-                  scrollContainer.scrollTo({
-                    top: Math.min(Math.max(0, targetTop), maxScrollTop),
-                    behavior: 'smooth'
-                  });
-                } else {
-                  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-              } else {
-                alert("오늘의 One Verse를 먼저 지정해주세요.");
-              }
-            }}
+          if (confirmedVerse) {
+            const target = document.getElementById('one-verse-target');
+            if (target) scrollElementToCenter(target);
+            return;
+          }
+
+          const candidateTargets = Array.from(
+            document.querySelectorAll<HTMLElement>('[data-one-verse-candidate="true"]'),
+          );
+          if (candidateTargets.length === 0) {
+            showToast("One Verse 후보를 선택해 주세요.");
+            return;
+          }
+
+          const targetIndex = candidateNavigationIndex % candidateTargets.length;
+          scrollElementToCenter(candidateTargets[targetIndex]);
+          setCandidateNavigationIndex((current) => (current + 1) % candidateTargets.length);
+        }}
       />
 
       <div className="w-full max-w-2xl bg-white dark:bg-stone-900 shadow-2xl flex flex-col h-full overflow-hidden mx-auto relative">
@@ -369,12 +394,14 @@ export default function BibleViewerPage() {
           fontSize={fontSize}
           selectedVerse={selectedVerse}
           confirmedVerse={confirmedVerse}
+          oneVerseCandidates={oneVerseCandidates}
           records={records}
           dayIndex={dayIndex}
           isCompletedDay={isCompletedDay}
           setIsMemoryModalOpen={setIsMemoryModalOpen}
           handleShareOneVerseClick={(record) => setSelectedRecordToShare(record)}
           handleConfirmVerse={handleConfirmVerse}
+          handleToggleCandidate={handleToggleCandidate}
           handleVerseClick={handleVerseClick}
           handleBottomButtonClick={handleBottomButtonClick}
         />

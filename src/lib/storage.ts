@@ -37,9 +37,50 @@ export interface DayRecord {
   oneVerse?: OneVerse;
 }
 
+export type OneVerseCandidate = OneVerse;
+
 export type ReadRecordsMap = Record<number, DayRecord>; // key: dayIndex (1~365)
 
 type JsonObject = { [key: string]: Json | undefined };
+
+type CandidateRow = {
+  user_id: string;
+  day_index: number;
+  track_type: string;
+  book: string;
+  chapter: number;
+  verse: number;
+  raw_text: string;
+  display_text: string;
+  chunks: Json;
+  reference: string;
+  created_at: string;
+};
+
+type CandidateQueryError = { message: string } | null;
+type CandidateTable = {
+  select: (columns: string) => {
+    eq: (column: string, value: string | number) => {
+      order: (column: string, options: { ascending: boolean }) => PromiseLike<{ data: CandidateRow[] | null; error: CandidateQueryError }>;
+    };
+  };
+  upsert: (row: Omit<CandidateRow, "created_at">, options: { onConflict: string; ignoreDuplicates: boolean }) => PromiseLike<{ error: CandidateQueryError }>;
+  delete: () => {
+    eq: (column: string, value: string | number) => {
+      eq: (column: string, value: string | number) => {
+        eq: (column: string, value: string | number) => {
+          eq: (column: string, value: string | number) => {
+            eq: (column: string, value: string | number) => PromiseLike<{ error: CandidateQueryError }>;
+          };
+        };
+      };
+    };
+  };
+};
+
+// This table is introduced by the pending candidate migration. Keep its
+// provisional shape local until generated types can be refreshed after apply.
+const candidateTable = () => supabase.from("one_verse_candidates" as never) as unknown as CandidateTable;
 
 function isJson(value: unknown): value is Json {
   if (value === null || typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
@@ -115,6 +156,87 @@ function serializeOneVerse(value: OneVerse): Json {
     throw new Error('One Verse cannot be serialized as JSON');
   }
   return serialized;
+}
+
+function parseCandidateRow(row: CandidateRow): OneVerseCandidate | undefined {
+  return parseOneVerse({
+    trackType: row.track_type,
+    book: row.book,
+    chapter: row.chapter,
+    verse: row.verse,
+    rawText: row.raw_text,
+    displayText: row.display_text,
+    chunks: row.chunks,
+    reference: row.reference,
+  });
+}
+
+export async function fetchOneVerseCandidates(dayIndex: number, currentUserId?: string): Promise<OneVerseCandidate[]> {
+  const userId = currentUserId ?? await getUserId();
+  if (!userId) return [];
+
+  const { data, error } = await candidateTable()
+    .select("user_id, day_index, track_type, book, chapter, verse, raw_text, display_text, chunks, reference, created_at")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.error("One Verse candidate fetch error:", error);
+    throw error;
+  }
+
+  return (data ?? [])
+    .filter((row) => row.day_index === dayIndex)
+    .flatMap((row) => {
+      const candidate = parseCandidateRow(row);
+      return candidate ? [candidate] : [];
+    });
+}
+
+export async function saveOneVerseCandidate(dayIndex: number, candidate: OneVerseCandidate, currentUserId?: string): Promise<boolean> {
+  const userId = currentUserId ?? await getUserId();
+  if (!userId) return false;
+
+  const { error } = await candidateTable().upsert({
+    user_id: userId,
+    day_index: dayIndex,
+    track_type: candidate.trackType,
+    book: candidate.book,
+    chapter: candidate.chapter,
+    verse: candidate.verse,
+    raw_text: candidate.rawText,
+    display_text: candidate.displayText,
+    chunks: candidate.chunks,
+    reference: candidate.reference,
+  }, {
+    onConflict: "user_id,day_index,book,chapter,verse",
+    ignoreDuplicates: true,
+  });
+
+  if (error) {
+    console.error("One Verse candidate save error:", error);
+    return false;
+  }
+  return true;
+}
+
+export async function removeOneVerseCandidate(dayIndex: number, candidate: OneVerseCandidate, currentUserId?: string): Promise<boolean> {
+  const userId = currentUserId ?? await getUserId();
+  if (!userId) return false;
+
+  const { error } = await candidateTable()
+    .delete()
+    .eq("user_id", userId)
+    .eq("day_index", dayIndex)
+    .eq("book", candidate.book)
+    .eq("chapter", candidate.chapter)
+    .eq("verse", candidate.verse);
+
+  if (error) {
+    console.error("One Verse candidate delete error:", error);
+    return false;
+  }
+  return true;
 }
 
 // Fetch user ID securely from session

@@ -17,17 +17,19 @@ interface BibleContentProps {
   fontSize: number;
   selectedVerse: OneVerse | null;
   confirmedVerse: OneVerse | null;
+  oneVerseCandidates: OneVerse[];
   records: ReadRecordsMap;
   dayIndex: number;
   isCompletedDay: boolean;
   setIsMemoryModalOpen: (open: boolean) => void;
   handleShareOneVerseClick: (record: DayRecord) => void;
   handleConfirmVerse: (verse: OneVerse, event: React.MouseEvent) => void;
+  handleToggleCandidate: (verse: OneVerse, event: React.MouseEvent) => void;
   handleVerseClick: (trackType: string, book: string, chapter: number, verse: number, rawText: string, displayText: string, chunks: string[]) => void;
   handleBottomButtonClick: () => void;
 }
 
-export default function BibleContent({ readingData, fontSize, selectedVerse, confirmedVerse, records, dayIndex, isCompletedDay, setIsMemoryModalOpen, handleShareOneVerseClick, handleConfirmVerse, handleVerseClick, handleBottomButtonClick }: BibleContentProps) {
+export default function BibleContent({ readingData, fontSize, selectedVerse, confirmedVerse, oneVerseCandidates, records, dayIndex, isCompletedDay, setIsMemoryModalOpen, handleShareOneVerseClick, handleConfirmVerse, handleToggleCandidate, handleVerseClick, handleBottomButtonClick }: BibleContentProps) {
   const tracks = readingData.tracks;
   const { activeTrackType, stickyHeaderRef, trackRefs } = useActiveReaderTrack(tracks);
   const activeTrack = tracks.find((track) => track.track.type === activeTrackType) ?? tracks[0];
@@ -47,7 +49,7 @@ export default function BibleContent({ readingData, fontSize, selectedVerse, con
               {track.chapters.map((chapter) => (
                 <div key={`${chapter.name}-${chapter.chapter}`} className="flex flex-col">
                   <h3 className="font-bold mb-4 px-2 text-stone-800 dark:text-stone-200 border-b border-stone-200 dark:border-stone-800 pb-2">{chapter.name} {chapter.chapter}{chapter.chapterUnit || (chapter.name === "시편" ? "편" : "장")}</h3>
-                  {chapter.verses.length === 0 ? <p className="text-stone-400 italic px-2">본문 데이터가 없습니다.</p> : <div className="flex flex-col gap-1">{chapter.verses.map((verse) => <BibleVerseRow key={verse.verse} trackType={track.track.type} book={chapter.name} chapter={chapter.chapter} verse={verse} fontSize={fontSize} dayIndex={dayIndex} selectedVerse={selectedVerse} confirmedVerse={confirmedVerse} record={records[dayIndex]} onVerseClick={handleVerseClick} onConfirmVerse={handleConfirmVerse} onOpenMemory={() => setIsMemoryModalOpen(true)} onShare={handleShareOneVerseClick} />)}</div>}
+                  {chapter.verses.length === 0 ? <p className="text-stone-400 italic px-2">본문 데이터가 없습니다.</p> : <div className="flex flex-col gap-1">{chapter.verses.map((verse) => <BibleVerseRow key={verse.verse} trackType={track.track.type} book={chapter.name} chapter={chapter.chapter} verse={verse} fontSize={fontSize} dayIndex={dayIndex} selectedVerse={selectedVerse} confirmedVerse={confirmedVerse} candidates={oneVerseCandidates} record={records[dayIndex]} onVerseClick={handleVerseClick} onConfirmVerse={handleConfirmVerse} onToggleCandidate={handleToggleCandidate} onOpenMemory={() => setIsMemoryModalOpen(true)} onShare={handleShareOneVerseClick} />)}</div>}
                 </div>
               ))}
             </div>
@@ -57,6 +59,7 @@ export default function BibleContent({ readingData, fontSize, selectedVerse, con
           <button onClick={handleBottomButtonClick} className={`flex items-center gap-2 px-6 py-4 rounded-2xl shadow-sm transition-all duration-300 font-bold text-lg w-full max-w-sm justify-center ${isCompletedDay ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800 scale-[0.98]" : "bg-sky-600 hover:bg-sky-700 text-white shadow-md hover:-translate-y-1"}`}>
             {isCompletedDay ? <><CheckCircle2 size={24} />Day {readingData.dayIndex} 말씀 통독 완료 🎉</> : <>Day {readingData.dayIndex} 말씀 통독 완료하기</>}
           </button>
+          {!isCompletedDay && <p className="mt-3 text-center text-xs font-medium text-stone-500 dark:text-stone-400">{confirmedVerse ? "오늘의 One Verse가 선택되었습니다." : oneVerseCandidates.length > 0 ? `후보 ${oneVerseCandidates.length}개 중 오늘의 One Verse를 선택해 주세요.` : "마음에 남는 구절을 후보로 담아 보세요."}</p>}
         </div>
       </div>
     </div>

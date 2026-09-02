@@ -95,7 +95,7 @@ export default function VerseInteractionModals({
             </div>
             <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 text-center">One Verse를 선택해주세요 ✨</h3>
             <p className="text-stone-500 dark:text-stone-400 text-center text-sm mb-2">
-              오늘 마음에 깊이 닿은 구절을 1개 선택해야 통독이 완료됩니다. 본문에서 구절을 클릭해 보세요.
+              마음에 남는 구절을 후보로 담고, 그중 오늘의 One Verse를 지정해야 통독이 완료됩니다.
             </p>
             <button
               onClick={() => setShowWarningModal(false)}

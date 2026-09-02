@@ -284,3 +284,37 @@ future, separately approved constraint migration):
 6. Verify friend list/request views, the batched friend One Verse feed, and
    like add/remove in the application. Keep the SQL Editor results with the
    production change record.
+
+## Pending manual rollout: One Verse candidates
+
+`migrations/20260902100000_one_verse_candidates.sql` adds persistent candidates
+that a user can save before completing a reading day. It creates the private
+`public.one_verse_candidates` table rather than adding incomplete rows to
+`reading_records`; this keeps completion statistics and public friend-feed
+queries limited to completed reading records.
+
+- The primary key `(user_id, day_index, book, chapter, verse)` prevents a user
+  from saving the same candidate twice for one Day.
+- RLS permits only the owner to select, insert, or delete candidates. There is
+  no public candidate feed and no update policy because candidate rows are
+  immutable until removed.
+- The primary key starts with `(user_id, day_index)`, covering the app's
+  per-user/per-Day candidate lookup. No extra index is required.
+
+This migration is **not applied** to production and is intentionally absent
+from `schema/public.sql`, which remains a snapshot of the current operational
+schema. Before enabling the feature for production, an approved operator must:
+
+1. Review the full migration in Supabase SQL Editor.
+2. Run the complete contents of
+   `supabase/migrations/20260902100000_one_verse_candidates.sql` exactly once.
+3. Verify the table, primary key, RLS enabled state, three owner-only policies,
+   and authenticated `SELECT`/`INSERT`/`DELETE` grants in SQL Editor.
+4. Regenerate `src/types/supabase.ts` from the updated linked schema and take a
+   new read-only `public` schema dump before updating the canonical snapshot.
+
+Do not use `supabase db push`, `supabase db reset`, or `supabase migration
+repair` for this rollout. Until the migration is applied and generated types
+are refreshed, the app uses a deliberately local provisional row type for this
+pending table; it mirrors the migration and avoids claiming that the current
+remote generated schema already contains it.
