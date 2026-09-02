@@ -12,8 +12,11 @@ export const metadata: Metadata = {
   description: "하루 네 장, 내게 남은 한 구절",
   manifest: "/manifest.json",
   icons: {
-    icon: "/icon.png",
-    apple: "/icon.png",
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon.png", type: "image/png" },
+    ],
+    apple: "/icons/icon-192x192.png",
   },
   appleWebApp: {
     capable: true,

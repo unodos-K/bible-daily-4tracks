@@ -26,8 +26,15 @@ export default function LandingPage() {
 
         {/* 로고 & 타이틀 영역 */}
         <div className="flex flex-col items-center text-center">
-          <div className="w-32 h-32 mb-6 rounded-3xl overflow-hidden shadow-2xl relative">
-            <Image src="/icon.png" alt="One Verse Logo" fill className="object-cover" />
+          <div className="w-28 h-28 sm:w-32 sm:h-32 mb-6 rounded-3xl overflow-hidden shadow-2xl flex items-center justify-center shrink-0">
+            <Image
+              src="/icon.png"
+              alt="One Verse Logo"
+              width={128}
+              height={128}
+              priority
+              className="w-full h-full object-cover"
+            />
           </div>
           <h1 className="text-4xl sm:text-5xl font-black text-stone-800 dark:text-stone-100 tracking-tight leading-tight">
             One Verse
