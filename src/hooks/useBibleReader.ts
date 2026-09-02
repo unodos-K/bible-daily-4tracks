@@ -165,7 +165,7 @@ export function useBibleReader() {
         console.error("Failed to load One Verse candidates:", error);
         if (isActive) {
           setOneVerseCandidates([]);
-          showToast("One Verse 후보를 불러오지 못했습니다.");
+          showToast("마킹한 구절을 불러오지 못했습니다.");
         }
       });
 
@@ -212,27 +212,10 @@ export function useBibleReader() {
   const isSameVerse = (left: OneVerse, right: OneVerse) =>
     left.book === right.book && left.chapter === right.chapter && left.verse === right.verse;
 
-  const ensureCandidate = async (verse: OneVerse): Promise<boolean> => {
-    if (oneVerseCandidates.some((candidate) => isSameVerse(candidate, verse))) return true;
-    const success = await saveOneVerseCandidate(dayIndex, verse, authUser?.id);
-    if (!success) {
-      showToast("One Verse 후보 저장에 실패했습니다.");
-      return false;
-    }
-    setOneVerseCandidates((current) => (
-      current.some((candidate) => isSameVerse(candidate, verse)) ? current : [...current, verse]
-    ));
-    return true;
-  };
-
   const handleToggleCandidate = async (verse: OneVerse, event: React.MouseEvent) => {
     event.stopPropagation();
     if (isCompletedDay) {
-      showToast("완료한 Day의 후보는 변경할 수 없습니다.");
-      return;
-    }
-    if (confirmedVerse && isSameVerse(confirmedVerse, verse)) {
-      showToast("오늘의 One Verse는 후보에서 해제할 수 없습니다.");
+      showToast("완료한 Day의 마킹은 변경할 수 없습니다.");
       return;
     }
 
@@ -242,7 +225,7 @@ export function useBibleReader() {
       : await saveOneVerseCandidate(dayIndex, verse, authUser?.id);
 
     if (!success) {
-      showToast(isCandidate ? "후보 해제에 실패했습니다." : "후보 저장에 실패했습니다.");
+      showToast(isCandidate ? "마킹 해제에 실패했습니다." : "마킹 저장에 실패했습니다.");
       return;
     }
 
@@ -251,11 +234,10 @@ export function useBibleReader() {
         ? current.filter((candidate) => !isSameVerse(candidate, verse))
         : [...current, verse]
     ));
-    showToast(isCandidate ? "One Verse 후보를 해제했습니다." : "One Verse 후보에 담았습니다.");
+    showToast(isCandidate ? "마킹을 해제했습니다." : "구절을 마킹했습니다.");
   };
 
   const executeReplaceVerse = async (verse: OneVerse) => {
-    if (!await ensureCandidate(verse)) return;
     let success = false;
     
     if (isCompletedDay) {
@@ -291,7 +273,6 @@ export function useBibleReader() {
       showToast("완료한 Day의 One Verse는 변경할 수 없습니다.");
       return;
     }
-    if (!await ensureCandidate(verse)) return;
     if (!confirmedVerse) {
       if (!await saveOneVerseDraft(dayIndex, verse, authUser?.id)) {
         showToast("오늘의 One Verse 저장에 실패했습니다.");
@@ -333,7 +314,7 @@ export function useBibleReader() {
     }
     setConfirmedVerse(null);
     setSelectedVerse(null);
-    showToast("One Verse 선택이 취소되었습니다. 후보에서 다시 선택해 주세요.");
+    showToast("One Verse 선택이 취소되었습니다. 원하는 구절을 다시 선택해 주세요.");
   };
 
   const completeReadingAndShowSuccess = async (verse: OneVerse) => {

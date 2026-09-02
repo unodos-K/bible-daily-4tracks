@@ -60,7 +60,7 @@ export default function BibleViewerPage() {
   const [isReadingTextLoading, setIsReadingTextLoading] = useState(true);
   const [readingTextError, setReadingTextError] = useState(false);
   const [readingTextRetryKey, setReadingTextRetryKey] = useState(0);
-  const [candidateNavigationIndex, setCandidateNavigationIndex] = useState(0);
+  const [markNavigationIndex, setMarkNavigationIndex] = useState(0);
   
   const {
     isClient,
@@ -120,7 +120,7 @@ export default function BibleViewerPage() {
   const allSchedules = getAllSchedules();
 
   useEffect(() => {
-    setCandidateNavigationIndex(0);
+    setMarkNavigationIndex(0);
   }, [dayIndex, oneVerseCandidates]);
 
   useEffect(() => {
@@ -362,18 +362,19 @@ export default function BibleViewerPage() {
             if (target) scrollElementToCenter(target);
             return;
           }
-
-          const candidateTargets = Array.from(
-            document.querySelectorAll<HTMLElement>('[data-one-verse-candidate="true"]'),
+          showToast("One Verse를 선택해 주세요.");
+        }}
+        onMark={() => {
+          const markedTargets = Array.from(
+            document.querySelectorAll<HTMLElement>('[data-one-verse-marked="true"]'),
           );
-          if (candidateTargets.length === 0) {
-            showToast("One Verse 후보를 선택해 주세요.");
+          if (markedTargets.length === 0) {
+            showToast("마킹한 구절이 없어요.");
             return;
           }
-
-          const targetIndex = candidateNavigationIndex % candidateTargets.length;
-          scrollElementToCenter(candidateTargets[targetIndex]);
-          setCandidateNavigationIndex((current) => (current + 1) % candidateTargets.length);
+          const targetIndex = markNavigationIndex % markedTargets.length;
+          scrollElementToCenter(markedTargets[targetIndex]);
+          setMarkNavigationIndex((current) => (current + 1) % markedTargets.length);
         }}
       />
 
@@ -412,14 +413,14 @@ export default function BibleViewerPage() {
           fontSize={fontSize}
           selectedVerse={selectedVerse}
           confirmedVerse={confirmedVerse}
-          oneVerseCandidates={oneVerseCandidates}
+          markedVerses={oneVerseCandidates}
           records={records}
           dayIndex={dayIndex}
           isCompletedDay={isCompletedDay}
           setIsMemoryModalOpen={setIsMemoryModalOpen}
           handleShareOneVerseClick={(record) => setSelectedRecordToShare(record)}
           handleConfirmVerse={handleConfirmVerse}
-          handleToggleCandidate={handleToggleCandidate}
+          handleToggleMark={handleToggleCandidate}
           handleRequestReselect={handleRequestReselect}
           handleVerseClick={handleVerseClick}
           handleBottomButtonClick={handleBottomButtonClick}

@@ -113,7 +113,7 @@ export default function VerseInteractionModals({
             </div>
             <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 text-center">One Verse를 선택해주세요 ✨</h3>
             <p className="text-stone-500 dark:text-stone-400 text-center text-sm mb-2">
-              마음에 남는 구절을 후보로 담고, 그중 오늘의 One Verse를 지정해야 통독이 완료됩니다.
+              오늘의 읽기를 완료하려면 마음에 남는 One Verse를 하나 선택해 주세요.
             </p>
             <button
               onClick={() => setShowWarningModal(false)}
@@ -132,7 +132,7 @@ export default function VerseInteractionModals({
             <p className="mt-3 text-sm leading-relaxed text-stone-500 dark:text-stone-400">
               {isCompletedDay
                 ? "완료한 Day의 One Verse는 비워둘 수 없어요. 새 구절을 선택하면 현재 One Verse가 교체됩니다."
-                : "현재 선택한 One Verse가 취소됩니다. 후보 목록은 유지되며, 다시 하나를 선택해야 오늘의 읽기를 완료할 수 있어요."}
+                : "현재 선택한 One Verse가 취소됩니다. 마킹은 유지되며, 다시 하나를 선택해야 오늘의 읽기를 완료할 수 있어요."}
             </p>
             <div className="mt-6 flex gap-3">
               <button onClick={() => setShowReselectModal(false)} className="flex-1 rounded-xl bg-stone-100 py-3 font-bold text-stone-700 transition-colors hover:bg-stone-200 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700">아니요</button>
