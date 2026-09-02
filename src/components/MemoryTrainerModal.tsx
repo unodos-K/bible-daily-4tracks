@@ -94,7 +94,7 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
           </div>
         </header>
 
-        <main className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-5 py-5 pb-[calc(1.5rem+env(safe-area-inset-bottom))] md:px-6 md:py-6">
+        <main className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain touch-pan-y px-5 py-5 pb-[calc(1.5rem+env(safe-area-inset-bottom))] md:px-6 md:py-6">
           {trainerState.stepState === 'intro' ? (
             <MemoryTrainerIntro
               oneVerse={oneVerse}

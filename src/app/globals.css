@@ -90,8 +90,8 @@ button, a, [role="button"], .interactive {
   }
 }
 
-/* Disable main scroll when modal is open */
-body.modal-open main {
+/* Lock only the app shell behind a modal. Modal content can keep scrolling. */
+body.modal-open .app-main {
   overflow: hidden !important;
   touch-action: none;
 }
