@@ -1,5 +1,5 @@
 import React from "react";
-import { Mic, Sparkles, Heart } from "lucide-react";
+import { Mic, PenLine, Heart, RotateCcw } from "lucide-react";
 import { TrainerStep } from "@/hooks/useMemoryTrainer";
 import { OneVerse } from "@/lib/storage";
 
@@ -13,7 +13,12 @@ interface MemoryTrainerContentProps {
   currentStep: TrainerStep;
   testResult: 'none' | 'success' | 'fail';
   handleStartListening: () => void;
-  handleComplete: () => void;
+  challengeMethod: 'voice' | 'writing' | null;
+  writingAnswer: string;
+  setWritingAnswer: (answer: string) => void;
+  writingError: string | null;
+  handleStartWritingChallenge: () => void;
+  handleCheckWritingAnswer: () => void;
 }
 
 export default function MemoryTrainerContent({
@@ -26,7 +31,12 @@ export default function MemoryTrainerContent({
   currentStep,
   testResult,
   handleStartListening,
-  handleComplete
+  challengeMethod,
+  writingAnswer,
+  setWritingAnswer,
+  writingError,
+  handleStartWritingChallenge,
+  handleCheckWritingAnswer
 }: MemoryTrainerContentProps) {
   return (
     <>
@@ -43,16 +53,46 @@ export default function MemoryTrainerContent({
               onClick={handleStartListening}
               className="flex min-h-12 items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-2 py-3 text-xs font-bold text-white shadow-sm transition-colors hover:bg-orange-600 sm:text-sm"
             >
-              <Mic size={18} /> 도전하기
+              <Mic size={18} /> 음성 도전
             </button>
             <button
               type="button"
-              onClick={handleComplete}
+              onClick={handleStartWritingChallenge}
               className="flex min-h-12 items-center justify-center gap-1.5 rounded-xl border border-stone-200 bg-stone-100 px-2 py-3 text-xs font-bold text-stone-700 transition-colors hover:bg-stone-200 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700 sm:text-sm"
             >
-              <Sparkles size={18} /> 마이크 없이 채점
+              <PenLine size={18} /> 쓰기 도전
             </button>
           </div>
+
+          {challengeMethod === 'writing' && (
+            <section className="rounded-xl border border-stone-200 bg-white p-3 dark:border-stone-700 dark:bg-stone-900" aria-label="쓰기 도전">
+              <p className="text-sm font-semibold text-stone-700 dark:text-stone-300">말씀을 기억나는 대로 써보세요.</p>
+              <p className="mt-1 text-xs leading-relaxed text-stone-400 dark:text-stone-500">공백과 줄바꿈은 정리해서 비교하지만, 글자와 문장부호는 원문과 같아야 해요.</p>
+              <textarea
+                value={writingAnswer}
+                onChange={(event) => setWritingAnswer(event.target.value)}
+                placeholder="말씀을 직접 입력해 주세요"
+                className="mt-3 min-h-32 w-full resize-y rounded-lg border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm leading-relaxed text-stone-800 outline-none transition-colors placeholder:text-stone-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100"
+              />
+              {writingError && <p className="mt-2 text-xs font-medium text-rose-600 dark:text-rose-400" role="alert">{writingError}</p>}
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={handleCheckWritingAnswer}
+                  className="flex min-h-11 items-center justify-center gap-1.5 rounded-lg bg-sky-600 px-2 py-2 text-sm font-bold text-white transition-colors hover:bg-sky-700"
+                >
+                  <PenLine size={16} /> 채점하기
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setWritingAnswer('')}
+                  className="flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-stone-200 bg-stone-100 px-2 py-2 text-sm font-bold text-stone-700 transition-colors hover:bg-stone-200 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700"
+                >
+                  <RotateCcw size={16} /> 다시 쓰기
+                </button>
+              </div>
+            </section>
+          )}
         </div>
       )}
 

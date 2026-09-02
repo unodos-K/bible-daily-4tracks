@@ -8,6 +8,14 @@ export function extractCleanText(text: string): string {
 }
 
 /**
+ * 쓰기 도전의 답안을 비교할 때 모바일 입력 차이만 완화합니다.
+ * 글자와 문장부호는 유지하고, Unicode 조합 및 연속 공백/줄바꿈만 정리합니다.
+ */
+export function normalizeMemoryAnswer(text: string): string {
+  return text.normalize('NFC').replace(/\s+/g, ' ').trim();
+}
+
+/**
  * 레벤슈타인 거리(Levenshtein Distance) 알고리즘을 사용하여 두 문자열 간의 거리를 계산합니다.
  */
 export function getLevenshteinDistance(a: string, b: string): number {

@@ -138,7 +138,12 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
                 currentStep={trainerState.currentStep}
                 testResult={trainerState.testResult}
                 handleStartListening={trainerState.handleStartListening}
-                handleComplete={trainerState.handleComplete}
+                challengeMethod={trainerState.challengeMethod}
+                writingAnswer={trainerState.writingAnswer}
+                setWritingAnswer={trainerState.setWritingAnswer}
+                writingError={trainerState.writingError}
+                handleStartWritingChallenge={trainerState.handleStartWritingChallenge}
+                handleCheckWritingAnswer={trainerState.handleCheckWritingAnswer}
               />
             </div>
           )}

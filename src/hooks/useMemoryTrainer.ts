@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import confetti from 'canvas-confetti';
-import { calculateSimilarity } from '@/lib/utils';
+import { calculateSimilarity, normalizeMemoryAnswer } from '@/lib/utils';
 import { OneVerse } from '@/lib/storage';
 import { loadChunkedBibleText } from '@/lib/chunkedBibleText';
 
@@ -61,6 +61,9 @@ export function useMemoryTrainer({ oneVerse, onComplete }: { oneVerse: OneVerse,
   const [testResult, setTestResult] = useState<'none' | 'success' | 'fail'>('none');
   const [speechResult, setSpeechResult] = useState('');
   const [showAnswer, setShowAnswer] = useState(false);
+  const [challengeMethod, setChallengeMethod] = useState<'voice' | 'writing' | null>(null);
+  const [writingAnswer, setWritingAnswer] = useState('');
+  const [writingError, setWritingError] = useState<string | null>(null);
   
   const [ttsVoices, setTtsVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [selectedVoiceIndex, setSelectedVoiceIndex] = useState<number>(0);
@@ -222,13 +225,31 @@ export function useMemoryTrainer({ oneVerse, onComplete }: { oneVerse: OneVerse,
 
   const handleStartListening = () => {
     if (!recognitionRef.current) {
-      alert("현재 브라우저에서는 음성 인식을 지원하지 않습니다. '직접 완료하기'를 이용해주세요.");
+      alert("현재 브라우저에서는 음성 인식을 지원하지 않습니다. '쓰기 도전'을 이용해 주세요.");
       return;
     }
     setTestResult('none');
     setSpeechResult('');
+    setChallengeMethod('voice');
+    setWritingError(null);
     setIsListening(true);
     recognitionRef.current.start();
+  };
+
+  const handleStartWritingChallenge = () => {
+    setTestResult('none');
+    setChallengeMethod('writing');
+    setWritingError(null);
+  };
+
+  const handleCheckWritingAnswer = () => {
+    if (normalizeMemoryAnswer(writingAnswer) === normalizeMemoryAnswer(displayString)) {
+      setWritingError(null);
+      setTestResult('success');
+      return;
+    }
+
+    setWritingError('원문과 다른 부분이 있어요. 입력 내용을 고쳐 다시 채점해 주세요.');
   };
 
   const handleStopListening = () => {
@@ -254,6 +275,8 @@ export function useMemoryTrainer({ oneVerse, onComplete }: { oneVerse: OneVerse,
     setStepIndex(steps.length - 1);
     setElapsed(intervalSeconds * 1000);
     setIsPlaying(false);
+    setChallengeMethod(null);
+    setWritingError(null);
   };
 
   const handleRestart = () => {
@@ -267,6 +290,9 @@ export function useMemoryTrainer({ oneVerse, onComplete }: { oneVerse: OneVerse,
     setTestResult('none');
     setSpeechResult('');
     setShowAnswer(false);
+    setChallengeMethod(null);
+    setWritingAnswer('');
+    setWritingError(null);
   };
 
   const jumpToPhase = (targetPhase: number) => {
@@ -326,6 +352,10 @@ export function useMemoryTrainer({ oneVerse, onComplete }: { oneVerse: OneVerse,
     isListening,
     testResult,
     speechResult,
+    challengeMethod,
+    writingAnswer,
+    setWritingAnswer,
+    writingError,
     showAnswer,
     setShowAnswer,
     ttsVoices,
@@ -340,6 +370,8 @@ export function useMemoryTrainer({ oneVerse, onComplete }: { oneVerse: OneVerse,
     currentSegmentFraction,
     timeLeftDisplay,
     handleStartListening,
+    handleStartWritingChallenge,
+    handleCheckWritingAnswer,
     handleStopListening,
     handleStartTraining,
     handleDirectChallenge,
