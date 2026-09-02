@@ -2,6 +2,7 @@ import React from "react";
 import type { DayRecord, OneVerse } from "@/lib/storage";
 import type { VerseData } from "./types";
 import { ConfirmedOneVerseActions, SelectedOneVerseActions } from "./OneVerseActions";
+import { Crown } from "lucide-react";
 
 interface BibleVerseRowProps {
   trackType: string;
@@ -41,6 +42,7 @@ export default function BibleVerseRow({ trackType, book, chapter, verse, fontSiz
       className={wrapperClass}
     >
       {(isConfirmed || isSelected || isCandidate) && <div className={markerClass} />}
+      {isConfirmed && <div className="mb-2 flex items-center pl-[2.5ch] sm:pl-[3ch]"><span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-700 dark:bg-amber-900/50 dark:text-amber-400"><Crown size={13} />오늘의 One Verse</span></div>}
       <button
         type="button"
         aria-label={`${formatReference(book, chapter, verse.verse)} 선택`}

@@ -50,7 +50,7 @@ function MemoEditorContent() {
   const oneVerseRef = useRef<HTMLDivElement>(null);
   const [isOriginalOneVerseVisible, setIsOriginalOneVerseVisible] = useState(true);
   const [isVerseDialogOpen, setIsVerseDialogOpen] = useState(false);
-  const [floatingVerseButtonBottom, setFloatingVerseButtonBottom] = useState(16);
+  const [floatingVerseButtonTop, setFloatingVerseButtonTop] = useState<number | null>(null);
   const [copyMessage, setCopyMessage] = useState<string | null>(null);
   const lastFocusedElementRef = useRef<HTMLElement | null>(null);
   const copyMessageTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -119,10 +119,8 @@ function MemoEditorContent() {
       const rect = oneVerseElement.getBoundingClientRect();
       setIsOriginalOneVerseVisible(rect.bottom > 0 && rect.top < viewportHeight);
 
-      const keyboardInset = viewport
-        ? Math.max(0, window.innerHeight - (viewport.offsetTop + viewport.height))
-        : 0;
-      setFloatingVerseButtonBottom(16 + keyboardInset);
+      const viewportTop = viewport?.offsetTop ?? 0;
+      setFloatingVerseButtonTop(viewportTop + viewportHeight / 2);
     };
 
     updateVerseVisibility();
@@ -464,15 +462,16 @@ function MemoEditorContent() {
         )}
       </div>
 
-      {showFloatingVerseButton && (
+      {showFloatingVerseButton && floatingVerseButtonTop !== null && (
         <button
           type="button"
           onClick={openVerseDialog}
-          style={{ bottom: `calc(${floatingVerseButtonBottom}px + env(safe-area-inset-bottom))` }}
-          className="fixed left-1/2 z-40 flex min-h-11 -translate-x-1/2 items-center gap-2 rounded-full bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white shadow-lg transition-colors hover:bg-emerald-700"
+          aria-label="One Verse 보기"
+          title="One Verse 보기"
+          style={{ top: `${floatingVerseButtonTop}px` }}
+          className="fixed right-2 z-40 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-emerald-600 text-white shadow-lg transition-colors hover:bg-emerald-700"
         >
-          <Footprints size={16} />
-          One Verse 보기
+          <Footprints size={18} />
         </button>
       )}
 
