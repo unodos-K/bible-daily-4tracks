@@ -48,9 +48,13 @@ function MemoEditorContent() {
   const prayerTextareaRef = useRef<HTMLTextAreaElement>(null);
   const editorScrollRef = useRef<HTMLDivElement>(null);
   const oneVerseRef = useRef<HTMLDivElement>(null);
+  const memoHeaderRef = useRef<HTMLDivElement>(null);
   const writingFocusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isWritingFocused, setIsWritingFocused] = useState(false);
   const [isOriginalOneVerseVisible, setIsOriginalOneVerseVisible] = useState(true);
+  const [isPreviewExpanded, setIsPreviewExpanded] = useState(false);
+  const [memoHeaderHeight, setMemoHeaderHeight] = useState(0);
+  const [visualViewportTop, setVisualViewportTop] = useState(0);
 
   useLayoutEffect(() => {
     if (mode !== 'edit') return;
@@ -122,6 +126,38 @@ function MemoEditorContent() {
   useEffect(() => () => {
     if (writingFocusTimeoutRef.current) clearTimeout(writingFocusTimeoutRef.current);
   }, []);
+
+  useEffect(() => {
+    const header = memoHeaderRef.current;
+    if (!header) return;
+
+    const updateHeight = () => setMemoHeaderHeight(header.getBoundingClientRect().height);
+    updateHeight();
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(header);
+    return () => observer.disconnect();
+  }, [isLoading, mode]);
+
+  useEffect(() => {
+    if (!isWritingFocused) {
+      setVisualViewportTop(0);
+      setIsPreviewExpanded(false);
+      return;
+    }
+
+    const viewport = window.visualViewport;
+    const updateViewportTop = () => setVisualViewportTop(viewport?.offsetTop ?? 0);
+    updateViewportTop();
+
+    viewport?.addEventListener("resize", updateViewportTop);
+    viewport?.addEventListener("scroll", updateViewportTop);
+    window.addEventListener("resize", updateViewportTop);
+    return () => {
+      viewport?.removeEventListener("resize", updateViewportTop);
+      viewport?.removeEventListener("scroll", updateViewportTop);
+      window.removeEventListener("resize", updateViewportTop);
+    };
+  }, [isWritingFocused]);
 
   if (isLoading || !record || dayIndex === null) {
     return (
@@ -235,6 +271,7 @@ function MemoEditorContent() {
   const verseText = record.oneVerse!.displayText || record.oneVerse!.rawText;
   const verseRef = formatReference(record.oneVerse!.book, record.oneVerse!.chapter, record.oneVerse!.verse);
   const shouldShowOneVersePreview = isWritingFocused || !isOriginalOneVerseVisible;
+  const canExpandPreview = verseText.length > 120;
 
   const isWritingInput = (target: EventTarget | null): target is HTMLInputElement | HTMLTextAreaElement =>
     target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement;
@@ -261,7 +298,7 @@ function MemoEditorContent() {
   return (
     <div className="h-full min-h-0 overflow-hidden bg-stone-900 flex flex-col relative w-full">
       {/* Sticky Header */}
-      <div className="shrink-0 z-50 flex items-center justify-between p-4 border-b border-stone-800 bg-stone-900/90 backdrop-blur-md">
+      <div ref={memoHeaderRef} className="shrink-0 z-50 flex items-center justify-between p-4 border-b border-stone-800 bg-stone-900/90 backdrop-blur-md">
         <button 
           onClick={() => router.back()}
           className="text-stone-400 hover:text-stone-200 transition-colors flex items-center gap-1"
@@ -294,9 +331,26 @@ function MemoEditorContent() {
       </div>
 
       {shouldShowOneVersePreview && verseText && (
-        <div aria-hidden="true" className="shrink-0 z-40 border-b border-stone-800 bg-stone-900/85 px-5 py-2.5 backdrop-blur-md">
+        <div
+          role="region"
+          aria-label="현재 묵상 중인 One Verse"
+          style={isWritingFocused ? { top: `${visualViewportTop + memoHeaderHeight}px` } : undefined}
+          className={isWritingFocused
+            ? "fixed left-1/2 z-40 w-full max-w-2xl -translate-x-1/2 border-b border-stone-800 bg-stone-900/90 px-5 py-2.5 shadow-lg backdrop-blur-md"
+            : "shrink-0 z-40 border-b border-stone-800 bg-stone-900/85 px-5 py-2.5 backdrop-blur-md"}
+        >
           <p className="mb-1 text-xs font-bold text-emerald-400">{verseRef}</p>
-          <p className="break-words text-[13px] font-medium leading-5 text-stone-200">{verseText}</p>
+          <p className={`break-words text-[13px] font-medium leading-5 text-stone-200 ${isWritingFocused && !isPreviewExpanded ? "line-clamp-3" : ""}`}>{verseText}</p>
+          {isWritingFocused && canExpandPreview && (
+            <button
+              type="button"
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => setIsPreviewExpanded((expanded) => !expanded)}
+              className="mt-1.5 text-xs font-bold text-emerald-400 underline underline-offset-2"
+            >
+              {isPreviewExpanded ? "접기" : "말씀 전체 보기"}
+            </button>
+          )}
         </div>
       )}
 
