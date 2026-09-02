@@ -3,7 +3,7 @@
 import React, { useEffect } from "react";
 import { Settings, Footprints } from "lucide-react";
 import {
-  DayRecord,
+  OneVerseRecord,
 } from "@/lib/storage";
 import { signInWithKakao } from "@/lib/supabase";
 import { shareOneVerse } from "@/lib/share";
@@ -49,17 +49,16 @@ export default function MyPage() {
     stats.router.push(`/verse/${dateStr}`);
   };
 
-  // 그룹화: 날짜별 완료한 Day 목록
-  const recordsByDate: Record<string, DayRecord[]> = {};
-  for (const day in stats.records) {
-    const r = stats.records[day];
-    if (!recordsByDate[r.readDate]) recordsByDate[r.readDate] = [];
-    recordsByDate[r.readDate].push(r);
+  // 달력은 완료 여부와 무관하게 최종 One Verse가 있는 기록을 표시한다.
+  const oneVerseRecordsByDate: Record<string, OneVerseRecord[]> = {};
+  for (const record of Object.values(stats.oneVerseRecords)) {
+    if (!oneVerseRecordsByDate[record.readDate]) oneVerseRecordsByDate[record.readDate] = [];
+    oneVerseRecordsByDate[record.readDate].push(record);
   }
 
   // 그룹 내에서 Day 순으로 정렬
-  for (const date in recordsByDate) {
-    recordsByDate[date].sort((a, b) => a.dayIndex - b.dayIndex);
+  for (const date in oneVerseRecordsByDate) {
+    oneVerseRecordsByDate[date].sort((a, b) => a.dayIndex - b.dayIndex);
   }
 
   // 달력 렌더링을 위한 데이터
@@ -134,7 +133,7 @@ export default function MyPage() {
             year={year}
             month={month}
             settings={stats.settings}
-            recordsByDate={recordsByDate}
+            oneVerseRecordsByDate={oneVerseRecordsByDate}
             selectedRecordStr={stats.selectedRecordStr}
             handleDayClick={handleDayClick}
           />

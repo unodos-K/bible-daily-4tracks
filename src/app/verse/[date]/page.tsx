@@ -4,36 +4,35 @@ import React, { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { ChevronLeft, Heart, HeartHandshake, BookOpen, Quote, Footprints } from "lucide-react";
 import { 
-  ReadRecordsMap, 
-  DayRecord,
+  OneVerseRecordsMap,
+  OneVerseRecord,
   OneVerse,
-  fetchReadRecords, 
+  fetchOneVerseRecords,
   updateMemorizeRecord
 } from "@/lib/storage";
 import { useAuth } from "@/components/AuthProvider";
 import { shareOneVerse } from "@/lib/share";
 import ShareModal from "@/components/ShareModal";
 import MemoryTrainerModal from "@/components/MemoryTrainerModal";
-import { getRecordsForReadDate } from "@/lib/readingRecords";
 
 export default function VerseDetailPage() {
   const router = useRouter();
   const params = useParams();
   const dateParam = params?.date as string;
   
-  const [records, setRecords] = useState<ReadRecordsMap>({});
+  const [records, setRecords] = useState<OneVerseRecordsMap>({});
   const { authUser, isAuthLoading } = useAuth();
   const [isClient, setIsClient] = useState(false);
   
   const [selectedDayIndexForMemory, setSelectedDayIndexForMemory] = useState<number | null>(null);
   const [isMemoryModalOpen, setIsMemoryModalOpen] = useState(false);
-  const [selectedRecordToShare, setSelectedRecordToShare] = useState<DayRecord | null>(null);
+  const [selectedRecordToShare, setSelectedRecordToShare] = useState<OneVerseRecord | null>(null);
 
   useEffect(() => {
     setIsClient(true);
     if (isAuthLoading) return;
     const loadRecords = async () => {
-      const r = await fetchReadRecords(authUser?.id);
+      const r = await fetchOneVerseRecords(authUser?.id);
       setRecords(r);
     };
     void loadRecords();
@@ -53,9 +52,11 @@ export default function VerseDetailPage() {
   const hasValidDate = y && m && d;
 
   // Get records for this date and sort by dayIndex
-  const dayRecords = getRecordsForReadDate(records, dateParam);
+  const dayRecords = Object.values(records)
+    .filter((record) => record.readDate === dateParam)
+    .sort((a, b) => a.dayIndex - b.dayIndex);
 
-  const handleShareOneVerse = (record: DayRecord) => {
+  const handleShareOneVerse = (record: OneVerseRecord) => {
     setSelectedRecordToShare(record);
   };
 
@@ -178,7 +179,7 @@ export default function VerseDetailPage() {
             const verse = records[selectedDayIndexForMemory].oneVerse;
             if (verse) {
               await updateMemorizeRecord(selectedDayIndexForMemory, true, verse, authUser?.id);
-              const r = await fetchReadRecords(authUser?.id);
+              const r = await fetchOneVerseRecords(authUser?.id);
               setRecords(r);
             }
             setIsMemoryModalOpen(false);

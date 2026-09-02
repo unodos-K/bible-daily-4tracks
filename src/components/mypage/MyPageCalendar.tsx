@@ -1,6 +1,6 @@
 import React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { DayRecord, ReadingSettings } from "@/lib/storage";
+import { OneVerseRecord, ReadingSettings } from "@/lib/storage";
 
 interface MyPageCalendarProps {
   currentDate: Date;
@@ -8,7 +8,7 @@ interface MyPageCalendarProps {
   year: number;
   month: number;
   settings: ReadingSettings;
-  recordsByDate: Record<string, DayRecord[]>;
+  oneVerseRecordsByDate: Record<string, OneVerseRecord[]>;
   selectedRecordStr: string | null;
   handleDayClick: (dateStr: string) => void;
 }
@@ -32,7 +32,7 @@ export default function MyPageCalendar({
   year,
   month,
   settings,
-  recordsByDate,
+  oneVerseRecordsByDate,
   selectedRecordStr,
   handleDayClick
 }: MyPageCalendarProps) {
@@ -79,9 +79,9 @@ export default function MyPageCalendar({
 
           const dateStr = formatDateStr(year, month, day);
           const isBeforeStart = dateStr < settings.startDate;
-          const dayRecords = recordsByDate[dateStr] || [];
+          const dayRecords = oneVerseRecordsByDate[dateStr] || [];
           const count = dayRecords.length;
-          const isCompleted = count > 0;
+          const hasOneVerse = count > 0;
           
           const isToday = formatDateStr(new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate()) === dateStr;
           const isSelected = selectedRecordStr === dateStr;
@@ -89,7 +89,7 @@ export default function MyPageCalendar({
           let borderClass = "";
           let bgClass = "";
           
-          if (isCompleted) {
+          if (hasOneVerse) {
             if (count === 3) {
               borderClass = "border-amber-400 dark:border-amber-500 shadow-[0_0_8px_rgba(251,191,36,0.3)]";
               bgClass = "bg-amber-50/50 dark:bg-amber-900/10";
@@ -106,22 +106,22 @@ export default function MyPageCalendar({
             <div 
               key={day}
               onClick={() => {
-                if (!isBeforeStart || isCompleted) {
+                if (!isBeforeStart || hasOneVerse) {
                   handleDayClick(dateStr);
                 }
               }}
               className={`
                 relative h-14 sm:h-20 flex flex-col items-center justify-start pt-2 rounded-xl transition-all border select-none
-                ${isBeforeStart && !isCompleted ? 'opacity-30 cursor-not-allowed bg-stone-50 dark:bg-stone-900 border-transparent' : 'cursor-pointer'}
+                ${isBeforeStart && !hasOneVerse ? 'opacity-30 cursor-not-allowed bg-stone-50 dark:bg-stone-900 border-transparent' : 'cursor-pointer'}
                 ${isSelected ? 'ring-2 ring-sky-500 bg-sky-100 dark:bg-sky-900/60' : ''}
-                ${isCompleted && !isSelected ? `${bgClass} ${borderClass} hover:brightness-95` : ''}
-                ${!isCompleted && !isSelected && !isBeforeStart ? 'bg-transparent border-transparent hover:border-stone-200 dark:hover:border-stone-800' : ''}
+                ${hasOneVerse && !isSelected ? `${bgClass} ${borderClass} hover:brightness-95` : ''}
+                ${!hasOneVerse && !isSelected && !isBeforeStart ? 'bg-transparent border-transparent hover:border-stone-200 dark:hover:border-stone-800' : ''}
               `}
             >
               <span className={`text-sm font-medium ${isToday ? 'text-sky-600 dark:text-sky-400 font-bold' : 'text-stone-700 dark:text-stone-300'}`}>
                 {day}
               </span>
-              {isCompleted && (
+              {hasOneVerse && (
                 <div className="flex mt-1 justify-center gap-1 items-center">
                   {count > 3 ? (
                     <span className="bg-stone-700 dark:bg-stone-600 text-stone-100 text-[10px] font-bold px-1.5 py-0.5 leading-none rounded-full">

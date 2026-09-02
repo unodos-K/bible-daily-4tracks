@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { 
   ReadingSettings, ReadRecordsMap, DayRecord, OneVerse, OneVerseCandidate,
-  fetchReadingSettings, fetchReadRecords,
+  fetchReadingSettings, fetchReadRecords, fetchOneVerseRecord,
   saveDayRecord, saveOneVerseDraft, updateReadRecordOneVerse, updateReadRecordCompletion, updateMemorizeRecord,
   saveReadingSettings, fetchOneVerseCandidates, saveOneVerseCandidate, removeOneVerseCandidate
 } from "@/lib/storage";
@@ -175,15 +175,37 @@ export function useBibleReader() {
   useEffect(() => {
     if (isClient && settings?.hasStarted) {
       const record = records[dayIndex];
-      if (record) {
-        setIsCompletedDay(true);
-        setConfirmedVerse(record.oneVerse || null);
-        setSelectedVerse(null);
-      } else {
-        setIsCompletedDay(false);
-      }
+      setIsCompletedDay(Boolean(record));
+      setSelectedVerse(null);
     }
   }, [isClient, dayIndex, settings, records]);
+
+  // `fetchReadRecords` intentionally contains completed records only. Final One
+  // Verse drafts must be restored separately so they remain visible before a
+  // Day is completed and after returning to the reader.
+  useEffect(() => {
+    let isActive = true;
+
+    if (!authUser || !isDataLoaded) {
+      setConfirmedVerse(null);
+      return () => { isActive = false; };
+    }
+
+    setConfirmedVerse(null);
+    void fetchOneVerseRecord(dayIndex, authUser.id)
+      .then((record) => {
+        if (isActive) setConfirmedVerse(record?.oneVerse ?? null);
+      })
+      .catch((error: unknown) => {
+        console.error("Failed to restore One Verse:", error);
+        if (isActive) {
+          setConfirmedVerse(null);
+          showToast("오늘의 One Verse를 불러오지 못했습니다.");
+        }
+      });
+
+    return () => { isActive = false; };
+  }, [authUser, dayIndex, isDataLoaded]);
 
   const handleGoToLastRead = () => {
     const lastDay = getLastOneVerseDay(records);
