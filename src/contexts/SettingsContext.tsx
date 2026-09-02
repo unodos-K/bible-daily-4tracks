@@ -100,6 +100,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       } else {
         root.classList.remove("dark");
       }
+
+      document
+        .querySelector<HTMLMetaElement>('meta[data-app-theme-color="true"]')
+        ?.setAttribute("content", mode === "dark" ? "#0c0a09" : "#fafaf9");
     };
 
     if (theme === "system") {

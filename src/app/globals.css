@@ -14,28 +14,35 @@
   --border: #e7e5e4;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #121212;
-    --foreground: #ecebeb;
-    --card: #1c1c1e;
-    --card-foreground: #ecebeb;
-    --primary: #3b82f6;
-    --primary-foreground: #ffffff;
-    --muted: #242426;
-    --muted-foreground: #a1a1aa;
-    --border: #2e2e32;
-  }
+:root.dark {
+  --background: #0c0a09;
+  --foreground: #ecebeb;
+  --card: #1c1c1e;
+  --card-foreground: #ecebeb;
+  --primary: #3b82f6;
+  --primary-foreground: #ffffff;
+  --muted: #242426;
+  --muted-foreground: #a1a1aa;
+  --border: #2e2e32;
+  color-scheme: dark;
+}
+
+html {
+  min-height: 100%;
+  background-color: var(--background);
+  overscroll-behavior-y: none;
 }
 
 body {
   color: var(--foreground);
-  background-color: #e5e5e5;
+  min-height: 100%;
+  background-color: var(--background);
   font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", "Segoe UI", Roboto, "Malgun Gothic", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-tap-highlight-color: transparent;
   user-select: text;
+  overscroll-behavior-y: none;
 }
 
 /* Custom scrollbar for clean mobile experience */
