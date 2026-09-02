@@ -30,11 +30,22 @@ export default function BibleVerseRow({ trackType, book, chapter, verse, fontSiz
   const markerClass = isConfirmed ? "absolute left-0 top-3 bottom-3 w-1.5 bg-amber-400 dark:bg-amber-500 rounded-r-md" : "absolute left-0 top-3 bottom-3 w-1 bg-sky-400 dark:bg-sky-500 rounded-r-md";
   const verseNumberClass = isConfirmed ? "text-amber-600 dark:text-amber-500 font-bold" : isSelected ? "text-sky-600 dark:text-sky-400 font-bold" : "text-stone-400 dark:text-stone-500 font-semibold";
   return (
-    <button id={(isConfirmed || isSelected) ? "one-verse-target" : undefined} onClick={() => onVerseClick(trackType, book, chapter, verse.verse, verse.rawText, verse.displayText, verse.chunks)} className={wrapperClass}>
+    <div
+      id={(isConfirmed || isSelected) ? "one-verse-target" : undefined}
+      className={wrapperClass}
+    >
       {(isConfirmed || isSelected) && <div className={markerClass} />}
-      <div className="flex items-start flex-1 w-full"><span className={`inline-block min-w-[2.5ch] mr-2 sm:mr-3 select-none mt-[0.1em] text-right ${verseNumberClass}`} style={{ fontSize: `${Math.max(fontSize * 0.7, 10)}px` }}>{verse.verse}</span><span className={isConfirmed ? "flex-1 font-medium" : "flex-1"}>{verse.displayText}</span></div>
+      <button
+        type="button"
+        aria-label={`${formatReference(book, chapter, verse.verse)} 선택`}
+        aria-pressed={isSelected || isConfirmed}
+        onClick={() => onVerseClick(trackType, book, chapter, verse.verse, verse.rawText, verse.displayText, verse.chunks)}
+        className="flex items-start flex-1 w-full rounded-lg text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
+      >
+        <span className={`inline-block min-w-[2.5ch] mr-2 sm:mr-3 select-none mt-[0.1em] text-right ${verseNumberClass}`} style={{ fontSize: `${Math.max(fontSize * 0.7, 10)}px` }}>{verse.verse}</span><span className={isConfirmed ? "flex-1 font-medium" : "flex-1"}>{verse.displayText}</span>
+      </button>
       {isConfirmed && <ConfirmedOneVerseActions verse={confirmedVerse} dayIndex={dayIndex} record={record} onOpenMemory={onOpenMemory} onShare={onShare} />}
       {isSelected && <SelectedOneVerseActions verse={verseValue} onConfirm={onConfirmVerse} />}
-    </button>
+    </div>
   );
 }

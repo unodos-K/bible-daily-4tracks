@@ -18,6 +18,8 @@ export default function FriendProfilePage() {
   const [stats, setStats] = useState<{ totalReadDays: number, memorizedCount: number }>({ totalReadDays: 0, memorizedCount: 0 });
   const [visibleCount, setVisibleCount] = useState(3);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [retryKey, setRetryKey] = useState(0);
   const { authUser, isAuthLoading } = useAuth();
   
   const observerTargetRef = useRef<HTMLDivElement>(null);
@@ -25,18 +27,26 @@ export default function FriendProfilePage() {
   useEffect(() => {
     let mounted = true;
     if (!friendId || isAuthLoading) return () => { mounted = false; };
-      getFriendDetail(friendId, authUser?.id).then(({ profile: prof, records: recs, stats: st }) => {
-        if (mounted) {
-          setProfile(prof);
-          // day_index 내림차순 (최신순) 정렬 보장
-          const sorted = [...recs].sort((a, b) => (b.day_index || 0) - (a.day_index || 0));
-          setRecords(sorted);
-          setStats(st);
-          setLoading(false);
-        }
+    setLoading(true);
+    setLoadError(false);
+    getFriendDetail(friendId, authUser?.id)
+      .then(({ profile: prof, records: recs, stats: st }) => {
+        if (!mounted) return;
+        setProfile(prof);
+        // day_index 내림차순 (최신순) 정렬 보장
+        const sorted = [...recs].sort((a, b) => (b.day_index || 0) - (a.day_index || 0));
+        setRecords(sorted);
+        setStats(st);
+      })
+      .catch((error: unknown) => {
+        console.error("친구 상세 정보를 불러오지 못했습니다:", error);
+        if (mounted) setLoadError(true);
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
       });
     return () => { mounted = false; };
-  }, [authUser, friendId, isAuthLoading]);
+  }, [authUser, friendId, isAuthLoading, retryKey]);
 
   // 스크롤 감지 Lazy Load (5개씩 추가)
   useEffect(() => {
@@ -100,6 +110,24 @@ export default function FriendProfilePage() {
       <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex flex-col items-center justify-center gap-3 text-stone-500">
         <Loader2 className="animate-spin text-stone-400 w-8 h-8" />
         <span className="text-sm font-medium">데이터를 불러오는 중...</span>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex flex-col items-center justify-center gap-4 p-8 text-center text-stone-500">
+        <p>친구 발자국을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.</p>
+        <button
+          type="button"
+          onClick={() => setRetryKey((key) => key + 1)}
+          className="rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-sky-700"
+        >
+          다시 시도
+        </button>
+        <button type="button" onClick={() => router.back()} className="text-sm font-medium text-stone-500 underline underline-offset-4">
+          돌아가기
+        </button>
       </div>
     );
   }

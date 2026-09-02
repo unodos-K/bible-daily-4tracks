@@ -38,6 +38,7 @@ export default function ReadHeader({
           <button
             onClick={() => handleSetDay(dayIndex - 10)}
             disabled={dayIndex <= 1}
+            aria-label="10일 이전으로 이동"
             className="p-1.5 sm:p-2 rounded-full hover:bg-stone-200 dark:hover:bg-stone-800 disabled:opacity-30 transition-colors"
             title="10일 이전"
           >
@@ -46,6 +47,7 @@ export default function ReadHeader({
           <button
             onClick={() => handleSetDay(dayIndex - 1)}
             disabled={dayIndex <= 1}
+            aria-label="1일 이전으로 이동"
             className="p-1.5 sm:p-2 rounded-full hover:bg-stone-200 dark:hover:bg-stone-800 disabled:opacity-30 transition-colors"
             title="1일 이전"
           >
@@ -53,7 +55,10 @@ export default function ReadHeader({
           </button>
         </div>
         
-        <div 
+        <button
+          type="button"
+          aria-label="Day 선택 열기"
+          aria-expanded={isDaySelectorOpen}
           className="flex flex-col items-center flex-1 cursor-pointer select-none py-1 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg transition-colors mx-2" 
           onClick={() => setIsDaySelectorOpen(!isDaySelectorOpen)}
         >
@@ -68,12 +73,13 @@ export default function ReadHeader({
               `${new Date().getMonth() + 1}월 ${new Date().getDate()}일 (오늘) / 목표 Day ${settings ? calculateDaysSince(settings.startDate) : 1}`
             )}
           </span>
-        </div>
+        </button>
 
         <div className="flex items-center gap-1 sm:gap-2">
           <button
             onClick={() => handleSetDay(dayIndex + 1)}
             disabled={dayIndex >= 365}
+            aria-label="1일 다음으로 이동"
             className="p-1.5 sm:p-2 rounded-full hover:bg-stone-200 dark:hover:bg-stone-800 disabled:opacity-30 transition-colors"
             title="1일 다음"
           >
@@ -82,6 +88,7 @@ export default function ReadHeader({
           <button
             onClick={() => handleSetDay(dayIndex + 10)}
             disabled={dayIndex >= 365}
+            aria-label="10일 다음으로 이동"
             className="p-1.5 sm:p-2 rounded-full hover:bg-stone-200 dark:hover:bg-stone-800 disabled:opacity-30 transition-colors"
             title="10일 다음"
           >

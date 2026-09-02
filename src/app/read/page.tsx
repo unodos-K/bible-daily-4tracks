@@ -39,6 +39,7 @@ export default function BibleViewerPage() {
   const [readingData, setReadingData] = useState<DailyReading | null>(null);
   const [isReadingTextLoading, setIsReadingTextLoading] = useState(true);
   const [readingTextError, setReadingTextError] = useState(false);
+  const [readingTextRetryKey, setReadingTextRetryKey] = useState(0);
   
   const {
     isClient,
@@ -108,7 +109,7 @@ export default function BibleViewerPage() {
     return () => {
       isActive = false;
     };
-  }, [authUser, dayIndex, isClient, isDataLoaded]);
+  }, [authUser, dayIndex, isClient, isDataLoaded, readingTextRetryKey]);
 
 
 
@@ -232,7 +233,18 @@ export default function BibleViewerPage() {
   }
 
   if (readingTextError) {
-    return <div className="p-8 text-center text-stone-500">본문을 불러오지 못했습니다. 네트워크를 확인한 뒤 다시 시도해주세요.</div>;
+    return (
+      <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex flex-col items-center justify-center gap-4 p-8 text-center text-stone-500">
+        <p>본문을 불러오지 못했습니다. 네트워크를 확인한 뒤 다시 시도해주세요.</p>
+        <button
+          type="button"
+          onClick={() => setReadingTextRetryKey((key) => key + 1)}
+          className="rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-sky-700"
+        >
+          다시 시도
+        </button>
+      </div>
+    );
   }
 
   if (!readingData) {
