@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useLayoutEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CheckSquare, ChevronLeft, Copy, Footprints, X } from "lucide-react";
+import { BookOpen, CheckSquare, ChevronLeft, Copy, Footprints, X } from "lucide-react";
 import { MemoData, fetchReadRecords, updateReadRecordOneVerse, DayRecord } from "@/lib/storage";
 import { useAuth } from "@/components/AuthProvider";
 
@@ -46,11 +46,7 @@ function MemoEditorContent() {
   const appRefs = useRef<(HTMLInputElement | null)[]>([]);
   const meditationTextareaRef = useRef<HTMLTextAreaElement>(null);
   const prayerTextareaRef = useRef<HTMLTextAreaElement>(null);
-  const editorScrollRef = useRef<HTMLDivElement>(null);
-  const oneVerseRef = useRef<HTMLDivElement>(null);
-  const [isOriginalOneVerseVisible, setIsOriginalOneVerseVisible] = useState(true);
   const [isVerseDialogOpen, setIsVerseDialogOpen] = useState(false);
-  const [floatingVerseButtonTop, setFloatingVerseButtonTop] = useState<number | null>(null);
   const [copyMessage, setCopyMessage] = useState<string | null>(null);
   const lastFocusedElementRef = useRef<HTMLElement | null>(null);
   const copyMessageTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -107,35 +103,6 @@ function MemoEditorContent() {
     
     loadRecord();
   }, [authUser, dayIndexParam, isAuthLoading, modeParam, router]);
-
-  useEffect(() => {
-    const scrollContainer = editorScrollRef.current;
-    const oneVerseElement = oneVerseRef.current;
-    if (!scrollContainer || !oneVerseElement) return;
-
-    const updateVerseVisibility = () => {
-      const viewport = window.visualViewport;
-      const viewportHeight = viewport?.height ?? window.innerHeight;
-      const rect = oneVerseElement.getBoundingClientRect();
-      setIsOriginalOneVerseVisible(rect.bottom > 0 && rect.top < viewportHeight);
-
-      const viewportTop = viewport?.offsetTop ?? 0;
-      setFloatingVerseButtonTop(viewportTop + viewportHeight / 2);
-    };
-
-    updateVerseVisibility();
-    const viewport = window.visualViewport;
-    scrollContainer.addEventListener("scroll", updateVerseVisibility, { passive: true });
-    viewport?.addEventListener("resize", updateVerseVisibility);
-    viewport?.addEventListener("scroll", updateVerseVisibility);
-    window.addEventListener("resize", updateVerseVisibility);
-    return () => {
-      scrollContainer.removeEventListener("scroll", updateVerseVisibility);
-      viewport?.removeEventListener("resize", updateVerseVisibility);
-      viewport?.removeEventListener("scroll", updateVerseVisibility);
-      window.removeEventListener("resize", updateVerseVisibility);
-    };
-  }, [record?.oneVerse?.reference, record?.oneVerse?.displayText, record?.oneVerse?.rawText]);
 
   useEffect(() => () => {
     if (copyMessageTimeoutRef.current) clearTimeout(copyMessageTimeoutRef.current);
@@ -252,8 +219,6 @@ function MemoEditorContent() {
 
   const verseText = record.oneVerse!.displayText || record.oneVerse!.rawText;
   const verseRef = formatReference(record.oneVerse!.book, record.oneVerse!.chapter, record.oneVerse!.verse);
-  const showFloatingVerseButton = !isOriginalOneVerseVisible;
-
   const closeVerseDialog = () => {
     setIsVerseDialogOpen(false);
     requestAnimationFrame(() => lastFocusedElementRef.current?.focus());
@@ -328,12 +293,9 @@ function MemoEditorContent() {
       </div>
 
       {/* Content */}
-      <div
-        ref={editorScrollRef}
-        className="flex-1 min-h-0 overflow-y-auto overscroll-y-contain p-5 pb-[calc(6rem+env(safe-area-inset-bottom))]"
-      >
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-y-contain p-5 pb-[calc(6rem+env(safe-area-inset-bottom))]">
         {verseText && verseRef && (
-          <div ref={oneVerseRef} className="mb-6 bg-stone-100 dark:bg-white/5 p-4 rounded-xl border border-stone-200 dark:border-stone-800">
+          <div className="mb-6 bg-stone-100 dark:bg-white/5 p-4 rounded-xl border border-stone-200 dark:border-stone-800">
             <blockquote className="break-words text-[15px] leading-relaxed italic text-stone-800 dark:text-stone-200 sm:text-base mb-3">
               {verseText}
             </blockquote>
@@ -462,18 +424,17 @@ function MemoEditorContent() {
         )}
       </div>
 
-      {showFloatingVerseButton && floatingVerseButtonTop !== null && (
-        <button
-          type="button"
-          onClick={openVerseDialog}
-          aria-label="One Verse 보기"
-          title="One Verse 보기"
-          style={{ top: `${floatingVerseButtonTop}px` }}
-          className="fixed right-2 z-40 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-emerald-600 text-white shadow-lg transition-colors hover:bg-emerald-700"
-        >
-          <Footprints size={18} />
-        </button>
-      )}
+      <button
+        type="button"
+        onClick={openVerseDialog}
+        aria-label="One Verse 보기"
+        title="One Verse 보기"
+        className="fixed right-1 top-[calc(env(safe-area-inset-top)+4.25rem)] z-40 flex h-11 w-11 items-center justify-center rounded-full p-1.5 transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-stone-950"
+      >
+        <span aria-hidden="true" className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 text-white shadow-lg transition-colors hover:bg-emerald-700">
+          <BookOpen size={16} />
+        </span>
+      </button>
 
       {isVerseDialogOpen && (
         <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 p-4 backdrop-blur-sm sm:items-center" role="dialog" aria-modal="true" aria-label="One Verse 보기">

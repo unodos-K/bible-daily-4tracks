@@ -84,6 +84,8 @@ export default function BibleViewerPage() {
     setShowConfirmModal,
     showCompletionModal,
     setShowCompletionModal,
+    showCompletionCancelModal,
+    setShowCompletionCancelModal,
     showReselectModal,
     setShowReselectModal,
     verseToReplace,
@@ -108,6 +110,7 @@ export default function BibleViewerPage() {
     handleToggleCandidate,
     executeReplaceVerse,
     handleBottomButtonClick,
+    handleCancelCompletion,
     completeReadingAndShowSuccess,
     handleMemoryComplete,
     calculateDaysSince
@@ -330,6 +333,8 @@ export default function BibleViewerPage() {
         setShowConfirmModal={setShowConfirmModal}
         showCompletionModal={showCompletionModal}
         setShowCompletionModal={setShowCompletionModal}
+        showCompletionCancelModal={showCompletionCancelModal}
+        setShowCompletionCancelModal={setShowCompletionCancelModal}
         showReselectModal={showReselectModal}
         setShowReselectModal={setShowReselectModal}
         showSuccessModal={showSuccessModal}
@@ -342,6 +347,7 @@ export default function BibleViewerPage() {
         setSelectedVerse={setSelectedVerse}
         executeReplaceVerse={executeReplaceVerse}
         completeReadingAndShowSuccess={completeReadingAndShowSuccess}
+        handleCancelCompletion={handleCancelCompletion}
         handleConfirmReselect={handleConfirmReselect}
         isCompletedDay={isCompletedDay}
         setIsMemoryModalOpen={setIsMemoryModalOpen}

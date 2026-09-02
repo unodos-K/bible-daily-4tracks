@@ -348,6 +348,32 @@ export async function updateReadRecordOneVerse(dayIndex: number, oneVerse: OneVe
   return true;
 }
 
+/**
+ * Keeps a reading record and its One Verse/memo intact while changing only its
+ * completion state. A cancelled completion can therefore be safely completed
+ * again without recreating user-authored data.
+ */
+export async function updateReadRecordCompletion(dayIndex: number, completedAt: string | null, currentUserId?: string): Promise<boolean> {
+  const userId = currentUserId ?? await getUserId();
+  if (!userId) return false;
+
+  const { error } = await supabase
+    .from('reading_records')
+    .update({ completed_at: completedAt })
+    .eq('user_id', userId)
+    .eq('day_index', dayIndex);
+
+  if (error) {
+    console.error("Reading completion update error:", error);
+    return false;
+  }
+
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('records_updated'));
+  }
+  return true;
+}
+
 export async function updateMemorizeRecord(dayIndex: number, isMemorized: boolean, currentOneVerse: OneVerse, currentUserId?: string): Promise<void> {
   const userId = currentUserId ?? await getUserId();
   if (!userId) return;

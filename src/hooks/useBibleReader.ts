@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { 
   ReadingSettings, ReadRecordsMap, DayRecord, OneVerse, OneVerseCandidate,
   fetchReadingSettings, fetchReadRecords,
-  saveDayRecord, updateReadRecordOneVerse, updateMemorizeRecord,
+  saveDayRecord, updateReadRecordOneVerse, updateReadRecordCompletion, updateMemorizeRecord,
   saveReadingSettings, fetchOneVerseCandidates, saveOneVerseCandidate, removeOneVerseCandidate
 } from "@/lib/storage";
 import { useAuth } from "@/components/AuthProvider";
@@ -27,6 +27,7 @@ export function useBibleReader() {
   const [showWarningModal, setShowWarningModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const [showCompletionCancelModal, setShowCompletionCancelModal] = useState(false);
   const [showReselectModal, setShowReselectModal] = useState(false);
   const [verseToReplace, setVerseToReplace] = useState<OneVerse | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -78,6 +79,7 @@ export function useBibleReader() {
     window.scrollTo({ top: 0, behavior: "smooth" });
     setIsDaySelectorOpen(false);
     setSelectedVerse(null);
+    setConfirmedVerse(null);
   };
 
   useEffect(() => {
@@ -179,7 +181,6 @@ export function useBibleReader() {
         setSelectedVerse(null);
       } else {
         setIsCompletedDay(false);
-        setConfirmedVerse(null);
       }
     }
   }, [isClient, dayIndex, settings, records]);
@@ -342,6 +343,10 @@ export function useBibleReader() {
   };
 
   const handleBottomButtonClick = () => {
+    if (isCompletedDay) {
+      setShowCompletionCancelModal(true);
+      return;
+    }
     if (!confirmedVerse) {
       setShowWarningModal(true);
       return;
@@ -349,6 +354,28 @@ export function useBibleReader() {
     if (confirmedVerse) {
       setShowCompletionModal(true);
     }
+  };
+
+  const handleCancelCompletion = async () => {
+    const success = await updateReadRecordCompletion(dayIndex, null, authUser?.id);
+    if (!success) {
+      showToast("읽기 완료 취소에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+      return;
+    }
+
+    setIsCompletedDay(false);
+    try {
+      const updatedRecords = await fetchReadRecords(authUser?.id);
+      setRecords(updatedRecords);
+    } catch (error) {
+      console.error("Failed to refresh records after cancelling completion:", error);
+      setRecords((current) => {
+        const remainingRecords = { ...current };
+        delete remainingRecords[dayIndex];
+        return remainingRecords;
+      });
+    }
+    showToast("읽기 완료를 취소했어요. One Verse와 발자국은 그대로 유지됩니다.");
   };
 
   const handleMemoryComplete = async () => {
@@ -362,11 +389,11 @@ export function useBibleReader() {
   };
 
   useEffect(() => {
-    const isAnyModalOpen = showConfirmModal || showCompletionModal || showReselectModal || showSuccessModal || showWarningModal || isMemoryModalOpen || showAccessDeniedModal;
+    const isAnyModalOpen = showConfirmModal || showCompletionModal || showCompletionCancelModal || showReselectModal || showSuccessModal || showWarningModal || isMemoryModalOpen || showAccessDeniedModal;
     if (isAnyModalOpen) document.body.classList.add('modal-open');
     else document.body.classList.remove('modal-open');
     return () => document.body.classList.remove('modal-open');
-  }, [showConfirmModal, showCompletionModal, showReselectModal, showSuccessModal, showWarningModal, isMemoryModalOpen, showAccessDeniedModal]);
+  }, [showConfirmModal, showCompletionModal, showCompletionCancelModal, showReselectModal, showSuccessModal, showWarningModal, isMemoryModalOpen, showAccessDeniedModal]);
 
   return {
     isClient,
@@ -391,6 +418,8 @@ export function useBibleReader() {
     setShowConfirmModal,
     showCompletionModal,
     setShowCompletionModal,
+    showCompletionCancelModal,
+    setShowCompletionCancelModal,
     showReselectModal,
     setShowReselectModal,
     verseToReplace,
@@ -415,6 +444,7 @@ export function useBibleReader() {
     handleConfirmReselect,
     executeReplaceVerse,
     handleBottomButtonClick,
+    handleCancelCompletion,
     completeReadingAndShowSuccess,
     handleMemoryComplete,
     calculateDaysSince
