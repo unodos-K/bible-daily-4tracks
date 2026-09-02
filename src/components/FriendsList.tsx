@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Footprints } from "lucide-react";
 import { getFriendsList, FriendProfile } from "@/lib/social";
 import { useAuth } from "@/components/AuthProvider";
+import AvatarImage from "@/components/AvatarImage";
 
 export default function FriendsList() {
   const [friends, setFriends] = useState<FriendProfile[]>([]);
@@ -76,8 +77,7 @@ export default function FriendsList() {
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-stone-200 dark:bg-stone-700 flex items-center justify-center text-xl overflow-hidden shrink-0">
               {friend.avatar_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={friend.avatar_url} alt={friend.name} className="w-full h-full object-cover" />
+                <AvatarImage src={friend.avatar_url} alt={friend.name} size={40} className="w-full h-full object-cover" />
               ) : (
                 <span>👤</span>
               )}

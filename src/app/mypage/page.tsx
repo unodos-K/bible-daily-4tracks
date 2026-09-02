@@ -16,6 +16,7 @@ import MemoryTrainerModal from "@/components/MemoryTrainerModal";
 import { useMyPageStats } from "@/hooks/useMyPageStats";
 import MyPageCalendar from "@/components/mypage/MyPageCalendar";
 import MyPageStatsBoard from "@/components/mypage/MyPageStatsBoard";
+import AvatarImage from "@/components/AvatarImage";
 import { getLastRecordDay, getRecordsWithOneVerse, sortRecordsByDay } from "@/lib/readingRecords";
 
 export default function MyPage() {
@@ -97,7 +98,7 @@ export default function MyPage() {
                 <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 bg-stone-100 dark:bg-stone-800 rounded-full border border-stone-200 dark:border-stone-700 shadow-inner min-w-0">
                   <div className="w-5 h-5 rounded-full bg-stone-300 dark:bg-stone-700 flex items-center justify-center text-[10px] font-bold text-stone-600 dark:text-stone-300 overflow-hidden shrink-0">
                     {stats.authUser.avatar_url ? (
-                      <img src={stats.authUser.avatar_url} alt={stats.authUser.name} className="w-full h-full object-cover" />
+                      <AvatarImage src={stats.authUser.avatar_url} alt={stats.authUser.name} size={20} className="w-full h-full object-cover" />
                     ) : (
                       <span>{stats.authUser.name.substring(0, 1)}</span>
                     )}

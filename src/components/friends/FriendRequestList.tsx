@@ -1,6 +1,7 @@
 import React from "react";
 import { Check, X as RejectIcon } from "lucide-react";
 import { FriendProfile } from "@/lib/social";
+import AvatarImage from "@/components/AvatarImage";
 
 interface FriendRequestListProps {
   requests: { id: string; profile: FriendProfile }[];
@@ -37,7 +38,7 @@ export default function FriendRequestList({
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden flex-shrink-0">
                 {req.profile.avatar_url && (
-                  <img src={req.profile.avatar_url} alt={req.profile.name} className="w-full h-full object-cover" />
+                  <AvatarImage src={req.profile.avatar_url} alt={req.profile.name} size={48} className="w-full h-full object-cover" />
                 )}
               </div>
               <div className="flex items-center gap-1.5">

@@ -6,6 +6,7 @@ import { ChevronLeft, Footprints, Loader2, Heart, Sparkles } from "lucide-react"
 import { getFriendDetail, toggleLike, FriendFeedItem, FriendProfile } from "@/lib/social";
 import LikeButton from "@/components/friends/LikeButton";
 import { useAuth } from "@/components/AuthProvider";
+import AvatarImage from "@/components/AvatarImage";
 
 export default function FriendProfilePage() {
   const params = useParams();
@@ -144,8 +145,7 @@ export default function FriendProfilePage() {
         <div className="flex flex-col items-center py-6 px-4">
           <div className="w-24 h-24 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden shadow-sm mb-4 flex items-center justify-center text-4xl">
             {profile.avatar_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={profile.avatar_url} alt={profile.name} className="w-full h-full object-cover" />
+              <AvatarImage src={profile.avatar_url} alt={profile.name} size={96} className="w-full h-full object-cover" />
             ) : (
               <span>👤</span>
             )}

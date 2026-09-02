@@ -3,6 +3,7 @@ import Link from "next/link";
 import { UserCheck } from "lucide-react";
 import { FriendProfile, FriendFeedItem } from "@/lib/social";
 import LikeButton from "./LikeButton";
+import AvatarImage from "@/components/AvatarImage";
 
 interface FriendListWidgetProps {
   friends: FriendProfile[];
@@ -45,8 +46,7 @@ export default function FriendListWidget({
               <div className="flex items-center gap-2.5 min-w-0">
                 <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden flex-shrink-0 group-hover/link:ring-2 ring-sky-500 transition-all">
                   {friend.avatar_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={friend.avatar_url} alt={friend.name} className="w-full h-full object-cover" />
+                    <AvatarImage src={friend.avatar_url} alt={friend.name} size={40} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-stone-400">
                       <UserCheck size={18} />

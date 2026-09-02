@@ -1,6 +1,7 @@
 import React from "react";
 import { Search, UserPlus } from "lucide-react";
 import { FriendProfile } from "@/lib/social";
+import AvatarImage from "@/components/AvatarImage";
 
 interface FriendSearchBoxProps {
   searchQuery: string;
@@ -74,8 +75,7 @@ export default function FriendSearchBox({
               <div className="flex items-center gap-2.5 min-w-0 flex-1">
                 <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden flex-shrink-0">
                   {user.avatar_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={user.avatar_url} alt={user.name} className="w-full h-full object-cover" />
+                    <AvatarImage src={user.avatar_url} alt={user.name} size={40} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-stone-400 text-sm">
                       👤
