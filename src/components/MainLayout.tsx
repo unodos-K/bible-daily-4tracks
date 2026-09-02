@@ -19,7 +19,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <div className="w-full max-w-2xl h-[100dvh] bg-stone-50 dark:bg-stone-950 shadow-xl flex flex-col relative border-x border-stone-200 dark:border-stone-800 overflow-hidden pt-[env(safe-area-inset-top)]">
-      <main className={`app-main flex-1 min-h-0 w-full ${hasPageScrollContainer ? 'flex flex-col overflow-hidden' : 'overflow-y-auto overscroll-y-contain'} ${hideBottomNav ? '' : 'pb-16'} bg-stone-50 dark:bg-stone-950`}>
+      <main className={`app-main flex-1 min-h-0 w-full ${hasPageScrollContainer ? 'flex flex-col overflow-hidden' : 'overflow-y-auto overscroll-y-contain'} ${hideBottomNav ? '' : 'pb-[calc(4rem+env(safe-area-inset-bottom))]'} bg-stone-50 dark:bg-stone-950`}>
         {children}
       </main>
       {!hideBottomNav && <BottomNavigation />}

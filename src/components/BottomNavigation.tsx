@@ -27,10 +27,10 @@ export function BottomNavigation() {
       fetchRequests();
     };
 
-    window.addEventListener('friend_requests_updated', handleUpdate);
+    window.addEventListener("friend_requests_updated", handleUpdate);
     return () => {
       isMounted = false;
-      window.removeEventListener('friend_requests_updated', handleUpdate);
+      window.removeEventListener("friend_requests_updated", handleUpdate);
     };
   }, [pathname]);
 
@@ -38,58 +38,61 @@ export function BottomNavigation() {
     return null;
   }
 
+  const tabItems = [
+    {
+      href: "/home",
+      label: "홈",
+      icon: Home,
+      isActive: pathname === "/home",
+    },
+    {
+      href: "/read",
+      label: "말씀 뷰어",
+      icon: BookOpen,
+      isActive: pathname === "/read" || pathname.startsWith("/read/"),
+    },
+    {
+      href: "/friends",
+      label: "친구",
+      icon: Users,
+      isActive: pathname.startsWith("/friends") || pathname.startsWith("/friend/"),
+      badge: pendingCount > 0,
+    },
+    {
+      href: "/mypage",
+      label: "마이페이지",
+      icon: User,
+      isActive: pathname === "/mypage",
+    },
+  ];
+
   return (
-    <nav className="fixed bottom-0 left-0 w-full z-50 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border-t border-stone-200 dark:border-stone-800 pb-[min(env(safe-area-inset-bottom),16px)] box-border">
-      <div className="max-w-md h-12 mx-auto flex">
-        <Link 
-          href="/home"
-          className={`flex-1 flex flex-col items-center justify-center gap-0.5 font-semibold transition-colors ${
-            pathname === "/home" 
-              ? "text-sky-700 dark:text-sky-400" 
-              : "text-stone-400 hover:text-stone-600 dark:hover:text-stone-300"
-          }`}
-        >
-          <Home size={20} />
-          <span className="text-[10px]">홈</span>
-        </Link>
-        <Link 
-          href="/read"
-          className={`flex-1 flex flex-col items-center justify-center gap-0.5 font-semibold transition-colors ${
-            pathname === "/read" 
-              ? "text-sky-700 dark:text-sky-400" 
-              : "text-stone-400 hover:text-stone-600 dark:hover:text-stone-300"
-          }`}
-        >
-          <BookOpen size={20} />
-          <span className="text-[10px]">말씀 뷰어</span>
-        </Link>
-        <Link 
-          href="/friends"
-          className={`flex-1 flex flex-col items-center justify-center gap-0.5 font-semibold transition-colors ${
-            pathname.startsWith("/friends") || pathname.startsWith("/friend/")
-              ? "text-sky-700 dark:text-sky-400" 
-              : "text-stone-400 hover:text-stone-600 dark:hover:text-stone-300"
-          }`}
-        >
-          <div className="relative">
-            <Users size={20} />
-            {pendingCount > 0 && (
-              <span className="absolute -top-1 -right-1.5 w-2 h-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-stone-900"></span>
-            )}
-          </div>
-          <span className="text-[10px]">친구</span>
-        </Link>
-        <Link 
-          href="/mypage"
-          className={`flex-1 flex flex-col items-center justify-center gap-0.5 font-semibold transition-colors ${
-            pathname === "/mypage" 
-              ? "text-sky-700 dark:text-sky-400" 
-              : "text-stone-400 hover:text-stone-600 dark:hover:text-stone-300"
-          }`}
-        >
-          <User size={20} />
-          <span className="text-[10px]">마이페이지</span>
-        </Link>
+    <nav className="fixed inset-x-0 bottom-0 z-50 box-border bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border-t border-stone-200 dark:border-stone-800 pb-[env(safe-area-inset-bottom)]">
+      <div className="mx-auto grid h-16 max-w-2xl grid-cols-4">
+        {tabItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`flex h-full w-full flex-col items-center justify-center gap-1 select-none font-semibold transition-colors ${
+                item.isActive
+                  ? "text-sky-700 dark:text-sky-400"
+                  : "text-stone-400 hover:text-stone-600 dark:hover:text-stone-300"
+              }`}
+            >
+              <div className="relative flex h-6 w-6 shrink-0 items-center justify-center">
+                <Icon size={22} strokeWidth={2.25} className="h-[22px] w-[22px] shrink-0" />
+                {item.badge && (
+                  <span className="absolute -top-0.5 -right-1 w-2 h-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-stone-900" />
+                )}
+              </div>
+              <span className="text-[11px] font-semibold leading-none tracking-tight">
+                {item.label}
+              </span>
+            </Link>
+          );
+        })}
       </div>
     </nav>
   );
