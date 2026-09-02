@@ -20,11 +20,12 @@ interface BibleVerseRowProps {
   onOpenMemory: () => void;
   onShare: (record: DayRecord) => void;
   onRequestReselect: () => void;
+  isCompletedDay: boolean;
 }
 
 const formatReference = (book: string, chapter: number, verse: number) => book === "시편" ? `${book} ${chapter}편 ${verse}절` : `${book} ${chapter}장 ${verse}절`;
 
-export default function BibleVerseRow({ trackType, book, chapter, verse, fontSize, dayIndex, selectedVerse, confirmedVerse, candidates, record, onVerseClick, onConfirmVerse, onToggleCandidate, onOpenMemory, onShare, onRequestReselect }: BibleVerseRowProps) {
+export default function BibleVerseRow({ trackType, book, chapter, verse, fontSize, dayIndex, selectedVerse, confirmedVerse, candidates, record, onVerseClick, onConfirmVerse, onToggleCandidate, onOpenMemory, onShare, onRequestReselect, isCompletedDay }: BibleVerseRowProps) {
   const isSelected = selectedVerse?.book === book && selectedVerse?.chapter === chapter && selectedVerse?.verse === verse.verse;
   const isConfirmed = confirmedVerse?.book === book && confirmedVerse?.chapter === chapter && confirmedVerse?.verse === verse.verse;
   const isCandidate = candidates.some((candidate) => candidate.book === book && candidate.chapter === chapter && candidate.verse === verse.verse);
@@ -49,7 +50,7 @@ export default function BibleVerseRow({ trackType, book, chapter, verse, fontSiz
       >
         <span className={`inline-block min-w-[2.5ch] mr-2 sm:mr-3 select-none mt-[0.1em] text-right ${verseNumberClass}`} style={{ fontSize: `${Math.max(fontSize * 0.7, 10)}px` }}>{verse.verse}</span><span className={isConfirmed ? "flex-1 font-medium" : "flex-1"}>{verse.displayText}</span>
       </button>
-      {isConfirmed && <ConfirmedOneVerseActions verse={confirmedVerse} dayIndex={dayIndex} record={record} onOpenMemory={onOpenMemory} onShare={onShare} onRequestReselect={onRequestReselect} />}
+      {isConfirmed && <ConfirmedOneVerseActions verse={confirmedVerse} dayIndex={dayIndex} record={record} onOpenMemory={onOpenMemory} onShare={onShare} onRequestReselect={onRequestReselect} isCompletedDay={isCompletedDay} />}
       {isSelected && <SelectedOneVerseActions verse={verseValue} isCandidate={isCandidate} onToggleCandidate={onToggleCandidate} onConfirm={onConfirmVerse} />}
     </div>
   );

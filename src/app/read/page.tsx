@@ -82,6 +82,8 @@ export default function BibleViewerPage() {
     setShowWarningModal,
     showConfirmModal,
     setShowConfirmModal,
+    showCompletionModal,
+    setShowCompletionModal,
     showReselectModal,
     setShowReselectModal,
     verseToReplace,
@@ -326,6 +328,8 @@ export default function BibleViewerPage() {
         setShowWarningModal={setShowWarningModal}
         showConfirmModal={showConfirmModal}
         setShowConfirmModal={setShowConfirmModal}
+        showCompletionModal={showCompletionModal}
+        setShowCompletionModal={setShowCompletionModal}
         showReselectModal={showReselectModal}
         setShowReselectModal={setShowReselectModal}
         showSuccessModal={showSuccessModal}

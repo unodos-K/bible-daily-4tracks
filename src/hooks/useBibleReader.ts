@@ -26,6 +26,7 @@ export function useBibleReader() {
   
   const [showWarningModal, setShowWarningModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [showReselectModal, setShowReselectModal] = useState(false);
   const [verseToReplace, setVerseToReplace] = useState<OneVerse | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -190,6 +191,7 @@ export function useBibleReader() {
   };
 
   const handleVerseClick = async (trackType: string, book: string, chapter: number, verse: number, rawText: string, displayText: string, chunks: string[]) => {
+    if (isCompletedDay) return;
     const verseObj = {
       trackType, book, chapter, verse, rawText, displayText, chunks,
       reference: `${book} ${chapter}:${verse}`
@@ -224,6 +226,10 @@ export function useBibleReader() {
 
   const handleToggleCandidate = async (verse: OneVerse, event: React.MouseEvent) => {
     event.stopPropagation();
+    if (isCompletedDay) {
+      showToast("완료한 Day의 후보는 변경할 수 없습니다.");
+      return;
+    }
     if (confirmedVerse && isSameVerse(confirmedVerse, verse)) {
       showToast("오늘의 One Verse는 후보에서 해제할 수 없습니다.");
       return;
@@ -275,6 +281,10 @@ export function useBibleReader() {
 
   const handleConfirmVerse = async (verse: OneVerse, e: React.MouseEvent) => {
     e.stopPropagation();
+    if (isCompletedDay) {
+      showToast("완료한 Day의 One Verse는 변경할 수 없습니다.");
+      return;
+    }
     if (!await ensureCandidate(verse)) return;
     if (!confirmedVerse) {
       setConfirmedVerse(verse);
@@ -337,7 +347,7 @@ export function useBibleReader() {
       return;
     }
     if (confirmedVerse) {
-      completeReadingAndShowSuccess(confirmedVerse);
+      setShowCompletionModal(true);
     }
   };
 
@@ -352,11 +362,11 @@ export function useBibleReader() {
   };
 
   useEffect(() => {
-    const isAnyModalOpen = showConfirmModal || showReselectModal || showSuccessModal || showWarningModal || isMemoryModalOpen || showAccessDeniedModal;
+    const isAnyModalOpen = showConfirmModal || showCompletionModal || showReselectModal || showSuccessModal || showWarningModal || isMemoryModalOpen || showAccessDeniedModal;
     if (isAnyModalOpen) document.body.classList.add('modal-open');
     else document.body.classList.remove('modal-open');
     return () => document.body.classList.remove('modal-open');
-  }, [showConfirmModal, showReselectModal, showSuccessModal, showWarningModal, isMemoryModalOpen, showAccessDeniedModal]);
+  }, [showConfirmModal, showCompletionModal, showReselectModal, showSuccessModal, showWarningModal, isMemoryModalOpen, showAccessDeniedModal]);
 
   return {
     isClient,
@@ -379,6 +389,8 @@ export function useBibleReader() {
     setShowWarningModal,
     showConfirmModal,
     setShowConfirmModal,
+    showCompletionModal,
+    setShowCompletionModal,
     showReselectModal,
     setShowReselectModal,
     verseToReplace,

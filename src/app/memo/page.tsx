@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useLayoutEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CheckSquare, ChevronLeft, Footprints } from "lucide-react";
+import { CheckSquare, ChevronLeft, Copy, Footprints, X } from "lucide-react";
 import { MemoData, fetchReadRecords, updateReadRecordOneVerse, DayRecord } from "@/lib/storage";
 import { useAuth } from "@/components/AuthProvider";
 
@@ -48,13 +48,12 @@ function MemoEditorContent() {
   const prayerTextareaRef = useRef<HTMLTextAreaElement>(null);
   const editorScrollRef = useRef<HTMLDivElement>(null);
   const oneVerseRef = useRef<HTMLDivElement>(null);
-  const memoHeaderRef = useRef<HTMLDivElement>(null);
-  const writingFocusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [isWritingFocused, setIsWritingFocused] = useState(false);
   const [isOriginalOneVerseVisible, setIsOriginalOneVerseVisible] = useState(true);
-  const [isPreviewExpanded, setIsPreviewExpanded] = useState(false);
-  const [memoHeaderHeight, setMemoHeaderHeight] = useState(0);
-  const [visualViewportTop, setVisualViewportTop] = useState(0);
+  const [isVerseDialogOpen, setIsVerseDialogOpen] = useState(false);
+  const [floatingVerseButtonBottom, setFloatingVerseButtonBottom] = useState(16);
+  const [copyMessage, setCopyMessage] = useState<string | null>(null);
+  const lastFocusedElementRef = useRef<HTMLElement | null>(null);
+  const copyMessageTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useLayoutEffect(() => {
     if (mode !== 'edit') return;
@@ -114,50 +113,35 @@ function MemoEditorContent() {
     const oneVerseElement = oneVerseRef.current;
     if (!scrollContainer || !oneVerseElement) return;
 
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsOriginalOneVerseVisible(entry.isIntersecting),
-      { root: scrollContainer, threshold: 0 },
-    );
-    observer.observe(oneVerseElement);
+    const updateVerseVisibility = () => {
+      const viewport = window.visualViewport;
+      const viewportHeight = viewport?.height ?? window.innerHeight;
+      const rect = oneVerseElement.getBoundingClientRect();
+      setIsOriginalOneVerseVisible(rect.bottom > 0 && rect.top < viewportHeight);
 
-    return () => observer.disconnect();
+      const keyboardInset = viewport
+        ? Math.max(0, window.innerHeight - (viewport.offsetTop + viewport.height))
+        : 0;
+      setFloatingVerseButtonBottom(16 + keyboardInset);
+    };
+
+    updateVerseVisibility();
+    const viewport = window.visualViewport;
+    scrollContainer.addEventListener("scroll", updateVerseVisibility, { passive: true });
+    viewport?.addEventListener("resize", updateVerseVisibility);
+    viewport?.addEventListener("scroll", updateVerseVisibility);
+    window.addEventListener("resize", updateVerseVisibility);
+    return () => {
+      scrollContainer.removeEventListener("scroll", updateVerseVisibility);
+      viewport?.removeEventListener("resize", updateVerseVisibility);
+      viewport?.removeEventListener("scroll", updateVerseVisibility);
+      window.removeEventListener("resize", updateVerseVisibility);
+    };
   }, [record?.oneVerse?.reference, record?.oneVerse?.displayText, record?.oneVerse?.rawText]);
 
   useEffect(() => () => {
-    if (writingFocusTimeoutRef.current) clearTimeout(writingFocusTimeoutRef.current);
+    if (copyMessageTimeoutRef.current) clearTimeout(copyMessageTimeoutRef.current);
   }, []);
-
-  useEffect(() => {
-    const header = memoHeaderRef.current;
-    if (!header) return;
-
-    const updateHeight = () => setMemoHeaderHeight(header.getBoundingClientRect().height);
-    updateHeight();
-    const observer = new ResizeObserver(updateHeight);
-    observer.observe(header);
-    return () => observer.disconnect();
-  }, [isLoading, mode]);
-
-  useEffect(() => {
-    if (!isWritingFocused) {
-      setVisualViewportTop(0);
-      setIsPreviewExpanded(false);
-      return;
-    }
-
-    const viewport = window.visualViewport;
-    const updateViewportTop = () => setVisualViewportTop(viewport?.offsetTop ?? 0);
-    updateViewportTop();
-
-    viewport?.addEventListener("resize", updateViewportTop);
-    viewport?.addEventListener("scroll", updateViewportTop);
-    window.addEventListener("resize", updateViewportTop);
-    return () => {
-      viewport?.removeEventListener("resize", updateViewportTop);
-      viewport?.removeEventListener("scroll", updateViewportTop);
-      window.removeEventListener("resize", updateViewportTop);
-    };
-  }, [isWritingFocused]);
 
   if (isLoading || !record || dayIndex === null) {
     return (
@@ -270,35 +254,50 @@ function MemoEditorContent() {
 
   const verseText = record.oneVerse!.displayText || record.oneVerse!.rawText;
   const verseRef = formatReference(record.oneVerse!.book, record.oneVerse!.chapter, record.oneVerse!.verse);
-  const shouldShowOneVersePreview = isWritingFocused || !isOriginalOneVerseVisible;
-  const canExpandPreview = verseText.length > 120;
+  const showFloatingVerseButton = !isOriginalOneVerseVisible;
 
-  const isWritingInput = (target: EventTarget | null): target is HTMLInputElement | HTMLTextAreaElement =>
-    target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement;
-
-  const handleEditorFocusCapture = (event: React.FocusEvent<HTMLDivElement>) => {
-    if (!isWritingInput(event.target)) return;
-    if (writingFocusTimeoutRef.current) clearTimeout(writingFocusTimeoutRef.current);
-    setIsWritingFocused(true);
+  const closeVerseDialog = () => {
+    setIsVerseDialogOpen(false);
+    requestAnimationFrame(() => lastFocusedElementRef.current?.focus());
   };
 
-  const handleEditorBlurCapture = (event: React.FocusEvent<HTMLDivElement>) => {
-    if (!isWritingInput(event.target)) return;
-    if (writingFocusTimeoutRef.current) clearTimeout(writingFocusTimeoutRef.current);
+  const openVerseDialog = () => {
+    lastFocusedElementRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    setIsVerseDialogOpen(true);
+  };
 
-    const nextTarget = event.relatedTarget;
-    if (isWritingInput(nextTarget) && editorScrollRef.current?.contains(nextTarget)) return;
+  const showCopyMessage = (message: string) => {
+    if (copyMessageTimeoutRef.current) clearTimeout(copyMessageTimeoutRef.current);
+    setCopyMessage(message);
+    copyMessageTimeoutRef.current = setTimeout(() => setCopyMessage(null), 2500);
+  };
 
-    writingFocusTimeoutRef.current = setTimeout(() => {
-      const activeElement = document.activeElement;
-      setIsWritingFocused(Boolean(isWritingInput(activeElement) && editorScrollRef.current?.contains(activeElement)));
-    }, 0);
+  const copyVerse = async () => {
+    const text = `${verseRef}\n${verseText}`;
+    try {
+      await navigator.clipboard.writeText(text);
+      showCopyMessage("복사했어요.");
+    } catch {
+      try {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
+        const copied = document.execCommand("copy");
+        document.body.removeChild(textarea);
+        showCopyMessage(copied ? "복사했어요." : "복사하지 못했어요.");
+      } catch {
+        showCopyMessage("복사하지 못했어요.");
+      }
+    }
   };
 
   return (
     <div className="h-full min-h-0 overflow-hidden bg-stone-900 flex flex-col relative w-full">
       {/* Sticky Header */}
-      <div ref={memoHeaderRef} className="shrink-0 z-50 flex items-center justify-between p-4 border-b border-stone-800 bg-stone-900/90 backdrop-blur-md">
+      <div className="shrink-0 z-50 flex items-center justify-between p-4 border-b border-stone-800 bg-stone-900/90 backdrop-blur-md">
         <button 
           onClick={() => router.back()}
           className="text-stone-400 hover:text-stone-200 transition-colors flex items-center gap-1"
@@ -330,35 +329,9 @@ function MemoEditorContent() {
         </div>
       </div>
 
-      {shouldShowOneVersePreview && verseText && (
-        <div
-          role="region"
-          aria-label="현재 묵상 중인 One Verse"
-          style={isWritingFocused ? { top: `${visualViewportTop + memoHeaderHeight}px` } : undefined}
-          className={isWritingFocused
-            ? "fixed left-1/2 z-40 w-full max-w-2xl -translate-x-1/2 border-b border-stone-800 bg-stone-900/90 px-5 py-2.5 shadow-lg backdrop-blur-md"
-            : "shrink-0 z-40 border-b border-stone-800 bg-stone-900/85 px-5 py-2.5 backdrop-blur-md"}
-        >
-          <p className="mb-1 text-xs font-bold text-emerald-400">{verseRef}</p>
-          <p className={`break-words text-[13px] font-medium leading-5 text-stone-200 ${isWritingFocused && !isPreviewExpanded ? "line-clamp-3" : ""}`}>{verseText}</p>
-          {isWritingFocused && canExpandPreview && (
-            <button
-              type="button"
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={() => setIsPreviewExpanded((expanded) => !expanded)}
-              className="mt-1.5 text-xs font-bold text-emerald-400 underline underline-offset-2"
-            >
-              {isPreviewExpanded ? "접기" : "말씀 전체 보기"}
-            </button>
-          )}
-        </div>
-      )}
-
       {/* Content */}
       <div
         ref={editorScrollRef}
-        onFocusCapture={handleEditorFocusCapture}
-        onBlurCapture={handleEditorBlurCapture}
         className="flex-1 min-h-0 overflow-y-auto overscroll-y-contain p-5 pb-[calc(6rem+env(safe-area-inset-bottom))]"
       >
         {verseText && verseRef && (
@@ -490,6 +463,42 @@ function MemoEditorContent() {
           </div>
         )}
       </div>
+
+      {showFloatingVerseButton && (
+        <button
+          type="button"
+          onClick={openVerseDialog}
+          style={{ bottom: `calc(${floatingVerseButtonBottom}px + env(safe-area-inset-bottom))` }}
+          className="fixed left-1/2 z-40 flex min-h-11 -translate-x-1/2 items-center gap-2 rounded-full bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white shadow-lg transition-colors hover:bg-emerald-700"
+        >
+          <Footprints size={16} />
+          One Verse 보기
+        </button>
+      )}
+
+      {isVerseDialogOpen && (
+        <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 p-4 backdrop-blur-sm sm:items-center" role="dialog" aria-modal="true" aria-label="One Verse 보기">
+          <div className="flex w-full max-w-lg flex-col rounded-2xl bg-stone-900 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-stone-800 px-5 py-4">
+              <div>
+                <p className="text-xs font-bold text-emerald-400">오늘의 One Verse</p>
+                <h3 className="mt-0.5 text-base font-bold text-stone-100">{verseRef}</h3>
+              </div>
+              <button type="button" onClick={closeVerseDialog} aria-label="말씀 팝업 닫기" className="rounded-full p-2 text-stone-400 transition-colors hover:bg-stone-800 hover:text-stone-100"><X size={20} /></button>
+            </div>
+            <div className="max-h-[60dvh] overflow-y-auto px-5 py-5">
+              <blockquote className="break-words text-base leading-relaxed text-stone-100 sm:text-lg">{verseText}</blockquote>
+            </div>
+            <div className="border-t border-stone-800 p-4">
+              <button type="button" onClick={copyVerse} className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-stone-800 py-3 text-sm font-bold text-stone-100 transition-colors hover:bg-stone-700"><Copy size={16} />말씀 복사하기</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {copyMessage && (
+        <div role="status" className="fixed bottom-6 left-1/2 z-[110] -translate-x-1/2 rounded-full bg-stone-100 px-4 py-2 text-sm font-bold text-stone-900 shadow-lg dark:bg-stone-800 dark:text-stone-100">{copyMessage}</div>
+      )}
     </div>
   );
 }
