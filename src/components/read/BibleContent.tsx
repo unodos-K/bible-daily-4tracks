@@ -25,11 +25,12 @@ interface BibleContentProps {
   handleShareOneVerseClick: (record: DayRecord) => void;
   handleConfirmVerse: (verse: OneVerse, event: React.MouseEvent) => void;
   handleToggleCandidate: (verse: OneVerse, event: React.MouseEvent) => void;
+  handleRequestReselect: () => void;
   handleVerseClick: (trackType: string, book: string, chapter: number, verse: number, rawText: string, displayText: string, chunks: string[]) => void;
   handleBottomButtonClick: () => void;
 }
 
-export default function BibleContent({ readingData, fontSize, selectedVerse, confirmedVerse, oneVerseCandidates, records, dayIndex, isCompletedDay, setIsMemoryModalOpen, handleShareOneVerseClick, handleConfirmVerse, handleToggleCandidate, handleVerseClick, handleBottomButtonClick }: BibleContentProps) {
+export default function BibleContent({ readingData, fontSize, selectedVerse, confirmedVerse, oneVerseCandidates, records, dayIndex, isCompletedDay, setIsMemoryModalOpen, handleShareOneVerseClick, handleConfirmVerse, handleToggleCandidate, handleRequestReselect, handleVerseClick, handleBottomButtonClick }: BibleContentProps) {
   const tracks = readingData.tracks;
   const { activeTrackType, stickyHeaderRef, trackRefs } = useActiveReaderTrack(tracks);
   const activeTrack = tracks.find((track) => track.track.type === activeTrackType) ?? tracks[0];
@@ -49,7 +50,7 @@ export default function BibleContent({ readingData, fontSize, selectedVerse, con
               {track.chapters.map((chapter) => (
                 <div key={`${chapter.name}-${chapter.chapter}`} className="flex flex-col">
                   <h3 className="font-bold mb-4 px-2 text-stone-800 dark:text-stone-200 border-b border-stone-200 dark:border-stone-800 pb-2">{chapter.name} {chapter.chapter}{chapter.chapterUnit || (chapter.name === "시편" ? "편" : "장")}</h3>
-                  {chapter.verses.length === 0 ? <p className="text-stone-400 italic px-2">본문 데이터가 없습니다.</p> : <div className="flex flex-col gap-1">{chapter.verses.map((verse) => <BibleVerseRow key={verse.verse} trackType={track.track.type} book={chapter.name} chapter={chapter.chapter} verse={verse} fontSize={fontSize} dayIndex={dayIndex} selectedVerse={selectedVerse} confirmedVerse={confirmedVerse} candidates={oneVerseCandidates} record={records[dayIndex]} onVerseClick={handleVerseClick} onConfirmVerse={handleConfirmVerse} onToggleCandidate={handleToggleCandidate} onOpenMemory={() => setIsMemoryModalOpen(true)} onShare={handleShareOneVerseClick} />)}</div>}
+                  {chapter.verses.length === 0 ? <p className="text-stone-400 italic px-2">본문 데이터가 없습니다.</p> : <div className="flex flex-col gap-1">{chapter.verses.map((verse) => <BibleVerseRow key={verse.verse} trackType={track.track.type} book={chapter.name} chapter={chapter.chapter} verse={verse} fontSize={fontSize} dayIndex={dayIndex} selectedVerse={selectedVerse} confirmedVerse={confirmedVerse} candidates={oneVerseCandidates} record={records[dayIndex]} onVerseClick={handleVerseClick} onConfirmVerse={handleConfirmVerse} onToggleCandidate={handleToggleCandidate} onRequestReselect={handleRequestReselect} onOpenMemory={() => setIsMemoryModalOpen(true)} onShare={handleShareOneVerseClick} />)}</div>}
                 </div>
               ))}
             </div>

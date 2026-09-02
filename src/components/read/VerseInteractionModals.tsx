@@ -8,6 +8,8 @@ interface VerseInteractionModalsProps {
   setShowWarningModal: (open: boolean) => void;
   showConfirmModal: boolean;
   setShowConfirmModal: (open: boolean) => void;
+  showReselectModal: boolean;
+  setShowReselectModal: (open: boolean) => void;
   showSuccessModal: boolean;
   setShowSuccessModal: (open: boolean) => void;
   verseToReplace: OneVerse | null;
@@ -18,6 +20,8 @@ interface VerseInteractionModalsProps {
   setSelectedVerse: (verse: OneVerse | null) => void;
   executeReplaceVerse: (verse: OneVerse) => void;
   completeReadingAndShowSuccess: (verse: OneVerse) => void;
+  handleConfirmReselect: () => void;
+  isCompletedDay: boolean;
   setIsMemoryModalOpen: (open: boolean) => void;
   dayIndex: number;
 }
@@ -27,6 +31,8 @@ export default function VerseInteractionModals({
   setShowWarningModal,
   showConfirmModal,
   setShowConfirmModal,
+  showReselectModal,
+  setShowReselectModal,
   showSuccessModal,
   setShowSuccessModal,
   verseToReplace,
@@ -37,6 +43,8 @@ export default function VerseInteractionModals({
   setSelectedVerse,
   executeReplaceVerse,
   completeReadingAndShowSuccess,
+  handleConfirmReselect,
+  isCompletedDay,
   setIsMemoryModalOpen,
   dayIndex
 }: VerseInteractionModalsProps) {
@@ -103,6 +111,23 @@ export default function VerseInteractionModals({
             >
               확인
             </button>
+          </div>
+        </div>
+      )}
+
+      {showReselectModal && confirmedVerse && (
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in p-4">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-stone-900 animate-in zoom-in-95">
+            <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100">One Verse를 다시 선택할까요?</h3>
+            <p className="mt-3 text-sm leading-relaxed text-stone-500 dark:text-stone-400">
+              {isCompletedDay
+                ? "완료한 Day의 One Verse는 비워둘 수 없어요. 새 구절을 선택하면 현재 One Verse가 교체됩니다."
+                : "현재 선택한 One Verse가 취소됩니다. 후보 목록은 유지되며, 다시 하나를 선택해야 오늘의 읽기를 완료할 수 있어요."}
+            </p>
+            <div className="mt-6 flex gap-3">
+              <button onClick={() => setShowReselectModal(false)} className="flex-1 rounded-xl bg-stone-100 py-3 font-bold text-stone-700 transition-colors hover:bg-stone-200 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700">아니요</button>
+              <button onClick={handleConfirmReselect} className="flex-1 rounded-xl bg-amber-500 py-3 font-bold text-white transition-colors hover:bg-amber-600">{isCompletedDay ? "새 구절 고르기" : "다시 선택하기"}</button>
+            </div>
           </div>
         </div>
       )}

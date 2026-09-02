@@ -9,9 +9,10 @@ interface ConfirmedOneVerseActionsProps {
   record?: DayRecord;
   onOpenMemory: () => void;
   onShare: (record: DayRecord) => void;
+  onRequestReselect: () => void;
 }
 
-export function ConfirmedOneVerseActions({ verse, dayIndex, record, onOpenMemory, onShare }: ConfirmedOneVerseActionsProps) {
+export function ConfirmedOneVerseActions({ verse, dayIndex, record, onOpenMemory, onShare, onRequestReselect }: ConfirmedOneVerseActionsProps) {
   const router = useRouter();
   const isMemorized = verse.isMemorized;
   return (
@@ -31,6 +32,11 @@ export function ConfirmedOneVerseActions({ verse, dayIndex, record, onOpenMemory
         </button>
         {verse.memo && <button onClick={(event) => { event.stopPropagation(); router.push(`/memo?day=${dayIndex}&mode=view`); }} className="flex-1 py-2 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors border border-stone-200 dark:border-stone-700 shadow-sm"><Footprints size={16} />발자국 보기</button>}
         <button onClick={(event) => { event.stopPropagation(); if (record) onShare(record); }} className="flex-1 py-2 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors border border-stone-200 dark:border-stone-700 shadow-sm"><HeartHandshake size={16} />나눔</button>
+      </div>
+      <div className="mt-2 pl-[2ch] sm:pl-[2.5ch]">
+        <button onClick={(event) => { event.stopPropagation(); onRequestReselect(); }} className="min-h-11 px-3 text-xs font-bold text-stone-500 underline underline-offset-4 transition-colors hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200">
+          다시 선택하기
+        </button>
       </div>
     </>
   );

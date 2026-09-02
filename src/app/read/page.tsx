@@ -82,6 +82,8 @@ export default function BibleViewerPage() {
     setShowWarningModal,
     showConfirmModal,
     setShowConfirmModal,
+    showReselectModal,
+    setShowReselectModal,
     verseToReplace,
     setVerseToReplace,
     showSuccessModal,
@@ -99,6 +101,8 @@ export default function BibleViewerPage() {
     handleGoToLastRead,
     handleVerseClick,
     handleConfirmVerse,
+    handleRequestReselect,
+    handleConfirmReselect,
     handleToggleCandidate,
     executeReplaceVerse,
     handleBottomButtonClick,
@@ -322,6 +326,8 @@ export default function BibleViewerPage() {
         setShowWarningModal={setShowWarningModal}
         showConfirmModal={showConfirmModal}
         setShowConfirmModal={setShowConfirmModal}
+        showReselectModal={showReselectModal}
+        setShowReselectModal={setShowReselectModal}
         showSuccessModal={showSuccessModal}
         setShowSuccessModal={setShowSuccessModal}
         verseToReplace={verseToReplace}
@@ -332,6 +338,8 @@ export default function BibleViewerPage() {
         setSelectedVerse={setSelectedVerse}
         executeReplaceVerse={executeReplaceVerse}
         completeReadingAndShowSuccess={completeReadingAndShowSuccess}
+        handleConfirmReselect={handleConfirmReselect}
+        isCompletedDay={isCompletedDay}
         setIsMemoryModalOpen={setIsMemoryModalOpen}
         dayIndex={dayIndex}
       />
@@ -402,6 +410,7 @@ export default function BibleViewerPage() {
           handleShareOneVerseClick={(record) => setSelectedRecordToShare(record)}
           handleConfirmVerse={handleConfirmVerse}
           handleToggleCandidate={handleToggleCandidate}
+          handleRequestReselect={handleRequestReselect}
           handleVerseClick={handleVerseClick}
           handleBottomButtonClick={handleBottomButtonClick}
         />

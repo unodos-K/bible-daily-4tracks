@@ -26,6 +26,7 @@ export function useBibleReader() {
   
   const [showWarningModal, setShowWarningModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showReselectModal, setShowReselectModal] = useState(false);
   const [verseToReplace, setVerseToReplace] = useState<OneVerse | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showAccessDeniedModal, setShowAccessDeniedModal] = useState(false);
@@ -291,6 +292,21 @@ export function useBibleReader() {
     }
   };
 
+  const handleRequestReselect = () => {
+    setShowReselectModal(true);
+  };
+
+  const handleConfirmReselect = () => {
+    setShowReselectModal(false);
+    if (isCompletedDay) {
+      showToast("새 구절을 선택하면 기존 One Verse가 교체됩니다.");
+      return;
+    }
+    setConfirmedVerse(null);
+    setSelectedVerse(null);
+    showToast("One Verse 선택이 취소되었습니다. 후보에서 다시 선택해 주세요.");
+  };
+
   const completeReadingAndShowSuccess = async (verse: OneVerse) => {
     const dateObj = new Date();
     const todayStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
@@ -336,11 +352,11 @@ export function useBibleReader() {
   };
 
   useEffect(() => {
-    const isAnyModalOpen = showConfirmModal || showSuccessModal || showWarningModal || isMemoryModalOpen || showAccessDeniedModal;
+    const isAnyModalOpen = showConfirmModal || showReselectModal || showSuccessModal || showWarningModal || isMemoryModalOpen || showAccessDeniedModal;
     if (isAnyModalOpen) document.body.classList.add('modal-open');
     else document.body.classList.remove('modal-open');
     return () => document.body.classList.remove('modal-open');
-  }, [showConfirmModal, showSuccessModal, showWarningModal, isMemoryModalOpen, showAccessDeniedModal]);
+  }, [showConfirmModal, showReselectModal, showSuccessModal, showWarningModal, isMemoryModalOpen, showAccessDeniedModal]);
 
   return {
     isClient,
@@ -363,6 +379,8 @@ export function useBibleReader() {
     setShowWarningModal,
     showConfirmModal,
     setShowConfirmModal,
+    showReselectModal,
+    setShowReselectModal,
     verseToReplace,
     setVerseToReplace,
     showSuccessModal,
@@ -381,6 +399,8 @@ export function useBibleReader() {
     handleVerseClick,
     handleToggleCandidate,
     handleConfirmVerse,
+    handleRequestReselect,
+    handleConfirmReselect,
     executeReplaceVerse,
     handleBottomButtonClick,
     completeReadingAndShowSuccess,
