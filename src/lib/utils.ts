@@ -9,10 +9,16 @@ export function extractCleanText(text: string): string {
 
 /**
  * 쓰기 도전의 답안을 비교할 때 모바일 입력 차이만 완화합니다.
- * 글자와 문장부호는 유지하고, Unicode 조합 및 연속 공백/줄바꿈만 정리합니다.
+ * 글자와 문장부호는 유지하되, 모바일 키보드가 자동 치환하는 따옴표와
+ * Unicode 조합 및 연속 공백/줄바꿈만 정리합니다.
  */
 export function normalizeMemoryAnswer(text: string): string {
-  return text.normalize('NFC').replace(/\s+/g, ' ').trim();
+  return text
+    .normalize('NFC')
+    .replace(/[“”„‟]/g, '"')
+    .replace(/[‘’‚‛]/g, "'")
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 /**
