@@ -266,10 +266,8 @@ function MemoEditorContent() {
 
       {isOneVersePreviewVisible && verseText && (
         <div aria-hidden="true" className="shrink-0 z-40 border-b border-stone-800 bg-stone-900/85 px-5 py-2.5 backdrop-blur-md">
-          <p className="truncate text-sm font-medium text-stone-200">
-            <span className="mr-2 text-xs font-bold text-emerald-400">{verseRef}</span>
-            {verseText}
-          </p>
+          <p className="mb-1 text-xs font-bold text-emerald-400">{verseRef}</p>
+          <p className="break-words text-[13px] font-medium leading-5 text-stone-200">{verseText}</p>
         </div>
       )}
 
@@ -277,7 +275,7 @@ function MemoEditorContent() {
       <div ref={editorScrollRef} className="flex-1 min-h-0 overflow-y-auto overscroll-y-contain p-5 pb-[calc(6rem+env(safe-area-inset-bottom))]">
         {verseText && verseRef && (
           <div ref={oneVerseRef} className="mb-6 bg-stone-100 dark:bg-white/5 p-4 rounded-xl border border-stone-200 dark:border-stone-800">
-            <blockquote className="text-[15px] sm:text-base text-stone-800 dark:text-stone-200 leading-relaxed italic break-keep mb-3">
+            <blockquote className="break-words text-[15px] leading-relaxed italic text-stone-800 dark:text-stone-200 sm:text-base mb-3">
               {verseText}
             </blockquote>
             <div className="text-right text-stone-500 dark:text-stone-400 font-bold text-xs">
