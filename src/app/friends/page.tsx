@@ -11,10 +11,10 @@ export default function FriendsPage() {
   const friendsState = useFriends();
 
   return (
-    <div className="w-full min-h-[calc(100vh-64px)] bg-stone-50 dark:bg-stone-950 flex flex-col pb-20">
-      <div className="w-full max-w-2xl mx-auto flex flex-col h-full">
+    <div className="w-full h-full min-h-0 bg-stone-50 dark:bg-stone-950 flex flex-col">
+      <div className="w-full max-w-2xl mx-auto flex flex-col h-full min-h-0">
         {/* Sticky 고정 래퍼 */}
-        <div className="sticky top-0 z-40 bg-stone-50 dark:bg-stone-950 w-full flex flex-col shadow-sm border-b border-stone-200/50 dark:border-stone-800/50">
+        <div className="shrink-0 z-40 bg-stone-50 dark:bg-stone-950 w-full flex flex-col shadow-sm border-b border-stone-200/50 dark:border-stone-800/50">
           {/* 헤더 */}
           <header className="pt-6 pb-2 px-6 flex items-center justify-between w-full">
             <h1 className="text-2xl font-black text-stone-800 dark:text-stone-100 flex items-center gap-2">
@@ -67,7 +67,7 @@ export default function FriendsPage() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-stone-50 dark:bg-stone-950">
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-y-contain p-4 pb-8 sm:p-6 sm:pb-8 bg-stone-50 dark:bg-stone-950">
           {friendsState.isLoading ? (
             <div className="flex flex-col gap-3 mt-4">
               {[1, 2, 3].map((i) => (

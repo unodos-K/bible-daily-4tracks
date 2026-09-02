@@ -150,9 +150,9 @@ export default function FriendProfilePage() {
   const hasMore = visibleCount < records.length;
 
   return (
-    <div className="w-full min-h-screen flex flex-col bg-stone-100/50 dark:bg-stone-950 pb-32">
+    <div className="w-full h-full min-h-0 overflow-hidden flex flex-col bg-stone-100/50 dark:bg-stone-950">
       {/* 헤더 */}
-      <header className="sticky top-0 z-40 bg-white/90 dark:bg-stone-900/90 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 shrink-0">
+      <header className="z-40 bg-white/90 dark:bg-stone-900/90 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 shrink-0">
         <div className="flex items-center px-4 h-14 max-w-2xl mx-auto w-full">
           <button 
             onClick={() => router.back()}
@@ -168,7 +168,7 @@ export default function FriendProfilePage() {
         </div>
       </header>
 
-      <main className="w-full max-w-2xl mx-auto flex flex-col gap-6 p-4 sm:p-8 mt-2">
+      <main className="w-full max-w-2xl mx-auto flex-1 min-h-0 overflow-y-auto overscroll-y-contain flex flex-col gap-6 p-4 pb-8 sm:p-8 sm:pb-8 mt-2">
         {/* 프로필 정보 섹션 */}
         <div className="flex flex-col items-center py-6 px-4">
           <div className="w-24 h-24 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden shadow-sm mb-4 flex items-center justify-center text-4xl">

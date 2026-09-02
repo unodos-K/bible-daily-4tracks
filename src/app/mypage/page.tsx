@@ -80,11 +80,11 @@ export default function MyPage() {
   const thisMonthMemorized = thisMonthRecords.filter(r => r.oneVerse?.isMemorized).length;
 
   return (
-    <div className="w-full min-h-full flex flex-col items-center bg-transparent pb-10">
-      <div className="w-full max-w-2xl flex flex-col">
+    <div className="w-full h-full min-h-0 flex flex-col items-center overflow-hidden bg-transparent">
+      <div className="w-full max-w-2xl h-full min-h-0 flex flex-col">
 
         {/* 헤더 및 프로필 (고정 헤더) */}
-        <header className="sticky top-0 z-40 bg-stone-50/95 dark:bg-stone-950/95 backdrop-blur-md pt-6 pb-4 px-4 sm:px-6 border-b border-stone-200/50 dark:border-stone-800/50 flex flex-row items-center justify-between w-full mb-6 gap-4">
+        <header className="shrink-0 z-40 bg-stone-50/95 dark:bg-stone-950/95 backdrop-blur-md pt-6 pb-4 px-4 sm:px-6 border-b border-stone-200/50 dark:border-stone-800/50 flex flex-row items-center justify-between w-full gap-4">
 
           {/* 좌측 묶음: 타이틀과 유저 정보 (반응형 래퍼) */}
           <div className="flex flex-col items-start gap-2 min-w-0 flex-1 sm:flex-row sm:items-center sm:justify-between">
@@ -130,7 +130,7 @@ export default function MyPage() {
         </header>
 
         {/* 메인 컨텐츠 영역 */}
-        <div className="flex flex-col gap-8 px-6 w-full">
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-y-contain flex flex-col gap-8 px-6 pt-6 pb-8 w-full">
           <MyPageCalendar
             currentDate={stats.currentDate}
             setCurrentDate={stats.setCurrentDate}

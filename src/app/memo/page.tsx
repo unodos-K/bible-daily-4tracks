@@ -46,6 +46,9 @@ function MemoEditorContent() {
   const appRefs = useRef<(HTMLInputElement | null)[]>([]);
   const meditationTextareaRef = useRef<HTMLTextAreaElement>(null);
   const prayerTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const editorScrollRef = useRef<HTMLDivElement>(null);
+  const oneVerseRef = useRef<HTMLDivElement>(null);
+  const [isOneVersePreviewVisible, setIsOneVersePreviewVisible] = useState(false);
 
   useLayoutEffect(() => {
     if (mode !== 'edit') return;
@@ -99,6 +102,20 @@ function MemoEditorContent() {
     
     loadRecord();
   }, [authUser, dayIndexParam, isAuthLoading, modeParam, router]);
+
+  useEffect(() => {
+    const scrollContainer = editorScrollRef.current;
+    const oneVerseElement = oneVerseRef.current;
+    if (!scrollContainer || !oneVerseElement) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsOneVersePreviewVisible(!entry.isIntersecting),
+      { root: scrollContainer, threshold: 0 },
+    );
+    observer.observe(oneVerseElement);
+
+    return () => observer.disconnect();
+  }, [record?.oneVerse?.reference, record?.oneVerse?.displayText, record?.oneVerse?.rawText]);
 
   if (isLoading || !record || dayIndex === null) {
     return (
@@ -213,9 +230,9 @@ function MemoEditorContent() {
   const verseRef = formatReference(record.oneVerse!.book, record.oneVerse!.chapter, record.oneVerse!.verse);
 
   return (
-    <div className="min-h-[100dvh] bg-stone-900 flex flex-col relative w-full">
+    <div className="h-full min-h-0 overflow-hidden bg-stone-900 flex flex-col relative w-full">
       {/* Sticky Header */}
-      <div className="sticky top-0 z-50 flex items-center justify-between p-4 border-b border-stone-800 bg-stone-900/90 backdrop-blur-md">
+      <div className="shrink-0 z-50 flex items-center justify-between p-4 border-b border-stone-800 bg-stone-900/90 backdrop-blur-md">
         <button 
           onClick={() => router.back()}
           className="text-stone-400 hover:text-stone-200 transition-colors flex items-center gap-1"
@@ -247,10 +264,19 @@ function MemoEditorContent() {
         </div>
       </div>
 
+      {isOneVersePreviewVisible && verseText && (
+        <div aria-hidden="true" className="shrink-0 z-40 border-b border-stone-800 bg-stone-900/85 px-5 py-2.5 backdrop-blur-md">
+          <p className="truncate text-sm font-medium text-stone-200">
+            <span className="mr-2 text-xs font-bold text-emerald-400">{verseRef}</span>
+            {verseText}
+          </p>
+        </div>
+      )}
+
       {/* Content */}
-      <div className="p-5 flex flex-col flex-1 pb-24">
+      <div ref={editorScrollRef} className="flex-1 min-h-0 overflow-y-auto overscroll-y-contain p-5 pb-[calc(6rem+env(safe-area-inset-bottom))]">
         {verseText && verseRef && (
-          <div className="mb-6 bg-stone-100 dark:bg-white/5 p-4 rounded-xl border border-stone-200 dark:border-stone-800">
+          <div ref={oneVerseRef} className="mb-6 bg-stone-100 dark:bg-white/5 p-4 rounded-xl border border-stone-200 dark:border-stone-800">
             <blockquote className="text-[15px] sm:text-base text-stone-800 dark:text-stone-200 leading-relaxed italic break-keep mb-3">
               {verseText}
             </blockquote>
