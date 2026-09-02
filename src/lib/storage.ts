@@ -1,5 +1,6 @@
 import { supabase } from "./supabase";
 import type { Json } from "@/types/supabase";
+export { getNextUnreadDay } from "./readingRecords";
 
 export interface ReadingSettings {
   startDate: string; // YYYY-MM-DD
@@ -235,15 +236,4 @@ export async function updateMemorizeRecord(dayIndex: number, isMemorized: boolea
     delete updatedOneVerse.memorizedAt;
   }
   await updateReadRecordOneVerse(dayIndex, updatedOneVerse, userId);
-}
-
-// 순수 계산 함수들
-export function getNextUnreadDay(records: ReadRecordsMap): number {
-  let maxDay = 0;
-  for (const key in records) {
-    if (records[key].dayIndex > maxDay) {
-      maxDay = records[key].dayIndex;
-    }
-  }
-  return Math.min(maxDay + 1, 365);
 }

@@ -5,24 +5,9 @@ import {
   ReadRecordsMap, 
   fetchReadingSettings, 
   fetchReadRecords,
-  getNextUnreadDay
 } from "@/lib/storage";
 import { useAuth } from "@/components/AuthProvider";
-
-export function calculateDaysSince(startDateStr: string): number {
-  if (!startDateStr) return 1;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const [y, m, d] = startDateStr.split("-").map(Number);
-  const start = new Date(y, m - 1, d);
-  start.setHours(0, 0, 0, 0);
-
-  const diffTime = today.getTime() - start.getTime();
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-  
-  return Math.max(1, diffDays + 1);
-}
+import { getNextUnreadDay } from "@/lib/readingRecords";
 
 export function useHomeDashboard() {
   const router = useRouter();
@@ -46,7 +31,7 @@ export function useHomeDashboard() {
           setSettings(s);
           const r = await fetchReadRecords(authUser.id);
           setRecords(r);
-          setNextUnreadDay(await getNextUnreadDay(r));
+          setNextUnreadDay(getNextUnreadDay(r));
         }
       } else {
         setSettings(null);

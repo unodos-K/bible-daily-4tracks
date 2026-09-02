@@ -2,7 +2,9 @@
 
 import React from "react";
 import { BookOpen, CalendarDays } from "lucide-react";
-import { useHomeDashboard, calculateDaysSince } from "@/hooks/useHomeDashboard";
+import { useHomeDashboard } from "@/hooks/useHomeDashboard";
+import { calculateDaysSince } from "@/hooks/bible-reader/dayUtils";
+import { getReadingProgress } from "@/lib/readingRecords";
 import MiniScheduleWidget from "@/components/home/MiniScheduleWidget";
 import ReadingProgressWidget from "@/components/home/ReadingProgressWidget";
 import ScheduleBottomSheet from "@/components/home/ScheduleBottomSheet";
@@ -106,11 +108,8 @@ export default function HomePage() {
     return <SplashScreen onFinish={() => setShowSplash(false)} />;
   }
 
-  const recordsArray = Object.values(records);
-  const totalReadDays = recordsArray.filter(r => r.completedAt || r.readDate).length;
-  const achievementRate = Math.round((totalReadDays / 365) * 100);
+  const { totalReadDays, achievementRate, memorizedCount } = getReadingProgress(records);
   const daysSince = settings ? calculateDaysSince(settings.startDate) : 1;
-  const memorizedCount = recordsArray.filter(r => r.oneVerse?.isMemorized).length;
   
   const isTodayRead = !!(records[daysSince]?.completedAt || records[daysSince]?.readDate);
   let pastMissedDays = 0;

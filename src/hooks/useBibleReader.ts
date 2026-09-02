@@ -7,6 +7,7 @@ import {
 } from "@/lib/storage";
 import { useAuth } from "@/components/AuthProvider";
 import { calculateDaysSince, clampReadingDay, getMaxAllowedDay } from "@/hooks/bible-reader/dayUtils";
+import { getLastOneVerseDay } from "@/lib/readingRecords";
 export function useBibleReader() {
   const [isClient, setIsClient] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
@@ -159,10 +160,7 @@ export function useBibleReader() {
   }, [isClient, dayIndex, settings, records]);
 
   const handleGoToLastRead = () => {
-    const completedDays = Object.keys(records)
-      .map((k) => Number(k))
-      .filter((day) => !!records[day]?.oneVerse);
-    const lastDay = completedDays.length > 0 ? Math.max(...completedDays) : 1;
+    const lastDay = getLastOneVerseDay(records);
     handleSetDay(lastDay);
     setIsDaySelectorOpen(false);
   };

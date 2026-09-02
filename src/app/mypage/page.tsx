@@ -16,6 +16,7 @@ import MemoryTrainerModal from "@/components/MemoryTrainerModal";
 import { useMyPageStats } from "@/hooks/useMyPageStats";
 import MyPageCalendar from "@/components/mypage/MyPageCalendar";
 import MyPageStatsBoard from "@/components/mypage/MyPageStatsBoard";
+import { getLastRecordDay, getRecordsWithOneVerse, sortRecordsByDay } from "@/lib/readingRecords";
 
 export default function MyPage() {
   const stats = useMyPageStats();
@@ -30,10 +31,8 @@ export default function MyPage() {
         if (dayStr) {
           stats.router.replace(`/memo?day=${dayStr}&mode=edit`);
         } else {
-          const sortedRecords = Object.values(stats.records).sort((a, b) => b.dayIndex - a.dayIndex);
-          if (sortedRecords.length > 0) {
-            stats.router.replace(`/memo?day=${sortedRecords[0].dayIndex}&mode=edit`);
-          }
+          const lastDay = getLastRecordDay(stats.records);
+          stats.router.replace(`/memo?day=${lastDay}&mode=edit`);
         }
       }
     }
@@ -71,9 +70,10 @@ export default function MyPage() {
 
   // 이번 달 One Verse 필터링 로직
   const currentMonthPrefix = `${year}-${String(month).padStart(2, "0")}-`;
-  const thisMonthRecords = Object.values(stats.records)
-    .filter(record => record.readDate.startsWith(currentMonthPrefix) && record.oneVerse)
-    .sort((a, b) => b.readDate.localeCompare(a.readDate) || b.dayIndex - a.dayIndex); // 내림차순 정렬 (최신순)
+  const thisMonthRecords = sortRecordsByDay(
+    getRecordsWithOneVerse(stats.records).filter((record) => record.readDate.startsWith(currentMonthPrefix)),
+    "desc",
+  ).sort((a, b) => b.readDate.localeCompare(a.readDate) || b.dayIndex - a.dayIndex);
 
   const thisMonthTotal = thisMonthRecords.length;
   const thisMonthMemorized = thisMonthRecords.filter(r => r.oneVerse?.isMemorized).length;

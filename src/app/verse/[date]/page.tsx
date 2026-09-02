@@ -14,6 +14,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { shareOneVerse } from "@/lib/share";
 import ShareModal from "@/components/ShareModal";
 import MemoryTrainerModal from "@/components/MemoryTrainerModal";
+import { getRecordsForReadDate } from "@/lib/readingRecords";
 
 export default function VerseDetailPage() {
   const router = useRouter();
@@ -52,9 +53,7 @@ export default function VerseDetailPage() {
   const hasValidDate = y && m && d;
 
   // Get records for this date and sort by dayIndex
-  const dayRecords = Object.values(records)
-    .filter(r => r.readDate === dateParam)
-    .sort((a, b) => a.dayIndex - b.dayIndex);
+  const dayRecords = getRecordsForReadDate(records, dateParam);
 
   const handleShareOneVerse = (record: DayRecord) => {
     setSelectedRecordToShare(record);

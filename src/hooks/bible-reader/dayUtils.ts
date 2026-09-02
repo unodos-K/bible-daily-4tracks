@@ -1,4 +1,5 @@
-import { getNextUnreadDay, type ReadRecordsMap, type ReadingSettings } from "@/lib/storage";
+import type { ReadRecordsMap, ReadingSettings } from "@/lib/storage";
+import { getNextUnreadDay } from "@/lib/readingRecords";
 
 export const MIN_READING_DAY = 1;
 export const MAX_READING_DAY = 365;
