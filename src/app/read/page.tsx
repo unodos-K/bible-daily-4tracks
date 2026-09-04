@@ -289,7 +289,7 @@ export default function BibleViewerPage() {
   }
 
   return (
-    <div className="w-full h-full flex flex-col overflow-hidden bg-stone-200/50 dark:bg-stone-950 relative">
+    <div className="relative flex h-[calc(100vh-4rem)] min-h-0 w-full flex-col overflow-hidden bg-stone-200/50 dark:bg-stone-950">
       
       {/* Toast */}
       {toastMessage && (
@@ -378,7 +378,7 @@ export default function BibleViewerPage() {
         }}
       />
 
-      <div className="w-full max-w-2xl bg-white dark:bg-stone-900 shadow-2xl flex flex-col h-full overflow-hidden mx-auto relative">
+      <div className="relative mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col overflow-hidden bg-white shadow-2xl dark:bg-stone-900">
         
         {/* 상단 네비게이터 */}
         <ReadHeader

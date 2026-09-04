@@ -76,8 +76,8 @@ export default function MyPage() {
   const thisMonthMemorized = thisMonthRecords.filter(r => r.oneVerse?.isMemorized).length;
 
   return (
-    <div className="w-full h-full min-h-0 flex flex-col items-center overflow-hidden bg-transparent">
-      <div className="w-full max-w-2xl h-full min-h-0 flex flex-col">
+    <div className="flex h-[calc(100vh-4rem)] min-h-0 w-full flex-col items-center overflow-hidden bg-transparent">
+      <div className="flex min-h-0 w-full max-w-2xl flex-1 flex-col">
 
         {/* 헤더 및 프로필 (고정 헤더) */}
         <header className="shrink-0 z-40 bg-stone-50/95 dark:bg-stone-950/95 backdrop-blur-md pt-6 pb-4 px-4 sm:px-6 border-b border-stone-200/50 dark:border-stone-800/50 flex flex-row items-center justify-between w-full gap-4">

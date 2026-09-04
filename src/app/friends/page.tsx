@@ -11,8 +11,8 @@ export default function FriendsPage() {
   const friendsState = useFriends();
 
   return (
-    <div className="w-full h-full min-h-0 bg-stone-50 dark:bg-stone-950 flex flex-col">
-      <div className="w-full max-w-2xl mx-auto flex flex-col h-full min-h-0">
+    <div className="flex h-[calc(100vh-4rem)] min-h-0 w-full flex-col bg-stone-50 dark:bg-stone-950">
+      <div className="mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col">
         {/* Sticky 고정 래퍼 */}
         <div className="shrink-0 z-40 bg-stone-50 dark:bg-stone-950 w-full flex flex-col shadow-sm border-b border-stone-200/50 dark:border-stone-800/50">
           {/* 헤더 */}
