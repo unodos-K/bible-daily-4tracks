@@ -67,7 +67,7 @@ export function BottomNavigation() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-1/2 z-40 box-border w-full max-w-2xl -translate-x-1/2 border-t border-stone-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md dark:border-stone-800 dark:bg-stone-900/95">
+    <nav className="fixed bottom-0 left-1/2 z-40 box-border w-full max-w-2xl -translate-x-1/2 border-t border-stone-200 bg-white/95 backdrop-blur-md dark:border-stone-800 dark:bg-stone-900/95">
       <div className="mx-auto grid h-14 max-w-2xl grid-cols-4">
         {tabItems.map((item) => {
           const Icon = item.icon;
