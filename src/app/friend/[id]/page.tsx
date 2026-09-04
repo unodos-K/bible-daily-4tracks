@@ -107,7 +107,7 @@ export default function FriendProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex flex-col items-center justify-center gap-3 text-stone-500">
+      <div data-v2-friend-detail className="min-h-screen bg-stone-50 dark:bg-stone-950 flex flex-col items-center justify-center gap-3 text-stone-500">
         <Loader2 className="animate-spin text-stone-400 w-8 h-8" />
         <span className="text-sm font-medium">데이터를 불러오는 중...</span>
       </div>
@@ -116,7 +116,7 @@ export default function FriendProfilePage() {
 
   if (loadError) {
     return (
-      <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex flex-col items-center justify-center gap-4 p-8 text-center text-stone-500">
+      <div data-v2-friend-detail className="min-h-screen bg-stone-50 dark:bg-stone-950 flex flex-col items-center justify-center gap-4 p-8 text-center text-stone-500">
         <p>친구 발자국을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.</p>
         <button
           type="button"
@@ -134,7 +134,7 @@ export default function FriendProfilePage() {
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex flex-col items-center pt-20">
+      <div data-v2-friend-detail className="min-h-screen bg-stone-50 dark:bg-stone-950 flex flex-col items-center pt-20">
         <p className="text-stone-500">친구 정보를 찾을 수 없습니다.</p>
         <button 
           onClick={() => router.back()}
@@ -150,7 +150,7 @@ export default function FriendProfilePage() {
   const hasMore = visibleCount < records.length;
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] min-h-0 w-full flex-col overflow-hidden bg-stone-100/50 dark:bg-stone-950">
+    <div data-v2-friend-detail className="flex h-[calc(100vh-4rem)] min-h-0 w-full flex-col overflow-hidden bg-stone-100/50 dark:bg-stone-950">
       {/* 헤더 */}
       <header className="z-40 shrink-0 border-b border-stone-200 bg-white/90 pt-[env(safe-area-inset-top)] backdrop-blur-md dark:border-stone-800 dark:bg-stone-900/90">
         <div className="flex items-center px-4 h-14 max-w-2xl mx-auto w-full">

@@ -152,7 +152,7 @@ export default function BibleViewerPage() {
 
   if (!isClient) {
     return (
-      <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex flex-col items-center justify-center gap-3 text-stone-500">
+      <div data-v2-reader className="min-h-screen bg-stone-50 dark:bg-stone-950 flex flex-col items-center justify-center gap-3 text-stone-500">
         <BookOpen className="animate-pulse w-8 h-8" />
         <span className="text-sm font-medium">오늘의 말씀을 펴는 중...</span>
       </div>
@@ -162,7 +162,7 @@ export default function BibleViewerPage() {
   // 스켈레톤 UI (로딩 중)
   if (!isDataLoaded) {
     return (
-      <div className="w-full min-h-screen bg-stone-50 dark:bg-stone-950 flex justify-center pb-20">
+      <div data-v2-reader className="w-full min-h-screen bg-stone-50 dark:bg-stone-950 flex justify-center pb-20">
         <div className="w-full max-w-2xl bg-white dark:bg-stone-900 min-h-screen shadow-sm flex flex-col relative pb-32">
           {/* Header Skeleton */}
           <div className="sticky top-0 z-40 bg-stone-50/95 dark:bg-stone-950/95 backdrop-blur border-b border-stone-200/50 dark:border-stone-800/50 flex flex-col pt-6 pb-2 px-6">
@@ -200,7 +200,7 @@ export default function BibleViewerPage() {
   // 첫 화면: 로그인 전용 랜딩
   if (!authUser) {
     return (
-      <div className="w-full min-h-screen flex flex-col items-center justify-center bg-stone-50 dark:bg-stone-950 p-6 px-4">
+      <div data-v2-reader className="w-full min-h-screen flex flex-col items-center justify-center bg-stone-50 dark:bg-stone-950 p-6 px-4">
         <div className="max-w-md w-full bg-white dark:bg-stone-900 rounded-3xl shadow-xl border border-stone-200 dark:border-stone-800 p-8 flex flex-col gap-6 animate-in fade-in zoom-in-95 text-center items-center">
           <div className="w-16 h-16 bg-sky-100 dark:bg-sky-900/50 rounded-full flex items-center justify-center text-3xl mb-1">
             🕊️
@@ -289,7 +289,7 @@ export default function BibleViewerPage() {
   }
 
   return (
-    <div className="relative flex h-[calc(100vh-4rem)] min-h-0 w-full flex-col overflow-hidden bg-stone-200/50 dark:bg-stone-950">
+    <div data-v2-reader className="relative flex h-[calc(100vh-4rem)] min-h-0 w-full flex-col overflow-hidden bg-stone-200/50 dark:bg-stone-950">
       
       {/* Toast */}
       {toastMessage && (

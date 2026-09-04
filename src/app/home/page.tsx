@@ -120,7 +120,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="w-full min-h-full flex flex-col items-center bg-transparent pb-10">
+    <div data-v2-home className="w-full min-h-full flex flex-col items-center bg-transparent pb-10">
       <div className="w-full max-w-xl flex flex-col">
         
         {/* 환영 메시지 (고정 헤더) */}

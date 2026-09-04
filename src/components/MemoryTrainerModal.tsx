@@ -66,9 +66,9 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
   }, [isBgmEnabled, trainerState.stepState, trainerState.isTrainingFinished]);
 
   return (
-    <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in md:p-4">
+    <div data-v2-memory className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in md:p-4">
       <div className="bg-white dark:bg-stone-900 rounded-none md:rounded-3xl shadow-2xl w-full h-[100dvh] md:h-auto md:max-h-[85vh] max-w-lg flex flex-col relative animate-in zoom-in-95 border-0 md:border border-stone-200 dark:border-stone-800 overflow-hidden">
-        <header className="shrink-0 flex justify-between items-center gap-3 border-b border-stone-200 dark:border-stone-800 bg-white/95 dark:bg-stone-900/95 px-5 pb-3 pt-[calc(0.75rem+env(safe-area-inset-top))] backdrop-blur-md md:px-6 md:pt-5">
+        <header data-v2-memory-header className="shrink-0 flex justify-between items-center gap-3 border-b border-stone-200 dark:border-stone-800 bg-white/95 dark:bg-stone-900/95 px-5 pb-3 pt-[calc(0.75rem+env(safe-area-inset-top))] backdrop-blur-md md:px-6 md:pt-5">
           <div className="flex min-w-0 items-center gap-2 text-sky-600 dark:text-sky-400 font-bold">
             <Heart size={20} className="shrink-0" />
             <h2 className="truncate text-base">마음새김 트레이너</h2>
@@ -94,7 +94,7 @@ export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: Me
           </div>
         </header>
 
-        <main className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain touch-pan-y px-5 py-5 pb-[calc(1.5rem+env(safe-area-inset-bottom))] md:px-6 md:py-6">
+        <main data-v2-memory-body className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain touch-pan-y px-5 py-5 pb-[calc(1.5rem+env(safe-area-inset-bottom))] md:px-6 md:py-6">
           {trainerState.stepState === 'intro' ? (
             <MemoryTrainerIntro
               oneVerse={oneVerse}

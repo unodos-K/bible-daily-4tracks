@@ -10,7 +10,7 @@ interface MiniScheduleWidgetProps {
 
 export default function MiniScheduleWidget({ daysSince, setIsScheduleSheetOpen }: MiniScheduleWidgetProps) {
   return (
-    <div className="bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl p-5 flex flex-col shadow-sm">
+    <div data-v2-schedule className="bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl p-5 flex flex-col shadow-sm">
       <div className="flex justify-between items-center mb-3">
         <div className="flex items-center gap-2">
           <CalendarDays size={18} className="text-sky-500" />

@@ -34,8 +34,8 @@ export default function MemoryTrainerProgress({
   setShowAnswer
 }: MemoryTrainerProgressProps) {
   return (
-    <div className="flex flex-col gap-3 mb-6 bg-stone-50 dark:bg-stone-800/50 p-3 rounded-xl border border-stone-100 dark:border-stone-800">
-      <div className="grid grid-cols-6 gap-1.5 w-full">
+    <div data-v2-memory-progress className="flex flex-col gap-3 mb-6 bg-stone-50 dark:bg-stone-800/50 p-3 rounded-xl border border-stone-100 dark:border-stone-800">
+      <div data-v2-memory-steps className="grid grid-cols-6 gap-1.5 w-full">
         {[1, 2, 3, 4, 5].map((phaseNum) => (
           <button
             type="button"
@@ -53,6 +53,7 @@ export default function MemoryTrainerProgress({
         <button
           type="button"
           onClick={handleDirectChallenge}
+          data-v2-memory-challenge-step
           className="min-w-0 px-1 py-2 rounded-lg text-[10px] sm:text-xs font-bold whitespace-nowrap transition-colors bg-orange-500 hover:bg-orange-600 text-white shadow-sm"
         >
           도전

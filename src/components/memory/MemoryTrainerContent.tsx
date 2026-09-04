@@ -39,15 +39,15 @@ export default function MemoryTrainerContent({
   handleCheckWritingAnswer
 }: MemoryTrainerContentProps) {
   return (
-    <>
+    <div data-v2-memory-content>
       {isTrainingFinished && testResult === 'none' && !isListening && (
         <div className="mb-5 flex flex-col gap-3 animate-in slide-in-from-top-2">
-          <div className="rounded-xl border border-amber-200 bg-amber-50/70 px-3 py-2.5 text-center dark:border-amber-900/60 dark:bg-amber-950/20">
+          <div data-v2-memory-prompt className="rounded-xl border border-amber-200 bg-amber-50/70 px-3 py-2.5 text-center dark:border-amber-900/60 dark:bg-amber-950/20">
             <span className="flex items-center justify-center gap-1.5 text-sm font-semibold text-amber-700 dark:text-amber-400">
               <Heart size={16} className="fill-current text-amber-500" /> 오늘의 One Verse를 마음에 새겨보세요
             </span>
           </div>
-          <div className="grid grid-cols-2 gap-2">
+          <div data-v2-memory-methods className="grid grid-cols-2 gap-2">
             <button
               type="button"
               onClick={handleStartListening}
@@ -65,7 +65,7 @@ export default function MemoryTrainerContent({
           </div>
 
           {challengeMethod === 'writing' && (
-            <section className="rounded-xl border border-stone-200 bg-white p-3 dark:border-stone-700 dark:bg-stone-900" aria-label="쓰기 도전">
+            <section data-v2-memory-writing className="rounded-xl border border-stone-200 bg-white p-3 dark:border-stone-700 dark:bg-stone-900" aria-label="쓰기 도전">
               <p className="text-sm font-semibold text-stone-700 dark:text-stone-300">말씀을 기억나는 대로 써보세요.</p>
               <p className="mt-1 text-xs leading-relaxed text-stone-400 dark:text-stone-500">공백과 줄바꿈은 정리해서 비교하지만, 글자와 문장부호는 원문과 같아야 해요.</p>
               <textarea
@@ -96,9 +96,9 @@ export default function MemoryTrainerContent({
         </div>
       )}
 
-      <div className="min-h-[160px] flex flex-col items-center justify-center text-center p-6 bg-stone-50 dark:bg-stone-950 rounded-2xl border border-stone-100 dark:border-stone-800 mb-8 shadow-inner relative overflow-hidden">
+      <div data-v2-memory-scripture className="min-h-[160px] flex flex-col items-center justify-center text-center p-6 bg-stone-50 dark:bg-stone-950 rounded-2xl border border-stone-100 dark:border-stone-800 mb-8 shadow-inner relative overflow-hidden">
         {isListening && (
-          <div className="absolute inset-0 bg-sky-50/90 dark:bg-sky-900/90 backdrop-blur-sm z-10 flex flex-col items-center justify-center animate-in fade-in">
+          <div data-v2-memory-recording className="absolute inset-0 bg-sky-50/90 dark:bg-sky-900/90 backdrop-blur-sm z-10 flex flex-col items-center justify-center animate-in fade-in">
             <div className="w-16 h-16 bg-sky-500 rounded-full flex items-center justify-center mb-4 animate-pulse shadow-lg shadow-sky-500/50">
               <Mic size={32} className="text-white" />
             </div>
@@ -124,8 +124,8 @@ export default function MemoryTrainerContent({
                 className={`
                   transition-all duration-300 ease-in-out px-1.5 py-0.5 mx-0.5 rounded-md
                   ${isHidden 
-                    ? "select-none cursor-help text-transparent bg-stone-300 dark:bg-stone-700 hover:text-stone-400 dark:hover:text-stone-400" 
-                    : "text-stone-800 dark:text-stone-100 bg-stone-100 dark:bg-stone-800"
+                  ? "memory-v2-blank select-none cursor-help text-transparent bg-stone-300 dark:bg-stone-700 hover:text-stone-400 dark:hover:text-stone-400"
+                    : "memory-v2-word text-stone-800 dark:text-stone-100 bg-stone-100 dark:bg-stone-800"
                   }
                 `}
                 title={isHidden ? "터치하여 살짝 보기" : ""}
@@ -140,6 +140,6 @@ export default function MemoryTrainerContent({
         </div>
       </div>
 
-    </>
+    </div>
   );
 }

@@ -48,7 +48,7 @@ export default function NicknameOnboardingModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in">
+    <div data-v2-nickname className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in">
       <div className="bg-white dark:bg-stone-900 w-full max-w-sm rounded-3xl p-6 sm:p-8 flex flex-col items-center text-center shadow-2xl relative overflow-hidden">
         {/* 장식용 배경 요소 */}
         <div className="absolute -top-12 -right-12 w-32 h-32 bg-amber-200/20 dark:bg-amber-500/10 rounded-full blur-3xl"></div>

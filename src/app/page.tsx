@@ -15,7 +15,7 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="w-full min-h-full flex flex-col relative items-center justify-center bg-stone-50 dark:bg-stone-950 overflow-hidden pb-6">
+    <div data-v2-landing className="w-full min-h-full flex flex-col relative items-center justify-center bg-stone-50 dark:bg-stone-950 overflow-hidden pb-6">
       {/* 백그라운드 효과 (블러 원) */}
       <div className="absolute top-[-10%] left-[-10%] w-72 h-72 bg-sky-200 dark:bg-sky-900/40 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-3xl opacity-70"></div>
       <div className="absolute top-[20%] right-[-10%] w-72 h-72 bg-amber-200 dark:bg-amber-900/40 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-3xl opacity-70"></div>

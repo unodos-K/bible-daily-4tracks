@@ -19,7 +19,7 @@ export default function ReadingProgressWidget({
   pastMissedDays
 }: ReadingProgressWidgetProps) {
   return (
-    <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 p-5 flex flex-col gap-4">
+    <div data-v2-progress className="bg-white dark:bg-stone-900 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 p-5 flex flex-col gap-4">
       <div className="flex justify-between items-end">
         <div>
           <p className="text-stone-500 dark:text-stone-400 text-sm font-semibold mb-1">나의 통독 여정</p>

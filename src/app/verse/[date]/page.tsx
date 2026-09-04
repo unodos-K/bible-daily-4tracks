@@ -40,7 +40,7 @@ export default function VerseDetailPage() {
 
   if (!isClient) {
     return (
-      <div className="min-h-[100dvh] bg-stone-50 dark:bg-stone-950 flex flex-col items-center justify-center gap-3 text-stone-500">
+      <div data-v2-verse-detail className="min-h-[100dvh] bg-stone-50 dark:bg-stone-950 flex flex-col items-center justify-center gap-3 text-stone-500">
         <BookOpen className="animate-pulse w-8 h-8" />
         <span className="text-sm font-medium">오늘의 말씀을 펴는 중...</span>
       </div>
@@ -61,7 +61,7 @@ export default function VerseDetailPage() {
   };
 
   return (
-    <div className="w-full min-h-[100dvh] bg-stone-50 dark:bg-stone-950 flex flex-col">
+    <div data-v2-verse-detail className="w-full min-h-[100dvh] bg-stone-50 dark:bg-stone-950 flex flex-col">
       {/* 고정 헤더 */}
       <header className="sticky top-0 z-40 bg-stone-50/95 dark:bg-stone-950/95 backdrop-blur-md pt-[calc(1rem+env(safe-area-inset-top))] pb-4 px-4 border-b border-stone-200/50 dark:border-stone-800/50 flex items-center shadow-sm">
         <button 

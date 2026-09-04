@@ -32,7 +32,7 @@ export default function MemoryTrainerIntro({
   isBibleTextLoading
 }: MemoryTrainerIntroProps) {
   return (
-    <div className="flex flex-col gap-6 animate-in slide-in-from-bottom-4">
+    <div data-v2-memory-intro className="flex flex-col gap-6 animate-in slide-in-from-bottom-4">
       <div className="text-center">
         <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-1">
           오늘의 One Verse 마음 새김하기
@@ -42,14 +42,14 @@ export default function MemoryTrainerIntro({
         </p>
       </div>
 
-      <div className="min-h-[120px] flex items-center justify-center text-center p-6 bg-stone-50 dark:bg-stone-800/50 rounded-2xl border border-stone-200 dark:border-stone-700 shadow-inner">
+      <div data-v2-memory-scripture className="min-h-[120px] flex items-center justify-center text-center p-6 bg-stone-50 dark:bg-stone-800/50 rounded-2xl border border-stone-200 dark:border-stone-700 shadow-inner">
         <p className="text-xl md:text-2xl font-semibold leading-loose break-keep text-stone-800 dark:text-stone-100">
           {displayString}
         </p>
       </div>
 
       {ttsVoices.length > 0 && (
-        <div className="flex items-center justify-between bg-stone-100 dark:bg-stone-800 p-3 rounded-xl gap-2">
+        <div data-v2-memory-voice className="flex items-center justify-between bg-stone-100 dark:bg-stone-800 p-3 rounded-xl gap-2">
           <div className="flex-1 overflow-hidden bg-white dark:bg-stone-900 rounded-lg border border-stone-200 dark:border-stone-700 px-3 py-2 flex items-center relative">
             <select
               value={selectedVoiceIndex}
@@ -84,7 +84,7 @@ export default function MemoryTrainerIntro({
         <h3 className="text-sm font-bold text-stone-700 dark:text-stone-300 mb-3 text-center">
           마음 새김 속도를 선택하세요
         </h3>
-        <div className="grid grid-cols-3 gap-2 bg-stone-100 dark:bg-stone-800 p-1 rounded-xl">
+        <div data-v2-memory-speed className="grid grid-cols-3 gap-2 bg-stone-100 dark:bg-stone-800 p-1 rounded-xl">
           {[
             { label: "⚡ 빠르게", value: 3 },
             { label: "🚶 보통", value: 5 },
@@ -105,7 +105,7 @@ export default function MemoryTrainerIntro({
         </div>
       </div>
 
-      <div className="mt-2 flex flex-col gap-2 w-full">
+      <div data-v2-memory-intro-actions className="mt-2 flex flex-col gap-2 w-full">
         <button
           onClick={handleStartTraining}
           disabled={isBibleTextLoading}

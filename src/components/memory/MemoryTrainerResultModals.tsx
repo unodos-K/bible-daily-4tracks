@@ -22,7 +22,7 @@ export default function MemoryTrainerResultModals({
     <>
       {testResult === 'success' && (
         <div className="absolute inset-0 bg-black/50 z-50 rounded-3xl flex items-center justify-center p-6 animate-in fade-in">
-          <div className="bg-white dark:bg-stone-900 rounded-2xl p-8 text-center max-w-sm w-full shadow-2xl transform animate-in zoom-in-90 border border-stone-200 dark:border-stone-800">
+          <div data-v2-memory-result className="bg-white dark:bg-stone-900 rounded-2xl p-8 text-center max-w-sm w-full shadow-2xl transform animate-in zoom-in-90 border border-stone-200 dark:border-stone-800">
             <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/50 rounded-full flex items-center justify-center mx-auto mb-6">
               <CheckCircle2 size={40} className="text-emerald-500" />
             </div>
@@ -44,7 +44,7 @@ export default function MemoryTrainerResultModals({
 
       {testResult === 'fail' && (
         <div className="absolute inset-0 bg-black/50 z-50 rounded-3xl flex items-center justify-center p-6 animate-in fade-in">
-          <div className="bg-white dark:bg-stone-900 rounded-2xl p-8 text-center max-w-sm w-full shadow-2xl transform animate-in zoom-in-90 border border-stone-200 dark:border-stone-800">
+          <div data-v2-memory-result className="bg-white dark:bg-stone-900 rounded-2xl p-8 text-center max-w-sm w-full shadow-2xl transform animate-in zoom-in-90 border border-stone-200 dark:border-stone-800">
             <div className="w-20 h-20 bg-rose-100 dark:bg-rose-900/50 rounded-full flex items-center justify-center mx-auto mb-6">
               <XCircle size={40} className="text-rose-500" />
             </div>
