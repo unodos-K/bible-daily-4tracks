@@ -6,6 +6,7 @@ import NicknameGuard from "@/components/NicknameGuard";
 import MainLayout from "@/components/MainLayout";
 import Script from "next/script";
 import AuthProvider from "@/components/AuthProvider";
+import { UIVersionProvider } from "@/contexts/UIVersionContext";
 
 export const metadata: Metadata = {
   title: "One Verse 성경읽기",
@@ -57,14 +58,10 @@ export default function RootLayout({
       </head>
       <body className="bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 selection:bg-amber-200 dark:selection:bg-amber-900">
         <KakaoInit />
-        <AuthProvider>
+        <UIVersionProvider><AuthProvider>
           <NicknameGuard />
-          <SettingsProvider>
-            <MainLayout>
-              {children}
-            </MainLayout>
-          </SettingsProvider>
-        </AuthProvider>
+          <SettingsProvider><MainLayout>{children}</MainLayout></SettingsProvider>
+        </AuthProvider></UIVersionProvider>
       </body>
     </html>
   );

@@ -21,6 +21,7 @@ import { startNewReading } from "@/lib/storage";
 import { signOut } from "@/lib/supabase";
 import NicknameOnboardingModal from "@/components/NicknameOnboardingModal";
 import { useAuth } from "@/components/AuthProvider";
+import UIVersionToggle from "@/components/UIVersionToggle";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -74,9 +75,9 @@ export default function SettingsPage() {
   if (!isClient || isAuthLoading) return null;
 
   return (
-    <div className="w-full min-h-[100dvh] bg-stone-50 dark:bg-stone-950 flex flex-col">
+    <div data-v2-settings className="w-full min-h-[100dvh] bg-stone-50 dark:bg-stone-950 flex flex-col">
       {/* 고정 헤더 */}
-      <header className="sticky top-0 z-40 bg-stone-50/95 dark:bg-stone-950/95 backdrop-blur-md pt-[calc(1rem+env(safe-area-inset-top))] pb-4 px-4 sm:px-6 border-b border-stone-200/50 dark:border-stone-800/50 flex items-center justify-between shadow-sm">
+      <header data-v2-settings-header className="sticky top-0 z-40 bg-stone-50/95 dark:bg-stone-950/95 backdrop-blur-md pt-[calc(1rem+env(safe-area-inset-top))] pb-4 px-4 sm:px-6 border-b border-stone-200/50 dark:border-stone-800/50 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-3">
           <button 
             onClick={() => router.back()}
@@ -97,7 +98,7 @@ export default function SettingsPage() {
         <div className="max-w-xl mx-auto w-full flex flex-col gap-6 py-6 animate-in fade-in duration-200">
           
           {/* 테마 설정 카드 */}
-          <div className="bg-white dark:bg-stone-900 rounded-2xl md:rounded-3xl p-5 md:p-6 shadow-sm border border-stone-200/80 dark:border-stone-800 flex flex-col gap-3">
+          <div data-v2-settings-card className="bg-white dark:bg-stone-900 rounded-2xl md:rounded-3xl p-5 md:p-6 shadow-sm border border-stone-200/80 dark:border-stone-800 flex flex-col gap-3">
             <label className="text-sm font-bold text-stone-600 dark:text-stone-300">화면 테마 모드</label>
             <div className="flex bg-stone-100 dark:bg-stone-800 rounded-xl p-1 gap-1">
               <button
@@ -133,8 +134,16 @@ export default function SettingsPage() {
             </div>
           </div>
 
+          <div data-v2-settings-card className="bg-white dark:bg-stone-900 rounded-2xl md:rounded-3xl p-5 md:p-6 shadow-sm border border-stone-200/80 dark:border-stone-800 flex flex-col gap-3">
+            <div>
+              <label className="text-sm font-bold text-stone-600 dark:text-stone-300">UI 디자인 버전</label>
+              <p className="mt-1 text-xs text-stone-400">Classic과 New 화면을 즉시 전환해 비교할 수 있습니다.</p>
+            </div>
+            <UIVersionToggle />
+          </div>
+
           {/* 글씨 크기 설정 카드 */}
-          <div className="bg-white dark:bg-stone-900 rounded-2xl md:rounded-3xl p-5 md:p-6 shadow-sm border border-stone-200/80 dark:border-stone-800 flex flex-col gap-4">
+          <div data-v2-settings-card className="bg-white dark:bg-stone-900 rounded-2xl md:rounded-3xl p-5 md:p-6 shadow-sm border border-stone-200/80 dark:border-stone-800 flex flex-col gap-4">
             <label className="text-sm font-bold text-stone-600 dark:text-stone-300">뷰어 글씨 크기</label>
             
             <div className="flex items-center gap-4">
@@ -162,7 +171,7 @@ export default function SettingsPage() {
               </button>
             </div>
             
-            <div className="p-4 bg-stone-50 dark:bg-stone-950 border border-stone-100 dark:border-stone-800 rounded-xl">
+            <div data-v2-settings-preview className="p-4 bg-stone-50 dark:bg-stone-950 border border-stone-100 dark:border-stone-800 rounded-xl">
               <p className="text-stone-800 dark:text-stone-200 text-center font-medium" style={{ fontSize: `${fontSize}px`, lineHeight: 1.8 }}>
                 태초에 하나님이 천지를 창조하시니라
               </p>
