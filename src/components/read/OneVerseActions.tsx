@@ -1,5 +1,5 @@
 import React from "react";
-import { Heart, HeartHandshake, Footprints } from "lucide-react";
+import { Heart, HeartHandshake, Footprints, Highlighter, Pin } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { DayRecord, OneVerse } from "@/lib/storage";
 
@@ -38,15 +38,16 @@ export function ConfirmedOneVerseActions({ verse, dayIndex, record, onOpenMemory
 
 interface SelectedOneVerseActionsProps {
   verse: OneVerse;
+  isMarked: boolean;
   onToggleMark: (verse: OneVerse, event: React.MouseEvent) => void;
   onConfirm: (verse: OneVerse, event: React.MouseEvent) => void;
 }
 
-export function SelectedOneVerseActions({ verse, onToggleMark, onConfirm }: SelectedOneVerseActionsProps) {
+export function SelectedOneVerseActions({ verse, isMarked, onToggleMark, onConfirm }: SelectedOneVerseActionsProps) {
   return (
     <div className="mt-3 grid grid-cols-2 gap-2 pl-[2.5ch] sm:pl-[3ch]">
-      <button type="button" onClick={(event) => onConfirm(verse, event)} className="min-h-11 w-full whitespace-nowrap rounded-lg bg-sky-600 px-3 py-2 text-sm font-bold text-white shadow-sm transition-transform hover:-translate-y-0.5 hover:bg-sky-700">One Verse</button>
-      <button type="button" onClick={(event) => onToggleMark(verse, event)} className="min-h-11 w-full whitespace-nowrap rounded-lg border border-stone-300 bg-stone-100 px-3 py-2 text-sm font-bold text-stone-800 shadow-sm transition-colors hover:bg-stone-200 dark:border-stone-600 dark:bg-stone-800 dark:text-stone-100 dark:hover:bg-stone-700">Mark</button>
+      <button type="button" onClick={(event) => onConfirm(verse, event)} className="flex min-h-11 w-full items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-sky-500 bg-sky-600 px-3 py-2 text-sm font-bold text-white shadow-sm transition-colors hover:bg-sky-700"><Pin size={18} strokeWidth={2} />One Verse</button>
+      <button type="button" onClick={(event) => onToggleMark(verse, event)} className={`flex min-h-11 w-full items-center justify-center gap-2 whitespace-nowrap rounded-lg border px-3 py-2 text-sm font-bold shadow-sm transition-colors ${isMarked ? "border-amber-400 bg-amber-200/80 text-amber-950 hover:bg-amber-300 dark:border-amber-500 dark:bg-amber-900/60 dark:text-amber-100 dark:hover:bg-amber-800" : "border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-300 dark:hover:bg-amber-900/60"}`}><Highlighter size={18} strokeWidth={2} />{isMarked ? "Mark 해제" : "Mark"}</button>
     </div>
   );
 }
