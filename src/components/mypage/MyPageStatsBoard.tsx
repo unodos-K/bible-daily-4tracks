@@ -1,5 +1,5 @@
 import React from "react";
-import { HeartHandshake, Heart, BookOpen, Footprints } from "lucide-react";
+import { HeartHandshake, Heart, BookOpen, CalendarDays, Footprints } from "lucide-react";
 import { OneVerseRecord } from "@/lib/storage";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import LikeButton from "@/components/friends/LikeButton";
@@ -43,7 +43,7 @@ export default function MyPageStatsBoard({
     <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 p-4 sm:p-6 flex flex-col">
       <div className="flex flex-col gap-4 mb-6">
         <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 flex items-center gap-2">
-          📅 {year}년 {month}월의 One Verse
+          <CalendarDays size={20} /> {year}년 {month}월의 One Verse
           <span className="text-sm font-medium text-stone-500 bg-stone-100 dark:bg-stone-800 px-2.5 py-0.5 rounded-full">
             총 {thisMonthTotal}개
           </span>
@@ -52,8 +52,8 @@ export default function MyPageStatsBoard({
           <span className="text-xs font-bold bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800 px-2 py-1 rounded-md flex items-center gap-1">
             <Heart size={12} fill="currentColor" /> 마음 새김: {thisMonthMemorized}개
           </span>
-          <span className="text-xs font-bold bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 px-2 py-1 rounded-md">
-            📖 통독: {thisMonthCompletedTotal}개
+          <span className="inline-flex items-center gap-1 text-xs font-bold bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 px-2 py-1 rounded-md">
+            <BookOpen size={12} /> 통독: {thisMonthCompletedTotal}개
           </span>
         </div>
       </div>

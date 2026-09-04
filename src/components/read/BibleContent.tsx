@@ -1,5 +1,5 @@
 import React from "react";
-import { CheckCircle2 } from "lucide-react";
+import { BookMarked, BookOpen, CheckCircle2, Lightbulb, Music2, type LucideIcon } from "lucide-react";
 import { TRACK_INFO } from "@/lib/bible";
 import type { OneVerse, ReadRecordsMap, DayRecord } from "@/lib/storage";
 import { useActiveReaderTrack } from "./useActiveReaderTrack";
@@ -8,7 +8,7 @@ import type { ReadingData, TrackData } from "./types";
 
 export type { ReadingData } from "./types";
 
-const TRACK_ICONS: Record<string, string> = { 구약: "📖", 신약: "✨", 시편: "🎵", 잠언: "💡" };
+const TRACK_ICONS: Record<string, LucideIcon> = { 구약: BookOpen, 신약: BookMarked, 시편: Music2, 잠언: Lightbulb };
 const TRACK_ID_MAP: Record<string, string> = { 구약: "track-ot", 신약: "track-nt", 시편: "track-psalms", 잠언: "track-proverbs" };
 
 interface BibleContentProps {
@@ -35,12 +35,13 @@ export default function BibleContent({ readingData, fontSize, selectedVerse, con
   const { activeTrackType, stickyHeaderRef, trackRefs } = useActiveReaderTrack(tracks);
   const activeTrack = tracks.find((track) => track.track.type === activeTrackType) ?? tracks[0];
   const activeTrackInfo = activeTrack && TRACK_INFO[activeTrack.track.type as keyof typeof TRACK_INFO];
+  const ActiveTrackIcon = activeTrack ? TRACK_ICONS[activeTrack.track.type] ?? BookOpen : BookOpen;
 
   return (
     <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
       {activeTrack && activeTrackInfo && (
         <div ref={stickyHeaderRef} className="shrink-0 relative z-20 py-2 px-4 text-sm font-semibold bg-stone-100/90 dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800 transition-colors">
-          <h2 className="flex items-center gap-2" style={{ color: activeTrackInfo.accentColor }}><span>{TRACK_ICONS[activeTrack.track.type] || "📖"}</span>{activeTrackInfo.title.split(" ")[0]} <span className="text-stone-500 font-normal mx-0.5">·</span> <span className="text-stone-700 dark:text-stone-300">{activeTrack.track.range}</span></h2>
+          <h2 className="flex items-center gap-2" style={{ color: activeTrackInfo.accentColor }}><ActiveTrackIcon size={18} strokeWidth={2} />{activeTrackInfo.title.split(" ")[0]} <span className="text-stone-500 font-normal mx-0.5">·</span> <span className="text-stone-700 dark:text-stone-300">{activeTrack.track.range}</span></h2>
         </div>
       )}
       <div id="bible-content-scroll" className="flex-1 overflow-y-auto overscroll-y-contain flex flex-col">

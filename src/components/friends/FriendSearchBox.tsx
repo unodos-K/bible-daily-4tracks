@@ -1,5 +1,5 @@
 import React from "react";
-import { Search, UserPlus } from "lucide-react";
+import { Search, User, UserPlus } from "lucide-react";
 import { FriendProfile } from "@/lib/social";
 import AvatarImage from "@/components/AvatarImage";
 
@@ -78,7 +78,7 @@ export default function FriendSearchBox({
                     <AvatarImage src={user.avatar_url} alt={user.name} size={40} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-stone-400 text-sm">
-                      👤
+                      <User size={18} />
                     </div>
                   )}
                 </div>

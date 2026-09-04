@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ChevronLeft, Footprints, Loader2, Heart, Sparkles } from "lucide-react";
+import { BookOpen, ChevronLeft, Footprints, Loader2, Heart, Sparkles } from "lucide-react";
 import { getFriendDetail, toggleLike, FriendFeedItem, FriendProfile } from "@/lib/social";
 import LikeButton from "@/components/friends/LikeButton";
 import { useAuth } from "@/components/AuthProvider";
@@ -234,7 +234,7 @@ export default function FriendProfilePage() {
                 {/* 상단: 레퍼런스 및 마음새김 뱃지 */}
                 <div className="flex justify-between items-center">
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 border border-sky-200/60 dark:border-sky-800/40">
-                    📖 {record.one_verse?.reference || `Day ${record.day_index}`}
+                    <BookOpen size={14} /> {record.one_verse?.reference || `Day ${record.day_index}`}
                   </span>
 
                   {record.one_verse?.isMemorized && (

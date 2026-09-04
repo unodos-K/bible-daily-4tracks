@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Footprints } from "lucide-react";
+import { ChevronRight, Footprints, User } from "lucide-react";
 import { getFriendsList, FriendProfile } from "@/lib/social";
 import { useAuth } from "@/components/AuthProvider";
 import AvatarImage from "@/components/AvatarImage";
@@ -79,7 +79,7 @@ export default function FriendsList() {
               {friend.avatar_url ? (
                 <AvatarImage src={friend.avatar_url} alt={friend.name} size={40} className="w-full h-full object-cover" />
               ) : (
-                <span>👤</span>
+                <User size={20} />
               )}
             </div>
             <div>
@@ -88,7 +88,7 @@ export default function FriendsList() {
             </div>
           </div>
           <div className="text-stone-400">
-            <span className="text-xl">👉</span>
+            <ChevronRight size={20} aria-hidden="true" />
           </div>
         </Link>
       ))}

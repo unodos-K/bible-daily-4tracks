@@ -1,5 +1,5 @@
 import React from "react";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, BadgeCheck, BookMarked, BookOpen, Heart, Lightbulb, Music2, Pin } from "lucide-react";
 
 import { ReadRecordsMap } from "@/lib/storage";
 
@@ -50,7 +50,7 @@ export default function DaySelectorSheet({
           onClick={handleGoToLastRead}
           className="w-full py-2.5 px-4 mb-3 rounded-xl bg-cyan-950/40 border border-cyan-500/40 hover:bg-cyan-900/50 text-cyan-300 font-medium text-sm flex items-center justify-center gap-2 transition-all shadow-sm shrink-0"
         >
-          📌 마지막으로 읽은 본문으로 이동하기
+          <Pin size={16} /> 마지막으로 읽은 본문으로 이동하기
         </button>
         {allSchedules.map((s) => {
           const maxAllowed = getNextUnreadDay(records);
@@ -78,25 +78,25 @@ export default function DaySelectorSheet({
                   </span>
                   
                   <div className="text-xs text-stone-500 dark:text-stone-400 truncate mt-1 leading-relaxed flex flex-wrap gap-x-2">
-                    <span>📖 {s.tracks.find((t: ScheduleTrack) => t.type === '구약')?.range}</span>
-                    <span>✝️ {s.tracks.find((t: ScheduleTrack) => t.type === '신약')?.range}</span>
-                    <span>🕊️ {s.tracks.find((t: ScheduleTrack) => t.type === '시편')?.range}</span>
-                    <span>💡 {s.tracks.find((t: ScheduleTrack) => t.type === '잠언')?.range}</span>
+                    <span className="inline-flex items-center gap-1"><BookOpen size={13} />{s.tracks.find((t: ScheduleTrack) => t.type === '구약')?.range}</span>
+                    <span className="inline-flex items-center gap-1"><BookMarked size={13} />{s.tracks.find((t: ScheduleTrack) => t.type === '신약')?.range}</span>
+                    <span className="inline-flex items-center gap-1"><Music2 size={13} />{s.tracks.find((t: ScheduleTrack) => t.type === '시편')?.range}</span>
+                    <span className="inline-flex items-center gap-1"><Lightbulb size={13} />{s.tracks.find((t: ScheduleTrack) => t.type === '잠언')?.range}</span>
                   </div>
                 </div>
 
                 {hasOneVerse && (
                   <div className="flex flex-col items-end justify-center gap-1.5 shrink-0 self-center">
                     <span className="text-[11px] px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-medium">
-                      📌 One Verse
+                      <Pin size={12} /> One Verse
                     </span>
                     {isMemorized ? (
                       <span className="text-[11px] px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-300 border border-amber-500/30 font-medium">
-                        👑 마음새김 완료
+                        <BadgeCheck size={12} /> 마음새김 완료
                       </span>
                     ) : (
                       <span className="text-[11px] px-2 py-0.5 rounded-md bg-stone-700/60 text-stone-400 border border-stone-600/40">
-                        ❤️ 마음 새김
+                        <Heart size={12} /> 마음 새김
                       </span>
                     )}
                   </div>

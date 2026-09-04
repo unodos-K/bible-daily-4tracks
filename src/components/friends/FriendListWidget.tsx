@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { UserCheck } from "lucide-react";
+import { BookOpen, UserCheck } from "lucide-react";
 import { FriendProfile, FriendFeedItem } from "@/lib/social";
 import LikeButton from "./LikeButton";
 import AvatarImage from "@/components/AvatarImage";
@@ -82,7 +82,7 @@ export default function FriendListWidget({
               <div className="p-3 bg-stone-50 dark:bg-stone-950/80 rounded-xl text-xs sm:text-sm border border-stone-100 dark:border-stone-800/80 flex flex-col gap-2">
                 <div className="flex justify-between items-center text-xs">
                   <span className="font-bold text-sky-600 dark:text-sky-400">
-                    📖 {latestFeed.one_verse?.reference || `Day ${latestFeed.day_index}`}
+                    <BookOpen size={14} /> {latestFeed.one_verse?.reference || `Day ${latestFeed.day_index}`}
                   </span>
                   <span className="text-[11px] font-medium text-stone-400">
                     Day {latestFeed.day_index}
