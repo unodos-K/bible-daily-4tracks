@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     title: "One Verse 성경읽기",
-    statusBarStyle: "default",
+    statusBarStyle: "black-translucent",
   },
 };
 

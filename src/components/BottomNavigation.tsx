@@ -34,10 +34,6 @@ export function BottomNavigation() {
     };
   }, [pathname]);
 
-  if (pathname === "/" || pathname === "/login") {
-    return null;
-  }
-
   const tabItems = [
     {
       href: "/home",
@@ -67,8 +63,8 @@ export function BottomNavigation() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-1/2 z-40 box-border w-full max-w-2xl -translate-x-1/2 border-t border-stone-200 bg-white/95 backdrop-blur-md dark:border-stone-800 dark:bg-stone-900/95">
-      <div className="mx-auto grid h-14 max-w-2xl grid-cols-4">
+    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-stone-200 bg-white dark:border-stone-800 dark:bg-stone-900">
+      <div className="mx-auto grid h-16 w-full max-w-2xl grid-cols-4">
         {tabItems.map((item) => {
           const Icon = item.icon;
           return (
@@ -81,13 +77,13 @@ export function BottomNavigation() {
                   : "text-stone-400 hover:text-stone-600 dark:hover:text-stone-300"
               }`}
             >
-              <div className="relative flex h-6 w-6 shrink-0 items-center justify-center">
+              <span className="relative flex items-center justify-center">
                 <Icon size={22} strokeWidth={2.25} className="h-[22px] w-[22px] shrink-0" />
                 {item.badge && (
                   <span className="absolute -top-0.5 -right-1 w-2 h-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-stone-900" />
                 )}
-              </div>
-              <span className="text-[11px] font-semibold leading-none tracking-tight">
+              </span>
+              <span className="text-[11px] font-semibold leading-tight tracking-tight">
                 {item.label}
               </span>
             </Link>
