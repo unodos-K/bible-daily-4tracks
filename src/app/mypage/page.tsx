@@ -80,7 +80,7 @@ export default function MyPage() {
       <div className="flex min-h-0 w-full max-w-2xl flex-1 flex-col">
 
         {/* 헤더 및 프로필 (고정 헤더) */}
-        <header className="shrink-0 z-40 bg-stone-50/95 dark:bg-stone-950/95 backdrop-blur-md pt-6 pb-4 px-4 sm:px-6 border-b border-stone-200/50 dark:border-stone-800/50 flex flex-row items-center justify-between w-full gap-4">
+        <header className="z-40 flex w-full shrink-0 flex-row items-center justify-between gap-4 border-b border-stone-200/50 bg-stone-50/95 px-4 pb-4 pt-[calc(1.5rem+env(safe-area-inset-top))] backdrop-blur-md dark:border-stone-800/50 dark:bg-stone-950/95 sm:px-6">
 
           {/* 좌측 묶음: 타이틀과 유저 정보 (반응형 래퍼) */}
           <div className="flex flex-col items-start gap-2 min-w-0 flex-1 sm:flex-row sm:items-center sm:justify-between">

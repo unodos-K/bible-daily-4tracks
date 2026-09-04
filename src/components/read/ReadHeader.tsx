@@ -31,7 +31,7 @@ export default function ReadHeader({
   return (
     <header 
       ref={headerRef as React.RefObject<HTMLDivElement>}
-      className="shrink-0 relative z-30 bg-stone-50 dark:bg-stone-950 border-b border-stone-200 dark:border-stone-800 flex flex-col px-3 py-2 gap-2"
+      className="relative z-30 flex shrink-0 flex-col gap-2 border-b border-stone-200 bg-stone-50 px-3 pb-2 pt-[calc(0.5rem+env(safe-area-inset-top))] dark:border-stone-800 dark:bg-stone-950"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1 sm:gap-2">

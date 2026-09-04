@@ -124,7 +124,7 @@ export default function HomePage() {
       <div className="w-full max-w-xl flex flex-col">
         
         {/* 환영 메시지 (고정 헤더) */}
-        <header className="sticky top-0 z-40 bg-stone-50/95 dark:bg-stone-950/95 backdrop-blur-md pt-6 pb-4 px-6 border-b border-stone-200/50 dark:border-stone-800/50 mb-6">
+        <header className="sticky top-0 z-40 mb-6 border-b border-stone-200/50 bg-stone-50/95 px-6 pb-4 pt-[calc(1.5rem+env(safe-area-inset-top))] backdrop-blur-md dark:border-stone-800/50 dark:bg-stone-950/95">
           <h1 className="flex flex-col gap-1.5 w-full">
             {authUser ? (
               <>

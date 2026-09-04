@@ -14,7 +14,7 @@ export default function FriendsPage() {
     <div className="flex h-[calc(100vh-4rem)] min-h-0 w-full flex-col bg-stone-50 dark:bg-stone-950">
       <div className="mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col">
         {/* Sticky 고정 래퍼 */}
-        <div className="shrink-0 z-40 bg-stone-50 dark:bg-stone-950 w-full flex flex-col shadow-sm border-b border-stone-200/50 dark:border-stone-800/50">
+        <div className="z-40 flex w-full shrink-0 flex-col border-b border-stone-200/50 bg-stone-50 pt-[env(safe-area-inset-top)] shadow-sm dark:border-stone-800/50 dark:bg-stone-950">
           {/* 헤더 */}
           <header className="pt-6 pb-2 px-6 flex items-center justify-between w-full">
             <h1 className="text-2xl font-black text-stone-800 dark:text-stone-100 flex items-center gap-2">

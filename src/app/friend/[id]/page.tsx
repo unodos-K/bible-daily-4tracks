@@ -152,7 +152,7 @@ export default function FriendProfilePage() {
   return (
     <div className="flex h-[calc(100vh-4rem)] min-h-0 w-full flex-col overflow-hidden bg-stone-100/50 dark:bg-stone-950">
       {/* 헤더 */}
-      <header className="z-40 bg-white/90 dark:bg-stone-900/90 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 shrink-0">
+      <header className="z-40 shrink-0 border-b border-stone-200 bg-white/90 pt-[env(safe-area-inset-top)] backdrop-blur-md dark:border-stone-800 dark:bg-stone-900/90">
         <div className="flex items-center px-4 h-14 max-w-2xl mx-auto w-full">
           <button 
             onClick={() => router.back()}
