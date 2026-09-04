@@ -38,18 +38,15 @@ export function ConfirmedOneVerseActions({ verse, dayIndex, record, onOpenMemory
 
 interface SelectedOneVerseActionsProps {
   verse: OneVerse;
-  isMarked: boolean;
   onToggleMark: (verse: OneVerse, event: React.MouseEvent) => void;
   onConfirm: (verse: OneVerse, event: React.MouseEvent) => void;
 }
 
-export function SelectedOneVerseActions({ verse, isMarked, onToggleMark, onConfirm }: SelectedOneVerseActionsProps) {
+export function SelectedOneVerseActions({ verse, onToggleMark, onConfirm }: SelectedOneVerseActionsProps) {
   return (
     <div className="mt-3 grid grid-cols-2 gap-2 pl-[2.5ch] sm:pl-[3ch]">
-      <button type="button" onClick={(event) => onConfirm(verse, event)} className="min-h-11 rounded-lg bg-sky-600 px-3 py-2 text-sm font-bold text-white shadow-sm transition-transform hover:-translate-y-0.5 hover:bg-sky-700">One Verse로 지정</button>
-      <button type="button" onClick={(event) => onToggleMark(verse, event)} className="min-h-11 rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm font-bold text-stone-700 shadow-sm transition-colors hover:bg-stone-50 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700">
-        {isMarked ? "마킹 해제" : "마킹"}
-      </button>
+      <button type="button" onClick={(event) => onConfirm(verse, event)} className="min-h-11 w-full whitespace-nowrap rounded-lg bg-sky-600 px-3 py-2 text-sm font-bold text-white shadow-sm transition-transform hover:-translate-y-0.5 hover:bg-sky-700">One Verse</button>
+      <button type="button" onClick={(event) => onToggleMark(verse, event)} className="min-h-11 w-full whitespace-nowrap rounded-lg border border-stone-300 bg-stone-100 px-3 py-2 text-sm font-bold text-stone-800 shadow-sm transition-colors hover:bg-stone-200 dark:border-stone-600 dark:bg-stone-800 dark:text-stone-100 dark:hover:bg-stone-700">Mark</button>
     </div>
   );
 }
