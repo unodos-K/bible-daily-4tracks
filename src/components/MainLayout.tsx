@@ -18,8 +18,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const hasPageScrollContainer = isReadPage || isMemoPage || isFriendsPage || isFriendDetailPage || isMyPage;
 
   return (
-    <div className="fixed inset-0 max-w-2xl mx-auto bg-stone-50 dark:bg-stone-950 shadow-xl flex flex-col border-x border-stone-200 dark:border-stone-800 overflow-hidden pt-[env(safe-area-inset-top)]">
-      <main className={`app-main flex-1 min-h-0 w-full ${hasPageScrollContainer ? 'flex flex-col overflow-hidden' : 'overflow-y-auto overscroll-y-contain'} bg-stone-50 dark:bg-stone-950`}>
+    <div className="relative mx-auto flex h-[100dvh] w-full max-w-2xl flex-col overflow-hidden border-x border-stone-200 bg-stone-50 pt-[env(safe-area-inset-top)] shadow-xl dark:border-stone-800 dark:bg-stone-950">
+      <main className={`app-main flex-1 min-h-0 w-full ${!hideBottomNav ? 'pb-[calc(3.5rem+env(safe-area-inset-bottom))]' : ''} ${hasPageScrollContainer ? 'flex flex-col overflow-hidden' : 'overflow-y-auto overscroll-y-contain'} bg-stone-50 dark:bg-stone-950`}>
         {children}
       </main>
       {!hideBottomNav && <BottomNavigation />}
