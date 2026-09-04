@@ -39,7 +39,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" className="bg-stone-50 dark:bg-stone-950 overscroll-none overflow-hidden h-full">
+    <html lang="ko" className="bg-stone-50 dark:bg-stone-950">
       <head>
         <meta name="theme-color" content="#0c0a09" data-app-theme-color="true" />
         <Script id="apply-initial-theme" strategy="beforeInteractive">{`
@@ -55,7 +55,7 @@ export default function RootLayout({
           strategy="beforeInteractive"
         />
       </head>
-      <body className="bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 flex flex-col items-center selection:bg-amber-200 dark:selection:bg-amber-900 h-full overflow-hidden overscroll-none">
+      <body className="bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 selection:bg-amber-200 dark:selection:bg-amber-900">
         <KakaoInit />
         <AuthProvider>
           <NicknameGuard />
