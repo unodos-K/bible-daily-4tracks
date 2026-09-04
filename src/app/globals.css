@@ -89,8 +89,130 @@ button, a, [role="button"], .interactive {
   }
 }
 
-/* Lock only the app shell behind a modal. Modal content can keep scrolling. */
 body.modal-open .app-main {
   overflow: hidden !important;
   touch-action: none;
 }
+
+/* Local UI V2: semantic color system, isolated from Classic. */
+:root[data-ui-version="new"] {
+  --new-bg: #f7f2e8; --new-surface: #fcf8f0; --new-surface-subtle: #eee6d9;
+  --new-text-primary: #2f2922; --new-text-secondary: #62584c; --new-text-muted: #74695d; --new-text-disabled: #b9aea0;
+  --new-accent: #766149; --new-accent-subtle: #e7dccb; --new-border: #d7ccbc; --new-divider: #e3d9cb;
+  --new-action-primary: #4d4033; --new-action-primary-text: #fffdf8;
+  --new-success: #53705b; --new-error: #8c5b52; --new-warning: #80643b;
+  --new-font-display: Georgia, "Times New Roman", serif; --new-font-body: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
+  --new-line-height-body: 1.65; --new-line-height-scripture: 1.9; --new-radius-sm: 8px; --new-radius-md: 12px;
+}
+:root[data-ui-version="new"] body, :root[data-ui-version="new"] .app-main { background: var(--new-bg) !important; color: var(--new-text-primary); }
+:root[data-ui-version="new"] .dark { color-scheme: light; }
+/* The comparison control deliberately owns its tokens: Classic has no --new-* values. */
+.ui-version-toggle { --toggle-surface:#fffcf6; --toggle-border:#cfc4b4; --toggle-text:#62584c; --toggle-active:#4d4033; --toggle-active-text:#fffdf8; display:flex; box-sizing:border-box; width:100%; max-width:none; gap:3px; align-items:center; padding:4px; border:1px solid var(--toggle-border); border-radius:8px; background:var(--toggle-surface); box-shadow:none; color:var(--toggle-text); font:600 11px/1 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif; white-space:nowrap; }
+.ui-version-toggle *, .ui-version-toggle *::before, .ui-version-toggle *::after { box-sizing:border-box; }
+.ui-version-toggle button { appearance:none; flex:none; min-height:28px; margin:0; padding:6px 8px; border:0; border-radius:5px; background:transparent; color:var(--toggle-text); font:inherit; line-height:1; white-space:nowrap; }
+.ui-version-toggle button[aria-pressed="true"] { background:var(--toggle-active); color:var(--toggle-active-text); }
+.ui-version-toggle button { flex:1; min-height:42px; font-size:13px; }
+
+/* Shared V2 surface and contrast repair. Attribute selectors deliberately cover dark: Tailwind classes too. */
+:root[data-ui-version="new"] [data-v2-home], :root[data-ui-version="new"] [data-v2-reader], :root[data-ui-version="new"] [data-v2-friends], :root[data-ui-version="new"] [data-v2-friend-detail], :root[data-ui-version="new"] [data-v2-archive], :root[data-ui-version="new"] [data-v2-memory], :root[data-ui-version="new"] [data-v2-memo], :root[data-ui-version="new"] [data-v2-settings], :root[data-ui-version="new"] [data-v2-verse-detail], :root[data-ui-version="new"] [data-v2-landing], :root[data-ui-version="new"] [data-v2-share], :root[data-ui-version="new"] [data-v2-nickname] { background:var(--new-bg) !important; color:var(--new-text-primary) !important; }
+:root[data-ui-version="new"] [data-v2-home] [class*="text-stone-"], :root[data-ui-version="new"] [data-v2-reader] [class*="text-stone-"], :root[data-ui-version="new"] [data-v2-friends] [class*="text-stone-"], :root[data-ui-version="new"] [data-v2-friend-detail] [class*="text-stone-"], :root[data-ui-version="new"] [data-v2-archive] [class*="text-stone-"], :root[data-ui-version="new"] [data-v2-memory] [class*="text-stone-"], :root[data-ui-version="new"] [data-v2-memo] [class*="text-stone-"], :root[data-ui-version="new"] [data-v2-settings] [class*="text-stone-"], :root[data-ui-version="new"] [data-v2-verse-detail] [class*="text-stone-"], :root[data-ui-version="new"] [data-v2-share] [class*="text-stone-"], :root[data-ui-version="new"] [data-v2-nickname] [class*="text-stone-"] { color:var(--new-text-secondary) !important; }
+:root[data-ui-version="new"] [data-v2-home] :is([class*="font-bold"], [class*="font-black"], [class*="font-semibold"]), :root[data-ui-version="new"] [data-v2-reader] :is([class*="font-bold"], [class*="font-black"], [class*="font-semibold"]), :root[data-ui-version="new"] [data-v2-friends] :is([class*="font-bold"], [class*="font-black"], [class*="font-semibold"]), :root[data-ui-version="new"] [data-v2-friend-detail] :is([class*="font-bold"], [class*="font-black"], [class*="font-semibold"]), :root[data-ui-version="new"] [data-v2-archive] :is([class*="font-bold"], [class*="font-black"], [class*="font-semibold"]), :root[data-ui-version="new"] [data-v2-memory] :is([class*="font-bold"], [class*="font-black"], [class*="font-semibold"]), :root[data-ui-version="new"] [data-v2-memo] :is([class*="font-bold"], [class*="font-black"], [class*="font-semibold"]), :root[data-ui-version="new"] [data-v2-settings] :is([class*="font-bold"], [class*="font-black"], [class*="font-semibold"]), :root[data-ui-version="new"] [data-v2-verse-detail] :is([class*="font-bold"], [class*="font-black"], [class*="font-semibold"]) { color:var(--new-text-primary) !important; }
+:root[data-ui-version="new"] [data-v2-home] [class*="bg-stone-8"], :root[data-ui-version="new"] [data-v2-home] [class*="bg-stone-9"], :root[data-ui-version="new"] [data-v2-reader] [class*="bg-stone-8"], :root[data-ui-version="new"] [data-v2-reader] [class*="bg-stone-9"], :root[data-ui-version="new"] [data-v2-friends] [class*="bg-stone-8"], :root[data-ui-version="new"] [data-v2-friend-detail] [class*="bg-stone-8"], :root[data-ui-version="new"] [data-v2-archive] [class*="bg-stone-8"], :root[data-ui-version="new"] [data-v2-memo] [class*="bg-stone-8"], :root[data-ui-version="new"] [data-v2-settings] [class*="bg-stone-8"], :root[data-ui-version="new"] [data-v2-verse-detail] [class*="bg-stone-8"], :root[data-ui-version="new"] [data-v2-share] [class*="bg-stone-8"] { background:var(--new-surface) !important; border-color:var(--new-border) !important; box-shadow:none !important; }
+:root[data-ui-version="new"] [data-v2-home] [class*="bg-stone-1"], :root[data-ui-version="new"] [data-v2-home] [class*="bg-white"], :root[data-ui-version="new"] [data-v2-friends] [class*="bg-white"], :root[data-ui-version="new"] [data-v2-archive] [class*="bg-white"], :root[data-ui-version="new"] [data-v2-settings] [class*="bg-white"], :root[data-ui-version="new"] [data-v2-verse-detail] [class*="bg-white"] { background:var(--new-surface-subtle) !important; border-color:var(--new-divider) !important; box-shadow:none !important; }
+
+/* Friend feed and personal archive share a light record surface, never dark cards. */
+:root[data-ui-version="new"] [data-v2-friends] [class*="bg-stone-9"],
+:root[data-ui-version="new"] [data-v2-archive] [class*="bg-stone-9"] { background:var(--new-surface) !important; border-color:var(--new-divider) !important; box-shadow:none !important; }
+:root[data-ui-version="new"] [data-v2-friends] [class*="border-"],
+:root[data-ui-version="new"] [data-v2-archive] [class*="border-"] { border-color:var(--new-divider) !important; }
+:root[data-ui-version="new"] [data-v2-friends] [class*="text-stone-7"],
+:root[data-ui-version="new"] [data-v2-friends] [class*="text-stone-8"],
+:root[data-ui-version="new"] [data-v2-archive] [class*="text-stone-7"],
+:root[data-ui-version="new"] [data-v2-archive] [class*="text-stone-8"] { color:var(--new-text-primary) !important; }
+
+/* Reader and navigation. */
+:root[data-ui-version="new"] [data-v2-reader] header, :root[data-ui-version="new"] [data-v2-reader] #bible-content-scroll { background:var(--new-bg) !important; border-color:var(--new-divider) !important; }
+:root[data-ui-version="new"] [data-v2-reader] header * { color:var(--new-text-primary) !important; }
+:root[data-ui-version="new"] [data-v2-reader] #bible-content-scroll button.items-start, :root[data-ui-version="new"] [data-v2-reader] #bible-content-scroll button.items-start span { color:var(--new-text-primary) !important; font-family:var(--new-font-display); line-height:var(--new-line-height-scripture); }
+:root[data-ui-version="new"] [data-v2-reader] #bible-content-scroll button.items-start > span:first-child { color:var(--new-text-muted) !important; font-family:var(--new-font-body); }
+:root[data-ui-version="new"] [data-v2-reader] .ios-pwa-bottom-safe button { background:var(--new-surface) !important; color:var(--new-text-secondary) !important; border:1px solid var(--new-border) !important; box-shadow:none !important; }
+:root[data-ui-version="new"] nav.fixed { background:var(--new-surface) !important; border-color:var(--new-divider) !important; }
+:root[data-ui-version="new"] nav.fixed a { color:var(--new-text-muted) !important; }
+:root[data-ui-version="new"] nav.fixed a.text-sky-700 { color:var(--new-text-primary) !important; }
+
+/* Accent and action hierarchy. */
+:root[data-ui-version="new"] [data-v2-home] [class*="text-sky"], :root[data-ui-version="new"] [data-v2-reader] [class*="text-sky"], :root[data-ui-version="new"] [data-v2-friends] [class*="text-sky"], :root[data-ui-version="new"] [data-v2-archive] [class*="text-sky"], :root[data-ui-version="new"] [data-v2-settings] [class*="text-sky"] { color:var(--new-accent) !important; }
+:root[data-ui-version="new"] [data-v2-home] [class*="bg-sky"], :root[data-ui-version="new"] [data-v2-reader] [class*="bg-sky"], :root[data-ui-version="new"] [data-v2-friends] [class*="bg-sky"], :root[data-ui-version="new"] [data-v2-archive] [class*="bg-sky"] { background:var(--new-accent-subtle) !important; border-color:var(--new-border) !important; }
+:root[data-ui-version="new"] [data-v2-home] button.bg-gradient-to-r { background:var(--new-action-primary) !important; color:var(--new-action-primary-text) !important; box-shadow:none !important; }
+:root[data-ui-version="new"] [data-v2-home] button.bg-gradient-to-r * { color:inherit !important; }
+:root[data-ui-version="new"] [data-v2-schedule], :root[data-ui-version="new"] [data-v2-progress] { background:transparent !important; border-color:var(--new-divider) !important; box-shadow:none !important; }
+:root[data-ui-version="new"] [data-v2-progress] .bg-gradient-to-r { background:var(--new-accent) !important; }
+:root[data-ui-version="new"] [data-v2-progress] .text-3xl { color:var(--new-text-primary) !important; font-family:var(--new-font-display); font-weight:500 !important; }
+
+/* Sheets, dialogs, inputs and historical scripture. */
+:root[data-ui-version="new"] [data-v2-memory] input, :root[data-ui-version="new"] [data-v2-memory] textarea, :root[data-ui-version="new"] [data-v2-memo] input, :root[data-ui-version="new"] [data-v2-memo] textarea, :root[data-ui-version="new"] [data-v2-settings] input, :root[data-ui-version="new"] [data-v2-share] input { background:var(--new-surface) !important; color:var(--new-text-primary) !important; border-color:var(--new-border) !important; accent-color:var(--new-accent); }
+:root[data-ui-version="new"] [data-v2-memory] > div:first-child, :root[data-ui-version="new"] [data-v2-share] > div, :root[data-ui-version="new"] [data-v2-nickname] > div { background:var(--new-surface) !important; border-color:var(--new-border) !important; }
+:root[data-ui-version="new"] [data-v2-verse-detail] blockquote { color:var(--new-text-primary) !important; font-family:var(--new-font-display); font-style:normal; }
+
+/* V2 footprint journal: scoped elements preserve the Classic editor unchanged. */
+:root[data-ui-version="new"] [data-v2-memo-header] { background:var(--new-bg) !important; border-color:var(--new-divider) !important; }
+:root[data-ui-version="new"] [data-v2-memo-header] h1, :root[data-ui-version="new"] [data-v2-memo-editor] h2 { color:var(--new-text-primary) !important; }
+:root[data-ui-version="new"] [data-v2-memo-header] button, :root[data-ui-version="new"] [data-v2-memo-header] span { color:var(--new-text-secondary) !important; }
+:root[data-ui-version="new"] [data-v2-memo-verse] { background:var(--new-surface-subtle) !important; border-color:var(--new-divider) !important; box-shadow:none !important; }
+:root[data-ui-version="new"] [data-v2-memo-verse] p, :root[data-ui-version="new"] [data-v2-memo-verse] blockquote { color:var(--new-text-primary) !important; }
+:root[data-ui-version="new"] [data-v2-memo-verse] blockquote { font-family:var(--new-font-display); font-size:1rem; line-height:var(--new-line-height-scripture); }
+:root[data-ui-version="new"] [data-v2-memo-verse] button { color:var(--new-text-secondary) !important; }
+:root[data-ui-version="new"] [data-v2-memo-entry] { border-color:var(--new-divider) !important; background:transparent !important; border-radius:var(--new-radius-md) !important; box-shadow:none !important; }
+:root[data-ui-version="new"] [data-v2-memo-entry]:hover { background:var(--new-surface) !important; border-color:var(--new-border) !important; }
+:root[data-ui-version="new"] [data-v2-memo-entry] > span > span:first-child { color:var(--new-text-primary) !important; }
+:root[data-ui-version="new"] [data-v2-memo-entry] > span > span:last-child { color:var(--new-text-secondary) !important; }
+:root[data-ui-version="new"] [data-v2-memo-status] { background:var(--new-accent-subtle) !important; color:var(--new-accent) !important; }
+:root[data-ui-version="new"] [data-v2-memo-editor] textarea, :root[data-ui-version="new"] [data-v2-memo-editor] input { background:var(--new-surface) !important; border-color:var(--new-border) !important; color:var(--new-text-primary) !important; }
+:root[data-ui-version="new"] [data-v2-memo-editor] :is(textarea, input)::placeholder { color:var(--new-text-muted) !important; opacity:1; }
+:root[data-ui-version="new"] [data-v2-memo-editor] button.bg-sky-600 { background:var(--new-action-primary) !important; color:var(--new-action-primary-text) !important; }
+:root[data-ui-version="new"] [data-v2-memo-dialog] > div { background:var(--new-surface) !important; border:1px solid var(--new-border); box-shadow:0 16px 40px rgb(47 41 34 / .16) !important; }
+:root[data-ui-version="new"] [data-v2-memo-dialog] h2 { color:var(--new-text-primary) !important; }
+:root[data-ui-version="new"] [data-v2-memo-dialog] p { color:var(--new-text-secondary) !important; }
+
+/* V2 memory trainer: quiet surfaces and readable scripture in every existing state. */
+:root[data-ui-version="new"] [data-v2-memory] { background:rgb(47 41 34 / .34) !important; }
+:root[data-ui-version="new"] [data-v2-memory] > div:first-child { background:var(--new-bg) !important; border-color:var(--new-border) !important; box-shadow:0 16px 40px rgb(47 41 34 / .16) !important; }
+:root[data-ui-version="new"] [data-v2-memory-header] { background:var(--new-bg) !important; border-color:var(--new-divider) !important; }
+:root[data-ui-version="new"] [data-v2-memory-header] > div:first-child { color:var(--new-accent) !important; }
+:root[data-ui-version="new"] [data-v2-memory-header] button { min-width:44px; min-height:44px; background:transparent !important; color:var(--new-text-secondary) !important; }
+:root[data-ui-version="new"] [data-v2-memory-scripture] { background:var(--new-surface-subtle) !important; border-color:var(--new-divider) !important; border-radius:var(--new-radius-md) !important; box-shadow:none !important; }
+:root[data-ui-version="new"] [data-v2-memory-scripture] p { color:var(--new-text-primary) !important; font-family:var(--new-font-display); font-weight:400 !important; line-height:var(--new-line-height-scripture) !important; }
+:root[data-ui-version="new"] [data-v2-memory-intro] > div:first-child p, :root[data-ui-version="new"] [data-v2-memory-scripture] > div { color:var(--new-text-muted) !important; }
+:root[data-ui-version="new"] [data-v2-memory-voice], :root[data-ui-version="new"] [data-v2-memory-speed] { background:var(--new-surface-subtle) !important; border:1px solid var(--new-divider); }
+:root[data-ui-version="new"] [data-v2-memory-voice] > div, :root[data-ui-version="new"] [data-v2-memory-speed] button { background:var(--new-surface) !important; border-color:var(--new-border) !important; color:var(--new-text-secondary) !important; box-shadow:none !important; }
+:root[data-ui-version="new"] [data-v2-memory-intro-actions] > button:first-child, :root[data-ui-version="new"] [data-v2-memory-writing] button:first-child { background:var(--new-action-primary) !important; color:var(--new-action-primary-text) !important; box-shadow:none !important; }
+:root[data-ui-version="new"] [data-v2-memory-intro-actions] > button:last-child { background:var(--new-surface) !important; color:var(--new-accent) !important; border-color:var(--new-border) !important; }
+:root[data-ui-version="new"] [data-v2-memory-progress] { background:transparent !important; border-color:var(--new-divider) !important; box-shadow:none !important; }
+:root[data-ui-version="new"] [data-v2-memory-steps] button { background:var(--new-surface-subtle) !important; color:var(--new-text-secondary) !important; box-shadow:none !important; }
+:root[data-ui-version="new"] [data-v2-memory-steps] button.bg-sky-600 { background:var(--new-accent-subtle) !important; color:var(--new-text-primary) !important; border:1px solid var(--new-accent) !important; }
+:root[data-ui-version="new"] [data-v2-memory-steps] [data-v2-memory-challenge-step] { background:var(--new-action-primary) !important; color:var(--new-action-primary-text) !important; }
+:root[data-ui-version="new"] [data-v2-memory-content] [data-v2-memory-prompt] { background:var(--new-surface-subtle) !important; border-color:var(--new-border) !important; }
+:root[data-ui-version="new"] [data-v2-memory-methods] button:first-child { background:var(--new-accent-subtle) !important; border:1px solid var(--new-border) !important; color:var(--new-text-primary) !important; box-shadow:none !important; }
+:root[data-ui-version="new"] [data-v2-memory-methods] button:last-child, :root[data-ui-version="new"] [data-v2-memory-writing] { background:var(--new-surface) !important; border-color:var(--new-border) !important; color:var(--new-text-secondary) !important; }
+:root[data-ui-version="new"] [data-v2-memory-writing] textarea { background:var(--new-bg) !important; border-color:var(--new-border) !important; color:var(--new-text-primary) !important; }
+:root[data-ui-version="new"] [data-v2-memory-writing] textarea::placeholder { color:var(--new-text-muted) !important; opacity:1; }
+:root[data-ui-version="new"] [data-v2-memory-scripture] .memory-v2-word { background:transparent !important; color:var(--new-text-primary) !important; }
+:root[data-ui-version="new"] [data-v2-memory-scripture] .memory-v2-blank { display:inline-block; min-width:2.4em; padding:0 .1em !important; border-bottom:1px solid var(--new-accent); border-radius:0 !important; background:var(--new-accent-subtle) !important; color:transparent !important; vertical-align:baseline; }
+:root[data-ui-version="new"] [data-v2-memory-recording] { background:rgb(238 230 217 / .94) !important; color:var(--new-text-primary) !important; }
+:root[data-ui-version="new"] [data-v2-memory-recording] p { color:var(--new-text-primary) !important; }
+:root[data-ui-version="new"] [data-v2-memory-recording] button { background:var(--new-surface) !important; border:1px solid var(--new-border); color:var(--new-text-secondary) !important; }
+:root[data-ui-version="new"] [data-v2-memory-result] { background:var(--new-surface) !important; border-color:var(--new-border) !important; box-shadow:0 16px 40px rgb(47 41 34 / .16) !important; }
+:root[data-ui-version="new"] [data-v2-memory-result] h3 { color:var(--new-text-primary) !important; }
+:root[data-ui-version="new"] [data-v2-memory-result] p { color:var(--new-text-secondary) !important; }
+:root[data-ui-version="new"] [data-v2-memory-result] button { box-shadow:none !important; }
+
+/* Settings remains an editable Classic page while its New treatment uses only V2 tokens. */
+:root[data-ui-version="new"] [data-v2-settings-header] { background:var(--new-bg) !important; border-color:var(--new-divider) !important; box-shadow:none !important; }
+:root[data-ui-version="new"] [data-v2-settings-header] h1 { color:var(--new-text-primary) !important; }
+:root[data-ui-version="new"] [data-v2-settings-header] button { background:var(--new-surface-subtle) !important; color:var(--new-text-secondary) !important; }
+:root[data-ui-version="new"] [data-v2-settings-card] { background:var(--new-surface) !important; border-color:var(--new-divider) !important; border-radius:var(--new-radius-md) !important; box-shadow:none !important; }
+:root[data-ui-version="new"] [data-v2-settings-card] label { color:var(--new-text-primary) !important; }
+:root[data-ui-version="new"] [data-v2-settings-card] > div.bg-stone-100 { background:var(--new-surface-subtle) !important; }
+:root[data-ui-version="new"] [data-v2-settings-card] > div.bg-stone-100 button { color:var(--new-text-secondary) !important; }
+:root[data-ui-version="new"] [data-v2-settings-preview] { background:var(--new-surface-subtle) !important; border-color:var(--new-divider) !important; }
+:root[data-ui-version="new"] [data-v2-settings-preview] p { color:var(--new-text-primary) !important; font-family:var(--new-font-display); font-weight:400 !important; line-height:var(--new-line-height-scripture) !important; }
