@@ -227,6 +227,27 @@ body.modal-open .app-main {
 :root[data-ui-version="new"] [data-v2-schedule], :root[data-ui-version="new"] [data-v2-progress] { background:transparent !important; border-color:var(--new-divider) !important; box-shadow:none !important; }
 :root[data-ui-version="new"] [data-v2-progress] .bg-gradient-to-r { background:var(--new-accent) !important; }
 :root[data-ui-version="new"] [data-v2-progress] .text-3xl { color:var(--new-text-primary) !important; font-family:var(--new-font-display); font-weight:500 !important; }
+:root[data-ui-version="new"] [data-v2-home-greeting] p { color:var(--new-accent) !important; }
+:root[data-ui-version="new"] [data-v2-home-greeting] h1 { color:var(--new-text-primary) !important; font-family:var(--new-font-ui); font-weight:650 !important; letter-spacing:-.015em; }
+:root[data-ui-version="new"] [data-v2-home-latest] { border-color:var(--new-divider) !important; }
+:root[data-ui-version="new"] [data-v2-home-latest] > p { color:var(--new-text-muted) !important; }
+:root[data-ui-version="new"] [data-v2-home-scripture] { color:var(--new-text-primary) !important; font-family:var(--new-font-scripture); font-weight:400 !important; line-height:var(--new-line-height-scripture) !important; letter-spacing:-.005em; }
+:root[data-ui-version="new"] [data-v2-home-reading] article,
+:root[data-ui-version="new"] [data-v2-home-journey] { background:var(--new-surface) !important; border-color:var(--new-divider) !important; border-radius:var(--new-radius-md) !important; box-shadow:none !important; }
+:root[data-ui-version="new"] [data-v2-home-reading] article > div > p:first-child,
+:root[data-ui-version="new"] [data-v2-home-journey] p:first-child { color:var(--new-text-muted) !important; }
+:root[data-ui-version="new"] [data-v2-home-reading] article p,
+:root[data-ui-version="new"] [data-v2-home-journey] h2,
+:root[data-ui-version="new"] [data-v2-home-journey] .text-lg { color:var(--new-text-primary) !important; }
+:root[data-ui-version="new"] [data-v2-home-reading] article span.bg-stone-100 { background:var(--new-surface-subtle) !important; color:var(--new-text-primary) !important; }
+:root[data-ui-version="new"] [data-v2-home-read-secondary] { background:var(--new-surface-subtle) !important; border-color:var(--new-border) !important; color:var(--new-text-secondary) !important; box-shadow:none !important; }
+:root[data-ui-version="new"] [data-v2-home-read-primary] { background:var(--new-action-primary) !important; color:var(--new-action-primary-text) !important; box-shadow:none !important; }
+:root[data-ui-version="new"] [data-v2-home-journey] > div { border-color:var(--new-divider) !important; }
+:root[data-ui-version="new"] [data-v2-home-journey] svg { color:var(--new-accent) !important; }
+:root[data-ui-version="new"] [data-v2-home-status] { color:var(--new-accent) !important; }
+:root[data-ui-version="new"] [data-v2-home-guide] { color:var(--new-text-secondary) !important; }
+:root[data-ui-version="new"] [data-v2-home-guide] h3,
+:root[data-ui-version="new"] [data-v2-home-guide] strong { color:var(--new-text-primary) !important; }
 
 /* Sheets, dialogs, inputs and historical scripture. */
 :root[data-ui-version="new"] [data-v2-memory] input, :root[data-ui-version="new"] [data-v2-memory] textarea, :root[data-ui-version="new"] [data-v2-memo] input, :root[data-ui-version="new"] [data-v2-memo] textarea, :root[data-ui-version="new"] [data-v2-settings] input, :root[data-ui-version="new"] [data-v2-share] input { background:var(--new-surface) !important; color:var(--new-text-primary) !important; border-color:var(--new-border) !important; accent-color:var(--new-accent); }

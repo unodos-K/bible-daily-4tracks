@@ -5,6 +5,8 @@ import {
   ReadRecordsMap, 
   fetchReadingSettings, 
   fetchReadRecords,
+  fetchOneVerseRecords,
+  OneVerseRecordsMap,
 } from "@/lib/storage";
 import { useAuth } from "@/components/AuthProvider";
 import { getNextUnreadDay } from "@/lib/readingRecords";
@@ -14,6 +16,7 @@ export function useHomeDashboard() {
   
   const [settings, setSettings] = useState<ReadingSettings | null>(null);
   const [records, setRecords] = useState<ReadRecordsMap>({});
+  const [oneVerseRecords, setOneVerseRecords] = useState<OneVerseRecordsMap>({});
   const { authUser, isAuthLoading } = useAuth();
   const [isClient, setIsClient] = useState(false);
   const [nextUnreadDay, setNextUnreadDay] = useState(1);
@@ -29,13 +32,23 @@ export function useHomeDashboard() {
         const s = await fetchReadingSettings(authUser.id);
         if (s && s.hasStarted) {
           setSettings(s);
-          const r = await fetchReadRecords(authUser.id);
+          const [r, oneVerseR] = await Promise.all([
+            fetchReadRecords(authUser.id),
+            fetchOneVerseRecords(authUser.id),
+          ]);
           setRecords(r);
+          setOneVerseRecords(oneVerseR);
           setNextUnreadDay(getNextUnreadDay(r));
+        } else {
+          setSettings(null);
+          setRecords({});
+          setOneVerseRecords({});
+          setNextUnreadDay(1);
         }
       } else {
         setSettings(null);
         setRecords({});
+        setOneVerseRecords({});
         setNextUnreadDay(1);
       }
       setIsLoading(false);
@@ -55,6 +68,7 @@ export function useHomeDashboard() {
     router,
     settings,
     records,
+    oneVerseRecords,
     authUser,
     isClient,
     nextUnreadDay,
