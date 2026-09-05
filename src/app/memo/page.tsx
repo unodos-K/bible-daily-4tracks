@@ -109,7 +109,7 @@ function MemoEditorContent() {
 
   if (isLoading || !record || dayIndex === null) {
     return (
-      <div className="flex min-h-[100dvh] flex-col items-center justify-center gap-3 bg-stone-950 text-stone-500">
+      <div data-v2-memo className="flex min-h-[100dvh] flex-col items-center justify-center gap-3 bg-stone-950 text-stone-500">
         <Footprints className="h-8 w-8 animate-pulse" />
         <span className="text-sm font-medium">발자국을 확인하는 중...</span>
       </div>
@@ -272,5 +272,5 @@ function MemoEditorContent() {
 }
 
 export default function MemoPage() {
-  return <Suspense fallback={<div className="flex min-h-[100dvh] items-center justify-center bg-stone-950 text-stone-500">발자국을 확인하는 중...</div>}><MemoEditorContent /></Suspense>;
+  return <Suspense fallback={<div data-v2-memo className="flex min-h-[100dvh] items-center justify-center bg-stone-950 text-stone-500">발자국을 확인하는 중...</div>}><MemoEditorContent /></Suspense>;
 }

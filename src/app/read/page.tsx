@@ -262,7 +262,7 @@ export default function BibleViewerPage() {
 
   if (isReadingTextLoading) {
     return (
-      <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex flex-col items-center justify-center gap-3 text-stone-500">
+      <div data-v2-reader className="min-h-screen bg-stone-50 dark:bg-stone-950 flex flex-col items-center justify-center gap-3 text-stone-500">
         <BookOpen className="animate-pulse w-8 h-8" />
         <span className="text-sm font-medium">오늘의 본문을 불러오는 중...</span>
       </div>
@@ -271,7 +271,7 @@ export default function BibleViewerPage() {
 
   if (readingTextError) {
     return (
-      <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex flex-col items-center justify-center gap-4 p-8 text-center text-stone-500">
+      <div data-v2-reader data-v2-error-state className="min-h-screen bg-stone-50 dark:bg-stone-950 flex flex-col items-center justify-center gap-4 p-8 text-center text-stone-500">
         <p>본문을 불러오지 못했습니다. 네트워크를 확인한 뒤 다시 시도해주세요.</p>
         <button
           type="button"
@@ -285,7 +285,7 @@ export default function BibleViewerPage() {
   }
 
   if (!readingData) {
-    return <div className="p-8 text-center text-stone-500">데이터를 불러올 수 없습니다.</div>;
+    return <div data-v2-reader data-v2-error-state className="p-8 text-center text-stone-500">데이터를 불러올 수 없습니다.</div>;
   }
 
   return (
@@ -293,7 +293,8 @@ export default function BibleViewerPage() {
       
       {/* Toast */}
       {toastMessage && (
-        <div 
+        <div
+          data-v2-toast
           style={{ top: `${headerHeight + 12}px` }}
           className="fixed left-1/2 -translate-x-1/2 z-50 bg-stone-800 text-white dark:bg-stone-200 dark:text-stone-900 px-4 py-2 rounded-full shadow-lg text-sm font-medium animate-in fade-in slide-in-from-top-4"
         >
@@ -303,8 +304,8 @@ export default function BibleViewerPage() {
 
       {/* Access Denied Modal */}
       {showAccessDeniedModal && (
-        <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white dark:bg-stone-900 rounded-2xl p-6 shadow-xl w-full max-w-sm flex flex-col items-center gap-4 animate-in zoom-in-95">
+        <div data-v2-dialog className="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
+          <div data-v2-dialog-panel className="bg-white dark:bg-stone-900 rounded-2xl p-6 shadow-xl w-full max-w-sm flex flex-col items-center gap-4 animate-in zoom-in-95">
             <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 flex items-center justify-center mb-2">
               <AlertCircle size={24} />
             </div>

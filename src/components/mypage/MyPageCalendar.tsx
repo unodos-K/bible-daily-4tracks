@@ -48,10 +48,11 @@ export default function MyPageCalendar({
   }
 
   return (
-    <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 p-4 sm:p-6">
+    <section data-v2-calendar className="bg-white dark:bg-stone-900 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 p-4 sm:p-6">
       <div className="flex items-center justify-between mb-6">
         <button 
           onClick={() => setCurrentDate(new Date(year, month - 2, 1))}
+          aria-label="이전 달"
           className="p-2 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full transition-colors"
         >
           <ChevronLeft className="text-stone-600 dark:text-stone-300" />
@@ -61,6 +62,7 @@ export default function MyPageCalendar({
         </h3>
         <button 
           onClick={() => setCurrentDate(new Date(year, month, 1))}
+          aria-label="다음 달"
           className="p-2 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full transition-colors"
         >
           <ChevronRight className="text-stone-600 dark:text-stone-300" />
@@ -103,7 +105,11 @@ export default function MyPageCalendar({
           }
 
           return (
-            <div 
+            <div
+              data-v2-calendar-day
+              data-selected={isSelected || undefined}
+              data-has-record={hasOneVerse || undefined}
+              data-disabled={isBeforeStart && !hasOneVerse || undefined}
               key={day}
               onClick={() => {
                 if (!isBeforeStart || hasOneVerse) {
@@ -138,6 +144,6 @@ export default function MyPageCalendar({
           );
         })}
       </div>
-    </div>
+    </section>
   );
 }

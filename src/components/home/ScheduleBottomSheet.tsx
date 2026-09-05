@@ -18,18 +18,19 @@ export default function ScheduleBottomSheet({
   targetDayRef
 }: ScheduleBottomSheetProps) {
   return (
-    <div className="fixed inset-0 z-50 flex justify-center items-end">
+    <div data-v2-sheet className="fixed inset-0 z-50 flex justify-center items-end">
       <div 
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
         onClick={() => setIsScheduleSheetOpen(false)}
       />
-      <div className="relative w-full max-w-xl bg-white dark:bg-stone-950 rounded-t-3xl h-[80vh] flex flex-col shadow-2xl overflow-hidden animate-in slide-in-from-bottom duration-300">
+      <div data-v2-sheet-panel className="relative w-full max-w-xl bg-white dark:bg-stone-950 rounded-t-3xl h-[80vh] flex flex-col shadow-2xl overflow-hidden animate-in slide-in-from-bottom duration-300">
         <div className="flex justify-between items-center p-5 border-b border-stone-200 dark:border-stone-800 shrink-0">
           <h2 className="text-xl font-black text-stone-800 dark:text-stone-100 flex items-center gap-2">
             <CalendarDays size={20} className="text-sky-500" /> 365일 전체 일정
           </h2>
           <button 
             onClick={() => setIsScheduleSheetOpen(false)}
+            aria-label="전체 일정 닫기"
             className="p-2 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-500 transition-colors"
           >
             <X size={20} />

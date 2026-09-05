@@ -75,13 +75,14 @@ export default function ShareModal({ isOpen, onClose, record, onShare }: ShareMo
 
   return (
     <div data-v2-share className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200" onClick={onClose}>
-      <div 
+      <div
+        data-v2-dialog-panel
         className="w-full max-w-sm bg-stone-900 border border-stone-700/50 rounded-2xl overflow-hidden shadow-2xl flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between p-6 pb-4">
+        <div data-v2-dialog-header className="flex items-center justify-between p-6 pb-4">
           <h3 className="text-xl font-bold text-stone-100">나눔 항목 선택</h3>
-          <button onClick={onClose} className="text-stone-400 hover:text-stone-200"><X size={24} /></button>
+          <button onClick={onClose} aria-label="나눔 항목 선택 닫기" className="text-stone-400 hover:text-stone-200"><X size={24} /></button>
         </div>
         
         <div className="px-6 pb-2 text-sm text-stone-400">
@@ -90,7 +91,8 @@ export default function ShareModal({ isOpen, onClose, record, onShare }: ShareMo
 
         <div className="flex flex-col gap-2 p-6 pt-2 overflow-y-auto max-h-[60vh]">
           {items.map((item, index) => (
-            <div 
+            <div
+              data-v2-share-item
               key={item.id}
               draggable
               onDragStart={(e) => handleDragStart(e, index)}
@@ -114,7 +116,7 @@ export default function ShareModal({ isOpen, onClose, record, onShare }: ShareMo
           ))}
         </div>
 
-        <div className="p-4 bg-stone-950/30 border-t border-stone-800">
+        <div data-v2-dialog-footer className="p-4 bg-stone-950/30 border-t border-stone-800">
           <button
             onClick={handleShareClick}
             className="w-full py-3.5 bg-[#FEE500] hover:bg-[#FDD800] text-black font-bold rounded-xl flex items-center justify-center transition-colors"

@@ -20,7 +20,7 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
   }, [onFinish]);
 
   return (
-    <div className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-stone-50 dark:bg-stone-950 transition-opacity duration-500 ${isFadingOut ? 'opacity-0' : 'opacity-100'}`}>
+    <div data-v2-splash className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-stone-50 dark:bg-stone-950 transition-opacity duration-500 ${isFadingOut ? 'opacity-0' : 'opacity-100'}`}>
       <div className="flex flex-col items-center gap-4 animate-in zoom-in duration-700">
         <div className="p-4 bg-emerald-500 rounded-2xl shadow-lg shadow-emerald-500/20">
           <BookOpen size={48} className="text-white" />

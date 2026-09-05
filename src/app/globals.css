@@ -97,14 +97,14 @@ body.modal-open .app-main {
 /* Local UI V2: semantic color system, isolated from Classic. */
 :root[data-ui-version="new"] {
   --new-bg: #f7f2e8; --new-surface: #fcf8f0; --new-surface-subtle: #eee6d9;
-  --new-text-primary: #2f2922; --new-text-secondary: #62584c; --new-text-muted: #74695d; --new-text-disabled: #b9aea0;
-  --new-accent: #766149; --new-accent-subtle: #e7dccb; --new-border: #d7ccbc; --new-divider: #e3d9cb;
+  --new-text-primary: #2f2922; --new-text-secondary: #62584c; --new-text-muted: #706559; --new-text-disabled: #b9aea0;
+  --new-accent: #705b43; --new-accent-subtle: #e7dccb; --new-border: #d7ccbc; --new-divider: #e3d9cb;
   --new-action-primary: #4d4033; --new-action-primary-text: #fffdf8;
   --new-success: #53705b; --new-error: #8c5b52; --new-warning: #80643b;
-  --new-font-display: Georgia, "Times New Roman", serif; --new-font-body: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
+  --new-font-display: Georgia, "Times New Roman", serif; --new-font-scripture: Georgia, "Times New Roman", serif; --new-font-ui: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif; --new-font-body: var(--new-font-ui);
   --new-line-height-body: 1.65; --new-line-height-scripture: 1.9; --new-radius-sm: 8px; --new-radius-md: 12px;
 }
-:root[data-ui-version="new"] body, :root[data-ui-version="new"] .app-main { background: var(--new-bg) !important; color: var(--new-text-primary); }
+:root[data-ui-version="new"] body, :root[data-ui-version="new"] .app-main { background: var(--new-bg) !important; color: var(--new-text-primary); font-family:var(--new-font-ui); line-height:var(--new-line-height-body); }
 :root[data-ui-version="new"] .dark { color-scheme: light; }
 /* The comparison control deliberately owns its tokens: Classic has no --new-* values. */
 .ui-version-toggle { --toggle-surface:#fffcf6; --toggle-border:#cfc4b4; --toggle-text:#62584c; --toggle-active:#4d4033; --toggle-active-text:#fffdf8; display:flex; box-sizing:border-box; width:100%; max-width:none; gap:3px; align-items:center; padding:4px; border:1px solid var(--toggle-border); border-radius:8px; background:var(--toggle-surface); box-shadow:none; color:var(--toggle-text); font:600 11px/1 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif; white-space:nowrap; }
@@ -113,22 +113,101 @@ body.modal-open .app-main {
 .ui-version-toggle button[aria-pressed="true"] { background:var(--toggle-active); color:var(--toggle-active-text); }
 .ui-version-toggle button { flex:1; min-height:42px; font-size:13px; }
 
-/* Shared V2 surface and contrast repair. Attribute selectors deliberately cover dark: Tailwind classes too. */
+/* Legacy coverage is limited to the already-stable primary screens. Secondary screens use semantic scopes below. */
 :root[data-ui-version="new"] [data-v2-home], :root[data-ui-version="new"] [data-v2-reader], :root[data-ui-version="new"] [data-v2-friends], :root[data-ui-version="new"] [data-v2-friend-detail], :root[data-ui-version="new"] [data-v2-archive], :root[data-ui-version="new"] [data-v2-memory], :root[data-ui-version="new"] [data-v2-memo], :root[data-ui-version="new"] [data-v2-settings], :root[data-ui-version="new"] [data-v2-verse-detail], :root[data-ui-version="new"] [data-v2-landing], :root[data-ui-version="new"] [data-v2-share], :root[data-ui-version="new"] [data-v2-nickname] { background:var(--new-bg) !important; color:var(--new-text-primary) !important; }
-:root[data-ui-version="new"] [data-v2-home] [class*="text-stone-"], :root[data-ui-version="new"] [data-v2-reader] [class*="text-stone-"], :root[data-ui-version="new"] [data-v2-friends] [class*="text-stone-"], :root[data-ui-version="new"] [data-v2-friend-detail] [class*="text-stone-"], :root[data-ui-version="new"] [data-v2-archive] [class*="text-stone-"], :root[data-ui-version="new"] [data-v2-memory] [class*="text-stone-"], :root[data-ui-version="new"] [data-v2-memo] [class*="text-stone-"], :root[data-ui-version="new"] [data-v2-settings] [class*="text-stone-"], :root[data-ui-version="new"] [data-v2-verse-detail] [class*="text-stone-"], :root[data-ui-version="new"] [data-v2-share] [class*="text-stone-"], :root[data-ui-version="new"] [data-v2-nickname] [class*="text-stone-"] { color:var(--new-text-secondary) !important; }
-:root[data-ui-version="new"] [data-v2-home] :is([class*="font-bold"], [class*="font-black"], [class*="font-semibold"]), :root[data-ui-version="new"] [data-v2-reader] :is([class*="font-bold"], [class*="font-black"], [class*="font-semibold"]), :root[data-ui-version="new"] [data-v2-friends] :is([class*="font-bold"], [class*="font-black"], [class*="font-semibold"]), :root[data-ui-version="new"] [data-v2-friend-detail] :is([class*="font-bold"], [class*="font-black"], [class*="font-semibold"]), :root[data-ui-version="new"] [data-v2-archive] :is([class*="font-bold"], [class*="font-black"], [class*="font-semibold"]), :root[data-ui-version="new"] [data-v2-memory] :is([class*="font-bold"], [class*="font-black"], [class*="font-semibold"]), :root[data-ui-version="new"] [data-v2-memo] :is([class*="font-bold"], [class*="font-black"], [class*="font-semibold"]), :root[data-ui-version="new"] [data-v2-settings] :is([class*="font-bold"], [class*="font-black"], [class*="font-semibold"]), :root[data-ui-version="new"] [data-v2-verse-detail] :is([class*="font-bold"], [class*="font-black"], [class*="font-semibold"]) { color:var(--new-text-primary) !important; }
-:root[data-ui-version="new"] [data-v2-home] [class*="bg-stone-8"], :root[data-ui-version="new"] [data-v2-home] [class*="bg-stone-9"], :root[data-ui-version="new"] [data-v2-reader] [class*="bg-stone-8"], :root[data-ui-version="new"] [data-v2-reader] [class*="bg-stone-9"], :root[data-ui-version="new"] [data-v2-friends] [class*="bg-stone-8"], :root[data-ui-version="new"] [data-v2-friend-detail] [class*="bg-stone-8"], :root[data-ui-version="new"] [data-v2-archive] [class*="bg-stone-8"], :root[data-ui-version="new"] [data-v2-memo] [class*="bg-stone-8"], :root[data-ui-version="new"] [data-v2-settings] [class*="bg-stone-8"], :root[data-ui-version="new"] [data-v2-verse-detail] [class*="bg-stone-8"], :root[data-ui-version="new"] [data-v2-share] [class*="bg-stone-8"] { background:var(--new-surface) !important; border-color:var(--new-border) !important; box-shadow:none !important; }
-:root[data-ui-version="new"] [data-v2-home] [class*="bg-stone-1"], :root[data-ui-version="new"] [data-v2-home] [class*="bg-white"], :root[data-ui-version="new"] [data-v2-friends] [class*="bg-white"], :root[data-ui-version="new"] [data-v2-archive] [class*="bg-white"], :root[data-ui-version="new"] [data-v2-settings] [class*="bg-white"], :root[data-ui-version="new"] [data-v2-verse-detail] [class*="bg-white"] { background:var(--new-surface-subtle) !important; border-color:var(--new-divider) !important; box-shadow:none !important; }
+:root[data-ui-version="new"] [data-v2-home] [class*="text-stone-"], :root[data-ui-version="new"] [data-v2-reader] [class*="text-stone-"], :root[data-ui-version="new"] [data-v2-memory] [class*="text-stone-"], :root[data-ui-version="new"] [data-v2-memo] [class*="text-stone-"], :root[data-ui-version="new"] [data-v2-settings] [class*="text-stone-"] { color:var(--new-text-secondary) !important; }
+:root[data-ui-version="new"] [data-v2-home] :is([class*="font-bold"], [class*="font-black"], [class*="font-semibold"]), :root[data-ui-version="new"] [data-v2-reader] :is([class*="font-bold"], [class*="font-black"], [class*="font-semibold"]), :root[data-ui-version="new"] [data-v2-memory] :is([class*="font-bold"], [class*="font-black"], [class*="font-semibold"]), :root[data-ui-version="new"] [data-v2-memo] :is([class*="font-bold"], [class*="font-black"], [class*="font-semibold"]), :root[data-ui-version="new"] [data-v2-settings] :is([class*="font-bold"], [class*="font-black"], [class*="font-semibold"]) { color:var(--new-text-primary) !important; }
+:root[data-ui-version="new"] [data-v2-home] [class*="bg-stone-8"], :root[data-ui-version="new"] [data-v2-home] [class*="bg-stone-9"], :root[data-ui-version="new"] [data-v2-reader] [class*="bg-stone-8"], :root[data-ui-version="new"] [data-v2-reader] [class*="bg-stone-9"], :root[data-ui-version="new"] [data-v2-memo] [class*="bg-stone-8"], :root[data-ui-version="new"] [data-v2-settings] [class*="bg-stone-8"] { background:var(--new-surface) !important; border-color:var(--new-border) !important; box-shadow:none !important; }
+:root[data-ui-version="new"] [data-v2-home] [class*="bg-stone-1"], :root[data-ui-version="new"] [data-v2-home] [class*="bg-white"], :root[data-ui-version="new"] [data-v2-settings] [class*="bg-white"] { background:var(--new-surface-subtle) !important; border-color:var(--new-divider) !important; box-shadow:none !important; }
 
-/* Friend feed and personal archive share a light record surface, never dark cards. */
-:root[data-ui-version="new"] [data-v2-friends] [class*="bg-stone-9"],
-:root[data-ui-version="new"] [data-v2-archive] [class*="bg-stone-9"] { background:var(--new-surface) !important; border-color:var(--new-divider) !important; box-shadow:none !important; }
-:root[data-ui-version="new"] [data-v2-friends] [class*="border-"],
-:root[data-ui-version="new"] [data-v2-archive] [class*="border-"] { border-color:var(--new-divider) !important; }
-:root[data-ui-version="new"] [data-v2-friends] [class*="text-stone-7"],
-:root[data-ui-version="new"] [data-v2-friends] [class*="text-stone-8"],
-:root[data-ui-version="new"] [data-v2-archive] [class*="text-stone-7"],
-:root[data-ui-version="new"] [data-v2-archive] [class*="text-stone-8"] { color:var(--new-text-primary) !important; }
+/* Semantic typography and standard secondary-route chrome. */
+:root[data-ui-version="new"] :is([data-v2-friends], [data-v2-friend-detail], [data-v2-archive], [data-v2-verse-detail], [data-v2-settings], [data-v2-landing]) { font-family:var(--new-font-ui); line-height:var(--new-line-height-body); }
+:root[data-ui-version="new"] [data-v2-standard-header] { background:color-mix(in srgb, var(--new-bg) 94%, transparent) !important; border-color:var(--new-divider) !important; box-shadow:none !important; }
+:root[data-ui-version="new"] [data-v2-standard-header] :is(h1, h2) { color:var(--new-text-primary) !important; font-family:var(--new-font-ui); font-weight:650 !important; letter-spacing:-.015em; }
+:root[data-ui-version="new"] [data-v2-standard-header] button { color:var(--new-text-secondary) !important; }
+
+/* Friends: calm actions, tabs, record surfaces and readable scripture. */
+:root[data-ui-version="new"] [data-v2-friends-content],
+:root[data-ui-version="new"] [data-v2-friend-detail] > main { background:var(--new-bg) !important; }
+:root[data-ui-version="new"] [data-v2-friend-actions] > button { min-height:44px; background:var(--new-surface) !important; border:1px solid var(--new-border); color:var(--new-text-primary) !important; box-shadow:none !important; }
+:root[data-ui-version="new"] [data-v2-friend-actions] > button:first-child { background:var(--new-accent-subtle) !important; color:var(--new-accent) !important; }
+:root[data-ui-version="new"] [data-v2-tabs] { border-color:var(--new-divider) !important; }
+:root[data-ui-version="new"] [data-v2-tabs] button { min-height:44px; border-color:transparent !important; color:var(--new-text-muted) !important; }
+:root[data-ui-version="new"] [data-v2-tabs] button[aria-pressed="true"] { border-color:var(--new-accent) !important; color:var(--new-text-primary) !important; }
+:root[data-ui-version="new"] [data-v2-friend-card],
+:root[data-ui-version="new"] [data-v2-friend-summary],
+:root[data-ui-version="new"] [data-v2-friend-record] { background:var(--new-surface) !important; border-color:var(--new-divider) !important; border-radius:var(--new-radius-md) !important; box-shadow:none !important; color:var(--new-text-secondary) !important; }
+:root[data-ui-version="new"] [data-v2-friend-card] :is(a, strong, [class*="font-bold"]),
+:root[data-ui-version="new"] [data-v2-friend-profile] :is(h2, [class*="font-bold"]),
+:root[data-ui-version="new"] [data-v2-friend-summary] [class*="font-bold"],
+:root[data-ui-version="new"] [data-v2-friend-record] [class*="font-bold"] { color:var(--new-text-primary) !important; }
+:root[data-ui-version="new"] [data-v2-friend-profile] > div:first-child,
+:root[data-ui-version="new"] [data-v2-profile-chip] { background:var(--new-surface-subtle) !important; border-color:var(--new-divider) !important; box-shadow:none !important; }
+:root[data-ui-version="new"] :is([data-v2-friend-card], [data-v2-friend-record]) svg { color:var(--new-accent) !important; }
+:root[data-ui-version="new"] [data-v2-scripture-preview] { background:var(--new-surface-subtle) !important; border-color:var(--new-divider) !important; }
+:root[data-ui-version="new"] [data-v2-scripture] { color:var(--new-text-primary) !important; font-family:var(--new-font-scripture); font-style:normal !important; font-weight:400 !important; line-height:var(--new-line-height-scripture) !important; letter-spacing:-.005em; }
+:root[data-ui-version="new"] [data-v2-search-control] input { min-height:44px; background:var(--new-surface) !important; border-color:var(--new-border) !important; color:var(--new-text-primary) !important; }
+:root[data-ui-version="new"] [data-v2-search-control] input::placeholder { color:var(--new-text-muted); opacity:1; }
+:root[data-ui-version="new"] [data-v2-search-control] button { min-width:44px; background:var(--new-action-primary) !important; color:var(--new-action-primary-text) !important; }
+:root[data-ui-version="new"] [data-v2-empty-state] { background:transparent !important; border-color:var(--new-divider) !important; color:var(--new-text-secondary) !important; box-shadow:none !important; }
+:root[data-ui-version="new"] [data-v2-progress-track] { background:var(--new-surface-subtle) !important; }
+:root[data-ui-version="new"] [data-v2-progress-fill] { background:var(--new-accent) !important; }
+:root[data-ui-version="new"] [data-v2-status-badge] { background:var(--new-accent-subtle) !important; border-color:var(--new-border) !important; color:var(--new-accent) !important; }
+:root[data-ui-version="new"] [data-v2-status-badge][data-active="true"] { background:color-mix(in srgb, var(--new-accent-subtle) 72%, var(--new-surface)) !important; border-color:var(--new-accent) !important; }
+
+/* Like is a shared action whose tooltip is portalled outside page wrappers. */
+:root[data-ui-version="new"] [data-v2-like-button] { background:var(--new-accent-subtle) !important; color:var(--new-accent) !important; }
+:root[data-ui-version="new"] [data-v2-like-tooltip] { background:var(--new-action-primary) !important; color:var(--new-action-primary-text) !important; border:1px solid var(--new-border); box-shadow:0 12px 30px rgb(47 41 34 / .16) !important; }
+:root[data-ui-version="new"] [data-v2-like-tooltip] span { color:inherit !important; }
+
+/* Personal archive and day detail use the same editorial record system. */
+:root[data-ui-version="new"] [data-v2-calendar],
+:root[data-ui-version="new"] [data-v2-archive-board],
+:root[data-ui-version="new"] [data-v2-archive-record] { background:var(--new-surface) !important; border-color:var(--new-divider) !important; border-radius:var(--new-radius-md) !important; box-shadow:none !important; color:var(--new-text-secondary) !important; }
+:root[data-ui-version="new"] :is([data-v2-calendar], [data-v2-archive-board], [data-v2-archive-record]) :is(h3, [class*="font-bold"]) { color:var(--new-text-primary) !important; }
+:root[data-ui-version="new"] [data-v2-calendar-day] { border-color:transparent !important; color:var(--new-text-secondary) !important; box-shadow:none !important; }
+:root[data-ui-version="new"] [data-v2-calendar-day][data-has-record="true"] { background:var(--new-surface-subtle) !important; border-color:var(--new-border) !important; }
+:root[data-ui-version="new"] [data-v2-calendar-day][data-selected="true"] { background:var(--new-accent-subtle) !important; border-color:var(--new-accent) !important; box-shadow:0 0 0 1px var(--new-accent) !important; }
+:root[data-ui-version="new"] [data-v2-calendar-day][data-disabled="true"] { background:transparent !important; color:var(--new-text-disabled) !important; }
+:root[data-ui-version="new"] [data-v2-scripture-panel] { background:var(--new-surface-subtle) !important; color:var(--new-text-primary) !important; }
+:root[data-ui-version="new"] [data-v2-scripture-panel] > div { color:var(--new-text-secondary) !important; }
+:root[data-ui-version="new"] [data-v2-record-header] { background:var(--new-surface) !important; border-color:var(--new-divider) !important; color:var(--new-text-primary) !important; }
+:root[data-ui-version="new"] [data-v2-record-actions] { background:var(--new-surface) !important; border-color:var(--new-divider) !important; }
+:root[data-ui-version="new"] [data-v2-record-actions] button { background:transparent !important; color:var(--new-text-secondary) !important; min-height:56px; }
+:root[data-ui-version="new"] [data-v2-archive-record] svg { color:var(--new-accent) !important; }
+
+/* Shared dialogs, sheets, toasts and onboarding. */
+:root[data-ui-version="new"] [data-v2-dialog],
+:root[data-ui-version="new"] [data-v2-share],
+:root[data-ui-version="new"] [data-v2-nickname],
+:root[data-ui-version="new"] [data-v2-sheet] { background:rgb(47 41 34 / .34) !important; }
+:root[data-ui-version="new"] [data-v2-dialog-panel],
+:root[data-ui-version="new"] [data-v2-sheet-panel] { background:var(--new-surface) !important; border-color:var(--new-border) !important; color:var(--new-text-primary) !important; box-shadow:0 16px 40px rgb(47 41 34 / .16) !important; }
+:root[data-ui-version="new"] [data-v2-sheet-panel] > div:first-child { border-color:var(--new-divider) !important; }
+:root[data-ui-version="new"] [data-v2-sheet-panel] :is(h2, [class*="font-black"]) { color:var(--new-text-primary) !important; }
+:root[data-ui-version="new"] [data-v2-sheet-panel] [class*="bg-stone-9"],
+:root[data-ui-version="new"] [data-v2-sheet-panel] [class*="bg-white"] { background:var(--new-surface-subtle) !important; border-color:var(--new-divider) !important; }
+:root[data-ui-version="new"] [data-v2-dialog-panel] :is(h2, h3) { color:var(--new-text-primary) !important; }
+:root[data-ui-version="new"] [data-v2-dialog-panel] p { color:var(--new-text-secondary) !important; }
+:root[data-ui-version="new"] [data-v2-dialog-panel] [class*="bg-stone-8"] { background:var(--new-surface-subtle) !important; border-color:var(--new-divider) !important; color:var(--new-text-secondary) !important; }
+:root[data-ui-version="new"] [data-v2-dialog-panel] button[class*="bg-sky"],
+:root[data-ui-version="new"] [data-v2-dialog-panel] button[class*="bg-amber"] { background:var(--new-action-primary) !important; color:var(--new-action-primary-text) !important; box-shadow:none !important; }
+:root[data-ui-version="new"] [data-v2-dialog-panel] button[class*="bg-red"] { background:var(--new-error) !important; color:var(--new-action-primary-text) !important; box-shadow:none !important; }
+:root[data-ui-version="new"] [data-v2-share-item] { background:var(--new-surface-subtle) !important; border-color:var(--new-divider) !important; }
+:root[data-ui-version="new"] [data-v2-share-item] span { color:var(--new-text-primary) !important; }
+:root[data-ui-version="new"] [data-v2-dialog-footer] { background:var(--new-surface) !important; border-color:var(--new-divider) !important; }
+:root[data-ui-version="new"] [data-v2-nickname-preview] { background:var(--new-surface-subtle) !important; border-color:var(--new-divider) !important; }
+:root[data-ui-version="new"] [data-v2-secondary-action] { background:var(--new-surface-subtle) !important; color:var(--new-text-secondary) !important; box-shadow:none !important; }
+:root[data-ui-version="new"] [data-v2-primary-action] { background:var(--new-action-primary) !important; color:var(--new-action-primary-text) !important; box-shadow:none !important; }
+:root[data-ui-version="new"] [data-v2-toast] { background:var(--new-action-primary) !important; color:var(--new-action-primary-text) !important; box-shadow:none !important; }
+
+/* Entry and splash remain restrained in V2; Kakao's brand button is intentionally preserved. */
+:root[data-ui-version="new"] [data-v2-landing-decoration] { display:none; }
+:root[data-ui-version="new"] [data-v2-landing-content] h1,
+:root[data-ui-version="new"] [data-v2-splash] h1 { color:var(--new-text-primary) !important; font-family:var(--new-font-display); font-weight:500 !important; letter-spacing:.08em; }
+:root[data-ui-version="new"] [data-v2-landing-content] p,
+:root[data-ui-version="new"] [data-v2-splash] p { color:var(--new-text-secondary) !important; }
+:root[data-ui-version="new"] [data-v2-splash] { background:var(--new-bg) !important; color:var(--new-text-primary) !important; }
 
 /* Reader and navigation. */
 :root[data-ui-version="new"] [data-v2-reader] header, :root[data-ui-version="new"] [data-v2-reader] #bible-content-scroll { background:var(--new-bg) !important; border-color:var(--new-divider) !important; }

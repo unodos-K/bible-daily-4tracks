@@ -63,7 +63,7 @@ export default function VerseDetailPage() {
   return (
     <div data-v2-verse-detail className="w-full min-h-[100dvh] bg-stone-50 dark:bg-stone-950 flex flex-col">
       {/* 고정 헤더 */}
-      <header className="sticky top-0 z-40 bg-stone-50/95 dark:bg-stone-950/95 backdrop-blur-md pt-[calc(1rem+env(safe-area-inset-top))] pb-4 px-4 border-b border-stone-200/50 dark:border-stone-800/50 flex items-center shadow-sm">
+      <header data-v2-standard-header className="sticky top-0 z-40 bg-stone-50/95 dark:bg-stone-950/95 backdrop-blur-md pt-[calc(1rem+env(safe-area-inset-top))] pb-4 px-4 border-b border-stone-200/50 dark:border-stone-800/50 flex items-center shadow-sm">
         <button 
           onClick={() => router.back()}
           className="p-2 mr-2 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 rounded-full text-stone-600 dark:text-stone-300 transition-colors"
@@ -93,14 +93,14 @@ export default function VerseDetailPage() {
               const formattedRef = verse.book === "시편" ? `${verse.book} ${verse.chapter}편 ${verse.verse}절` : `${verse.book} ${verse.chapter}장 ${verse.verse}절`;
 
               return (
-                <div key={record.dayIndex} className="flex flex-col mb-4 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl md:rounded-3xl shadow-sm overflow-hidden">
+                <article data-v2-archive-record key={record.dayIndex} className="flex flex-col mb-4 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl md:rounded-3xl shadow-sm overflow-hidden">
                   
                   {/* Day 라벨 (여러 개일 경우 구분) */}
-                  <div className="flex justify-between items-center px-5 py-3 border-b border-stone-100 dark:border-stone-800 bg-stone-50 dark:bg-stone-900/50">
+                  <div data-v2-record-header className="flex justify-between items-center px-5 py-3 border-b border-stone-100 dark:border-stone-800 bg-stone-50 dark:bg-stone-900/50">
                     <span className="font-bold text-stone-700 dark:text-stone-300 text-sm md:text-base">
                       Day {record.dayIndex}
                     </span>
-                    <div className={`px-2 py-1 rounded-md text-xs font-bold ${
+                    <div data-v2-status-badge data-active={isMem || undefined} className={`px-2 py-1 rounded-md text-xs font-bold flex items-center gap-1 ${
                       isMem 
                         ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400 border border-amber-300 dark:border-amber-800' 
                         : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800'
@@ -110,10 +110,10 @@ export default function VerseDetailPage() {
                   </div>
 
                   {/* 말씀 본문 영역 (UI 확대 및 여백) */}
-                  <div className="relative p-6 md:p-10 bg-stone-800 dark:bg-stone-800/40 text-stone-100 flex flex-col">
+                  <div data-v2-scripture-panel className="relative p-6 md:p-10 bg-stone-800 dark:bg-stone-800/40 text-stone-100 flex flex-col">
                     <Quote className="absolute top-4 left-4 md:top-6 md:left-6 text-white/10 w-12 h-12 md:w-16 md:h-16 -scale-x-100" />
                     
-                    <blockquote className="relative z-10 text-lg md:text-2xl leading-relaxed md:leading-loose font-medium italic break-words break-keep mt-6">
+                    <blockquote data-v2-scripture className="relative z-10 text-lg md:text-2xl leading-relaxed md:leading-loose font-medium italic break-words break-keep mt-6">
                       {displayTxt}
                     </blockquote>
                     
@@ -123,7 +123,7 @@ export default function VerseDetailPage() {
                   </div>
 
                   {/* 4열 액션 버튼 (마이페이지와 동일) */}
-                  <div className="grid grid-cols-4 gap-1 p-3 bg-white dark:bg-stone-900">
+                  <div data-v2-record-actions className="grid grid-cols-4 gap-1 p-3 bg-white dark:bg-stone-900">
                     <button
                       onClick={() => router.push(`/memo?day=${record.dayIndex}&mode=${verse.memo ? 'view' : 'edit'}`)}
                       className="flex flex-col items-center justify-center gap-1.5 py-4 bg-stone-50 dark:bg-white/5 hover:bg-stone-100 dark:hover:bg-white/10 text-stone-600 dark:text-stone-300 rounded-xl transition-all active:scale-95"
@@ -163,7 +163,7 @@ export default function VerseDetailPage() {
                     </button>
                   </div>
 
-                </div>
+                </article>
               );
             })}
           </div>

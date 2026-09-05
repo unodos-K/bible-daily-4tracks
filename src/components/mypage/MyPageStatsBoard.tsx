@@ -40,7 +40,7 @@ export default function MyPageStatsBoard({
   handleToggleLike
 }: MyPageStatsBoardProps) {
   return (
-    <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 p-4 sm:p-6 flex flex-col">
+    <section data-v2-archive-board className="bg-white dark:bg-stone-900 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 p-4 sm:p-6 flex flex-col">
       <div className="flex flex-col gap-4 mb-6">
         <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 flex items-center gap-2">
           <CalendarDays size={20} /> {year}년 {month}월의 One Verse
@@ -59,7 +59,7 @@ export default function MyPageStatsBoard({
       </div>
 
       {thisMonthTotal === 0 ? (
-        <div className="bg-stone-50 dark:bg-stone-800/50 p-6 rounded-2xl border border-stone-100 dark:border-stone-800 flex flex-col items-center justify-center py-12 text-center">
+        <div data-v2-empty-state className="bg-stone-50 dark:bg-stone-800/50 p-6 rounded-2xl border border-stone-100 dark:border-stone-800 flex flex-col items-center justify-center py-12 text-center">
           <p className="text-stone-500 dark:text-stone-400 mb-2 font-medium">이번 달에 등록된 One Verse가 아직 없습니다.</p>
           <p className="text-stone-400 dark:text-stone-500 text-sm">오늘의 말씀을 읽고 마음에 닿는 구절을 남겨보세요! ✨</p>
         </div>
@@ -77,9 +77,9 @@ export default function MyPageStatsBoard({
             const formattedRef = verse.book === "시편" ? `${verse.book} ${verse.chapter}편 ${verse.verse}절` : `${verse.book} ${verse.chapter}장 ${verse.verse}절`;
 
             return (
-              <div key={`${record.readDate}-${record.dayIndex}`} className="flex flex-col bg-stone-50 dark:bg-stone-950 border border-stone-100 dark:border-stone-800 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+              <article data-v2-archive-record key={`${record.readDate}-${record.dayIndex}`} className="flex flex-col bg-stone-50 dark:bg-stone-950 border border-stone-100 dark:border-stone-800 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
                 
-                <div className="flex flex-col px-4 py-3 bg-white dark:bg-stone-900 border-b border-stone-100 dark:border-stone-800 gap-2 rounded-t-2xl">
+                <div data-v2-record-header className="flex flex-col px-4 py-3 bg-white dark:bg-stone-900 border-b border-stone-100 dark:border-stone-800 gap-2 rounded-t-2xl">
                   <div className="flex justify-between items-center">
                     <span className="font-bold text-stone-800 dark:text-stone-200">
                       {parseInt(mStr)}월 {dayNum}일 ({weekDay})
@@ -128,13 +128,13 @@ export default function MyPageStatsBoard({
                       Day {record.dayIndex}
                     </span>
                   </div>
-                  <blockquote className="text-base sm:text-lg text-stone-800 dark:text-stone-200 font-medium leading-relaxed italic break-keep">
+                  <blockquote data-v2-scripture className="text-base sm:text-lg text-stone-800 dark:text-stone-200 font-medium leading-relaxed italic break-keep">
                     {displayTxt}
                   </blockquote>
                   <div className="text-right text-stone-500 dark:text-stone-400 font-bold text-xs sm:text-sm">
                     - {formattedRef} -
                   </div>
-                  <div className="grid grid-cols-4 gap-1 mt-6 pt-4 border-t border-stone-100 dark:border-stone-800">
+                  <div data-v2-record-actions className="grid grid-cols-4 gap-1 mt-6 pt-4 border-t border-stone-100 dark:border-stone-800">
                     <button
                       onClick={() => router.push(`/memo?day=${record.dayIndex}&mode=${verse.memo ? 'view' : 'edit'}`)}
                       className="flex flex-col items-center justify-center gap-1.5 py-3 bg-stone-100 dark:bg-white/5 hover:bg-stone-200 dark:hover:bg-white/10 text-stone-600 dark:text-stone-300 rounded-xl transition-all active:scale-95"
@@ -168,11 +168,11 @@ export default function MyPageStatsBoard({
                     </button>
                   </div>
                 </div>
-              </div>
+              </article>
             );
           })}
         </div>
       )}
-    </div>
+    </section>
   );
 }

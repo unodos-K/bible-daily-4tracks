@@ -17,12 +17,12 @@ export default function LandingPage() {
   return (
     <div data-v2-landing className="w-full min-h-full flex flex-col relative items-center justify-center bg-stone-50 dark:bg-stone-950 overflow-hidden pb-6">
       {/* 백그라운드 효과 (블러 원) */}
-      <div className="absolute top-[-10%] left-[-10%] w-72 h-72 bg-sky-200 dark:bg-sky-900/40 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-3xl opacity-70"></div>
-      <div className="absolute top-[20%] right-[-10%] w-72 h-72 bg-amber-200 dark:bg-amber-900/40 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-3xl opacity-70"></div>
-      <div className="absolute bottom-[-10%] left-[20%] w-72 h-72 bg-emerald-200 dark:bg-emerald-900/30 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-3xl opacity-70"></div>
+      <div data-v2-landing-decoration className="absolute top-[-10%] left-[-10%] w-72 h-72 bg-sky-200 dark:bg-sky-900/40 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-3xl opacity-70"></div>
+      <div data-v2-landing-decoration className="absolute top-[20%] right-[-10%] w-72 h-72 bg-amber-200 dark:bg-amber-900/40 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-3xl opacity-70"></div>
+      <div data-v2-landing-decoration className="absolute bottom-[-10%] left-[20%] w-72 h-72 bg-emerald-200 dark:bg-emerald-900/30 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-3xl opacity-70"></div>
 
       {/* 메인 컨텐츠 */}
-      <div className="relative z-10 flex flex-col items-center justify-center px-6 w-full max-w-md h-full gap-8 py-8">
+      <div data-v2-landing-content className="relative z-10 flex flex-col items-center justify-center px-6 w-full max-w-md h-full gap-8 py-8">
 
         {/* 로고 & 타이틀 영역 */}
         <div className="flex flex-col items-center text-center">

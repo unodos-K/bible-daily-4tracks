@@ -38,7 +38,7 @@ export default function MyPage() {
 
   if (!stats.isClient || !stats.settings || !stats.settings.hasStarted) {
     return (
-      <div className="min-h-[calc(100vh-52px)] bg-stone-50 dark:bg-stone-950 flex flex-col items-center justify-center gap-3 text-stone-500">
+      <div data-v2-archive className="min-h-[calc(100vh-52px)] bg-stone-50 dark:bg-stone-950 flex flex-col items-center justify-center gap-3 text-stone-500">
         <Footprints className="animate-pulse w-8 h-8" />
         <span className="text-sm font-medium">발자국을 확인하는 중...</span>
       </div>
@@ -80,7 +80,7 @@ export default function MyPage() {
       <div className="flex min-h-0 w-full max-w-2xl flex-1 flex-col">
 
         {/* 헤더 및 프로필 (고정 헤더) */}
-        <header className="z-40 flex w-full shrink-0 flex-row items-center justify-between gap-4 border-b border-stone-200/50 bg-stone-50/95 px-4 pb-4 pt-[calc(1.5rem+env(safe-area-inset-top))] backdrop-blur-md dark:border-stone-800/50 dark:bg-stone-950/95 sm:px-6">
+        <header data-v2-standard-header className="z-40 flex w-full shrink-0 flex-row items-center justify-between gap-4 border-b border-stone-200/50 bg-stone-50/95 px-4 pb-4 pt-[calc(1.5rem+env(safe-area-inset-top))] backdrop-blur-md dark:border-stone-800/50 dark:bg-stone-950/95 sm:px-6">
 
           {/* 좌측 묶음: 타이틀과 유저 정보 (반응형 래퍼) */}
           <div className="flex flex-col items-start gap-2 min-w-0 flex-1 sm:flex-row sm:items-center sm:justify-between">
@@ -91,7 +91,7 @@ export default function MyPage() {
 
             <div className="flex items-center min-w-0">
               {stats.authUser ? (
-                <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 bg-stone-100 dark:bg-stone-800 rounded-full border border-stone-200 dark:border-stone-700 shadow-inner min-w-0">
+                <div data-v2-profile-chip className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 bg-stone-100 dark:bg-stone-800 rounded-full border border-stone-200 dark:border-stone-700 shadow-inner min-w-0">
                   <div className="w-5 h-5 rounded-full bg-stone-300 dark:bg-stone-700 flex items-center justify-center text-[10px] font-bold text-stone-600 dark:text-stone-300 overflow-hidden shrink-0">
                     {stats.authUser.avatar_url ? (
                       <AvatarImage src={stats.authUser.avatar_url} alt={stats.authUser.name} size={20} className="w-full h-full object-cover" />
@@ -176,7 +176,7 @@ export default function MyPage() {
       />
 
       {stats.toastMessage && (
-        <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-stone-800 text-white px-4 py-2 rounded-full shadow-lg z-[100] animate-fade-in-up text-sm whitespace-nowrap">
+        <div data-v2-toast className="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-stone-800 text-white px-4 py-2 rounded-full shadow-lg z-[100] animate-fade-in-up text-sm whitespace-nowrap">
           {stats.toastMessage}
         </div>
       )}

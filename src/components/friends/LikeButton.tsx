@@ -114,7 +114,10 @@ export default function LikeButton({ item, onLike }: LikeButtonProps) {
   return (
     <>
       <button 
+        data-v2-like-button
         ref={buttonRef}
+        aria-label={item.is_liked_by_me ? `아멘 취소, 현재 ${item.like_count}명` : `아멘 보내기, 현재 ${item.like_count}명`}
+        aria-pressed={item.is_liked_by_me}
         onClick={handleClick}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -135,6 +138,7 @@ export default function LikeButton({ item, onLike }: LikeButtonProps) {
 
       {showTooltip && tooltipPos && typeof document !== 'undefined' && createPortal(
         <div 
+          data-v2-like-tooltip
           ref={tooltipRef}
           className="absolute z-[9999] w-48 p-3 bg-stone-800 dark:bg-stone-100 text-white dark:text-stone-900 text-xs rounded-2xl shadow-xl animate-in fade-in zoom-in-95 duration-200 pointer-events-auto origin-bottom-right"
           style={{ 

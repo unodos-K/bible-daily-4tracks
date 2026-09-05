@@ -14,7 +14,7 @@ export default function FriendsPage() {
     <div data-v2-friends className="flex h-[calc(100vh-4rem)] min-h-0 w-full flex-col bg-stone-50 dark:bg-stone-950">
       <div className="mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col">
         {/* Sticky 고정 래퍼 */}
-        <div className="z-40 flex w-full shrink-0 flex-col border-b border-stone-200/50 bg-stone-50 pt-[env(safe-area-inset-top)] shadow-sm dark:border-stone-800/50 dark:bg-stone-950">
+        <div data-v2-standard-header className="z-40 flex w-full shrink-0 flex-col border-b border-stone-200/50 bg-stone-50 pt-[env(safe-area-inset-top)] shadow-sm dark:border-stone-800/50 dark:bg-stone-950">
           {/* 헤더 */}
           <header className="pt-6 pb-2 px-6 flex items-center justify-between w-full">
             <h1 className="text-2xl font-black text-stone-800 dark:text-stone-100 flex items-center gap-2">
@@ -23,7 +23,7 @@ export default function FriendsPage() {
           </header>
 
           {/* 상단 공통 구역 (소셜 액션) */}
-          <div className="px-4 py-3 flex flex-col sm:flex-row gap-2">
+          <div data-v2-friend-actions className="px-4 py-3 flex flex-col sm:flex-row gap-2">
             <button
               onClick={friendsState.handleInvite}
               className="flex-1 flex items-center justify-center gap-2 bg-[#FEE500] hover:bg-[#FDD800] text-black text-sm font-bold py-2.5 rounded-xl transition-colors shadow-sm"
@@ -40,15 +40,17 @@ export default function FriendsPage() {
             </button>
           </div>
 
-          <div className="flex px-4 pt-1">
+          <div data-v2-tabs className="flex px-4 pt-1">
             <button 
               onClick={() => friendsState.setActiveTab("friends")}
+              aria-pressed={friendsState.activeTab === "friends"}
               className={`flex-1 pb-3 font-semibold border-b-2 transition-colors ${friendsState.activeTab === "friends" ? "border-stone-800 text-stone-800 dark:border-stone-200 dark:text-stone-200" : "border-transparent text-stone-400 hover:text-stone-600"}`}
             >
               내 친구 ({friendsState.friends.length})
             </button>
             <button 
               onClick={() => friendsState.setActiveTab("requests")}
+              aria-pressed={friendsState.activeTab === "requests"}
               className={`flex-1 flex justify-center pb-3 font-semibold border-b-2 transition-colors ${friendsState.activeTab === "requests" ? "border-stone-800 text-stone-800 dark:border-stone-200 dark:text-stone-200" : "border-transparent text-stone-400 hover:text-stone-600"}`}
             >
               <span className="relative">
@@ -60,6 +62,7 @@ export default function FriendsPage() {
             </button>
             <button 
               onClick={() => friendsState.setActiveTab("search")}
+              aria-pressed={friendsState.activeTab === "search"}
               className={`flex-1 pb-3 font-semibold border-b-2 transition-colors ${friendsState.activeTab === "search" ? "border-stone-800 text-stone-800 dark:border-stone-200 dark:text-stone-200" : "border-transparent text-stone-400 hover:text-stone-600"}`}
             >
               친구 찾기
@@ -67,7 +70,7 @@ export default function FriendsPage() {
           </div>
         </div>
 
-        <div className="flex-1 min-h-0 overflow-y-auto overscroll-y-contain p-4 pb-8 sm:p-6 sm:pb-8 bg-stone-50 dark:bg-stone-950">
+        <div data-v2-friends-content className="flex-1 min-h-0 overflow-y-auto overscroll-y-contain p-4 pb-8 sm:p-6 sm:pb-8 bg-stone-50 dark:bg-stone-950">
           {friendsState.isLoading ? (
             <div className="flex flex-col gap-3 mt-4">
               {[1, 2, 3].map((i) => (

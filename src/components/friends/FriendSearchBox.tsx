@@ -34,7 +34,7 @@ export default function FriendSearchBox({
   return (
     <div className="flex flex-col gap-4">
       {/* 검색창 */}
-      <div className="flex gap-2">
+      <div data-v2-search-control className="flex gap-2">
         <input 
           type="text" 
           placeholder="친구의 닉네임을 입력하세요" 
@@ -46,6 +46,7 @@ export default function FriendSearchBox({
         <button 
           onClick={handleSearch}
           disabled={isSearching}
+          aria-label="친구 검색"
           className="px-4 bg-stone-800 hover:bg-stone-900 dark:bg-stone-100 dark:hover:bg-stone-200 text-white dark:text-stone-900 font-bold rounded-xl transition-colors text-sm flex items-center justify-center cursor-pointer"
         >
           <Search size={18} />
@@ -55,7 +56,7 @@ export default function FriendSearchBox({
       {/* 검색 결과 리스트 */}
       <div className="flex flex-col gap-2.5 mt-2">
         {filteredResults.length === 0 && searchQuery !== "" && !isSearching && (
-          <div className="text-center text-stone-500 text-sm py-8 bg-white dark:bg-stone-900 rounded-2xl border border-stone-100 dark:border-stone-800">
+          <div data-v2-empty-state className="text-center text-stone-500 text-sm py-8 bg-white dark:bg-stone-900 rounded-2xl border border-stone-100 dark:border-stone-800">
             검색 결과가 없거나 이미 친구로 등록되어 있습니다.
           </div>
         )}
@@ -64,7 +65,8 @@ export default function FriendSearchBox({
           const isPendingRequest = sentRequests.includes(user.id);
           
           return (
-            <div 
+            <article
+              data-v2-friend-card
               key={user.id} 
               className="bg-white dark:bg-stone-900 p-3.5 sm:p-4 rounded-2xl shadow-xs border border-stone-200/70 dark:border-stone-800 flex items-center justify-between gap-3 group transition-all"
               onTouchStart={() => handleTouchStart(user.id)}
@@ -117,7 +119,7 @@ export default function FriendSearchBox({
                   </button>
                 )}
               </div>
-            </div>
+            </article>
           );
         })}
       </div>

@@ -68,8 +68,8 @@ export default function VerseInteractionModals({
     <>
 
       {verseToReplace && confirmedVerse && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="w-full max-w-sm bg-stone-900 border border-stone-800 rounded-2xl overflow-hidden shadow-2xl flex flex-col p-6 items-center text-center">
+        <div data-v2-dialog className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div data-v2-dialog-panel className="w-full max-w-sm bg-stone-900 border border-stone-800 rounded-2xl overflow-hidden shadow-2xl flex flex-col p-6 items-center text-center">
             <h2 className="text-xl font-bold text-stone-100 mb-4">One Verse를 교체하시겠습니까?</h2>
             
             <div className="bg-stone-800/50 p-4 rounded-xl mb-4 w-full text-left">
@@ -106,8 +106,8 @@ export default function VerseInteractionModals({
       )}
 
       {showWarningModal && (
-        <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white dark:bg-stone-900 rounded-2xl p-6 shadow-xl w-full max-w-sm flex flex-col items-center gap-4 animate-in zoom-in-95">
+        <div data-v2-dialog className="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
+          <div data-v2-dialog-panel className="bg-white dark:bg-stone-900 rounded-2xl p-6 shadow-xl w-full max-w-sm flex flex-col items-center gap-4 animate-in zoom-in-95">
             <div className="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:bg-amber-400 flex items-center justify-center mb-2">
               <Bookmark size={24} />
             </div>
@@ -126,8 +126,8 @@ export default function VerseInteractionModals({
       )}
 
       {showReselectModal && confirmedVerse && (
-        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in p-4">
-          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-stone-900 animate-in zoom-in-95">
+        <div data-v2-dialog className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in p-4">
+          <div data-v2-dialog-panel className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-stone-900 animate-in zoom-in-95">
             <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100">One Verse를 다시 선택할까요?</h3>
             <p className="mt-3 text-sm leading-relaxed text-stone-500 dark:text-stone-400">
               {isCompletedDay
@@ -143,8 +143,8 @@ export default function VerseInteractionModals({
       )}
 
       {showCompletionModal && confirmedVerse && (
-        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-in fade-in">
-          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-stone-900 animate-in zoom-in-95">
+        <div data-v2-dialog className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-in fade-in">
+          <div data-v2-dialog-panel className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-stone-900 animate-in zoom-in-95">
             <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100">오늘의 읽기를 완료할까요?</h3>
             <p className="mt-3 text-sm leading-relaxed text-stone-500 dark:text-stone-400">완료하면 오늘의 One Verse는 변경할 수 없습니다. 선택한 구절을 확인한 뒤 완료해 주세요.</p>
             <div className="mt-6 flex gap-3">
@@ -156,8 +156,8 @@ export default function VerseInteractionModals({
       )}
 
       {showCompletionCancelModal && (
-        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-in fade-in">
-          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-stone-900 animate-in zoom-in-95">
+        <div data-v2-dialog className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-in fade-in">
+          <div data-v2-dialog-panel className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-stone-900 animate-in zoom-in-95">
             <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100">읽기 완료를 취소할까요?</h3>
             <p className="mt-3 text-sm leading-relaxed text-stone-500 dark:text-stone-400">완료 상태만 취소되고, 선택한 One Verse와 작성한 발자국은 유지됩니다.</p>
             <div className="mt-6 flex gap-3">
@@ -169,8 +169,8 @@ export default function VerseInteractionModals({
       )}
 
       {showConfirmModal && selectedVerse && (
-        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in md:p-4">
-          <div className="bg-white dark:bg-stone-900 rounded-none md:rounded-2xl px-6 shadow-xl w-full h-full md:h-auto md:max-h-[85vh] max-w-sm flex flex-col items-center justify-center gap-4 animate-in zoom-in-95 pt-[calc(2rem+env(safe-area-inset-top))] pb-[calc(2rem+env(safe-area-inset-bottom))] md:py-6 overflow-y-auto">
+        <div data-v2-dialog className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in md:p-4">
+          <div data-v2-dialog-panel className="bg-white dark:bg-stone-900 rounded-none md:rounded-2xl px-6 shadow-xl w-full h-full md:h-auto md:max-h-[85vh] max-w-sm flex flex-col items-center justify-center gap-4 animate-in zoom-in-95 pt-[calc(2rem+env(safe-area-inset-top))] pb-[calc(2rem+env(safe-area-inset-bottom))] md:py-6 overflow-y-auto">
             <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 text-center mb-2 leading-relaxed">
               <span className="block">&apos;{formatReference(selectedVerse.book, selectedVerse.chapter, selectedVerse.verse)}&apos;을(를)</span>
               <span className="block">오늘의 One Verse로 선택하시겠습니까?</span>
@@ -199,8 +199,8 @@ export default function VerseInteractionModals({
       )}
 
       {showSuccessModal && confirmedVerse && (
-        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in md:p-4">
-          <div className="bg-white dark:bg-stone-900 rounded-none md:rounded-3xl p-6 md:p-8 shadow-2xl w-full h-full md:h-auto md:max-h-[85vh] max-w-lg flex flex-col justify-between relative animate-in zoom-in-95 border border-stone-200 dark:border-stone-800 text-center overflow-hidden pt-[calc(2rem+env(safe-area-inset-top))] pb-[calc(2rem+env(safe-area-inset-bottom))] md:py-8">
+        <div data-v2-dialog className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in md:p-4">
+          <div data-v2-dialog-panel className="bg-white dark:bg-stone-900 rounded-none md:rounded-3xl p-6 md:p-8 shadow-2xl w-full h-full md:h-auto md:max-h-[85vh] max-w-lg flex flex-col justify-between relative animate-in zoom-in-95 border border-stone-200 dark:border-stone-800 text-center overflow-hidden pt-[calc(2rem+env(safe-area-inset-top))] pb-[calc(2rem+env(safe-area-inset-bottom))] md:py-8">
             
             <div className="flex-shrink-0 relative">
               <button 

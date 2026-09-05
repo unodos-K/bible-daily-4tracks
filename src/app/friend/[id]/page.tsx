@@ -152,10 +152,11 @@ export default function FriendProfilePage() {
   return (
     <div data-v2-friend-detail className="flex h-[calc(100vh-4rem)] min-h-0 w-full flex-col overflow-hidden bg-stone-100/50 dark:bg-stone-950">
       {/* 헤더 */}
-      <header className="z-40 shrink-0 border-b border-stone-200 bg-white/90 pt-[env(safe-area-inset-top)] backdrop-blur-md dark:border-stone-800 dark:bg-stone-900/90">
+      <header data-v2-standard-header className="z-40 shrink-0 border-b border-stone-200 bg-white/90 pt-[env(safe-area-inset-top)] backdrop-blur-md dark:border-stone-800 dark:bg-stone-900/90">
         <div className="flex items-center px-4 h-14 max-w-2xl mx-auto w-full">
           <button 
             onClick={() => router.back()}
+            aria-label="뒤로가기"
             className="p-2 -ml-2 text-stone-500 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full transition-colors"
             title="뒤로가기"
           >
@@ -170,7 +171,7 @@ export default function FriendProfilePage() {
 
       <main className="w-full max-w-2xl mx-auto flex-1 min-h-0 overflow-y-auto overscroll-y-contain flex flex-col gap-6 p-4 pb-8 sm:p-8 sm:pb-8 mt-2">
         {/* 프로필 정보 섹션 */}
-        <div className="flex flex-col items-center py-6 px-4">
+        <section data-v2-friend-profile className="flex flex-col items-center py-6 px-4">
           <div className="w-24 h-24 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden shadow-sm mb-4 flex items-center justify-center text-4xl">
             {profile.avatar_url ? (
               <AvatarImage src={profile.avatar_url} alt={profile.name} size={96} className="w-full h-full object-cover" />
@@ -189,13 +190,14 @@ export default function FriendProfilePage() {
           )}
 
           {/* 통독 현황 위젯 */}
-          <div className="w-full mt-6 bg-white dark:bg-stone-900 rounded-2xl p-5 shadow-sm border border-stone-200 dark:border-stone-800">
+          <div data-v2-friend-summary className="w-full mt-6 bg-white dark:bg-stone-900 rounded-2xl p-5 shadow-sm border border-stone-200 dark:border-stone-800">
             <div className="flex justify-between items-end mb-2">
               <span className="text-sm font-bold text-stone-600 dark:text-stone-300">전체 통독 현황</span>
               <span className="text-xs font-semibold text-stone-400">{stats.totalReadDays} / 365일 ({(stats.totalReadDays / 365 * 100).toFixed(1)}%)</span>
             </div>
-            <div className="w-full h-3 bg-stone-100 dark:bg-stone-800 rounded-full overflow-hidden">
+            <div data-v2-progress-track className="w-full h-3 bg-stone-100 dark:bg-stone-800 rounded-full overflow-hidden">
               <div 
+                data-v2-progress-fill
                 className="h-full bg-sky-500 dark:bg-sky-400 transition-all duration-1000 ease-out rounded-full" 
                 style={{ width: `${Math.min(100, (stats.totalReadDays / 365) * 100)}%` }} 
               />
@@ -204,12 +206,12 @@ export default function FriendProfilePage() {
             {/* 뇌새김(암송) 통계 */}
             <div className="mt-4 pt-4 border-t border-stone-100 dark:border-stone-800 flex justify-between items-center">
               <span className="text-sm font-bold text-stone-600 dark:text-stone-300">마음새김 완료</span>
-              <span className="px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs font-bold rounded-full flex items-center gap-1">
+              <span data-v2-status-badge className="px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs font-bold rounded-full flex items-center gap-1">
                 <Heart size={12} fill="currentColor" /> {stats.memorizedCount}구절
               </span>
             </div>
           </div>
-        </div>
+        </section>
 
         {/* One Verse 아카이브 (최신순 3개 시작, 스크롤시 5개씩 추가) */}
         <div className="flex flex-col gap-4 mt-2">
@@ -222,12 +224,13 @@ export default function FriendProfilePage() {
           </h3>
 
           {visibleRecords.length === 0 ? (
-            <div className="text-center py-12 text-stone-500 bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-sm">
+            <div data-v2-empty-state className="text-center py-12 text-stone-500 bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-sm">
               <p>남긴 발자국이 없어요.</p>
             </div>
           ) : (
             visibleRecords.map((record) => (
-              <div 
+              <article
+                data-v2-friend-record
                 key={record.day_index} 
                 className="bg-white dark:bg-stone-900 p-6 rounded-3xl shadow-sm border border-stone-200/80 dark:border-stone-800 flex flex-col gap-4 transition-all hover:shadow-md"
               >
@@ -245,7 +248,7 @@ export default function FriendProfilePage() {
                 </div>
 
                 {/* 중앙: 말씀 본문 텍스트 (가장 크고 또렷하게 강조) */}
-                <blockquote className="text-stone-800 dark:text-stone-100 text-lg sm:text-xl font-bold leading-relaxed tracking-tight my-1 pl-1">
+                <blockquote data-v2-scripture className="text-stone-800 dark:text-stone-100 text-lg sm:text-xl font-bold leading-relaxed tracking-tight my-1 pl-1">
                   &ldquo;{record.one_verse?.displayText}&rdquo;
                 </blockquote>
 
@@ -260,7 +263,7 @@ export default function FriendProfilePage() {
                   {/* 좋아요 버튼 유지 */}
                   <LikeButton item={record} onLike={() => handleLike(record)} />
                 </div>
-              </div>
+              </article>
             ))
           )}
         </div>

@@ -18,7 +18,7 @@ export default function FriendRequestList({
 }: FriendRequestListProps) {
   if (requests.length === 0) {
     return (
-      <div className="text-center text-stone-500 py-10">
+      <div data-v2-empty-state className="text-center text-stone-500 py-10">
         받은 친구 요청이 없습니다.
       </div>
     );
@@ -27,7 +27,8 @@ export default function FriendRequestList({
   return (
     <div className="flex flex-col gap-3">
       {requests.map(req => (
-        <div 
+        <article
+          data-v2-friend-card
           key={req.id} 
           className="bg-white dark:bg-stone-900 p-5 rounded-2xl shadow-sm border border-stone-100 dark:border-stone-800 flex flex-col gap-3 group"
           onTouchStart={() => handleTouchStart(req.id)}
@@ -65,7 +66,7 @@ export default function FriendRequestList({
               <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-red-500 ring-2 ring-stone-50 dark:ring-stone-900 animate-pulse"></span>
             </button>
           </div>
-        </div>
+        </article>
       ))}
     </div>
   );

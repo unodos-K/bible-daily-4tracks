@@ -179,7 +179,7 @@ export default function SettingsPage() {
           </div>
 
           {/* 마음 새김 음악 자동 재생 설정 카드 */}
-          <div className="bg-white dark:bg-stone-900 rounded-2xl md:rounded-3xl p-5 md:p-6 shadow-sm border border-stone-200/80 dark:border-stone-800 flex items-center justify-between">
+          <div data-v2-settings-card className="bg-white dark:bg-stone-900 rounded-2xl md:rounded-3xl p-5 md:p-6 shadow-sm border border-stone-200/80 dark:border-stone-800 flex items-center justify-between">
             <div className="flex flex-col gap-1">
               <span className="text-sm font-bold text-stone-800 dark:text-stone-100">마음 새김 시 음악 자동 재생</span>
               <span className="text-xs text-stone-400">말씀 암송 훈련 시작 시 배경음악을 켭니다</span>
@@ -196,7 +196,7 @@ export default function SettingsPage() {
           </div>
 
           {/* 발자국 나눔 기본 설정 카드 */}
-          <div className="bg-white dark:bg-stone-900 rounded-2xl md:rounded-3xl p-5 md:p-6 shadow-sm border border-stone-200/80 dark:border-stone-800 flex flex-col gap-3">
+          <div data-v2-settings-card className="bg-white dark:bg-stone-900 rounded-2xl md:rounded-3xl p-5 md:p-6 shadow-sm border border-stone-200/80 dark:border-stone-800 flex flex-col gap-3">
             <div className="flex flex-col gap-1">
               <label className="text-sm font-bold text-stone-800 dark:text-stone-100">발자국 나눔 기본 설정</label>
               <p className="text-xs text-stone-400">나눔 시 포함할 항목과 표시 순서를 변경할 수 있습니다 (드래그하여 순서 변경)</p>
@@ -234,7 +234,7 @@ export default function SettingsPage() {
 
           {/* 프로필 설정 카드 */}
           {authUser && (
-            <div className="bg-white dark:bg-stone-900 rounded-2xl md:rounded-3xl p-5 md:p-6 shadow-sm border border-stone-200/80 dark:border-stone-800 flex flex-col gap-4">
+            <div data-v2-settings-card className="bg-white dark:bg-stone-900 rounded-2xl md:rounded-3xl p-5 md:p-6 shadow-sm border border-stone-200/80 dark:border-stone-800 flex flex-col gap-4">
               <label className="text-sm font-bold text-stone-800 dark:text-stone-100">프로필 및 계정</label>
               <button
                 onClick={() => setShowNicknameModal(true)}
@@ -258,7 +258,7 @@ export default function SettingsPage() {
           )}
 
           {/* 설정 초기화 영역 */}
-          <div className="bg-white dark:bg-stone-900 rounded-2xl md:rounded-3xl p-5 md:p-6 shadow-sm border border-red-100 dark:border-red-950/30 flex flex-col gap-3">
+          <div data-v2-settings-card data-v2-danger-zone className="bg-white dark:bg-stone-900 rounded-2xl md:rounded-3xl p-5 md:p-6 shadow-sm border border-red-100 dark:border-red-950/30 flex flex-col gap-3">
             <label className="text-sm font-bold text-red-500 flex items-center gap-1.5">
               <AlertCircle size={16} /> Danger Zone
             </label>
@@ -278,8 +278,8 @@ export default function SettingsPage() {
 
       {/* Reset Confirm Modal */}
       {isResetModalOpen && (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in" onClick={() => setIsResetModalOpen(false)}>
-          <div className="bg-white dark:bg-stone-900 w-full max-w-sm rounded-2xl p-6 shadow-xl text-center flex flex-col gap-4 animate-in zoom-in-95 border border-stone-200 dark:border-stone-800" onClick={e => e.stopPropagation()}>
+        <div data-v2-dialog className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in" onClick={() => setIsResetModalOpen(false)}>
+          <div data-v2-dialog-panel className="bg-white dark:bg-stone-900 w-full max-w-sm rounded-2xl p-6 shadow-xl text-center flex flex-col gap-4 animate-in zoom-in-95 border border-stone-200 dark:border-stone-800" onClick={e => e.stopPropagation()}>
             <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 text-red-500 mx-auto flex items-center justify-center mb-1">
               <AlertCircle size={24} />
             </div>

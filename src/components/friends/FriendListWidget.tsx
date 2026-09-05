@@ -22,7 +22,7 @@ export default function FriendListWidget({
 }: FriendListWidgetProps) {
   if (friends.length === 0) {
     return (
-      <div className="text-center text-stone-500 py-10 text-sm">
+      <div data-v2-empty-state className="text-center text-stone-500 py-10 text-sm">
         아직 등록된 친구가 없습니다. <br/>[친구 찾기]에서 닉네임으로 검색해보세요!
       </div>
     );
@@ -34,7 +34,8 @@ export default function FriendListWidget({
         const latestFeed = friendsFeed[friend.id]?.[0];
 
         return (
-          <div 
+          <article
+            data-v2-friend-card
             key={friend.id} 
             className="bg-white dark:bg-stone-900 p-3.5 sm:p-4 rounded-2xl shadow-xs border border-stone-200/70 dark:border-stone-800 flex flex-col gap-2.5 group transition-all"
             onTouchStart={() => handleTouchStart(friend.id)}
@@ -79,7 +80,7 @@ export default function FriendListWidget({
             
             {/* 최신 One Verse 노출 (심플 & 컴팩트) */}
             {latestFeed ? (
-              <div className="p-3 bg-stone-50 dark:bg-stone-950/80 rounded-xl text-xs sm:text-sm border border-stone-100 dark:border-stone-800/80 flex flex-col gap-2">
+              <div data-v2-scripture-preview className="p-3 bg-stone-50 dark:bg-stone-950/80 rounded-xl text-xs sm:text-sm border border-stone-100 dark:border-stone-800/80 flex flex-col gap-2">
                 <div className="flex justify-between items-center text-xs">
                   <span className="font-bold text-sky-600 dark:text-sky-400">
                     <BookOpen size={14} /> {latestFeed.one_verse?.reference || `Day ${latestFeed.day_index}`}
@@ -89,7 +90,7 @@ export default function FriendListWidget({
                   </span>
                 </div>
                 
-                <p className="font-semibold text-stone-700 dark:text-stone-200 leading-relaxed text-xs sm:text-sm line-clamp-2">
+                <p data-v2-scripture className="font-semibold text-stone-700 dark:text-stone-200 leading-relaxed text-xs sm:text-sm line-clamp-2">
                   &ldquo;{latestFeed.one_verse?.displayText || latestFeed.one_verse?.rawText}&rdquo;
                 </p>
                 
@@ -101,7 +102,7 @@ export default function FriendListWidget({
             ) : (
               <div className="text-[11px] text-stone-400 py-1 pl-1">아직 남긴 발자국이 없습니다.</div>
             )}
-          </div>
+          </article>
         );
       })}
     </div>

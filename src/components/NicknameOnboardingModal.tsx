@@ -49,7 +49,7 @@ export default function NicknameOnboardingModal({
 
   return (
     <div data-v2-nickname className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in">
-      <div className="bg-white dark:bg-stone-900 w-full max-w-sm rounded-3xl p-6 sm:p-8 flex flex-col items-center text-center shadow-2xl relative overflow-hidden">
+      <div data-v2-dialog-panel className="bg-white dark:bg-stone-900 w-full max-w-sm rounded-3xl p-6 sm:p-8 flex flex-col items-center text-center shadow-2xl relative overflow-hidden">
         {/* 장식용 배경 요소 */}
         <div className="absolute -top-12 -right-12 w-32 h-32 bg-amber-200/20 dark:bg-amber-500/10 rounded-full blur-3xl"></div>
         <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-sky-200/20 dark:bg-sky-500/10 rounded-full blur-3xl"></div>
@@ -67,7 +67,7 @@ export default function NicknameOnboardingModal({
           <span className="block">한 번 확정된 닉네임은 변경할 수 없으니 신중하게 선택해 주세요!</span>
         </p>
 
-        <div className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-2xl p-6 mb-6 z-10 flex flex-col items-center justify-center min-h-[100px]">
+        <div data-v2-nickname-preview className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-2xl p-6 mb-6 z-10 flex flex-col items-center justify-center min-h-[100px]">
           <div className="text-xl sm:text-2xl font-black text-amber-600 dark:text-amber-500 tracking-tight flex items-center gap-2">
             <Sparkles size={20} className="text-amber-400" />
             {nickname}
@@ -76,6 +76,7 @@ export default function NicknameOnboardingModal({
 
         <div className="flex flex-col w-full gap-3 z-10">
           <button
+            data-v2-secondary-action
             onClick={handleShuffle}
             disabled={isSaving}
             className="w-full py-3.5 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-bold rounded-xl flex justify-center items-center gap-2 transition-colors disabled:opacity-50"
@@ -85,6 +86,7 @@ export default function NicknameOnboardingModal({
           </button>
 
           <button
+            data-v2-primary-action
             onClick={handleSave}
             disabled={isSaving}
             className="w-full py-3.5 bg-stone-800 hover:bg-stone-900 dark:bg-stone-200 dark:hover:bg-stone-300 text-white dark:text-stone-900 font-bold rounded-xl transition-colors disabled:opacity-50 shadow-md"
