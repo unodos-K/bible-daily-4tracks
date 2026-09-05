@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { 
   ReadingSettings, 
@@ -24,37 +24,51 @@ export function useHomeDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const targetDayRef = useRef<HTMLDivElement>(null);
 
+  const clearDashboard = useCallback(() => {
+    setSettings(null);
+    setRecords({});
+    setOneVerseRecords({});
+    setNextUnreadDay(1);
+  }, []);
+
+  const loadDashboard = useCallback(async (showLoading = true) => {
+    if (showLoading) setIsLoading(true);
+
+    if (authUser) {
+      const s = await fetchReadingSettings(authUser.id);
+      if (s && s.hasStarted) {
+        setSettings(s);
+        const [r, oneVerseR] = await Promise.all([
+          fetchReadRecords(authUser.id),
+          fetchOneVerseRecords(authUser.id),
+        ]);
+        setRecords(r);
+        setOneVerseRecords(oneVerseR);
+        setNextUnreadDay(getNextUnreadDay(r));
+      } else {
+        clearDashboard();
+      }
+    } else {
+      clearDashboard();
+    }
+
+    setIsLoading(false);
+  }, [authUser, clearDashboard]);
+
   useEffect(() => {
     setIsClient(true);
     if (isAuthLoading) return;
-    const loadDashboard = async () => {
-      if (authUser) {
-        const s = await fetchReadingSettings(authUser.id);
-        if (s && s.hasStarted) {
-          setSettings(s);
-          const [r, oneVerseR] = await Promise.all([
-            fetchReadRecords(authUser.id),
-            fetchOneVerseRecords(authUser.id),
-          ]);
-          setRecords(r);
-          setOneVerseRecords(oneVerseR);
-          setNextUnreadDay(getNextUnreadDay(r));
-        } else {
-          setSettings(null);
-          setRecords({});
-          setOneVerseRecords({});
-          setNextUnreadDay(1);
-        }
-      } else {
-        setSettings(null);
-        setRecords({});
-        setOneVerseRecords({});
-        setNextUnreadDay(1);
-      }
-      setIsLoading(false);
-    };
     void loadDashboard();
-  }, [authUser, isAuthLoading]);
+  }, [isAuthLoading, loadDashboard]);
+
+  useEffect(() => {
+    if (isAuthLoading) return;
+    const handleRecordsUpdated = () => {
+      void loadDashboard(false);
+    };
+    window.addEventListener('records_updated', handleRecordsUpdated);
+    return () => window.removeEventListener('records_updated', handleRecordsUpdated);
+  }, [isAuthLoading, loadDashboard]);
 
   useEffect(() => {
     if (isScheduleSheetOpen && targetDayRef.current) {

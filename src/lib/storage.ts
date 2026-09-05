@@ -397,6 +397,9 @@ export async function saveDayRecord(record: DayRecord, currentUserId?: string): 
     console.error("One Verse Save Error:", error);
     return false;
   }
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('records_updated'));
+  }
   return true;
 }
 
@@ -409,17 +412,42 @@ export async function saveOneVerseDraft(dayIndex: number, oneVerse: OneVerse, cu
   if (!userId) return false;
   const date = new Date();
   const readDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-  const { error } = await supabase.from('reading_records').upsert({
-    user_id: userId,
-    day_index: dayIndex,
-    read_date: readDate,
-    completed_at: null,
-    one_verse: serializeOneVerse(oneVerse),
-  }, { onConflict: 'user_id, day_index' });
+
+  const { data: existingRecord, error: fetchError } = await supabase
+    .from('reading_records')
+    .select('read_date, completed_at')
+    .eq('user_id', userId)
+    .eq('day_index', dayIndex)
+    .maybeSingle();
+
+  if (fetchError) {
+    console.error("One Verse draft fetch error:", fetchError);
+    return false;
+  }
+
+  const { error } = existingRecord
+    ? await supabase
+      .from('reading_records')
+      .update({
+        one_verse: serializeOneVerse(oneVerse),
+        read_date: existingRecord.read_date ?? readDate,
+      })
+      .eq('user_id', userId)
+      .eq('day_index', dayIndex)
+    : await supabase.from('reading_records').insert({
+      user_id: userId,
+      day_index: dayIndex,
+      read_date: readDate,
+      completed_at: null,
+      one_verse: serializeOneVerse(oneVerse),
+    });
 
   if (error) {
     console.error("One Verse draft save error:", error);
     return false;
+  }
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('records_updated'));
   }
   return true;
 }
