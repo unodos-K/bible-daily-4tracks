@@ -245,6 +245,11 @@ body.modal-open .app-main {
 :root[data-ui-version="new"] [data-v2-home-journey] > div { border-color:var(--new-divider) !important; }
 :root[data-ui-version="new"] [data-v2-home-journey] svg { color:var(--new-accent) !important; }
 :root[data-ui-version="new"] [data-v2-home-status] { color:var(--new-accent) !important; }
+:root[data-ui-version="new"] [data-v2-home-incomplete] { border-color:var(--new-divider) !important; }
+:root[data-ui-version="new"] [data-v2-home-incomplete] p:first-child { color:var(--new-text-primary) !important; }
+:root[data-ui-version="new"] [data-v2-home-incomplete] p:last-child { color:var(--new-text-secondary) !important; }
+:root[data-ui-version="new"] [data-v2-home-incomplete] button,
+:root[data-ui-version="new"] [data-v2-home-incomplete] span { background:var(--new-surface-subtle) !important; border-color:var(--new-border) !important; color:var(--new-text-secondary) !important; box-shadow:none !important; }
 :root[data-ui-version="new"] [data-v2-home-guide] { color:var(--new-text-secondary) !important; }
 :root[data-ui-version="new"] [data-v2-home-guide] h3,
 :root[data-ui-version="new"] [data-v2-home-guide] strong { color:var(--new-text-primary) !important; }

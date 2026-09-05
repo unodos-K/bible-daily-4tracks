@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { AlertCircle, BookOpen, CalendarDays, CheckCircle2, Footprints, Heart, Pin } from "lucide-react";
+import { AlertCircle, ArrowRight, BookOpen, CalendarDays, CheckCircle2, Footprints, Heart, Pin } from "lucide-react";
 import { useHomeDashboard } from "@/hooks/useHomeDashboard";
 import { calculateDaysSince } from "@/hooks/bible-reader/dayUtils";
 import { getLastRecordDay, getReadingProgress } from "@/lib/readingRecords";
@@ -54,6 +54,16 @@ function hasMemo(value: unknown) {
 
 function countFootprints(oneVerseRecords: OneVerseRecordsMap) {
   return Object.values(oneVerseRecords).filter((record) => hasMemo(record.oneVerse.memo)).length;
+}
+
+function getIncompletePastReadings(oneVerseRecords: OneVerseRecordsMap, currentDay: number) {
+  return Object.values(oneVerseRecords)
+    .filter((record) => (
+      record.dayIndex < currentDay &&
+      record.completedAt === null &&
+      Boolean(record.readDate || record.oneVerse)
+    ))
+    .sort((a, b) => a.dayIndex - b.dayIndex);
 }
 
 function getLastReadingParts(records: ReadRecordsMap) {
@@ -155,11 +165,15 @@ export default function HomePage() {
   const latestOneVerse = latestOneVerseRecord?.oneVerse ?? null;
   const lastReadingParts = getLastReadingParts(records);
   const footprintCount = countFootprints(oneVerseRecords);
+  const incompletePastReadings = getIncompletePastReadings(oneVerseRecords, daysSince);
+  const visibleIncompleteReadings = incompletePastReadings.slice(0, 3);
+  const hiddenIncompleteCount = Math.max(0, incompletePastReadings.length - visibleIncompleteReadings.length);
   
   const isTodayRead = !!(records[daysSince]?.completedAt || records[daysSince]?.readDate);
   let pastMissedDays = 0;
   for (let d = 1; d < daysSince; d++) {
-    if (!records[d]?.completedAt && !records[d]?.readDate) {
+    const hasStartedReading = Boolean(oneVerseRecords[d]?.readDate || oneVerseRecords[d]?.oneVerse);
+    if (!records[d]?.completedAt && !hasStartedReading) {
       pastMissedDays++;
     }
   }
@@ -308,6 +322,47 @@ export default function HomePage() {
                   <TodayStatusIcon size={17} />
                   <span className="break-keep">{todayStatus.label}</span>
                 </div>
+
+                {incompletePastReadings.length > 0 && (
+                  <div data-v2-home-incomplete className="space-y-3 border-t border-stone-200 pt-4 dark:border-stone-800">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 space-y-1">
+                        <p className="break-keep text-sm font-bold text-stone-800 dark:text-stone-100">
+                          완료하지 않은 읽기가 {incompletePastReadings.length}일 있어요
+                        </p>
+                        <p className="break-keep text-xs leading-relaxed text-stone-500 dark:text-stone-400">
+                          읽던 Day로 돌아가 마지막 완료만 확인할 수 있어요.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => router.push(`/read?day=${incompletePastReadings[0].dayIndex}`)}
+                        className="inline-flex min-h-11 shrink-0 items-center gap-1 rounded-lg border border-stone-200 bg-stone-100 px-3 text-xs font-bold text-stone-700 transition-colors hover:bg-stone-200 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-200 dark:hover:bg-stone-700"
+                      >
+                        이어 확인하기
+                        <ArrowRight size={14} />
+                      </button>
+                    </div>
+
+                    <div className="flex flex-wrap gap-1.5">
+                      {visibleIncompleteReadings.map((record) => (
+                        <button
+                          key={record.dayIndex}
+                          type="button"
+                          onClick={() => router.push(`/read?day=${record.dayIndex}`)}
+                          className="min-h-9 rounded-md bg-stone-100 px-2.5 text-sm font-bold text-stone-800 transition-colors hover:bg-stone-200 dark:bg-stone-800 dark:text-stone-100 dark:hover:bg-stone-700"
+                        >
+                          Day {record.dayIndex}
+                        </button>
+                      ))}
+                      {hiddenIncompleteCount > 0 && (
+                        <span className="inline-flex min-h-9 items-center rounded-md bg-stone-100 px-2.5 text-sm font-bold text-stone-600 dark:bg-stone-800 dark:text-stone-300">
+                          외 {hiddenIncompleteCount}일
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
               </section>
 
               <section data-v2-home-guide className="mb-8 flex flex-col gap-3 text-sm leading-relaxed text-stone-500 dark:text-stone-400 break-keep">
