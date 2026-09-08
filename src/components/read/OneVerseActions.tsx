@@ -1,14 +1,14 @@
 import React from "react";
 import { Heart, HeartHandshake, Footprints, Highlighter, Pin } from "lucide-react";
 import { useRouter } from "next/navigation";
-import type { DayRecord, OneVerse } from "@/lib/storage";
+import type { DayRecord, OneVerse, ShareableOneVerseRecord } from "@/lib/storage";
 
 interface ConfirmedOneVerseActionsProps {
   verse: OneVerse;
   dayIndex: number;
   record?: DayRecord;
   onOpenMemory: () => void;
-  onShare: (record: DayRecord) => void;
+  onShare: (record: ShareableOneVerseRecord) => void;
   onRequestReselect: () => void;
   isCompletedDay: boolean;
 }
@@ -16,6 +16,16 @@ interface ConfirmedOneVerseActionsProps {
 export function ConfirmedOneVerseActions({ verse, dayIndex, record, onOpenMemory, onShare, onRequestReselect, isCompletedDay }: ConfirmedOneVerseActionsProps) {
   const router = useRouter();
   const isMemorized = verse.isMemorized;
+  const openShare = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    onShare(record?.oneVerse ? record : {
+      dayIndex,
+      readDate: new Date().toISOString().slice(0, 10),
+      completedAt: null,
+      oneVerse: verse,
+    });
+  };
+
   return (
     <>
       <div className="mt-4 grid grid-cols-3 gap-2 border-t border-stone-200 pt-3 pl-[2ch] sm:pl-[2.5ch] dark:border-stone-800/50">
@@ -25,7 +35,7 @@ export function ConfirmedOneVerseActions({ verse, dayIndex, record, onOpenMemory
         <button type="button" onClick={(event) => { event.stopPropagation(); router.push(`/memo?day=${dayIndex}&mode=${verse.memo ? "view" : "edit"}`); }} className="min-h-11 min-w-0 rounded-lg border border-stone-200 bg-white text-xs font-bold text-stone-700 flex items-center justify-center gap-1 transition-colors hover:bg-stone-50 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700">
           <Footprints size={15} />발자국
         </button>
-        <button type="button" onClick={(event) => { event.stopPropagation(); if (record) onShare(record); }} className="min-h-11 min-w-0 rounded-lg border border-stone-200 bg-white text-xs font-bold text-stone-700 flex items-center justify-center gap-1 transition-colors hover:bg-stone-50 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700"><HeartHandshake size={15} />나눔</button>
+        <button type="button" onClick={openShare} className="min-h-11 min-w-0 rounded-lg border border-stone-200 bg-white text-xs font-bold text-stone-700 flex items-center justify-center gap-1 transition-colors hover:bg-stone-50 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700"><HeartHandshake size={15} />나눔</button>
       </div>
       {!isCompletedDay && <div className="mt-2 pl-[2ch] sm:pl-[2.5ch]">
         <button type="button" onClick={(event) => { event.stopPropagation(); onRequestReselect(); }} className="min-h-11 px-3 text-xs font-bold text-stone-500 underline underline-offset-4 transition-colors hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200">

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { 
-  ReadingSettings, ReadRecordsMap, DayRecord, OneVerse, OneVerseCandidate,
+  ReadingSettings, ReadRecordsMap, OneVerse, OneVerseCandidate, ShareableOneVerseRecord,
   fetchReadingSettings, fetchReadRecords, fetchOneVerseRecord,
   saveDayRecord, saveOneVerseDraft, updateReadRecordOneVerse, updateReadRecordCompletion, updateMemorizeRecord,
   saveReadingSettings, fetchOneVerseCandidates, saveOneVerseCandidate, removeOneVerseCandidate
@@ -33,7 +33,7 @@ export function useBibleReader() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showAccessDeniedModal, setShowAccessDeniedModal] = useState(false);
   
-  const [selectedRecordToShare, setSelectedRecordToShare] = useState<DayRecord | null>(null);
+  const [selectedRecordToShare, setSelectedRecordToShare] = useState<ShareableOneVerseRecord | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const headerRef = useRef<HTMLElement>(null);

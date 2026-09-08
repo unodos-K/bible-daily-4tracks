@@ -1,7 +1,7 @@
 import React from "react";
 import { BookMarked, BookOpen, CheckCircle2, Lightbulb, Music2, type LucideIcon } from "lucide-react";
 import { TRACK_INFO } from "@/lib/bible";
-import type { OneVerse, ReadRecordsMap, DayRecord } from "@/lib/storage";
+import type { OneVerse, ReadRecordsMap, ShareableOneVerseRecord } from "@/lib/storage";
 import { useActiveReaderTrack } from "./useActiveReaderTrack";
 import BibleVerseRow from "./BibleVerseRow";
 import type { ReadingData, TrackData } from "./types";
@@ -22,7 +22,7 @@ interface BibleContentProps {
   dayIndex: number;
   isCompletedDay: boolean;
   setIsMemoryModalOpen: (open: boolean) => void;
-  handleShareOneVerseClick: (record: DayRecord) => void;
+  handleShareOneVerseClick: (record: ShareableOneVerseRecord) => void;
   handleConfirmVerse: (verse: OneVerse, event: React.MouseEvent) => void;
   handleToggleMark: (verse: OneVerse, event: React.MouseEvent) => void;
   handleRequestReselect: () => void;

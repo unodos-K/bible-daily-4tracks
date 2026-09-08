@@ -1,5 +1,5 @@
 import React from "react";
-import type { DayRecord, OneVerse } from "@/lib/storage";
+import type { DayRecord, OneVerse, ShareableOneVerseRecord } from "@/lib/storage";
 import type { VerseData } from "./types";
 import { ConfirmedOneVerseActions, SelectedOneVerseActions } from "./OneVerseActions";
 import { Crown } from "lucide-react";
@@ -19,7 +19,7 @@ interface BibleVerseRowProps {
   onConfirmVerse: (verse: OneVerse, event: React.MouseEvent) => void;
   onToggleMark: (verse: OneVerse, event: React.MouseEvent) => void;
   onOpenMemory: () => void;
-  onShare: (record: DayRecord) => void;
+  onShare: (record: ShareableOneVerseRecord) => void;
   onRequestReselect: () => void;
   isCompletedDay: boolean;
 }
