@@ -76,7 +76,6 @@ export function useBibleReader() {
     }
 
     setDayIndex(validDay);
-    window.scrollTo({ top: 0, behavior: "smooth" });
     setIsDaySelectorOpen(false);
     setSelectedVerse(null);
     setConfirmedVerse(null);

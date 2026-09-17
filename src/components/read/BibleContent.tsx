@@ -3,6 +3,7 @@ import { BookMarked, BookOpen, CheckCircle2, Lightbulb, Music2, type LucideIcon 
 import { TRACK_INFO } from "@/lib/bible";
 import type { OneVerse, ReadRecordsMap, ShareableOneVerseRecord } from "@/lib/storage";
 import { useActiveReaderTrack } from "./useActiveReaderTrack";
+import { useReadingProgress } from "@/hooks/useReadingProgress";
 import BibleVerseRow from "./BibleVerseRow";
 import type { ReadingData, TrackData } from "./types";
 
@@ -20,6 +21,7 @@ interface BibleContentProps {
   markedVerses: OneVerse[];
   records: ReadRecordsMap;
   dayIndex: number;
+  userId?: string;
   isCompletedDay: boolean;
   setIsMemoryModalOpen: (open: boolean) => void;
   handleShareOneVerseClick: (record: ShareableOneVerseRecord) => void;
@@ -30,8 +32,9 @@ interface BibleContentProps {
   handleBottomButtonClick: () => void;
 }
 
-export default function BibleContent({ readingData, fontSize, selectedVerse, confirmedVerse, markedVerses, records, dayIndex, isCompletedDay, setIsMemoryModalOpen, handleShareOneVerseClick, handleConfirmVerse, handleToggleMark, handleRequestReselect, handleVerseClick, handleBottomButtonClick }: BibleContentProps) {
+export default function BibleContent({ readingData, fontSize, selectedVerse, confirmedVerse, markedVerses, records, dayIndex, userId, isCompletedDay, setIsMemoryModalOpen, handleShareOneVerseClick, handleConfirmVerse, handleToggleMark, handleRequestReselect, handleVerseClick, handleBottomButtonClick }: BibleContentProps) {
   const tracks = readingData.tracks;
+  const scrollContainerRef = useReadingProgress({ userId, dayIndex, tracks: tracks.map((track) => track.track.type), isReady: tracks.length > 0 });
   const { activeTrackType, stickyHeaderRef, trackRefs } = useActiveReaderTrack(tracks);
   const activeTrack = tracks.find((track) => track.track.type === activeTrackType) ?? tracks[0];
   const activeTrackInfo = activeTrack && TRACK_INFO[activeTrack.track.type as keyof typeof TRACK_INFO];
@@ -44,7 +47,7 @@ export default function BibleContent({ readingData, fontSize, selectedVerse, con
           <h2 className="flex items-center gap-2" style={{ color: activeTrackInfo.accentColor }}><ActiveTrackIcon size={18} strokeWidth={2} />{activeTrackInfo.title.split(" ")[0]} <span className="text-stone-500 font-normal mx-0.5">·</span> <span className="text-stone-700 dark:text-stone-300">{activeTrack.track.range}</span></h2>
         </div>
       )}
-      <div id="bible-content-scroll" className="flex-1 overflow-y-auto overscroll-y-contain flex flex-col">
+      <div ref={scrollContainerRef} id="bible-content-scroll" className="flex-1 overflow-y-auto overscroll-y-contain flex flex-col">
         {tracks.map((track: TrackData) => (
           <div key={track.track.type} id={TRACK_ID_MAP[track.track.type]} className="flex flex-col border-b border-stone-200 dark:border-stone-800/60 pb-10" ref={(element) => { if (element) trackRefs.current.set(track.track.type, element); else trackRefs.current.delete(track.track.type); }}>
             <div className="pl-3 pr-14 sm:pl-6 sm:pr-8 py-6 sm:py-8 flex flex-col gap-6" style={{ fontSize: `${fontSize}px`, lineHeight: 1.8 }}>

@@ -39,6 +39,11 @@ export default function BibleVerseRow({ trackType, book, chapter, verse, fontSiz
     <div
       id={(isConfirmed || isSelected) ? "one-verse-target" : undefined}
       data-one-verse-marked={isMarked ? "true" : undefined}
+      data-reader-verse="true"
+      data-track={trackType}
+      data-book={book}
+      data-chapter={chapter}
+      data-verse={verse.verse}
       className={wrapperClass}
     >
       {(isConfirmed || isSelected) && <div className={markerClass} />}

@@ -417,6 +417,7 @@ export default function BibleViewerPage() {
           markedVerses={oneVerseCandidates}
           records={records}
           dayIndex={dayIndex}
+          userId={authUser.id}
           isCompletedDay={isCompletedDay}
           setIsMemoryModalOpen={setIsMemoryModalOpen}
           handleShareOneVerseClick={(record) => setSelectedRecordToShare(record)}
