@@ -25,6 +25,7 @@ export function useReadingProgress({ userId, dayIndex, tracks, isReady }: Readin
     let lastSavedAt = 0;
     let disposed = false;
     let isInitialized = false;
+    const restoreTimers: number[] = [];
 
     const getVisibleVerse = () => {
       const containerTop = container.getBoundingClientRect().top;
@@ -87,6 +88,9 @@ export function useReadingProgress({ userId, dayIndex, tracks, isReady }: Readin
         isInitialized = true;
       }));
     };
+    const restoreIfReset = () => {
+      if (!disposed && isInitialized && container.scrollTop === 0) restore();
+    };
     const onVisibilityChange = () => {
       if (document.visibilityState === "hidden") save(true);
       else restore();
@@ -108,6 +112,11 @@ export function useReadingProgress({ userId, dayIndex, tracks, isReady }: Readin
       const progress = getLatestReadingProgress(userId, dayIndex, stableTracks);
       if (progress) {
         restore();
+        // Client-side route transitions and late layout effects can reset a
+        // nested scroller after the first restoration. Only retry when it is
+        // still at the initial position, so One/Quick Navigation is untouched.
+        restoreTimers.push(window.setTimeout(restoreIfReset, 250));
+        restoreTimers.push(window.setTimeout(restoreIfReset, 800));
       } else {
         restoredKeyRef.current = identity;
         isInitialized = true;
@@ -124,6 +133,7 @@ export function useReadingProgress({ userId, dayIndex, tracks, isReady }: Readin
       window.removeEventListener("pagehide", onPageHide);
       window.removeEventListener("pageshow", onPageShow);
       if (frameId !== null) window.cancelAnimationFrame(frameId);
+      restoreTimers.forEach((timer) => window.clearTimeout(timer));
       window.history.scrollRestoration = previousScrollRestoration;
     };
   }, [userId, dayIndex, isReady, stableTracks, trackSignature]);
