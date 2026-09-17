@@ -63,10 +63,36 @@ export function useReadingProgress({ userId, dayIndex, tracks, isReady }: Readin
         save();
       });
     };
+    const restore = () => {
+      const progress = getLatestReadingProgress(userId, dayIndex, stableTracks);
+      if (!progress) return;
+      // A tab/PWA can keep this component mounted while its nested scroll
+      // viewport is recreated. Re-apply after visibility/layout restoration.
+      window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
+        if (disposed) return;
+        const target = Array.from(container.querySelectorAll<HTMLElement>("[data-reader-verse='true']")).find((element) =>
+          element.dataset.track === progress.track
+          && element.dataset.book === progress.book
+          && Number(element.dataset.chapter) === progress.chapter
+          && Number(element.dataset.verse) === progress.verse,
+        );
+        if (target) {
+          const containerRect = container.getBoundingClientRect();
+          const targetTop = container.scrollTop + target.getBoundingClientRect().top - containerRect.top - 12;
+          container.scrollTo({ top: Math.max(0, targetTop), behavior: "auto" });
+        } else {
+          container.scrollTo({ top: progress.scroll_offset, behavior: "auto" });
+        }
+        restoredKeyRef.current = identity;
+        isInitialized = true;
+      }));
+    };
     const onVisibilityChange = () => {
       if (document.visibilityState === "hidden") save(true);
+      else restore();
     };
     const onPageHide = () => save(true);
+    const onPageShow = () => restore();
 
     // The reader owns a nested scroll container, so prevent browser history from
     // attempting an unrelated document-level restoration while it is mounted.
@@ -76,29 +102,12 @@ export function useReadingProgress({ userId, dayIndex, tracks, isReady }: Readin
     container.addEventListener("scroll", onScroll, { passive: true });
     document.addEventListener("visibilitychange", onVisibilityChange);
     window.addEventListener("pagehide", onPageHide);
+    window.addEventListener("pageshow", onPageShow);
 
     if (restoredKeyRef.current !== identity) {
       const progress = getLatestReadingProgress(userId, dayIndex, stableTracks);
       if (progress) {
-        // Wait for layout after asynchronously loaded Bible text has painted.
-        window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
-          if (disposed) return;
-          const target = Array.from(container.querySelectorAll<HTMLElement>("[data-reader-verse='true']")).find((element) =>
-            element.dataset.track === progress.track
-            && element.dataset.book === progress.book
-            && Number(element.dataset.chapter) === progress.chapter
-            && Number(element.dataset.verse) === progress.verse,
-          );
-          if (target) {
-            const containerRect = container.getBoundingClientRect();
-            const targetTop = container.scrollTop + target.getBoundingClientRect().top - containerRect.top - 12;
-            container.scrollTo({ top: Math.max(0, targetTop), behavior: "auto" });
-          } else {
-            container.scrollTo({ top: progress.scroll_offset, behavior: "auto" });
-          }
-          restoredKeyRef.current = identity;
-          isInitialized = true;
-        }));
+        restore();
       } else {
         restoredKeyRef.current = identity;
         isInitialized = true;
@@ -113,6 +122,7 @@ export function useReadingProgress({ userId, dayIndex, tracks, isReady }: Readin
       container.removeEventListener("scroll", onScroll);
       document.removeEventListener("visibilitychange", onVisibilityChange);
       window.removeEventListener("pagehide", onPageHide);
+      window.removeEventListener("pageshow", onPageShow);
       if (frameId !== null) window.cancelAnimationFrame(frameId);
       window.history.scrollRestoration = previousScrollRestoration;
     };
