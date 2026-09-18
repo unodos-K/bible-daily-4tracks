@@ -48,7 +48,7 @@ export default function BibleContent({ readingData, fontSize, selectedVerse, con
   return (
     <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
       {activeTrack && activeTrackInfo && (
-        <div ref={stickyHeaderRef} className="shrink-0 relative z-20 py-2 px-4 text-sm font-semibold bg-stone-100/90 dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800 transition-colors">
+        <div ref={stickyHeaderRef} data-reader-sticky-header className="shrink-0 relative z-20 py-2 px-4 text-sm font-semibold bg-stone-100/90 dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800 transition-colors">
           <h2 className="flex items-center gap-2" style={{ color: activeTrackInfo.accentColor }}><ActiveTrackIcon size={18} strokeWidth={2} />{activeTrackInfo.title.split(" ")[0]} <span className="text-stone-500 font-normal mx-0.5">·</span> <span className="text-stone-700 dark:text-stone-300">{activeTrack.track.range}</span></h2>
         </div>
       )}

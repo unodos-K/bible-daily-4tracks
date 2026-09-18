@@ -64,6 +64,7 @@ export default function BibleViewerPage() {
   const [readingTextError, setReadingTextError] = useState(false);
   const [readingTextRetryKey, setReadingTextRetryKey] = useState(0);
   const [markNavigationIndex, setMarkNavigationIndex] = useState(0);
+  const [toastTop, setToastTop] = useState(76);
   
   const {
     isClient,
@@ -111,6 +112,26 @@ export default function BibleViewerPage() {
   useEffect(() => {
     setMarkNavigationIndex(0);
   }, [dayIndex, oneVerseCandidates]);
+
+  useEffect(() => {
+    const updateToastPosition = () => {
+      const headerBottom = headerRef.current?.getBoundingClientRect().bottom ?? headerHeight;
+      const stickyHeader = document.querySelector<HTMLElement>("[data-reader-sticky-header]");
+      const fixedContentBottom = stickyHeader?.getBoundingClientRect().bottom ?? headerBottom;
+      setToastTop(Math.max(headerBottom, fixedContentBottom) + 10);
+    };
+
+    updateToastPosition();
+    const resizeObserver = new ResizeObserver(updateToastPosition);
+    if (headerRef.current) resizeObserver.observe(headerRef.current);
+    const stickyHeader = document.querySelector<HTMLElement>("[data-reader-sticky-header]");
+    if (stickyHeader) resizeObserver.observe(stickyHeader);
+    window.addEventListener("resize", updateToastPosition);
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", updateToastPosition);
+    };
+  }, [headerHeight, headerRef, isDataLoaded, readingData?.dayIndex]);
 
   useEffect(() => {
     if (!isClient || !isDataLoaded || !readerUserId) return;
@@ -284,8 +305,10 @@ export default function BibleViewerPage() {
       {toastMessage && (
         <div
           data-v2-toast
-          style={{ top: `${headerHeight + 12}px` }}
-          className="fixed left-1/2 -translate-x-1/2 z-50 bg-stone-800 text-white dark:bg-stone-200 dark:text-stone-900 px-4 py-2 rounded-full shadow-lg text-sm font-medium animate-in fade-in slide-in-from-top-4"
+          role="status"
+          aria-live="polite"
+          style={{ top: `${toastTop}px` }}
+          className="fixed left-1/2 z-[60] w-max max-w-[calc(100vw-24px)] -translate-x-1/2 break-words rounded-full bg-stone-800 px-4 py-2 text-center text-sm font-medium text-white shadow-lg animate-in fade-in slide-in-from-top-4 dark:bg-stone-200 dark:text-stone-900"
         >
           {toastMessage}
         </div>
