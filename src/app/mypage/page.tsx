@@ -1,4 +1,5 @@
 "use client";
+import NotificationBell from '@/components/notifications/NotificationBell';
 
 import React, { useEffect } from "react";
 import { Settings, Footprints } from "lucide-react";
@@ -115,6 +116,7 @@ export default function MyPage() {
           </div>
 
           {/* 우측 설정 버튼 */}
+          <NotificationBell />
           <button
             onClick={() => stats.router.push("/settings")}
             className="p-2 text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 transition-colors bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-full shadow-sm shrink-0"

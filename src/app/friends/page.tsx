@@ -1,6 +1,7 @@
 "use client";
+import NotificationBell from '@/components/notifications/NotificationBell';
 
-import React from "react";
+import React, { Suspense } from "react";
 import { HeartHandshake, Copy } from "lucide-react";
 import { useFriends } from "@/hooks/useFriends";
 import FriendListWidget from "@/components/friends/FriendListWidget";
@@ -8,6 +9,10 @@ import FriendRequestList from "@/components/friends/FriendRequestList";
 import FriendSearchBox from "@/components/friends/FriendSearchBox";
 
 export default function FriendsPage() {
+  return <Suspense fallback={<div className="p-6 text-stone-500">친구를 불러오는 중…</div>}><FriendsContent /></Suspense>;
+}
+
+function FriendsContent() {
   const friendsState = useFriends();
 
   return (
@@ -20,6 +25,7 @@ export default function FriendsPage() {
             <h1 className="text-2xl font-black text-stone-800 dark:text-stone-100 flex items-center gap-2">
               친구
             </h1>
+            <NotificationBell />
           </header>
 
           {/* 상단 공통 구역 (소셜 액션) */}

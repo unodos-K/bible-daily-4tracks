@@ -1,0 +1,55 @@
+"use client";
+import { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
+import { useRouter } from 'next/navigation';
+import { Bell, BookOpen, Flame, Heart, Sparkles, UserPlus, Users, X } from 'lucide-react';
+import AvatarImage from '@/components/AvatarImage';
+import { notificationHref, notificationMessage, type NotificationItem } from '@/lib/notifications';
+
+interface Props {
+  open: boolean; onClose: () => void; items: NotificationItem[]; count: number;
+  loading: boolean; busy: boolean; error: string; hasMore: boolean;
+  onMore: () => void; onRetry: () => void; onRead: (id?: string) => Promise<boolean>;
+}
+const icons = { friend_request: UserPlus, friend_request_accepted: Users, one_verse_liked: Heart,
+  reading_streak_achieved: Flame, memorization_completed: Sparkles, one_verse_completed: BookOpen, friend_completed_reading: BookOpen };
+
+export default function NotificationPanel(props: Props) {
+  const dialog = useRef<HTMLDialogElement>(null);
+  const router = useRouter();
+  useEffect(() => {
+    if (props.open && !dialog.current?.open) dialog.current?.showModal();
+    if (!props.open && dialog.current?.open) dialog.current?.close();
+  }, [props.open]);
+  if (typeof document === 'undefined') return null;
+  return createPortal(<dialog ref={dialog} aria-labelledby="notification-title" onCancel={props.onClose}
+    className="fixed inset-0 m-auto w-[calc(100%-2rem)] max-w-lg rounded-2xl border border-stone-200 bg-stone-50 p-0 text-stone-800 shadow-xl backdrop:bg-black/40 dark:border-stone-800 dark:bg-stone-950 dark:text-stone-100">
+    <div className="flex max-h-[85dvh] flex-col">
+      <header className="flex shrink-0 items-center justify-between border-b border-stone-200 px-5 py-3 dark:border-stone-800">
+        <h2 id="notification-title" className="flex items-center gap-2 text-lg font-bold"><Bell size={20} />알림</h2>
+        <button autoFocus type="button" onClick={props.onClose} aria-label="알림 닫기" className="flex h-11 w-11 items-center justify-center rounded-full hover:bg-stone-200 dark:hover:bg-stone-800"><X size={22} /></button>
+      </header>
+      <div className="flex justify-end px-5 py-2"><button disabled={props.busy || props.count === 0} onClick={() => void props.onRead()} className="min-h-11 text-sm font-medium text-amber-800 disabled:opacity-40 dark:text-amber-300">모두 읽음 처리</button></div>
+      <div className="overflow-y-auto overscroll-contain px-3 pb-5" aria-busy={props.loading}>
+        {props.error && <div role="alert" className="p-4 text-sm text-rose-700 dark:text-rose-300">{props.error}<button onClick={props.onRetry} className="ml-2 min-h-11 underline">다시 시도</button></div>}
+        {!props.error && !props.loading && props.items.length === 0 && <p className="py-16 text-center text-sm text-stone-500">아직 새로운 알림이 없어요.</p>}
+        <ul className="space-y-1">{props.items.map(item => {
+          const Icon = icons[item.type as keyof typeof icons] ?? Bell;
+          const name = item.actor?.nickname || item.actor?.name || '친구';
+          return <li key={item.id}><button disabled={props.busy} onClick={async () => {
+            if (!item.is_read && !await props.onRead(item.id)) return;
+            props.onClose(); router.push(notificationHref(item));
+          }} className={`flex w-full items-start gap-3 rounded-xl p-3 text-left transition-colors hover:bg-stone-200/60 dark:hover:bg-stone-800 ${item.is_read ? '' : 'bg-amber-100/40 dark:bg-amber-950/20'}`}>
+            <span className="relative shrink-0">{item.actor?.avatar_url ? <AvatarImage src={item.actor.avatar_url} alt={name} size={36} className="h-9 w-9 rounded-full bg-stone-200" /> : <span className="flex h-9 w-9 items-center justify-center rounded-full bg-stone-200 text-sm text-stone-600 dark:bg-stone-800 dark:text-stone-300">{name.slice(0,1)}</span>}<Icon size={14} className="absolute -bottom-1 -right-1 rounded-full bg-stone-50 text-amber-800 dark:bg-stone-900 dark:text-amber-300" /></span>
+            <span className="min-w-0 flex-1"><span className={`block break-words text-sm leading-relaxed ${item.is_read ? 'text-stone-500' : 'font-semibold'}`}>{notificationMessage(item)}</span>
+              <time dateTime={item.created_at} className="mt-1 block text-xs text-stone-500">{new Date(item.created_at).toLocaleString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</time>
+              <span className="sr-only">{item.is_read ? '읽음' : '읽지 않음'} · 관련 화면으로 이동</span></span>
+            {!item.is_read && <span aria-hidden="true" className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-700" />}
+          </button></li>;
+        })}</ul>
+        {props.loading && <p role="status" className="p-4 text-center text-sm text-stone-500">알림을 불러오는 중…</p>}
+        {props.hasMore && <button disabled={props.loading} onClick={props.onMore} className="mt-3 min-h-11 w-full rounded-xl border border-stone-200 text-sm dark:border-stone-800">이전 알림 더 보기</button>}
+      </div>
+    </div>
+  </dialog>, document.body);
+}

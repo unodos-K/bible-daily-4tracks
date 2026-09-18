@@ -1,4 +1,5 @@
 "use client";
+import NotificationBell from '@/components/notifications/NotificationBell';
 
 import React from "react";
 import { AlertCircle, ArrowRight, BookOpen, CalendarDays, CheckCircle2, Footprints, Heart, Pin } from "lucide-react";
@@ -193,7 +194,8 @@ export default function HomePage() {
             <DashboardSkeleton />
           ) : (
             <>
-              <section data-v2-home-greeting className="space-y-2">
+              <section data-v2-home-greeting className="relative space-y-2 pr-12">
+                <div className="absolute right-0 top-0"><NotificationBell /></div>
                 {authUser ? (
                   <>
                     <p className="truncate text-sm font-semibold text-amber-700 dark:text-amber-400">

@@ -1,4 +1,5 @@
 import React from "react";
+import NotificationBell from '@/components/notifications/NotificationBell';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ChevronDown } from "lucide-react";
 import { ReadRecordsMap, ReadingSettings } from "@/lib/storage";
 import { ReadingData } from "./BibleContent";
@@ -94,6 +95,7 @@ export default function ReadHeader({
           >
             <ChevronsRight size={22} className="text-stone-700 dark:text-stone-300" />
           </button>
+          <NotificationBell />
         </div>
       </div>
     </header>

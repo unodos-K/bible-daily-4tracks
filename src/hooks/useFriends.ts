@@ -13,12 +13,16 @@ import {
   createInviteLink
 } from "@/lib/social";
 import { useAuth } from "@/components/AuthProvider";
+import { useRouter, useSearchParams } from 'next/navigation';
 import type { AuthUser } from "@/lib/auth";
 
 export type TabType = "friends" | "requests" | "search";
 
 export function useFriends() {
-  const [activeTab, setActiveTab] = useState<TabType>("friends");
+  const router = useRouter();
+  const requestedTab = useSearchParams().get('tab');
+  const activeTab: TabType = requestedTab === 'requests' || requestedTab === 'search' ? requestedTab : 'friends';
+  const setActiveTab = (tab: TabType) => router.replace(`/friends?tab=${tab}`, { scroll: false });
   const { authUser, isAuthLoading } = useAuth();
   
   const [friends, setFriends] = useState<FriendProfile[]>([]);

@@ -3,6 +3,7 @@
 import React from "react";
 import { usePathname } from "next/navigation";
 import { BottomNavigation } from "./BottomNavigation";
+import NotificationProvider from "./notifications/NotificationProvider";
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -19,13 +20,13 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const hasPageScrollContainer = isReadPage || isMemoPage || isFriendsPage || isFriendDetailPage || isMyPage;
 
   return (
-    <>
+    <NotificationProvider>
       <div className="relative mx-auto flex min-h-screen w-full max-w-2xl flex-col border-x border-stone-200 bg-stone-50 shadow-xl dark:border-stone-800 dark:bg-stone-950">
         <main className={`app-main flex-1 min-h-0 w-full ${showBottomNav ? 'pb-16' : ''} ${hasPageScrollContainer ? 'flex flex-col overflow-hidden' : 'overflow-y-auto overscroll-y-contain'} bg-stone-50 dark:bg-stone-950`}>
           {children}
         </main>
       </div>
       {showBottomNav && <BottomNavigation />}
-    </>
+    </NotificationProvider>
   );
 }

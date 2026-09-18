@@ -4,6 +4,7 @@ import React, { createContext, useCallback, useContext, useEffect, useRef, useSt
 import { useAuth } from '@/components/AuthProvider';
 import { supabase } from '@/lib/supabase';
 import { fetchNotifications, fetchUnreadNotificationCount, markNotificationsRead, NOTIFICATION_PAGE_SIZE, type NotificationItem } from '@/lib/notifications';
+import NotificationPanel from './NotificationPanel';
 
 interface NotificationContextValue {
   count: number;
@@ -106,5 +107,7 @@ function UserNotifications({ userId, children }: { userId: string; children: Rea
     openRef.current = true; setOpen(true); void load(); void refreshCount();
   } }}>
     {children}
+    <NotificationPanel open={open} onClose={close} items={items} loading={loading} busy={busy} error={error}
+      hasMore={hasMore} onMore={() => void load(true)} onRetry={() => void load()} onRead={markRead} count={count} />
   </NotificationContext.Provider>;
 }
