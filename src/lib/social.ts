@@ -24,6 +24,12 @@ export interface FriendFeedItem {
   liked_by_users?: { id: string; name: string }[];
 }
 
+export interface VerseLikeData {
+  count: number;
+  isLikedByMe: boolean;
+  likers: { id: string; name: string }[];
+}
+
 export async function createInviteLink(origin: string): Promise<string | null> {
   const { data: inviteId, error } = await supabase.rpc('create_invite');
   if (error || !inviteId) {
@@ -453,4 +459,25 @@ export async function toggleLike(authorId: string, dayIndex: number, currentUser
   }
   
   return true;
+}
+
+export async function getVerseLikes(authorId: string, dayIndex: number, currentUserId?: string): Promise<VerseLikeData> {
+  const userId = currentUserId ?? await getUserId();
+  const { data, error } = await supabase
+    .from('one_verse_likes')
+    .select('liker_id, profiles!liker_id(name, nickname)')
+    .eq('author_id', authorId)
+    .eq('day_index', dayIndex);
+  if (error) throw error;
+
+  const likers = (data ?? []).flatMap((like) => {
+    if (!like.liker_id) return [];
+    const profile = Array.isArray(like.profiles) ? like.profiles[0] : like.profiles;
+    return [{ id: like.liker_id, name: profile?.nickname || profile?.name || '알 수 없음' }];
+  });
+  return {
+    count: likers.length,
+    isLikedByMe: Boolean(userId && likers.some((liker) => liker.id === userId)),
+    likers,
+  };
 }

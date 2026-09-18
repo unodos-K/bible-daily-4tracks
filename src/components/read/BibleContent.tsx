@@ -5,6 +5,7 @@ import { TRACK_INFO } from "@/lib/bible";
 import type { OneVerse, ReadRecordsMap, ShareableOneVerseRecord } from "@/lib/storage";
 import { useActiveReaderTrack } from "./useActiveReaderTrack";
 import { useReadingProgress } from "@/hooks/useReadingProgress";
+import type { VerseLikeData } from "@/lib/social";
 import BibleVerseRow from "./BibleVerseRow";
 import type { ReadingData, TrackData } from "./types";
 
@@ -24,16 +25,18 @@ interface BibleContentProps {
   dayIndex: number;
   userId?: string;
   isCompletedDay: boolean;
+  verseLikes: VerseLikeData | null;
+  isLikeBusy: boolean;
+  handleToggleLike: () => void;
   setIsMemoryModalOpen: (open: boolean) => void;
   handleShareOneVerseClick: (record: ShareableOneVerseRecord) => void;
   handleConfirmVerse: (verse: OneVerse, event: React.MouseEvent) => void;
   handleToggleMark: (verse: OneVerse, event: React.MouseEvent) => void;
   handleRequestReselect: () => void;
   handleVerseClick: (trackType: string, book: string, chapter: number, verse: number, rawText: string, displayText: string, chunks: string[]) => void;
-  handleBottomButtonClick: () => void;
 }
 
-export default function BibleContent({ readingData, fontSize, selectedVerse, confirmedVerse, markedVerses, records, dayIndex, userId, isCompletedDay, setIsMemoryModalOpen, handleShareOneVerseClick, handleConfirmVerse, handleToggleMark, handleRequestReselect, handleVerseClick, handleBottomButtonClick }: BibleContentProps) {
+export default function BibleContent({ readingData, fontSize, selectedVerse, confirmedVerse, markedVerses, records, dayIndex, userId, isCompletedDay, verseLikes, isLikeBusy, handleToggleLike, setIsMemoryModalOpen, handleShareOneVerseClick, handleConfirmVerse, handleToggleMark, handleRequestReselect, handleVerseClick }: BibleContentProps) {
   const tracks = readingData.tracks;
   const pathname = usePathname();
   const scrollContainerRef = useReadingProgress({ userId, dayIndex, tracks: tracks.map((track) => track.track.type), isReady: tracks.length > 0, isActive: pathname === "/read" });
@@ -56,7 +59,7 @@ export default function BibleContent({ readingData, fontSize, selectedVerse, con
               {track.chapters.map((chapter) => (
                 <div key={`${chapter.name}-${chapter.chapter}`} className="flex flex-col">
                   <h3 className="font-bold mb-4 px-2 text-stone-800 dark:text-stone-200 border-b border-stone-200 dark:border-stone-800 pb-2">{chapter.name} {chapter.chapter}{chapter.chapterUnit || (chapter.name === "시편" ? "편" : "장")}</h3>
-                  {chapter.verses.length === 0 ? <p className="text-stone-400 italic px-2">본문 데이터가 없습니다.</p> : <div className="flex flex-col gap-1">{chapter.verses.map((verse) => <BibleVerseRow key={verse.verse} trackType={track.track.type} book={chapter.name} chapter={chapter.chapter} verse={verse} fontSize={fontSize} dayIndex={dayIndex} selectedVerse={selectedVerse} confirmedVerse={confirmedVerse} markedVerses={markedVerses} record={records[dayIndex]} onVerseClick={handleVerseClick} onConfirmVerse={handleConfirmVerse} onToggleMark={handleToggleMark} onRequestReselect={handleRequestReselect} isCompletedDay={isCompletedDay} onOpenMemory={() => setIsMemoryModalOpen(true)} onShare={handleShareOneVerseClick} />)}</div>}
+                  {chapter.verses.length === 0 ? <p className="text-stone-400 italic px-2">본문 데이터가 없습니다.</p> : <div className="flex flex-col gap-1">{chapter.verses.map((verse) => <BibleVerseRow key={verse.verse} trackType={track.track.type} book={chapter.name} chapter={chapter.chapter} verse={verse} fontSize={fontSize} dayIndex={dayIndex} userId={userId} selectedVerse={selectedVerse} confirmedVerse={confirmedVerse} markedVerses={markedVerses} record={records[dayIndex]} verseLikes={verseLikes} isLikeBusy={isLikeBusy} onToggleLike={handleToggleLike} onVerseClick={handleVerseClick} onConfirmVerse={handleConfirmVerse} onToggleMark={handleToggleMark} onRequestReselect={handleRequestReselect} isCompletedDay={isCompletedDay} onOpenMemory={() => setIsMemoryModalOpen(true)} onShare={handleShareOneVerseClick} />)}</div>}
                 </div>
               ))}
             </div>
@@ -64,9 +67,9 @@ export default function BibleContent({ readingData, fontSize, selectedVerse, con
         ))}
         <div id="viewer-bottom" className="relative z-10 flex flex-col items-center gap-3 border-t border-stone-200 bg-stone-50 px-5 py-12 dark:border-stone-800 dark:bg-stone-900 sm:px-8">
           {!isCompletedDay && <p className="max-w-sm text-center text-xs font-medium leading-relaxed text-stone-500 dark:text-stone-400">{confirmedVerse ? "오늘의 One Verse가 선택되었습니다." : "오늘의 One Verse를 선택해 주세요."}</p>}
-          <button onClick={handleBottomButtonClick} className={`flex w-full max-w-sm items-center justify-center gap-2 rounded-2xl px-6 py-4 text-lg font-bold shadow-sm transition-all duration-300 ${isCompletedDay ? "scale-[0.98] border border-emerald-300 bg-emerald-100 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-400" : "bg-sky-600 text-white shadow-md hover:-translate-y-1 hover:bg-sky-700"}`}>
-            {isCompletedDay ? <><CheckCircle2 size={24} />Day {readingData.dayIndex} 말씀 통독 완료 🎉</> : <>Day {readingData.dayIndex} 말씀 통독 완료하기</>}
-          </button>
+          <div role="status" className={`flex w-full max-w-sm items-center justify-center gap-2 rounded-2xl border px-6 py-4 text-center text-sm font-bold ${isCompletedDay ? "border-emerald-300 bg-emerald-100 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-400" : "border-stone-200 bg-white text-stone-500 dark:border-stone-800 dark:bg-stone-950 dark:text-stone-400"}`}>
+            {isCompletedDay ? <><CheckCircle2 size={20} />Day {readingData.dayIndex} 말씀 통독 완료</> : <>마음에 남는 One Verse를 선택하면 읽기가 완료돼요.</>}
+          </div>
         </div>
       </div>
     </div>

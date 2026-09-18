@@ -5,15 +5,18 @@ import { FriendFeedItem } from '@/lib/social';
 
 interface LikeButtonProps {
   item: FriendFeedItem;
-  onLike: () => void;
+  onLike: () => void | Promise<void>;
+  disabled?: boolean;
+  viewerId?: string;
 }
 
-export default function LikeButton({ item, onLike }: LikeButtonProps) {
+export default function LikeButton({ item, onLike, disabled = false, viewerId }: LikeButtonProps) {
   const [showTooltip, setShowTooltip] = useState(false);
   const pressTimer = useRef<NodeJS.Timeout | null>(null);
   const hideTimer = useRef<NodeJS.Timeout | null>(null);
   const isLongPress = useRef(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const listButtonRef = useRef<HTMLButtonElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
   const [tooltipPos, setTooltipPos] = useState<{ top: number; left: number } | null>(null);
@@ -99,6 +102,7 @@ export default function LikeButton({ item, onLike }: LikeButtonProps) {
       if (showTooltip) {
         const target = e.target as Node;
         if (buttonRef.current && buttonRef.current.contains(target)) return;
+        if (listButtonRef.current && listButtonRef.current.contains(target)) return;
         if (tooltipRef.current && tooltipRef.current.contains(target)) return;
         setShowTooltip(false);
       }
@@ -113,8 +117,8 @@ export default function LikeButton({ item, onLike }: LikeButtonProps) {
 
   return (
     <>
+      <div data-v2-like-button className="inline-flex shrink-0 items-center">
       <button 
-        data-v2-like-button
         ref={buttonRef}
         aria-label={item.is_liked_by_me ? `아멘 취소, 현재 ${item.like_count}명` : `아멘 보내기, 현재 ${item.like_count}명`}
         aria-pressed={item.is_liked_by_me}
@@ -125,7 +129,8 @@ export default function LikeButton({ item, onLike }: LikeButtonProps) {
         onTouchEnd={handleTouchEnd}
         onTouchMove={handleTouchMove}
         onContextMenu={handleContextMenu}
-        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-colors select-none ${
+        disabled={disabled}
+        className={`flex items-center px-3 py-1.5 rounded-l-full transition-colors select-none ${
           item.is_liked_by_me 
             ? "bg-red-50 dark:bg-red-950/30 text-red-500" 
             : "bg-stone-100 dark:bg-stone-800 text-stone-500 hover:bg-stone-200 dark:hover:bg-stone-700"
@@ -133,8 +138,15 @@ export default function LikeButton({ item, onLike }: LikeButtonProps) {
         style={{ WebkitTouchCallout: 'none', WebkitUserSelect: 'none', userSelect: 'none' }}
       >
         <HandHeart size={16} fill={item.is_liked_by_me ? "currentColor" : "none"} />
-        <span className="text-xs font-bold">{item.like_count}</span>
       </button>
+      <button
+        ref={listButtonRef}
+        type="button"
+        aria-label={`아멘 한 사람 ${item.like_count}명 보기`}
+        onClick={(event) => { event.stopPropagation(); setShowTooltip((current) => !current); }}
+        className={`min-w-8 rounded-r-full px-2 py-1.5 text-xs font-bold transition-colors ${item.is_liked_by_me ? "bg-red-50 text-red-500 dark:bg-red-950/30" : "bg-stone-100 text-stone-500 hover:bg-stone-200 dark:bg-stone-800 dark:text-stone-400 dark:hover:bg-stone-700"}`}
+      >{item.like_count}</button>
+      </div>
 
       {showTooltip && tooltipPos && typeof document !== 'undefined' && createPortal(
         <div 
@@ -155,7 +167,7 @@ export default function LikeButton({ item, onLike }: LikeButtonProps) {
             {likers.length > 0 ? (
               likers.map(u => (
                 <span key={u.id} className="bg-stone-700 dark:bg-stone-200 px-2 py-1 rounded-lg text-[11px] whitespace-nowrap">
-                  {u.name}
+                  {u.id === viewerId ? '나' : u.name}
                 </span>
               ))
             ) : (

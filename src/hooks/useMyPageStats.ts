@@ -12,13 +12,9 @@ import {
 } from "@/lib/storage";
 import { useAuth } from "@/components/AuthProvider";
 import { signOut, supabase } from "@/lib/supabase";
-import { toggleLike } from "@/lib/social";
+import { toggleLike, type VerseLikeData } from "@/lib/social";
 
-export interface VerseLikeData {
-  count: number;
-  isLikedByMe: boolean;
-  likers: { id: string; name: string }[];
-}
+export type { VerseLikeData } from "@/lib/social";
 
 
 export function useMyPageStats() {

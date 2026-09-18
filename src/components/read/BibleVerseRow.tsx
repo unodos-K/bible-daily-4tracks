@@ -3,6 +3,8 @@ import type { DayRecord, OneVerse, ShareableOneVerseRecord } from "@/lib/storage
 import type { VerseData } from "./types";
 import { ConfirmedOneVerseActions, SelectedOneVerseActions } from "./OneVerseActions";
 import { Crown } from "lucide-react";
+import type { VerseLikeData } from "@/lib/social";
+import LikeButton from "@/components/friends/LikeButton";
 
 interface BibleVerseRowProps {
   trackType: string;
@@ -11,6 +13,7 @@ interface BibleVerseRowProps {
   verse: VerseData;
   fontSize: number;
   dayIndex: number;
+  userId?: string;
   selectedVerse: OneVerse | null;
   confirmedVerse: OneVerse | null;
   markedVerses: OneVerse[];
@@ -22,11 +25,14 @@ interface BibleVerseRowProps {
   onShare: (record: ShareableOneVerseRecord) => void;
   onRequestReselect: () => void;
   isCompletedDay: boolean;
+  verseLikes: VerseLikeData | null;
+  isLikeBusy: boolean;
+  onToggleLike: () => void;
 }
 
 const formatReference = (book: string, chapter: number, verse: number) => book === "시편" ? `${book} ${chapter}편 ${verse}절` : `${book} ${chapter}장 ${verse}절`;
 
-export default function BibleVerseRow({ trackType, book, chapter, verse, fontSize, dayIndex, selectedVerse, confirmedVerse, markedVerses, record, onVerseClick, onConfirmVerse, onToggleMark, onOpenMemory, onShare, onRequestReselect, isCompletedDay }: BibleVerseRowProps) {
+export default function BibleVerseRow({ trackType, book, chapter, verse, fontSize, dayIndex, userId, selectedVerse, confirmedVerse, markedVerses, record, verseLikes, isLikeBusy, onToggleLike, onVerseClick, onConfirmVerse, onToggleMark, onOpenMemory, onShare, onRequestReselect, isCompletedDay }: BibleVerseRowProps) {
   const isSelected = selectedVerse?.book === book && selectedVerse?.chapter === chapter && selectedVerse?.verse === verse.verse;
   const isConfirmed = confirmedVerse?.book === book && confirmedVerse?.chapter === chapter && confirmedVerse?.verse === verse.verse;
   const isMarked = markedVerses.some((markedVerse) => markedVerse.book === book && markedVerse.chapter === chapter && markedVerse.verse === verse.verse);
@@ -47,7 +53,7 @@ export default function BibleVerseRow({ trackType, book, chapter, verse, fontSiz
       className={wrapperClass}
     >
       {(isConfirmed || isSelected) && <div className={markerClass} />}
-      {isConfirmed && <div className="mb-2 flex items-center pl-[2.5ch] sm:pl-[3ch]"><span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-700 dark:bg-amber-900/50 dark:text-amber-400"><Crown size={13} />오늘의 One Verse</span></div>}
+      {isConfirmed && <div className="mb-2 flex min-w-0 items-center justify-between gap-2 pl-[2.5ch] sm:pl-[3ch]"><span className="inline-flex min-w-0 items-center gap-1 whitespace-nowrap rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-700 dark:bg-amber-900/50 dark:text-amber-400"><Crown size={13} />오늘의 One Verse</span>{isCompletedDay && verseLikes && <LikeButton viewerId={userId} disabled={isLikeBusy} item={{ user_id: userId ?? '', name: '나', avatar_url: '', day_index: dayIndex, read_date: record?.readDate ?? '', completed_at: record?.completedAt ?? '', one_verse: confirmedVerse, like_count: verseLikes.count, is_liked_by_me: verseLikes.isLikedByMe, liked_by_users: verseLikes.likers }} onLike={onToggleLike} />}</div>}
       <button
         type="button"
         aria-label={`${formatReference(book, chapter, verse.verse)} 선택`}

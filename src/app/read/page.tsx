@@ -77,6 +77,8 @@ export default function BibleViewerPage() {
     selectedVerse,
     confirmedVerse,
     oneVerseCandidates,
+    verseLikes,
+    isLikeBusy,
     isMemoryModalOpen,
     setIsMemoryModalOpen,
     showReselectModal,
@@ -96,6 +98,7 @@ export default function BibleViewerPage() {
     handleConfirmVerse,
     handleRequestReselect,
     handleConfirmReselect,
+    handleToggleLike,
     handleToggleCandidate,
     handleMemoryComplete,
     calculateDaysSince
@@ -384,6 +387,9 @@ export default function BibleViewerPage() {
           dayIndex={dayIndex}
           userId={authUser.id}
           isCompletedDay={isCompletedDay}
+          verseLikes={verseLikes}
+          isLikeBusy={isLikeBusy}
+          handleToggleLike={handleToggleLike}
           setIsMemoryModalOpen={setIsMemoryModalOpen}
           handleShareOneVerseClick={(record) => setSelectedRecordToShare(record)}
           handleConfirmVerse={handleConfirmVerse}
