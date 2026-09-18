@@ -21,8 +21,9 @@ BEGIN
     END IF;
 END $$;
 
--- 기존의 우정 관계는 모두 승인된(accepted) 것으로 간주하여 마이그레이션
-UPDATE public.friendships SET status = 'accepted' WHERE status = 'pending' OR status IS NULL;
+-- 기존 friendship 상태는 보존한다. 기존 pending 요청을 자동 승인하거나
+-- NULL 상태를 accepted로 추정 변환하지 않는다. 상태 정합성은 별도 점검 후
+-- 제품 정책에 맞는 명시적 작업으로 처리해야 한다.
 
 -- 3. RLS (Row Level Security) 설정
 -- invites RLS
