@@ -130,7 +130,7 @@ export default function LikeButton({ item, onLike, disabled = false, viewerId }:
         onTouchMove={handleTouchMove}
         onContextMenu={handleContextMenu}
         disabled={disabled}
-        className={`flex items-center px-3 py-1.5 rounded-l-full transition-colors select-none ${
+        className={`flex items-center justify-center px-2 py-1.5 rounded-l-full transition-colors select-none ${
           item.is_liked_by_me 
             ? "bg-red-50 dark:bg-red-950/30 text-red-500" 
             : "bg-stone-100 dark:bg-stone-800 text-stone-500 hover:bg-stone-200 dark:hover:bg-stone-700"
@@ -144,7 +144,7 @@ export default function LikeButton({ item, onLike, disabled = false, viewerId }:
         type="button"
         aria-label={`아멘 한 사람 ${item.like_count}명 보기`}
         onClick={(event) => { event.stopPropagation(); setShowTooltip((current) => !current); }}
-        className={`min-w-8 rounded-r-full px-2 py-1.5 text-xs font-bold transition-colors ${item.is_liked_by_me ? "bg-red-50 text-red-500 dark:bg-red-950/30" : "bg-stone-100 text-stone-500 hover:bg-stone-200 dark:bg-stone-800 dark:text-stone-400 dark:hover:bg-stone-700"}`}
+        className={`min-w-7 rounded-r-full px-1.5 py-1.5 text-xs font-bold transition-colors ${item.is_liked_by_me ? "bg-red-50 text-red-500 dark:bg-red-950/30" : "bg-stone-100 text-stone-500 hover:bg-stone-200 dark:bg-stone-800 dark:text-stone-400 dark:hover:bg-stone-700"}`}
       >{item.like_count}</button>
       </div>
 
