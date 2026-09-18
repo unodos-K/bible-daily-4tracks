@@ -26,6 +26,7 @@ export interface OneVerse {
   reference: string;
   isMemorized?: boolean;
   memorizedAt?: string; // ISO String
+  memorizedMethods?: Array<'voice' | 'writing'>;
   memo?: string | MemoData;
   memoUpdatedAt?: string; // ISO String
 }
@@ -155,6 +156,7 @@ export function parseOneVerse(value: Json | null): OneVerse | undefined {
     reference: value.reference,
     ...(typeof value.isMemorized === 'boolean' ? { isMemorized: value.isMemorized } : {}),
     ...(typeof value.memorizedAt === 'string' ? { memorizedAt: value.memorizedAt } : {}),
+    ...(Array.isArray(value.memorizedMethods) ? { memorizedMethods: value.memorizedMethods.filter((method): method is 'voice' | 'writing' => method === 'voice' || method === 'writing') } : {}),
     ...(memo !== undefined ? { memo } : {}),
     ...(typeof value.memoUpdatedAt === 'string' ? { memoUpdatedAt: value.memoUpdatedAt } : {}),
   };
@@ -498,12 +500,13 @@ export async function updateReadRecordCompletion(dayIndex: number, completedAt: 
   return true;
 }
 
-export async function updateMemorizeRecord(dayIndex: number, isMemorized: boolean, currentOneVerse: OneVerse, currentUserId?: string): Promise<void> {
+export async function updateMemorizeRecord(dayIndex: number, isMemorized: boolean, currentOneVerse: OneVerse, currentUserId?: string, method?: 'voice' | 'writing'): Promise<void> {
   const userId = currentUserId ?? await getUserId();
   if (!userId) return;
   const updatedOneVerse = { ...currentOneVerse, isMemorized };
   if (isMemorized) {
     updatedOneVerse.memorizedAt = new Date().toISOString();
+    if (method) updatedOneVerse.memorizedMethods = Array.from(new Set([...(currentOneVerse.memorizedMethods ?? []), method]));
   } else {
     delete updatedOneVerse.memorizedAt;
   }

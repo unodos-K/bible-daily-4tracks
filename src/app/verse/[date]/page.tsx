@@ -175,10 +175,10 @@ export default function VerseDetailPage() {
         <MemoryTrainerModal
           oneVerse={records[selectedDayIndexForMemory].oneVerse as OneVerse}
           onClose={() => setIsMemoryModalOpen(false)}
-          onComplete={async () => {
+          onComplete={async (method) => {
             const verse = records[selectedDayIndexForMemory].oneVerse;
             if (verse) {
-              await updateMemorizeRecord(selectedDayIndexForMemory, true, verse, authUser?.id);
+              await updateMemorizeRecord(selectedDayIndexForMemory, true, verse, authUser?.id, method);
               const r = await fetchOneVerseRecords(authUser?.id);
               setRecords(r);
             }

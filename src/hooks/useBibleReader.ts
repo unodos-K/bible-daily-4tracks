@@ -401,10 +401,11 @@ export function useBibleReader() {
     showToast("읽기 완료를 취소했어요. One Verse와 발자국은 그대로 유지됩니다.");
   };
 
-  const handleMemoryComplete = async () => {
+  const handleMemoryComplete = async (method?: 'voice' | 'writing') => {
     if (confirmedVerse) {
-      await updateMemorizeRecord(dayIndex, true, confirmedVerse, authUser?.id);
-      setConfirmedVerse({ ...confirmedVerse, isMemorized: true, memorizedAt: new Date().toISOString() });
+      await updateMemorizeRecord(dayIndex, true, confirmedVerse, authUser?.id, method);
+      setConfirmedVerse({ ...confirmedVerse, isMemorized: true, memorizedAt: new Date().toISOString(),
+        memorizedMethods: method ? Array.from(new Set([...(confirmedVerse.memorizedMethods ?? []), method])) : confirmedVerse.memorizedMethods });
       const r = await fetchReadRecords(authUser?.id);
       setRecords(r);
       setIsMemoryModalOpen(false);

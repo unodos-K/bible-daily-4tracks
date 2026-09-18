@@ -23,7 +23,7 @@ declare global {
 interface MemoryTrainerModalProps {
   oneVerse: OneVerse;
   onClose: () => void;
-  onComplete: () => void;
+  onComplete: (method?: 'voice' | 'writing') => void;
 }
 
 export default function MemoryTrainerModal({ oneVerse, onClose, onComplete }: MemoryTrainerModalProps) {

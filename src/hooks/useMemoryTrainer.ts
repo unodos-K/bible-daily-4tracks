@@ -10,7 +10,7 @@ export interface TrainerStep {
   hiddenIndices: number[];
 }
 
-export function useMemoryTrainer({ oneVerse, onComplete }: { oneVerse: OneVerse, onComplete: () => void }) {
+export function useMemoryTrainer({ oneVerse, onComplete }: { oneVerse: OneVerse, onComplete: (method?: 'voice' | 'writing') => void }) {
   const [freshRawText, setFreshRawText] = useState<string | null>(null);
   const [isBibleTextLoading, setIsBibleTextLoading] = useState(true);
   const [bibleTextLoadError, setBibleTextLoadError] = useState(false);
@@ -327,7 +327,7 @@ export function useMemoryTrainer({ oneVerse, onComplete }: { oneVerse: OneVerse,
       if (Date.now() < end) {
         requestAnimationFrame(frame);
       } else {
-        onComplete();
+        onComplete(challengeMethod ?? undefined);
       }
     };
     frame();
