@@ -1,7 +1,7 @@
 "use client";
 import NotificationBell from '@/components/notifications/NotificationBell';
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Settings, Footprints } from "lucide-react";
 import {
   OneVerseRecord,
@@ -19,6 +19,29 @@ import { getLastRecordDay } from "@/lib/readingRecords";
 
 export default function MyPage() {
   const stats = useMyPageStats();
+  const { isClient, setCurrentDate, oneVerseRecords, currentDate } = stats;
+  const [highlightDate, setHighlightDate] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isClient) return;
+    const date = new URLSearchParams(window.location.search).get('date');
+    if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return;
+    const [year, month, day] = date.split('-').map(Number);
+    const parsed = new Date(year, month - 1, day);
+    if (parsed.getFullYear() !== year || parsed.getMonth() !== month - 1 || parsed.getDate() !== day) return;
+    setCurrentDate(new Date(year, month - 1, 1));
+    setHighlightDate(date);
+  }, [isClient, setCurrentDate]);
+
+  useEffect(() => {
+    if (!highlightDate || !isClient || Object.keys(oneVerseRecords).length === 0) return;
+    const frame = window.requestAnimationFrame(() => {
+      document.querySelector<HTMLElement>(`[data-v2-archive-record-date="${highlightDate}"]`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+    const timeout = window.setTimeout(() => setHighlightDate(null), 4000);
+    return () => { window.cancelAnimationFrame(frame); window.clearTimeout(timeout); };
+  }, [highlightDate, isClient, oneVerseRecords, currentDate]);
 
   useEffect(() => {
     if (stats.isClient && Object.keys(stats.records).length > 0) {
@@ -150,6 +173,7 @@ export default function MyPage() {
             router={stats.router}
             handleShareOneVerse={stats.handleShareOneVerse}
             onOpenMemory={stats.handleOpenMemory}
+            highlightDate={highlightDate}
             likesMap={stats.likesMap}
             handleToggleLike={stats.handleToggleLike}
           />

@@ -16,6 +16,7 @@ interface MyPageStatsBoardProps {
   router: AppRouterInstance;
   handleShareOneVerse: (record: OneVerseRecord) => void;
   onOpenMemory: (dayIndex: number, readDate: string) => void;
+  highlightDate?: string | null;
   likesMap?: Record<number, VerseLikeData>;
   handleToggleLike?: (dayIndex: number) => void;
 }
@@ -36,6 +37,7 @@ export default function MyPageStatsBoard({
   router,
   handleShareOneVerse,
   onOpenMemory,
+  highlightDate,
   likesMap,
   handleToggleLike
 }: MyPageStatsBoardProps) {
@@ -77,7 +79,7 @@ export default function MyPageStatsBoard({
             const formattedRef = verse.book === "시편" ? `${verse.book} ${verse.chapter}편 ${verse.verse}절` : `${verse.book} ${verse.chapter}장 ${verse.verse}절`;
 
             return (
-              <article data-v2-archive-record key={`${record.readDate}-${record.dayIndex}`} className="flex flex-col bg-stone-50 dark:bg-stone-950 border border-stone-100 dark:border-stone-800 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+              <article data-v2-archive-record data-v2-archive-record-date={record.readDate} key={`${record.readDate}-${record.dayIndex}`} className={`flex flex-col bg-stone-50 dark:bg-stone-950 border border-stone-100 dark:border-stone-800 rounded-2xl shadow-sm hover:shadow-md transition-shadow ${highlightDate === record.readDate ? 'ring-2 ring-amber-400 ring-offset-2 ring-offset-stone-50 dark:ring-offset-stone-950' : ''}`}>
                 
                 <div data-v2-record-header className="flex flex-col px-4 py-3 bg-white dark:bg-stone-900 border-b border-stone-100 dark:border-stone-800 gap-2 rounded-t-2xl">
                   <div className="flex justify-between items-center">

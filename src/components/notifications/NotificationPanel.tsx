@@ -12,7 +12,7 @@ interface Props {
   onMore: () => void; onRetry: () => void; onRead: (id?: string) => Promise<boolean>; anchorRect: DOMRect | null;
 }
 const icons = { friend_request: UserPlus, friend_request_accepted: Users, one_verse_liked: Heart,
-  reading_streak_achieved: Flame, memorization_completed: Sparkles, one_verse_completed: BookOpen, friend_completed_reading: BookOpen };
+  reading_streak_achieved: Flame, memorization_completed: Sparkles, one_verse_completed: BookOpen };
 
 export default function NotificationPanel(props: Props) {
   const router = useRouter();

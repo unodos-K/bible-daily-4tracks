@@ -28,11 +28,10 @@
 |---|---|---|
 | friend_request | friendships pending INSERT | /friends?tab=requests |
 | friend_request_accepted | pending → accepted UPDATE 또는 초대 수락 RPC의 방향성 accepted INSERT | /friends |
-| one_verse_liked | one_verse_likes INSERT, 공개 완료 One Verse와 accepted 친구 확인 | /read?day=N |
+| one_verse_liked | one_verse_likes INSERT, 공개 완료 One Verse와 accepted 친구 확인 | /mypage?date=YYYY-MM-DD |
 | reading_streak_achieved | reading_records의 완료 전환 | /friend/actorId |
 | memorization_completed | one_verse JSON의 isMemorized 및 memorizedMethods 변화 | /friend/actorId |
 | one_verse_completed | one_verse가 존재하는 완료 기록의 최초 완료 | /friend/actorId |
-| friend_completed_reading | 향후 확장용 타입만 예약, 현재 생성 안 함 | /friend/actorId |
 
 삭제된 actor는 친구 화면으로 이동하며, 기존 상세/읽기 화면의 빈 상태 처리를 재사용한다. 친구 요청 탭은 URL 상태로 관리하여 이미 친구 화면에 있을 때도 알림 링크가 작동한다.
 
@@ -40,7 +39,7 @@
 
 ## 읽기와 마음새김 기준
 
-기존 앱에 연속 읽기 계산 함수는 없었다. `completed_at AT TIME ZONE 'Asia/Seoul'`의 중복 없는 실제 완료 날짜를 기준으로 계산한다. 같은 날 여러 Day를 읽어도 하루, 날짜가 끊기면 연속 기록이 끊긴다. 3/7/14/30일에 생성하며 actor/달성 날짜/일수로 중복을 막는다.
+기존 앱에 연속 읽기 계산 함수는 없었다. `completed_at AT TIME ZONE 'Asia/Seoul'`의 중복 없는 실제 완료 날짜를 기준으로 계산한다. 같은 날 여러 Day를 읽어도 하루, 날짜가 끊기면 연속 기록이 끊긴다. 계산은 유지하지만 `reading_streak_achieved` 생성은 기준 재설계 전까지 migration에서 일시 중지한다.
 
 기존 음성/쓰기 성공은 모두 `isMemorized`로만 저장되고 방법은 메모리 상태에만 있었다. 성공 확인 callback에 방법을 전달하고 `one_verse.memorizedMethods` 배열에 voice/writing을 보존한다. 성공 판단 방식·점수·읽기 완료 방식은 그대로다. One Verse 완료는 선택만 한 draft가 아니라 완료 시각과 One Verse가 모두 있는 기록이다.
 

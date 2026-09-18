@@ -2,7 +2,7 @@ import { supabase } from './supabase';
 import type { Database } from '@/types/supabase';
 
 export type NotificationType = 'friend_request' | 'friend_request_accepted' | 'one_verse_liked'
-  | 'reading_streak_achieved' | 'memorization_completed' | 'one_verse_completed' | 'friend_completed_reading';
+  | 'reading_streak_achieved' | 'memorization_completed' | 'one_verse_completed';
 export type NotificationRow = Database['public']['Tables']['notifications']['Row'];
 export type NotificationItem = NotificationRow & {
   actor: { id: string; name: string | null; nickname: string | null; avatar_url: string | null } | null;
@@ -42,7 +42,6 @@ export function notificationMessage(item: NotificationItem) {
     case 'reading_streak_achieved': return `${name}님이 ${typeof meta.days === 'number' ? meta.days : ''}일 연속 읽기를 성공했어요.`;
     case 'memorization_completed': return `${name}님이 ${meta.method === 'voice' ? '음성 도전으로 ' : meta.method === 'writing' ? '쓰기 도전으로 ' : ''}마음새김을 성공했어요.`;
     case 'one_verse_completed': return `${name}님이 오늘의 One Verse를 완성했어요.`;
-    case 'friend_completed_reading': return `${name}님이 말씀 읽기를 완료했어요.`;
     default: return '새로운 활동이 있어요.';
   }
 }
@@ -50,6 +49,12 @@ export function notificationMessage(item: NotificationItem) {
 export function notificationHref(item: NotificationItem): string {
   if (item.type === 'friend_request') return '/friends?tab=requests';
   if (item.type === 'friend_request_accepted') return '/friends';
-  if (item.type === 'one_verse_liked') return item.related_day_index ? `/read?day=${item.related_day_index}` : '/mypage';
+  if (item.type === 'one_verse_liked') {
+    const metadata = item.metadata && typeof item.metadata === 'object' && !Array.isArray(item.metadata) ? item.metadata : {};
+    const readDate = typeof metadata.read_date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(metadata.read_date)
+      ? metadata.read_date
+      : null;
+    return readDate ? `/mypage?date=${encodeURIComponent(readDate)}` : '/mypage';
+  }
   return item.actor_id ? `/friend/${encodeURIComponent(item.actor_id)}` : '/friends';
 }

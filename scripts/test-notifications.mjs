@@ -21,6 +21,7 @@ try {
     CREATE TABLE one_verse_likes(id uuid DEFAULT gen_random_uuid(),liker_id uuid REFERENCES profiles,author_id uuid REFERENCES profiles,day_index integer,UNIQUE(liker_id,author_id,day_index));
   `);
   await db.exec(await readFile(new URL('../supabase/migrations/20260918090000_notifications.sql', import.meta.url), 'utf8'));
+  await db.exec(await readFile(new URL('../supabase/migrations/20260919090000_refine_notifications.sql', import.meta.url), 'utf8'));
   for(const id of [A,B,C]) await db.query('INSERT INTO profiles VALUES ($1,$2)',[id,id===A?'A':id===B?'B':'C']);
   await as(A);
   await db.query("INSERT INTO friendships(user_id,friend_id,status) VALUES ($1,$2,'pending')",[A,B]);
@@ -40,6 +41,8 @@ try {
     await db.query('DELETE FROM one_verse_likes WHERE liker_id=$1',[A]);
   }
   assert.equal(await count('one_verse_liked',B),1,'unlike/re-like deduplication');
+  const likedDate = (await db.query('SELECT read_date::text read_date FROM reading_records WHERE user_id=$1 AND day_index=1',[B])).rows[0].read_date;
+  assert.equal((await db.query("SELECT metadata->>'read_date' read_date FROM notifications WHERE type='one_verse_liked' AND recipient_id=$1",[B])).rows[0].read_date, likedDate, 'amen stores calendar date');
   await as(C);
   await db.query('INSERT INTO one_verse_likes(liker_id,author_id,day_index) VALUES ($1,$2,1)',[C,B]);
   assert.equal(await count('one_verse_liked',B),1,'nonfriend cannot notify');
@@ -52,10 +55,10 @@ try {
   for(let day=1;day<=30;day++) {
     await db.query("INSERT INTO reading_records VALUES ($1,$2,$3::date,$3::date + interval '3 hour',$4)",[A,day,`2026-08-${String(day).padStart(2,'0')}`,verse]);
   }
-  assert.equal(await count('reading_streak_achieved',B),4,'3/7/14/30 milestones');
+  assert.equal(await count('reading_streak_achieved',B),0,'streak notifications are paused');
   await db.query('UPDATE reading_records SET completed_at=NULL WHERE user_id=$1 AND day_index=7',[A]);
   await db.query("UPDATE reading_records SET completed_at='2026-08-07 03:00:00+00' WHERE user_id=$1 AND day_index=7",[A]);
-  assert.equal(await count('reading_streak_achieved',B),4,'same achievement date deduplicated');
+  assert.equal(await count('reading_streak_achieved',B),0,'paused streak notifications remain disabled');
   assert.equal((await db.query('SELECT count(*) n FROM notifications WHERE actor_id=recipient_id')).rows[0].n,0);
   // Validate read authorization as the actual restricted role, not the owner.
   await as(A); await db.exec('SET ROLE authenticated');
