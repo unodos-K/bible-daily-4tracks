@@ -59,6 +59,7 @@ export default function ReadHeader({
           type="button"
           aria-label="Day 선택 열기"
           aria-expanded={isDaySelectorOpen}
+          aria-controls="day-selector-sheet"
           className="flex flex-col items-center flex-1 cursor-pointer select-none py-1 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg transition-colors mx-2" 
           onClick={() => setIsDaySelectorOpen(!isDaySelectorOpen)}
         >

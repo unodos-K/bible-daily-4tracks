@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { AlertCircle, BadgeCheck, BookMarked, BookOpen, Heart, Lightbulb, Music2, Pin } from "lucide-react";
 
 import { ReadRecordsMap } from "@/lib/storage";
@@ -38,20 +38,45 @@ export default function DaySelectorSheet({
   handleSetDay,
   getNextUnreadDay
 }: DaySelectorSheetProps) {
+  useEffect(() => {
+    if (!isDaySelectorOpen) return;
+
+    const readerScrollContainer = document.getElementById("bible-content-scroll") as HTMLDivElement | null;
+    const previousOverflow = readerScrollContainer?.style.overflowY;
+    if (readerScrollContainer) readerScrollContainer.style.overflowY = "hidden";
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsDaySelectorOpen(false);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      if (readerScrollContainer) readerScrollContainer.style.overflowY = previousOverflow ?? "";
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isDaySelectorOpen, scrollContainerRef, setIsDaySelectorOpen]);
+
   if (!isDaySelectorOpen) return null;
 
   return (
     <div 
       style={{ top: `${headerHeight}px` }}
-      className="absolute left-0 right-0 z-40 bg-white dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800 shadow-2xl flex flex-col animate-in slide-in-from-top-2 h-[75vh] max-h-[600px]"
+      id="day-selector-sheet"
+      role="dialog"
+      aria-label="Day 선택"
+      className="absolute inset-x-0 bottom-0 z-40 flex min-h-0 flex-col overflow-hidden border-b border-stone-200 bg-white shadow-2xl animate-in slide-in-from-top-2 dark:border-stone-800 dark:bg-stone-900"
     >
-      <div ref={scrollContainerRef as React.RefObject<HTMLDivElement>} className="flex-1 overflow-y-auto p-2 flex flex-col gap-1">
+      <div className="shrink-0 border-b border-stone-200 bg-white p-2 dark:border-stone-800 dark:bg-stone-900">
         <button
           onClick={handleGoToLastRead}
-          className="w-full py-2.5 px-4 mb-3 rounded-xl bg-cyan-950/40 border border-cyan-500/40 hover:bg-cyan-900/50 text-cyan-300 font-medium text-sm flex items-center justify-center gap-2 transition-all shadow-sm shrink-0"
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-cyan-500/40 bg-cyan-950/40 px-4 py-2.5 text-sm font-medium text-cyan-300 shadow-sm transition-all hover:bg-cyan-900/50"
         >
           <Pin size={16} /> 마지막으로 읽은 본문으로 이동하기
         </button>
+      </div>
+
+      <div ref={scrollContainerRef as React.RefObject<HTMLDivElement>} className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-2 pt-1">
+        <div className="flex flex-col gap-1">
         {allSchedules.map((s) => {
           const maxAllowed = getNextUnreadDay(records);
           const isLocked = s.dayIndex > maxAllowed;
@@ -105,12 +130,13 @@ export default function DaySelectorSheet({
             </React.Fragment>
           );
         })}
+        </div>
       </div>
       
-      <div className="p-3 border-t border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-950 flex justify-center">
+      <div className="shrink-0 border-t border-stone-200 bg-stone-50 p-3 dark:border-stone-800 dark:bg-stone-950">
         <button
           onClick={() => setIsDaySelectorOpen(false)}
-          className="text-sm font-medium text-stone-500 hover:text-stone-800 dark:hover:text-stone-300 py-1 px-4"
+          className="w-full rounded-xl px-4 py-2 text-sm font-bold text-stone-600 transition-colors hover:bg-stone-200 hover:text-stone-800 dark:text-stone-300 dark:hover:bg-stone-800 dark:hover:text-stone-100"
         >
           닫기
         </button>
