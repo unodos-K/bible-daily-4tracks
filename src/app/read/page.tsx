@@ -75,26 +75,12 @@ export default function BibleViewerPage() {
     setIsDaySelectorOpen,
     isCompletedDay,
     selectedVerse,
-    setSelectedVerse,
     confirmedVerse,
-    setConfirmedVerse,
     oneVerseCandidates,
     isMemoryModalOpen,
     setIsMemoryModalOpen,
-    showWarningModal,
-    setShowWarningModal,
-    showConfirmModal,
-    setShowConfirmModal,
-    showCompletionModal,
-    setShowCompletionModal,
-    showCompletionCancelModal,
-    setShowCompletionCancelModal,
     showReselectModal,
     setShowReselectModal,
-    verseToReplace,
-    setVerseToReplace,
-    showSuccessModal,
-    setShowSuccessModal,
     showAccessDeniedModal,
     setShowAccessDeniedModal,
     selectedRecordToShare,
@@ -111,10 +97,6 @@ export default function BibleViewerPage() {
     handleRequestReselect,
     handleConfirmReselect,
     handleToggleCandidate,
-    executeReplaceVerse,
-    handleBottomButtonClick,
-    handleCancelCompletion,
-    completeReadingAndShowSuccess,
     handleMemoryComplete,
     calculateDaysSince
   } = useBibleReader();
@@ -332,31 +314,10 @@ export default function BibleViewerPage() {
       )}
 
       <VerseInteractionModals
-        showWarningModal={showWarningModal}
-        setShowWarningModal={setShowWarningModal}
-        showConfirmModal={showConfirmModal}
-        setShowConfirmModal={setShowConfirmModal}
-        showCompletionModal={showCompletionModal}
-        setShowCompletionModal={setShowCompletionModal}
-        showCompletionCancelModal={showCompletionCancelModal}
-        setShowCompletionCancelModal={setShowCompletionCancelModal}
         showReselectModal={showReselectModal}
         setShowReselectModal={setShowReselectModal}
-        showSuccessModal={showSuccessModal}
-        setShowSuccessModal={setShowSuccessModal}
-        verseToReplace={verseToReplace}
-        setVerseToReplace={setVerseToReplace}
         confirmedVerse={confirmedVerse}
-        setConfirmedVerse={setConfirmedVerse}
-        selectedVerse={selectedVerse}
-        setSelectedVerse={setSelectedVerse}
-        executeReplaceVerse={executeReplaceVerse}
-        completeReadingAndShowSuccess={completeReadingAndShowSuccess}
-        handleCancelCompletion={handleCancelCompletion}
         handleConfirmReselect={handleConfirmReselect}
-        isCompletedDay={isCompletedDay}
-        setIsMemoryModalOpen={setIsMemoryModalOpen}
-        dayIndex={dayIndex}
       />
 
       <ReaderQuickNavigation
@@ -429,7 +390,6 @@ export default function BibleViewerPage() {
           handleToggleMark={handleToggleCandidate}
           handleRequestReselect={handleRequestReselect}
           handleVerseClick={handleVerseClick}
-          handleBottomButtonClick={handleBottomButtonClick}
         />
       </div>
 

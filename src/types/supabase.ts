@@ -249,6 +249,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      save_final_one_verse: { Args: { p_day_index: number; p_one_verse: Json }; Returns: boolean }
       mark_notifications_read: { Args: { p_id?: string; p_before?: string }; Returns: undefined }
       accept_invite: { Args: { p_invite_id: string }; Returns: boolean }
       create_invite: { Args: never; Returns: string }

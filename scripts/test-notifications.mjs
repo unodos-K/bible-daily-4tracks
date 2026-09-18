@@ -22,6 +22,7 @@ try {
   `);
   await db.exec(await readFile(new URL('../supabase/migrations/20260918090000_notifications.sql', import.meta.url), 'utf8'));
   await db.exec(await readFile(new URL('../supabase/migrations/20260919090000_refine_notifications.sql', import.meta.url), 'utf8'));
+  await db.exec(await readFile(new URL('../supabase/migrations/20260919110000_atomic_one_verse_completion.sql', import.meta.url), 'utf8'));
   for(const id of [A,B,C]) await db.query('INSERT INTO profiles VALUES ($1,$2)',[id,id===A?'A':id===B?'B':'C']);
   await as(A);
   await db.query("INSERT INTO friendships(user_id,friend_id,status) VALUES ($1,$2,'pending')",[A,B]);
@@ -51,6 +52,26 @@ try {
     await db.query('UPDATE reading_records SET one_verse=$1 WHERE user_id=$2 AND day_index=1',[{...verse,isMemorized:true,memorizedMethods:methods},B]);
   }
   assert.equal(await count('memorization_completed',A),2,'voice/writing distinct and idempotent');
+  await as(A);
+  await db.query("INSERT INTO reading_records(user_id,day_index,read_date,completed_at,one_verse) VALUES ($1,31,'2026-08-31',NULL,$2)", [A, verse]);
+  await db.exec('SET ROLE authenticated');
+  assert.equal((await db.query('SELECT public.save_final_one_verse(31,$1)', [{...verse, verse: 2}])).rows[0].save_final_one_verse, true, 'final One Verse atomically completes a draft');
+  await db.exec('RESET ROLE');
+  assert.equal((await db.query('SELECT completed_at IS NOT NULL completed, read_date::text read_date, one_verse->>\'verse\' verse FROM reading_records WHERE user_id=$1 AND day_index=31',[A])).rows[0].completed, true);
+  await db.exec('SET ROLE authenticated');
+  assert.equal((await db.query('SELECT public.save_final_one_verse(31,$1)', [{...verse, verse: 3}])).rows[0].save_final_one_verse, false, 'completed timestamp cannot be replaced');
+  await db.exec('RESET ROLE');
+  await db.query('INSERT INTO one_verse_likes(liker_id,author_id,day_index) VALUES ($1,$1,31)', [A]);
+  assert.equal(await count('one_verse_liked', A), 0, 'self amen does not notify self');
+  await db.exec('RESET ROLE');
+  await db.query("INSERT INTO reading_records(user_id,day_index,read_date,completed_at,one_verse) VALUES ($1,32,'2026-09-01',NULL,$2)", [A, {...verse, memo: 'keep me', isMemorized: true, memorizedMethods: ['voice']}]);
+  await db.exec('SET ROLE authenticated');
+  assert.equal((await db.query('SELECT public.save_final_one_verse(32,$1)', [verse])).rows[0].save_final_one_verse, true, 'final save completes legacy draft');
+  await db.exec('RESET ROLE');
+  const preserved = (await db.query("SELECT one_verse->>'memo' memo, one_verse->>'isMemorized' memorized FROM reading_records WHERE user_id=$1 AND day_index=32", [A])).rows[0];
+  assert.equal(preserved.memo, 'keep me', 'same-verse memo is preserved');
+  assert.equal(preserved.memorized, 'true', 'same-verse memorization is preserved');
+  await db.exec('RESET ROLE');
   await as(A);
   for(let day=1;day<=30;day++) {
     await db.query("INSERT INTO reading_records VALUES ($1,$2,$3::date,$3::date + interval '3 hour',$4)",[A,day,`2026-08-${String(day).padStart(2,'0')}`,verse]);

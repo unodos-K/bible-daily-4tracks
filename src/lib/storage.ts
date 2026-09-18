@@ -405,52 +405,20 @@ export async function saveDayRecord(record: DayRecord, currentUserId?: string): 
   return true;
 }
 
-/**
- * Persists the selected One Verse before completion so follow-up actions such
- * as a footprint can be opened without marking the Day as completed.
- */
-export async function saveOneVerseDraft(dayIndex: number, oneVerse: OneVerse, currentUserId?: string): Promise<boolean> {
+/** Atomically persists the final One Verse and first completion timestamp. */
+export async function saveFinalOneVerse(dayIndex: number, oneVerse: OneVerse, currentUserId?: string): Promise<boolean> {
   const userId = currentUserId ?? await getUserId();
   if (!userId) return false;
-  const date = new Date();
-  const readDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 
-  const { data: existingRecord, error: fetchError } = await supabase
-    .from('reading_records')
-    .select('read_date, completed_at')
-    .eq('user_id', userId)
-    .eq('day_index', dayIndex)
-    .maybeSingle();
-
-  if (fetchError) {
-    console.error("One Verse draft fetch error:", fetchError);
+  const { data, error } = await supabase.rpc('save_final_one_verse', {
+    p_day_index: dayIndex,
+    p_one_verse: serializeOneVerse(oneVerse),
+  });
+  if (error || data !== true) {
+    console.error("Final One Verse save error:", error ?? 'record is already completed');
     return false;
   }
-
-  const { error } = existingRecord
-    ? await supabase
-      .from('reading_records')
-      .update({
-        one_verse: serializeOneVerse(oneVerse),
-        read_date: existingRecord.read_date ?? readDate,
-      })
-      .eq('user_id', userId)
-      .eq('day_index', dayIndex)
-    : await supabase.from('reading_records').insert({
-      user_id: userId,
-      day_index: dayIndex,
-      read_date: readDate,
-      completed_at: null,
-      one_verse: serializeOneVerse(oneVerse),
-    });
-
-  if (error) {
-    console.error("One Verse draft save error:", error);
-    return false;
-  }
-  if (typeof window !== 'undefined') {
-    window.dispatchEvent(new CustomEvent('records_updated'));
-  }
+  if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('records_updated'));
   return true;
 }
 
@@ -468,32 +436,6 @@ export async function updateReadRecordOneVerse(dayIndex: number, oneVerse: OneVe
     return false;
   }
   
-  if (typeof window !== 'undefined') {
-    window.dispatchEvent(new CustomEvent('records_updated'));
-  }
-  return true;
-}
-
-/**
- * Keeps a reading record and its One Verse/memo intact while changing only its
- * completion state. A cancelled completion can therefore be safely completed
- * again without recreating user-authored data.
- */
-export async function updateReadRecordCompletion(dayIndex: number, completedAt: string | null, currentUserId?: string): Promise<boolean> {
-  const userId = currentUserId ?? await getUserId();
-  if (!userId) return false;
-
-  const { error } = await supabase
-    .from('reading_records')
-    .update({ completed_at: completedAt })
-    .eq('user_id', userId)
-    .eq('day_index', dayIndex);
-
-  if (error) {
-    console.error("Reading completion update error:", error);
-    return false;
-  }
-
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent('records_updated'));
   }
