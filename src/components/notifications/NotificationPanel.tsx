@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef } from 'react';
+import type { CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { Bell, BookOpen, Flame, Heart, Sparkles, UserPlus, Users, X } from 'lucide-react';
@@ -9,28 +9,29 @@ import { notificationHref, notificationMessage, type NotificationItem } from '@/
 interface Props {
   open: boolean; onClose: () => void; items: NotificationItem[]; count: number;
   loading: boolean; busy: boolean; error: string; hasMore: boolean;
-  onMore: () => void; onRetry: () => void; onRead: (id?: string) => Promise<boolean>;
+  onMore: () => void; onRetry: () => void; onRead: (id?: string) => Promise<boolean>; anchorRect: DOMRect | null;
 }
 const icons = { friend_request: UserPlus, friend_request_accepted: Users, one_verse_liked: Heart,
   reading_streak_achieved: Flame, memorization_completed: Sparkles, one_verse_completed: BookOpen, friend_completed_reading: BookOpen };
 
 export default function NotificationPanel(props: Props) {
-  const dialog = useRef<HTMLDialogElement>(null);
   const router = useRouter();
-  useEffect(() => {
-    if (props.open && !dialog.current?.open) dialog.current?.showModal();
-    if (!props.open && dialog.current?.open) dialog.current?.close();
-  }, [props.open]);
-  if (typeof document === 'undefined') return null;
-  return createPortal(<dialog ref={dialog} aria-labelledby="notification-title" onCancel={props.onClose}
-    className="fixed inset-0 m-auto w-[calc(100%-2rem)] max-w-lg rounded-2xl border border-stone-200 bg-stone-50 p-0 text-stone-800 shadow-xl backdrop:bg-black/40 dark:border-stone-800 dark:bg-stone-950 dark:text-stone-100">
-    <div className="flex max-h-[85dvh] flex-col">
+  if (typeof document === 'undefined' || !props.open || !props.anchorRect) return null;
+  const style: CSSProperties = {
+    top: props.anchorRect.bottom + 8,
+    right: Math.max(12, window.innerWidth - props.anchorRect.right),
+    maxHeight: 'min(70vh, 560px)',
+  };
+  return createPortal(<div data-notification-panel="true" role="dialog" aria-labelledby="notification-title"
+    onKeyDown={(event) => { if (event.key === 'Escape') props.onClose(); }}
+    style={style} className="fixed z-[100] w-[min(380px,calc(100vw-24px))] overflow-hidden rounded-2xl border border-stone-200 bg-stone-50 text-stone-800 shadow-2xl ring-1 ring-black/5 dark:border-stone-800 dark:bg-stone-950 dark:text-stone-100">
+    <div className="flex min-h-0 max-h-[inherit] flex-col">
       <header className="flex shrink-0 items-center justify-between border-b border-stone-200 px-5 py-3 dark:border-stone-800">
         <h2 id="notification-title" className="flex items-center gap-2 text-lg font-bold"><Bell size={20} />알림</h2>
         <button autoFocus type="button" onClick={props.onClose} aria-label="알림 닫기" className="flex h-11 w-11 items-center justify-center rounded-full hover:bg-stone-200 dark:hover:bg-stone-800"><X size={22} /></button>
       </header>
       <div className="flex justify-end px-5 py-2"><button disabled={props.busy || props.count === 0} onClick={() => void props.onRead()} className="min-h-11 text-sm font-medium text-amber-800 disabled:opacity-40 dark:text-amber-300">모두 읽음 처리</button></div>
-      <div className="overflow-y-auto overscroll-contain px-3 pb-5" aria-busy={props.loading}>
+      <div className="min-h-0 overflow-y-auto overscroll-contain px-3 pb-5" aria-busy={props.loading}>
         {props.error && <div role="alert" className="p-4 text-sm text-rose-700 dark:text-rose-300">{props.error}<button onClick={props.onRetry} className="ml-2 min-h-11 underline">다시 시도</button></div>}
         {!props.error && !props.loading && props.items.length === 0 && <p className="py-16 text-center text-sm text-stone-500">아직 새로운 알림이 없어요.</p>}
         <ul className="space-y-1">{props.items.map(item => {
@@ -51,5 +52,5 @@ export default function NotificationPanel(props: Props) {
         {props.hasMore && <button disabled={props.loading} onClick={props.onMore} className="mt-3 min-h-11 w-full rounded-xl border border-stone-200 text-sm dark:border-stone-800">이전 알림 더 보기</button>}
       </div>
     </div>
-  </dialog>, document.body);
+  </div>, document.body);
 }

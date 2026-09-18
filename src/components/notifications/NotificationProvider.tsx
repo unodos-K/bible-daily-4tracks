@@ -8,7 +8,7 @@ import NotificationPanel from './NotificationPanel';
 
 interface NotificationContextValue {
   count: number;
-  openPanel: () => void;
+  openPanel: (anchor: HTMLElement) => void;
 }
 const NotificationContext = createContext<NotificationContextValue | null>(null);
 export const useNotifications = () => useContext(NotificationContext);
@@ -28,6 +28,7 @@ function UserNotifications({ userId, children }: { userId: string; children: Rea
   const [busy, setBusy] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [error, setError] = useState('');
+  const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
   const alive = useRef(true);
   const countRequest = useRef(0);
   const listRequest = useRef(0);
@@ -57,6 +58,12 @@ function UserNotifications({ userId, children }: { userId: string; children: Rea
       if (alive.current && request === listRequest.current) setLoading(false);
     }
   }, [userId]);
+
+  const close = useCallback(() => {
+    openRef.current = false;
+    setOpen(false);
+    setAnchorRect(null);
+  }, []);
 
   useEffect(() => {
     alive.current = true;
@@ -88,6 +95,29 @@ function UserNotifications({ userId, children }: { userId: string; children: Rea
     };
   }, [userId, refreshCount, load]);
 
+  useEffect(() => {
+    if (!open || !anchorRect) return;
+    const anchor = document.querySelector<HTMLElement>('[data-notification-bell="true"]');
+    if (!anchor) return;
+    const update = () => setAnchorRect(anchor.getBoundingClientRect());
+    window.addEventListener('resize', update);
+    window.addEventListener('scroll', update, true);
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target as Element | null;
+      if (target?.closest('[data-notification-panel="true"]') || target?.closest('[data-notification-bell="true"]')) return;
+      close();
+    };
+    const onKeyDown = (event: KeyboardEvent) => { if (event.key === 'Escape') close(); };
+    document.addEventListener('pointerdown', onPointerDown);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      window.removeEventListener('resize', update);
+      window.removeEventListener('scroll', update, true);
+      document.removeEventListener('pointerdown', onPointerDown);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [open, anchorRect, close]);
+
   const markRead = async (id?: string) => {
     setBusy(true); setError('');
     try {
@@ -102,12 +132,21 @@ function UserNotifications({ userId, children }: { userId: string; children: Rea
       return false;
     } finally { if (alive.current) setBusy(false); }
   };
-  const close = () => { openRef.current = false; setOpen(false); };
-  return <NotificationContext.Provider value={{ count, openPanel: () => {
-    openRef.current = true; setOpen(true); void load(); void refreshCount();
-  } }}>
+  const openPanel = useCallback((anchor: HTMLElement) => {
+    const nextOpen = !openRef.current;
+    openRef.current = nextOpen;
+    setOpen(nextOpen);
+    if (nextOpen) {
+      setAnchorRect(anchor.getBoundingClientRect());
+      void load();
+      void refreshCount();
+    } else {
+      setAnchorRect(null);
+    }
+  }, [load, refreshCount]);
+  return <NotificationContext.Provider value={{ count, openPanel }}>
     {children}
     <NotificationPanel open={open} onClose={close} items={items} loading={loading} busy={busy} error={error}
-      hasMore={hasMore} onMore={() => void load(true)} onRetry={() => void load()} onRead={markRead} count={count} />
+      hasMore={hasMore} onMore={() => void load(true)} onRetry={() => void load()} onRead={markRead} count={count} anchorRect={anchorRect} />
   </NotificationContext.Provider>;
 }
