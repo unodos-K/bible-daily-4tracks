@@ -2,7 +2,7 @@
 import NotificationBell from '@/components/notifications/NotificationBell';
 
 import React, { useEffect, useState } from "react";
-import { Settings, Footprints } from "lucide-react";
+import { Settings, Footprints, ShieldCheck } from "lucide-react";
 import {
   OneVerseRecord,
 } from "@/lib/storage";
@@ -16,6 +16,7 @@ import MyPageCalendar from "@/components/mypage/MyPageCalendar";
 import MyPageStatsBoard from "@/components/mypage/MyPageStatsBoard";
 import AvatarImage from "@/components/AvatarImage";
 import { getLastRecordDay } from "@/lib/readingRecords";
+import { isAdminUserId } from "@/lib/admin";
 
 export default function MyPage() {
   const stats = useMyPageStats();
@@ -140,6 +141,16 @@ export default function MyPage() {
 
           {/* 우측 설정 버튼 */}
           <NotificationBell />
+          {stats.authUser && isAdminUserId(stats.authUser.id) && (
+            <button
+              onClick={() => stats.router.push("/admin")}
+              className="rounded-full border border-amber-200 bg-amber-50 p-2 text-amber-700 shadow-sm transition-colors hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300"
+              aria-label="관리자 점검"
+              title="관리자 점검"
+            >
+              <ShieldCheck size={20} />
+            </button>
+          )}
           <button
             onClick={() => stats.router.push("/settings")}
             className="p-2 text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 transition-colors bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-full shadow-sm shrink-0"

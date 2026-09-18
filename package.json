@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "test:notifications": "node scripts/test-notifications.mjs",
+    "test:admin": "node scripts/test-admin.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

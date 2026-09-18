@@ -15,6 +15,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const isFriendsPage = pathname === "/friends" || pathname?.startsWith("/friends/");
   const isFriendDetailPage = pathname?.startsWith("/friend/");
   const isMyPage = pathname === "/mypage";
+  const isAdminPage = pathname === "/admin" || pathname?.startsWith("/admin/");
   const hideBottomNav = isMemoPage || isVersePage || isSettingsPage;
   const showBottomNav = !hideBottomNav && pathname !== "/" && pathname !== "/login";
   const hasPageScrollContainer = isReadPage || isMemoPage || isFriendsPage || isFriendDetailPage || isMyPage;
@@ -22,7 +23,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   return (
     <NotificationProvider>
       <div className="relative mx-auto flex min-h-screen w-full max-w-2xl flex-col border-x border-stone-200 bg-stone-50 shadow-xl dark:border-stone-800 dark:bg-stone-950">
-        <main className={`app-main flex-1 min-h-0 w-full ${showBottomNav ? 'pb-16' : ''} ${hasPageScrollContainer ? 'flex flex-col overflow-hidden' : 'overflow-y-auto overscroll-y-contain'} bg-stone-50 dark:bg-stone-950`}>
+        <main className={`app-main flex-1 min-h-0 w-full ${showBottomNav ? 'pb-16' : ''} ${isAdminPage ? 'overflow-visible' : hasPageScrollContainer ? 'flex flex-col overflow-hidden' : 'overflow-y-auto overscroll-y-contain'} bg-stone-50 dark:bg-stone-950`}>
           {children}
         </main>
       </div>
