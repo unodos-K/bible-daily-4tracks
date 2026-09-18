@@ -8,10 +8,12 @@ import {
 import { useAuth } from "@/components/AuthProvider";
 import { calculateDaysSince, clampReadingDay, getMaxAllowedDay } from "@/hooks/bible-reader/dayUtils";
 import { getLastOneVerseDay } from "@/lib/readingRecords";
+import { getLastReadingDay } from "@/lib/readingProgress";
 export function useBibleReader() {
   const [isClient, setIsClient] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const { authUser, isAuthLoading } = useAuth();
+  const readerUserId = authUser?.id;
   const [settings, setSettings] = useState<ReadingSettings | null>(null);
   const [records, setRecords] = useState<ReadRecordsMap>({});
   
@@ -93,10 +95,10 @@ export function useBibleReader() {
       let currentRecords: ReadRecordsMap = {};
       let currentSettings: ReadingSettings | null = null;
       
-      if (authUser) {
+      if (readerUserId) {
         try {
-          currentSettings = await fetchReadingSettings(authUser.id);
-          currentRecords = await fetchReadRecords(authUser.id);
+          currentSettings = await fetchReadingSettings(readerUserId);
+          currentRecords = await fetchReadRecords(readerUserId);
         } catch (error) {
           console.error("Failed to load user data due to network error", error);
           showToast("데이터를 불러오는데 실패했습니다. 네트워크 상태를 확인해주세요.");
@@ -107,7 +109,7 @@ export function useBibleReader() {
       if (!currentSettings || !currentSettings.hasStarted) {
         const dateObj = new Date();
         const todayStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
-        if (authUser) await saveReadingSettings(todayStr, authUser.id);
+        if (readerUserId) await saveReadingSettings(todayStr, readerUserId);
         currentSettings = {
           startDate: todayStr,
           currentDay: 1,
@@ -123,9 +125,10 @@ export function useBibleReader() {
       try {
         const maxAllowed = getMaxAllowedDay(currentSettings, currentRecords);
         const requestedDay = Number(new URLSearchParams(window.location.search).get('day'));
+        const lastDay = readerUserId ? getLastReadingDay(readerUserId) : null;
         const initialDay = Number.isInteger(requestedDay) && requestedDay >= 1
           ? Math.min(requestedDay, maxAllowed)
-          : maxAllowed;
+          : Math.min(lastDay ?? maxAllowed, maxAllowed);
 
         if (isActive) setDayIndex(initialDay);
       } catch {
@@ -138,8 +141,8 @@ export function useBibleReader() {
     void loadReader();
 
     const handleRecordsUpdated = async () => {
-      if (!authUser) return;
-      const r = await fetchReadRecords(authUser.id);
+      if (!readerUserId) return;
+      const r = await fetchReadRecords(readerUserId);
       if (isActive) setRecords(r);
     };
     window.addEventListener('records_updated', handleRecordsUpdated);
@@ -147,16 +150,16 @@ export function useBibleReader() {
       isActive = false;
       window.removeEventListener('records_updated', handleRecordsUpdated);
     };
-  }, [authUser, isAuthLoading]);
+  }, [readerUserId, isAuthLoading]);
 
   useEffect(() => {
     let isActive = true;
-    if (!authUser || !isDataLoaded) {
+    if (!readerUserId || !isDataLoaded) {
       setOneVerseCandidates([]);
       return () => { isActive = false; };
     }
 
-    void fetchOneVerseCandidates(dayIndex, authUser.id)
+    void fetchOneVerseCandidates(dayIndex, readerUserId)
       .then((candidates) => {
         if (isActive) setOneVerseCandidates(candidates);
       })
@@ -169,7 +172,7 @@ export function useBibleReader() {
       });
 
     return () => { isActive = false; };
-  }, [authUser, dayIndex, isDataLoaded]);
+  }, [readerUserId, dayIndex, isDataLoaded]);
 
   useEffect(() => {
     if (isClient && settings?.hasStarted) {
@@ -185,13 +188,13 @@ export function useBibleReader() {
   useEffect(() => {
     let isActive = true;
 
-    if (!authUser || !isDataLoaded) {
+    if (!readerUserId || !isDataLoaded) {
       setConfirmedVerse(null);
       return () => { isActive = false; };
     }
 
     setConfirmedVerse(null);
-    void fetchOneVerseRecord(dayIndex, authUser.id)
+    void fetchOneVerseRecord(dayIndex, readerUserId)
       .then((record) => {
         if (isActive) setConfirmedVerse(record?.oneVerse ?? null);
       })
@@ -204,7 +207,7 @@ export function useBibleReader() {
       });
 
     return () => { isActive = false; };
-  }, [authUser, dayIndex, isDataLoaded]);
+  }, [readerUserId, dayIndex, isDataLoaded]);
 
   const handleGoToLastRead = () => {
     const lastDay = getLastOneVerseDay(records);

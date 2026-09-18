@@ -22,6 +22,7 @@ const scrollToSection = (id: string) => {
   if (el) {
     const scrollContainer = document.getElementById('bible-content-scroll');
     if (scrollContainer) {
+      scrollContainer.dispatchEvent(new Event('reader:navigate'));
       const containerRect = scrollContainer.getBoundingClientRect();
       const elRect = el.getBoundingClientRect();
       const targetTop = scrollContainer.scrollTop + (elRect.top - containerRect.top);
@@ -41,6 +42,8 @@ const scrollElementToCenter = (element: HTMLElement) => {
     element.scrollIntoView({ behavior: 'smooth', block: 'center' });
     return;
   }
+
+  scrollContainer.dispatchEvent(new Event('reader:navigate'));
 
   const containerRect = scrollContainer.getBoundingClientRect();
   const elementRect = element.getBoundingClientRect();
@@ -117,6 +120,7 @@ export default function BibleViewerPage() {
   } = useBibleReader();
   
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const readerUserId = authUser?.id;
   const allSchedules = getAllSchedules();
 
   useEffect(() => {
@@ -124,7 +128,7 @@ export default function BibleViewerPage() {
   }, [dayIndex, oneVerseCandidates]);
 
   useEffect(() => {
-    if (!isClient || !isDataLoaded || !authUser) return;
+    if (!isClient || !isDataLoaded || !readerUserId) return;
 
     let isActive = true;
     setIsReadingTextLoading(true);
@@ -146,7 +150,7 @@ export default function BibleViewerPage() {
     return () => {
       isActive = false;
     };
-  }, [authUser, dayIndex, isClient, isDataLoaded, readingTextRetryKey]);
+  }, [readerUserId, dayIndex, isClient, isDataLoaded, readingTextRetryKey]);
 
 
 
@@ -260,7 +264,7 @@ export default function BibleViewerPage() {
     );
   }
 
-  if (isReadingTextLoading) {
+  if (isReadingTextLoading || (readingData && readingData.dayIndex !== dayIndex)) {
     return (
       <div data-v2-reader className="min-h-screen bg-stone-50 dark:bg-stone-950 flex flex-col items-center justify-center gap-3 text-stone-500">
         <BookOpen className="animate-pulse w-8 h-8" />

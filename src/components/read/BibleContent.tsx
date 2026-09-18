@@ -1,4 +1,5 @@
 import React from "react";
+import { usePathname } from "next/navigation";
 import { BookMarked, BookOpen, CheckCircle2, Lightbulb, Music2, type LucideIcon } from "lucide-react";
 import { TRACK_INFO } from "@/lib/bible";
 import type { OneVerse, ReadRecordsMap, ShareableOneVerseRecord } from "@/lib/storage";
@@ -34,7 +35,8 @@ interface BibleContentProps {
 
 export default function BibleContent({ readingData, fontSize, selectedVerse, confirmedVerse, markedVerses, records, dayIndex, userId, isCompletedDay, setIsMemoryModalOpen, handleShareOneVerseClick, handleConfirmVerse, handleToggleMark, handleRequestReselect, handleVerseClick, handleBottomButtonClick }: BibleContentProps) {
   const tracks = readingData.tracks;
-  const scrollContainerRef = useReadingProgress({ userId, dayIndex, tracks: tracks.map((track) => track.track.type), isReady: tracks.length > 0 });
+  const pathname = usePathname();
+  const scrollContainerRef = useReadingProgress({ userId, dayIndex, tracks: tracks.map((track) => track.track.type), isReady: tracks.length > 0, isActive: pathname === "/read" });
   const { activeTrackType, stickyHeaderRef, trackRefs } = useActiveReaderTrack(tracks);
   const activeTrack = tracks.find((track) => track.track.type === activeTrackType) ?? tracks[0];
   const activeTrackInfo = activeTrack && TRACK_INFO[activeTrack.track.type as keyof typeof TRACK_INFO];

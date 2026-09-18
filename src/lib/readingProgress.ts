@@ -6,6 +6,7 @@ export interface ReadingProgress {
   chapter: number;
   verse: number;
   scroll_offset: number;
+  verse_offset?: number;
   updated_at: string;
 }
 
@@ -20,6 +21,7 @@ export function saveReadingProgress(progress: ReadingProgress) {
       getReadingProgressKey(progress.user_id, progress.day_index, progress.track),
       JSON.stringify(progress),
     );
+    window.localStorage.setItem(`${PREFIX}:${progress.user_id}:last-day`, String(progress.day_index));
   } catch {
     // Storage can be unavailable in private browsing or a restricted webview.
   }
@@ -32,7 +34,9 @@ export function getLatestReadingProgress(userId: string, dayIndex: number, track
       if (!value) return [];
       try {
         const progress = JSON.parse(value) as ReadingProgress;
-        return progress.user_id === userId && progress.day_index === dayIndex && progress.track === track
+        return progress && progress.user_id === userId && progress.day_index === dayIndex && progress.track === track
+          && Number.isFinite(progress.scroll_offset) && progress.scroll_offset >= 0
+          && Number.isFinite(Date.parse(progress.updated_at))
           ? [progress]
           : [];
       } catch {
@@ -40,6 +44,15 @@ export function getLatestReadingProgress(userId: string, dayIndex: number, track
       }
     });
     return entries.sort((a, b) => Date.parse(b.updated_at) - Date.parse(a.updated_at))[0] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export function getLastReadingDay(userId: string): number | null {
+  try {
+    const day = Number(window.localStorage.getItem(`${PREFIX}:${userId}:last-day`));
+    return Number.isInteger(day) && day >= 1 && day <= 365 ? day : null;
   } catch {
     return null;
   }
