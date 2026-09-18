@@ -14,6 +14,34 @@ export type Database = {
   }
   public: {
     Tables: {
+      notifications: {
+        Row: {
+          id: string
+          recipient_id: string
+          actor_id: string | null
+          type: string
+          related_day_index: number | null
+          metadata: Json
+          event_key: string
+          is_read: boolean
+          read_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          recipient_id: string
+          actor_id?: string | null
+          type: string
+          related_day_index?: number | null
+          metadata?: Json
+          event_key: string
+          is_read?: boolean
+          read_at?: string | null
+          created_at?: string
+        }
+        Update: { is_read?: boolean; read_at?: string | null }
+        Relationships: []
+      }
       friendships: {
         Row: {
           created_at: string
@@ -221,6 +249,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      mark_notifications_read: { Args: { p_id?: string; p_before?: string }; Returns: undefined }
       accept_invite: { Args: { p_invite_id: string }; Returns: boolean }
       create_invite: { Args: never; Returns: string }
     }
