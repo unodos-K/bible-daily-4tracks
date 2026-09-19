@@ -1,0 +1,83 @@
+import { PGlite } from '@electric-sql/pglite';
+import { readFile } from 'node:fs/promises';
+import assert from 'node:assert/strict';
+import { randomUUID } from 'node:crypto';
+const db = new PGlite();
+const ADMIN='77d3a5c6-f9bb-447e-b6cf-be5c663dce54',USER='00000000-0000-4000-8000-000000000001';
+const as=async (id,role='authenticated')=>{await db.exec('RESET ROLE');await db.query("SELECT set_config('request.jwt.claim.sub',$1,false)",[id]);await db.exec(`SET ROLE ${role}`);};
+const complete=(user,day,expectedDate,expectedTime,request=randomUUID(),time=null)=>db.query('SELECT admin_complete_one_verse_record($1,$2,$3,$4,$5,$6) result',[user,day,expectedDate,expectedTime,request,time]);
+const dates=(user,day,date,time,expectedDate,expectedTime,request=randomUUID())=>db.query('SELECT admin_update_reading_record_date($1,$2,$3,$4,$5,$6,$7) result',[user,day,date,time,expectedDate,expectedTime,request]);
+try {
+ await db.exec(`CREATE ROLE anon;CREATE ROLE authenticated;CREATE ROLE service_role;CREATE SCHEMA auth;
+ CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$ SELECT nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
+ GRANT USAGE ON SCHEMA auth TO authenticated; GRANT EXECUTE ON FUNCTION auth.uid() TO authenticated;
+ CREATE TABLE auth.users(id uuid PRIMARY KEY,created_at timestamptz DEFAULT now());
+ CREATE TABLE profiles(id uuid PRIMARY KEY,nickname text,name text);
+ CREATE TABLE reading_settings(user_id uuid PRIMARY KEY,start_date date,created_at timestamptz DEFAULT now(),updated_at timestamptz DEFAULT now());
+ CREATE TABLE reading_records(user_id uuid,day_index integer,read_date date NOT NULL,completed_at timestamptz,one_verse jsonb,PRIMARY KEY(user_id,day_index));
+ CREATE TABLE friendships(user_id uuid,friend_id uuid,status text,created_at timestamptz DEFAULT now(),PRIMARY KEY(user_id,friend_id));
+ CREATE TABLE one_verse_likes(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),liker_id uuid,author_id uuid,day_index integer,created_at timestamptz DEFAULT now());`);
+ for(const f of ['20260918090000_notifications.sql','20260919090000_refine_notifications.sql','20260919110000_atomic_one_verse_completion.sql','20260919130000_admin_readonly_inspection.sql','20260919200000_admin_record_corrections.sql']) await db.exec(await readFile(new URL(`../supabase/migrations/${f}`,import.meta.url),'utf8'));
+ for(const id of [ADMIN,USER]) {await db.query('INSERT INTO profiles VALUES ($1,$2,$2)',[id,'test']);await db.query('INSERT INTO auth.users(id) VALUES ($1)',[id]);await db.query("INSERT INTO reading_settings(user_id,start_date) VALUES ($1,'2020-01-01')",[id]);}
+ await db.query("INSERT INTO friendships(user_id,friend_id,status) VALUES ($1,$2,'accepted'),($2,$1,'accepted')",[ADMIN,USER]);
+ const verse={book:'창세기',chapter:1,verse:1,memo:'synthetic private fixture',isMemorized:true,memorizedAt:'2021-01-01T00:00:00Z',memorizedMethods:['voice']};
+ for(const user of [ADMIN,USER]) for(const day of [1,2,3,4]) await db.query("INSERT INTO reading_records VALUES ($1,$2,'2021-01-01',NULL,$3)",[user,day,day===2?null:verse]);
+ const beforeOther=(await db.query('SELECT to_jsonb(r) v FROM reading_records r WHERE user_id=$1 AND day_index=4',[USER])).rows[0].v;
+ await as(USER);
+ await assert.rejects(complete(USER,1,'2021-01-01',null),/administrator access required/);
+ await assert.rejects(dates(USER,1,'2021-01-02',null,'2021-01-01',null),/administrator access required/);
+ assert.equal((await db.query('SELECT count(*) n FROM admin_audit_logs')).rows[0].n,0);
+ await assert.rejects(db.query("INSERT INTO admin_audit_logs(request_id) VALUES (gen_random_uuid())"),/permission denied/);
+ await assert.rejects(db.query("SELECT admin_change_record(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)"),/permission denied/);
+ await as('');await assert.rejects(complete(USER,1,'2021-01-01',null),/administrator access required/);
+ await as('', 'anon');await assert.rejects(complete(USER,1,'2021-01-01',null),/permission denied/);
+ await as(ADMIN);
+ const request=randomUUID();
+ const first=(await complete(USER,1,'2021-01-01',null,request)).rows[0].result;
+ assert.equal(first.success,true);
+ const second=(await complete(USER,1,'2021-01-01',null,request)).rows[0].result;
+ assert.equal(second.replayed,true);assert.deepEqual(first.values,second.values);
+ await assert.rejects(complete(USER,3,'2021-01-01',null,request),/REQUEST_CONFLICT/);
+ await assert.rejects(complete(USER,1,'2021-01-01',null),/STALE_RECORD/);
+ await assert.rejects(complete(USER,2,'2021-01-01',null),/NOT_COMPLETABLE/);
+ await assert.rejects(complete(USER,365,'2021-01-01',null),/RECORD_NOT_FOUND/);
+ await assert.rejects(complete(USER,366,'2021-01-01',null),/INVALID_INPUT/);
+ await assert.rejects(dates(USER,3,'2099-01-01',null,'2021-01-01',null),/INVALID_RECORD_DATE/);
+ await assert.rejects(dates(USER,3,'2019-01-01',null,'2021-01-01',null),/INVALID_RECORD_DATE/);
+ await assert.rejects(dates(USER,3,'2021-02-30',null,'2021-01-01',null),/date\/time field value out of range/);
+ await assert.rejects(dates(USER,1,'2021-01-01',null,'2021-01-01',first.values.completed_at),/CANNOT_CLEAR_COMPLETION/);
+ await assert.rejects(dates(USER,2,'2021-01-01','2021-01-01T00:00:00Z','2021-01-01',null),/ONE_VERSE_REQUIRED/);
+ // Same calendar date across plan Days is allowed; another Day remains untouched.
+ await dates(USER,3,'2021-01-01','2021-01-01T09:00:00+09:00','2021-01-01',null);
+ // Own admin record must also suppress notifications, including memorization.
+ await complete(ADMIN,1,'2021-01-01',null);
+ const summary=(await db.query('SELECT admin_summary() value')).rows[0].value;
+ assert.equal(summary.todayOneVerseUsers,0,'admin completions are not user activity today');
+ await db.exec('RESET ROLE');
+ assert.equal((await db.query('SELECT count(*) n FROM notifications')).rows[0].n,0,'no admin-generated activity notifications');
+ assert.deepEqual((await db.query('SELECT one_verse FROM reading_records WHERE user_id=$1 AND day_index=1',[USER])).rows[0].one_verse,verse);
+ assert.deepEqual((await db.query('SELECT to_jsonb(r) v FROM reading_records r WHERE user_id=$1 AND day_index=4',[USER])).rows[0].v,beforeOther);
+ const audits=(await db.query('SELECT before_values,after_values,request_values FROM admin_audit_logs')).rows;
+ assert.equal(audits.length,3,'retry and validation failures create no audit duplicates');
+ assert.ok(!JSON.stringify(audits).includes('synthetic private fixture'));
+ for(const a of audits) assert.deepEqual(Object.keys(a.after_values).sort(),['completed_at','read_date']);
+ // A failing UPDATE trigger must roll back the audit insert as well.
+ await db.exec(`CREATE FUNCTION reject_test_update() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'test failure'; END $$;
+ CREATE TRIGGER test_failure BEFORE UPDATE ON reading_records FOR EACH ROW EXECUTE FUNCTION reject_test_update();`);
+ await as(ADMIN);await assert.rejects(complete(USER,4,'2021-01-01',null),/test failure/);
+ await db.exec('RESET ROLE;DROP TRIGGER test_failure ON reading_records');
+ assert.equal((await db.query('SELECT count(*) n FROM admin_audit_logs')).rows[0].n,3);
+ // Ordinary final-save flow still emits its notification after the new guard.
+ await as(USER);await db.query('SELECT save_final_one_verse(5,$1)',[{book:'창세기',chapter:1,verse:2}]);
+ await db.exec('RESET ROLE');
+ assert.equal((await db.query("SELECT count(*) n FROM notifications WHERE type='one_verse_completed'")).rows[0].n,1);
+ assert.equal((await db.query("SELECT count(*) n FROM notifications WHERE type='reading_streak_achieved'")).rows[0].n,0);
+ const natural=(await db.query('SELECT read_date::text d,completed_at::text t FROM reading_records WHERE user_id=$1 AND day_index=5',[USER])).rows[0];
+ await as(ADMIN);
+ assert.equal((await db.query('SELECT admin_summary() value')).rows[0].value.todayOneVerseUsers,1);
+ await dates(USER,5,'2021-01-01','2021-01-01T09:00:00+09:00',natural.d,natural.t);
+ assert.equal((await db.query('SELECT admin_summary() value')).rows[0].value.todayOneVerseUsers,1,'date correction does not rewrite evidence of natural activity');
+ await db.exec('RESET ROLE');
+ assert.equal((await db.query("SELECT count(*) n FROM notifications WHERE type='one_verse_completed'")).rows[0].n,1,'date changes do not duplicate notifications');
+ console.log('PASS: admin writes, authorization, NULL/anon, audit atomicity, idempotency, stale writes, date policy, own-record suppression, data preservation, normal notification regression');
+} finally {await db.close();}

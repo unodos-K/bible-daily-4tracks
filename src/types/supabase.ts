@@ -249,6 +249,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_complete_one_verse_record: { Args: { p_user_id: string; p_day_index: number; p_expected_read_date: string; p_expected_completed_at: string | null; p_request_id: string; p_completed_at?: string | null }; Returns: Json }
+      admin_update_reading_record_date: { Args: { p_user_id: string; p_day_index: number; p_read_date: string; p_completed_at: string | null; p_expected_read_date: string; p_expected_completed_at: string | null; p_request_id: string }; Returns: Json }
       admin_summary: { Args: never; Returns: Json }
       admin_search_users: { Args: { p_page?: number; p_page_size?: number; p_query?: string }; Returns: Json }
       admin_user_detail: { Args: { p_user_id: string }; Returns: Json }

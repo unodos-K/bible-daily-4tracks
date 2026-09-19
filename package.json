@@ -5,6 +5,7 @@
   "scripts": {
     "test:notifications": "node scripts/test-notifications.mjs",
     "test:admin": "node scripts/test-admin.mjs",
+    "test:admin-records": "node scripts/test-admin-records.mjs && node scripts/test-admin-record-dates.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
