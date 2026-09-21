@@ -62,6 +62,14 @@ createRoot(document.getElementById('root')).render(<React.StrictMode><App/></Rea
       const completed=await page.evaluate(()=>window.record.completedAt);
       await page.getByRole('button',{name:'다시 선택하기',exact:true}).waitFor();
       await page.getByRole('button',{name:'창세기 1장 2절 선택',exact:true}).click();
+      await page.getByRole('button',{name:'Mark',exact:true}).click();
+      await page.getByRole('button',{name:'Mark 해제',exact:true}).waitFor();
+      assert.equal(await page.locator('[data-one-verse-marked="true"]').count(),2,'completed Day allows marking');
+      await page.getByRole('button',{name:'Mark 해제',exact:true}).click();
+      await page.getByRole('button',{name:'Mark',exact:true}).waitFor();
+      assert.equal(await page.locator('[data-one-verse-marked="true"]').count(),1,'completed Day allows unmarking');
+      assert.equal(await page.evaluate(()=>window.record.completedAt),completed,'Mark changes preserve completion');
+      assert.equal(await page.evaluate(()=>window.record.oneVerse.verse),1,'Mark changes preserve One Verse');
       assert.equal(await page.locator('#one-verse-target').count(),1,'Quick Navigation unique target');
       await page.getByRole('button',{name:'One Verse',exact:true}).click();
       assert.equal(await page.evaluate(()=>window.record.oneVerse.verse),1);

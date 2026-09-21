@@ -263,11 +263,6 @@ export function useBibleReader() {
 
   const handleToggleCandidate = async (verse: OneVerse, event: React.MouseEvent) => {
     event.stopPropagation();
-    if (isCompletedDay) {
-      showToast("완료한 Day의 마킹은 변경할 수 없습니다.");
-      return;
-    }
-
     const isCandidate = oneVerseCandidates.some((candidate) => isSameVerse(candidate, verse));
     const success = isCandidate
       ? await removeOneVerseCandidate(dayIndex, verse, authUser?.id)
