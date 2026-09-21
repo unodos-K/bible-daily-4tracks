@@ -67,6 +67,11 @@ export default function BibleViewerPage() {
   const [toastTop, setToastTop] = useState(76);
   
   const {
+    pendingVerse,
+    setPendingVerse,
+    isSelectionSaving,
+    selectionError,
+    handleSaveSelection,
     isClient,
     authUser,
     settings,
@@ -340,6 +345,11 @@ export default function BibleViewerPage() {
       )}
 
       <VerseInteractionModals
+        pendingVerse={pendingVerse}
+        setPendingVerse={setPendingVerse}
+        isSaving={isSelectionSaving}
+        error={selectionError}
+        handleSaveSelection={handleSaveSelection}
         showReselectModal={showReselectModal}
         setShowReselectModal={setShowReselectModal}
         confirmedVerse={confirmedVerse}

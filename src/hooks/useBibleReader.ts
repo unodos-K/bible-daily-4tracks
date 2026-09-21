@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { 
   ReadingSettings, ReadRecordsMap, OneVerse, OneVerseCandidate, ShareableOneVerseRecord,
   fetchReadingSettings, fetchReadRecords, fetchOneVerseRecord,
-  saveFinalOneVerse, updateReadRecordOneVerse, updateMemorizeRecord,
+  saveOneVerseSelection, updateMemorizeRecord,
   saveReadingSettings, fetchOneVerseCandidates, saveOneVerseCandidate, removeOneVerseCandidate
 } from "@/lib/storage";
 import { useAuth } from "@/components/AuthProvider";
@@ -24,12 +24,24 @@ export function useBibleReader() {
   
   const [selectedVerse, setSelectedVerse] = useState<OneVerse | null>(null);
   const [confirmedVerse, setConfirmedVerse] = useState<OneVerse | null>(null);
+  const [isVerseLoaded, setIsVerseLoaded] = useState(false);
   const [oneVerseCandidates, setOneVerseCandidates] = useState<OneVerseCandidate[]>([]);
   const [verseLikes, setVerseLikes] = useState<VerseLikeData | null>(null);
   const [isLikeBusy, setIsLikeBusy] = useState(false);
   const [isMemoryModalOpen, setIsMemoryModalOpen] = useState(false);
   
   const [showReselectModal, setShowReselectModal] = useState(false);
+  const [pendingVerse, setPendingVerse] = useState<OneVerse | null>(null);
+  const [isSelectionSaving, setIsSelectionSaving] = useState(false);
+  const [selectionError, setSelectionError] = useState<string | null>(null);
+  const selectionLock = useRef(false);
+  const scope = useRef('');
+  scope.current = `${readerUserId}:${dayIndex}`;
+  useEffect(() => {
+    setPendingVerse(null);
+    setShowReselectModal(false);
+    setSelectionError(null);
+  }, [readerUserId, dayIndex]);
   const [showAccessDeniedModal, setShowAccessDeniedModal] = useState(false);
   
   const [selectedRecordToShare, setSelectedRecordToShare] = useState<ShareableOneVerseRecord | null>(null);
@@ -64,6 +76,7 @@ export function useBibleReader() {
   }, [isClient, isDataLoaded]);
 
   const handleSetDay = (newDay: number, currentRecords: ReadRecordsMap = records) => {
+    if (selectionLock.current) return;
     const validDay = clampReadingDay(newDay);
     const maxAllowedDay = getMaxAllowedDay(settings, currentRecords);
 
@@ -195,6 +208,7 @@ export function useBibleReader() {
   // Day is completed and after returning to the reader.
   useEffect(() => {
     let isActive = true;
+    setIsVerseLoaded(false);
 
     if (!readerUserId || !isDataLoaded) {
       setConfirmedVerse(null);
@@ -204,7 +218,10 @@ export function useBibleReader() {
     setConfirmedVerse(null);
     void fetchOneVerseRecord(dayIndex, readerUserId)
       .then((record) => {
-        if (isActive) setConfirmedVerse(record?.oneVerse ?? null);
+        if (isActive) {
+          setConfirmedVerse(record?.oneVerse ?? null);
+          setIsVerseLoaded(true);
+        }
       })
       .catch((error: unknown) => {
         console.error("Failed to restore One Verse:", error);
@@ -224,7 +241,7 @@ export function useBibleReader() {
   };
 
   const handleVerseClick = async (trackType: string, book: string, chapter: number, verse: number, rawText: string, displayText: string, chunks: string[]) => {
-    if (isCompletedDay) return;
+    if (selectionLock.current) return;
     const verseObj = {
       trackType, book, chapter, verse, rawText, displayText, chunks,
       reference: `${book} ${chapter}:${verse}`
@@ -269,32 +286,55 @@ export function useBibleReader() {
     showToast(isCandidate ? "마킹을 해제했습니다." : "구절을 마킹했습니다.");
   };
 
-  const handleConfirmVerse = async (verse: OneVerse, e: React.MouseEvent) => {
+  const handleConfirmVerse = (verse: OneVerse, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (isCompletedDay) {
-      showToast("완료한 Day의 One Verse는 변경할 수 없습니다.");
+    if (selectionLock.current) return;
+    if (!isVerseLoaded) {
+      showToast("기존 One Verse를 확인 중입니다. 불러오기가 실패했다면 새로고침해 주세요.");
       return;
     }
     if (confirmedVerse && isSameVerse(confirmedVerse, verse)) return;
-
-    const success = await saveFinalOneVerse(dayIndex, verse, authUser?.id);
-    if (!success) {
-      showToast("One Verse 저장에 실패했습니다. 잠시 후 다시 시도해 주세요.");
-      return;
-    }
-    setConfirmedVerse(verse);
-    setSelectedVerse(null);
-    setIsCompletedDay(true);
-    try {
-      const updatedRecords = await fetchReadRecords(authUser?.id);
-      setRecords(updatedRecords);
-    } catch (error) {
-      console.error("Failed to refresh records after final One Verse save:", error);
-    }
-    showToast("오늘의 One Verse를 저장하고 읽기를 완료했어요.");
+    setSelectionError(null);
+    setPendingVerse(verse);
   };
 
+  const persistSelection = async (verse: OneVerse | null) => {
+    if (selectionLock.current) return;
+    if (!readerUserId) {
+      setSelectionError("로그인 후 다시 시도해 주세요.");
+      return;
+    }
+    const operationScope = scope.current;
+    selectionLock.current = true;
+    setIsSelectionSaving(true);
+    setSelectionError(null);
+    try {
+      const success = await saveOneVerseSelection(dayIndex, verse, confirmedVerse, readerUserId);
+      if (scope.current !== operationScope) return;
+      if (!success) {
+        setSelectionError("저장하지 못했습니다. 다른 화면에서 기록이 변경되었다면 새로고침 후 다시 시도해 주세요.");
+        return;
+      }
+      setConfirmedVerse(verse);
+      setSelectedVerse(null);
+      setPendingVerse(null);
+      setShowReselectModal(false);
+      setRecords(current => current[dayIndex] ? { ...current, [dayIndex]: { ...current[dayIndex], oneVerse: verse ?? undefined } } : current);
+      if (verse) setIsCompletedDay(true);
+      showToast(verse ? (isCompletedDay ? "오늘의 One Verse를 변경했어요." : "오늘의 One Verse를 저장하고 읽기를 완료했어요.") : "One Verse 선택이 취소되었습니다. 원하는 구절을 다시 선택해 주세요.");
+    } catch {
+      if (scope.current === operationScope) setSelectionError("저장에 실패했습니다. 다시 시도해 주세요.");
+    } finally {
+      selectionLock.current = false;
+      setIsSelectionSaving(false);
+    }
+  };
+  const handleSaveSelection = () => pendingVerse ? persistSelection(pendingVerse) : Promise.resolve();
+
+
   const handleRequestReselect = () => {
+    if (selectionLock.current) return;
+    setSelectionError(null);
     setShowReselectModal(true);
   };
 
@@ -320,15 +360,7 @@ export function useBibleReader() {
   };
 
   const handleConfirmReselect = async () => {
-    setShowReselectModal(false);
-    const success = await updateReadRecordOneVerse(dayIndex, null, authUser?.id);
-    if (!success) {
-      showToast("One Verse 선택 취소에 실패했습니다.");
-      return;
-    }
-    setConfirmedVerse(null);
-    setSelectedVerse(null);
-    showToast("One Verse 선택이 취소되었습니다. 원하는 구절을 다시 선택해 주세요.");
+    await persistSelection(null);
   };
 
   const handleMemoryComplete = async (method?: 'voice' | 'writing') => {
@@ -343,14 +375,19 @@ export function useBibleReader() {
   };
 
   useEffect(() => {
-    const isAnyModalOpen = showReselectModal || isMemoryModalOpen || showAccessDeniedModal;
+    const isAnyModalOpen = showReselectModal || !!pendingVerse || isMemoryModalOpen || showAccessDeniedModal;
     if (isAnyModalOpen) document.body.classList.add('modal-open');
     else document.body.classList.remove('modal-open');
     return () => document.body.classList.remove('modal-open');
-  }, [showReselectModal, isMemoryModalOpen, showAccessDeniedModal]);
+  }, [showReselectModal, pendingVerse, isMemoryModalOpen, showAccessDeniedModal]);
 
   return {
     isClient,
+    pendingVerse,
+    setPendingVerse,
+    isSelectionSaving,
+    selectionError,
+    handleSaveSelection,
     authUser,
     settings,
     records,

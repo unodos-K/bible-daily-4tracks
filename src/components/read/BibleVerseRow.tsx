@@ -43,7 +43,7 @@ export default function BibleVerseRow({ trackType, book, chapter, verse, fontSiz
   const verseNumberClass = isConfirmed ? "text-amber-600 dark:text-amber-500 font-bold" : isSelected ? "text-sky-600 dark:text-sky-400 font-bold" : "text-stone-400 dark:text-stone-500 font-semibold";
   return (
     <div
-      id={(isConfirmed || isSelected) ? "one-verse-target" : undefined}
+      id={(isConfirmed || (isSelected && !confirmedVerse)) ? "one-verse-target" : undefined}
       data-one-verse-marked={isMarked ? "true" : undefined}
       data-reader-verse="true"
       data-track={trackType}
@@ -63,7 +63,7 @@ export default function BibleVerseRow({ trackType, book, chapter, verse, fontSiz
       >
         <span className={`inline-block min-w-[2.5ch] mr-2 sm:mr-3 select-none mt-[0.1em] text-right ${verseNumberClass}`} style={{ fontSize: `${Math.max(fontSize * 0.7, 10)}px` }}>{verse.verse}</span><span className={`${isConfirmed ? "flex-1 font-medium" : "flex-1"} ${isMarked && !isConfirmed ? "rounded-sm bg-emerald-200/60 px-0.5 dark:bg-emerald-400/20" : ""}`}>{verse.displayText}</span>
       </button>
-      {isConfirmed && <ConfirmedOneVerseActions verse={confirmedVerse} dayIndex={dayIndex} record={record} onOpenMemory={onOpenMemory} onShare={onShare} onRequestReselect={onRequestReselect} isCompletedDay={isCompletedDay} />}
+      {isConfirmed && <ConfirmedOneVerseActions verse={confirmedVerse} dayIndex={dayIndex} record={record} onOpenMemory={onOpenMemory} onShare={onShare} onRequestReselect={onRequestReselect} />}
       {isSelected && <SelectedOneVerseActions verse={verseValue} isMarked={isMarked} onToggleMark={onToggleMark} onConfirm={onConfirmVerse} />}
     </div>
   );

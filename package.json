@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "test:one-verse-selection": "node scripts/test-one-verse-selection.mjs",
     "test:notifications": "node scripts/test-notifications.mjs",
     "test:admin": "node scripts/test-admin.mjs",
     "test:admin-records": "node scripts/test-admin-records.mjs && node scripts/test-admin-record-dates.mjs",

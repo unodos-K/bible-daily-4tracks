@@ -405,17 +405,27 @@ export async function saveDayRecord(record: DayRecord, currentUserId?: string): 
   return true;
 }
 
-/** Atomically persists the final One Verse and first completion timestamp. */
-export async function saveFinalOneVerse(dayIndex: number, oneVerse: OneVerse, currentUserId?: string): Promise<boolean> {
+/** First selection completes; replacements preserve completion/date and archive old private data. */
+export async function saveOneVerseSelection(dayIndex: number, oneVerse: OneVerse | null, expected: OneVerse | null, currentUserId?: string): Promise<boolean> {
   const userId = currentUserId ?? await getUserId();
   if (!userId) return false;
 
-  const { data, error } = await supabase.rpc('save_final_one_verse', {
+  // Preserve unknown legacy JSON fields in the RPC's compare-and-swap token.
+  // This read is not the concurrency guarantee: the RPC compares again under a row lock.
+  const { data: record, error: loadError } = await supabase.from('reading_records')
+    .select('one_verse').eq('user_id', userId).eq('day_index', dayIndex).maybeSingle();
+  if (loadError) return false;
+  const snapshot = record?.one_verse ?? null;
+  const parsed = parseOneVerse(snapshot);
+  if (snapshot !== null && !parsed) return false;
+  if (JSON.stringify(parsed ?? null) !== JSON.stringify(expected ? parseOneVerse(serializeOneVerse(expected)) : null)) return false;
+
+  const { data, error } = await supabase.rpc('set_one_verse_selection', {
     p_day_index: dayIndex,
-    p_one_verse: serializeOneVerse(oneVerse),
+    p_one_verse: oneVerse ? serializeOneVerse(oneVerse) : null,
+    p_expected: snapshot,
   });
   if (error || data !== true) {
-    console.error("Final One Verse save error:", error ?? 'record is already completed');
     return false;
   }
   if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('records_updated'));

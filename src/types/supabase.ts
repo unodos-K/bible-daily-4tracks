@@ -257,6 +257,7 @@ export type Database = {
       admin_search_notifications: { Args: { p_actor_id?: string | null; p_day_index?: number | null; p_from?: string | null; p_is_read?: boolean | null; p_page?: number; p_page_size?: number; p_recipient_id?: string | null; p_to?: string | null; p_type?: string | null }; Returns: Json }
       admin_data_checks: { Args: { p_limit?: number }; Returns: Json }
       save_final_one_verse: { Args: { p_day_index: number; p_one_verse: Json }; Returns: boolean }
+      set_one_verse_selection: { Args: { p_day_index: number; p_one_verse: Json | null; p_expected: Json | null }; Returns: boolean }
       mark_notifications_read: { Args: { p_id?: string; p_before?: string }; Returns: undefined }
       accept_invite: { Args: { p_invite_id: string }; Returns: boolean }
       create_invite: { Args: never; Returns: string }

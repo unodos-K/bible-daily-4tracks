@@ -10,15 +10,14 @@ interface ConfirmedOneVerseActionsProps {
   onOpenMemory: () => void;
   onShare: (record: ShareableOneVerseRecord) => void;
   onRequestReselect: () => void;
-  isCompletedDay: boolean;
 }
 
-export function ConfirmedOneVerseActions({ verse, dayIndex, record, onOpenMemory, onShare, onRequestReselect, isCompletedDay }: ConfirmedOneVerseActionsProps) {
+export function ConfirmedOneVerseActions({ verse, dayIndex, record, onOpenMemory, onShare, onRequestReselect }: ConfirmedOneVerseActionsProps) {
   const router = useRouter();
   const isMemorized = verse.isMemorized;
   const openShare = (event: React.MouseEvent) => {
     event.stopPropagation();
-    onShare(record?.oneVerse ? record : {
+    onShare(record ? { ...record, oneVerse: verse } : {
       dayIndex,
       readDate: new Date().toISOString().slice(0, 10),
       completedAt: null,
@@ -37,11 +36,11 @@ export function ConfirmedOneVerseActions({ verse, dayIndex, record, onOpenMemory
         </button>
         <button type="button" onClick={openShare} className="min-h-11 min-w-0 rounded-lg border border-stone-200 bg-white text-xs font-bold text-stone-700 flex items-center justify-center gap-1 transition-colors hover:bg-stone-50 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700"><HeartHandshake size={15} />나눔</button>
       </div>
-      {!isCompletedDay && <div className="mt-2 pl-[2ch] sm:pl-[2.5ch]">
+      <div className="mt-2 pl-[2ch] sm:pl-[2.5ch]">
         <button type="button" onClick={(event) => { event.stopPropagation(); onRequestReselect(); }} className="min-h-11 px-3 text-xs font-bold text-stone-500 underline underline-offset-4 transition-colors hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200">
           다시 선택하기
         </button>
-      </div>}
+      </div>
     </>
   );
 }
